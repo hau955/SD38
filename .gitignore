@@ -1,0 +1,21 @@
+# Build folders
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.rsuser
+
+# VS folder
+.vs/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# EF/DB metadata
+*.dbmdl
+
+# Solution state
+*.sln.docstates
