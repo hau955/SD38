@@ -6,14 +6,11 @@ namespace WebModels.Models
 {
     public class ApplicationRole : IdentityRole<Guid>
     {
-        [Required]
-        public DateTime NgayTao { get; set; } = DateTime.UtcNow;
-
-        [Required]
-        public DateTime NgaySua { get; set; } = DateTime.UtcNow;
-
-        [Required]
-        public bool TrangThai { get; set; } = true;
+        public ApplicationRole() { }
+        public ApplicationRole(string name) : base()
+        {
+            Name = name;
+        }
 
         // Quan hệ 1 - N: 1 Role → N User
         [JsonIgnore]

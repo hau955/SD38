@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebModels.Models;
 
@@ -11,9 +12,11 @@ using WebModels.Models;
 namespace AppData.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250613015018_hau")]
+    partial class hau
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -139,25 +142,10 @@ namespace AppData.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-<<<<<<< HEAD
-                    b.Property<DateTime>("NgaySua")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("NgayTao")
-                        .HasColumnType("datetime2");
-
-=======
->>>>>>> hauhoang
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-<<<<<<< HEAD
-                    b.Property<bool>("TrangThai")
-                        .HasColumnType("bit");
-
-=======
->>>>>>> hauhoang
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
@@ -204,12 +192,6 @@ namespace AppData.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-<<<<<<< HEAD
-                    b.Property<Guid>("IDRole")
-                        .HasColumnType("uniqueidentifier");
-
-=======
->>>>>>> hauhoang
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -251,11 +233,6 @@ namespace AppData.Migrations
 
                     b.HasKey("Id");
 
-<<<<<<< HEAD
-                    b.HasIndex("IDRole");
-
-=======
->>>>>>> hauhoang
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -854,20 +831,6 @@ namespace AppData.Migrations
                         .IsRequired();
                 });
 
-<<<<<<< HEAD
-            modelBuilder.Entity("WebModels.Models.ApplicationUser", b =>
-                {
-                    b.HasOne("WebModels.Models.ApplicationRole", "Role")
-                        .WithMany("Users")
-                        .HasForeignKey("IDRole")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-                });
-
-=======
->>>>>>> hauhoang
             modelBuilder.Entity("WebModels.Models.DiaChiNhanHang", b =>
                 {
                     b.HasOne("WebModels.Models.ApplicationUser", "User")
@@ -1017,14 +980,6 @@ namespace AppData.Migrations
                     b.Navigation("SanPham");
                 });
 
-<<<<<<< HEAD
-            modelBuilder.Entity("WebModels.Models.ApplicationRole", b =>
-                {
-                    b.Navigation("Users");
-                });
-
-=======
->>>>>>> hauhoang
             modelBuilder.Entity("WebModels.Models.ApplicationUser", b =>
                 {
                     b.Navigation("DiaChiNhanHangs");

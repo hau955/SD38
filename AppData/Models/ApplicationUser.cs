@@ -23,11 +23,7 @@ namespace WebModels.Models
         [Required]
         public bool TrangThai { get; set; } = true;
 
-        // Quan hệ N - 1 với Role (bắt buộc nếu logic yêu cầu user phải có role)
-        [Required]
-        [ForeignKey("Role")]
-        public Guid IDRole { get; set; }
-        public virtual ApplicationRole? Role { get; set; }
+       
 
         // Quan hệ 1 - 1 với Giỏ hàng
         public virtual GioHang? GioHang { get; set; }

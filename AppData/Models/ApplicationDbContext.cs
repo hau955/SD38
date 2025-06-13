@@ -38,9 +38,9 @@ namespace WebModels.Models
 
             // Quan hệ ApplicationUser - ApplicationRole (IDRole nullable)
             builder.Entity<ApplicationUser>()
-                .HasOne(u => u.Role)
-                .WithMany(r => r.Users)
-                .HasForeignKey(u => u.IDRole)
+                .HasOne(u => u.GioHang)
+                .WithOne(r => r.User)
+                .HasForeignKey<GioHang>(u => u.IDGioHang)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // 1-1: User - GioHang
