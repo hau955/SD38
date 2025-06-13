@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebModels.Models;
 
@@ -11,9 +12,11 @@ using WebModels.Models;
 namespace AppData.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250610092535_hauhoangg")]
+    partial class hauhoangg
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -139,13 +142,11 @@ namespace AppData.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-
                     b.Property<DateTime>("NgaySua")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("NgayTao")
                         .HasColumnType("datetime2");
-
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
@@ -203,7 +204,7 @@ namespace AppData.Migrations
                     b.Property<Guid>("IDRole")
                         .HasColumnType("uniqueidentifier");
 
-      b.Property<bool>("LockoutEnabled")
+                    b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
@@ -244,9 +245,7 @@ namespace AppData.Migrations
 
                     b.HasKey("Id");
 
-
                     b.HasIndex("IDRole");
-
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -857,7 +856,6 @@ namespace AppData.Migrations
                     b.Navigation("Role");
                 });
 
-
             modelBuilder.Entity("WebModels.Models.DiaChiNhanHang", b =>
                 {
                     b.HasOne("WebModels.Models.ApplicationUser", "User")
@@ -1007,12 +1005,10 @@ namespace AppData.Migrations
                     b.Navigation("SanPham");
                 });
 
-
             modelBuilder.Entity("WebModels.Models.ApplicationRole", b =>
                 {
                     b.Navigation("Users");
                 });
-
 
             modelBuilder.Entity("WebModels.Models.ApplicationUser", b =>
                 {
