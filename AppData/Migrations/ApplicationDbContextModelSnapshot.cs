@@ -139,25 +139,21 @@ namespace AppData.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-<<<<<<< HEAD
+
                     b.Property<DateTime>("NgaySua")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("NgayTao")
                         .HasColumnType("datetime2");
 
-=======
->>>>>>> hauhoang
+
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-<<<<<<< HEAD
                     b.Property<bool>("TrangThai")
                         .HasColumnType("bit");
 
-=======
->>>>>>> hauhoang
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
@@ -204,13 +200,10 @@ namespace AppData.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-<<<<<<< HEAD
                     b.Property<Guid>("IDRole")
                         .HasColumnType("uniqueidentifier");
 
-=======
->>>>>>> hauhoang
-                    b.Property<bool>("LockoutEnabled")
+      b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
@@ -251,11 +244,10 @@ namespace AppData.Migrations
 
                     b.HasKey("Id");
 
-<<<<<<< HEAD
+
                     b.HasIndex("IDRole");
 
-=======
->>>>>>> hauhoang
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -854,7 +846,6 @@ namespace AppData.Migrations
                         .IsRequired();
                 });
 
-<<<<<<< HEAD
             modelBuilder.Entity("WebModels.Models.ApplicationUser", b =>
                 {
                     b.HasOne("WebModels.Models.ApplicationRole", "Role")
@@ -866,8 +857,7 @@ namespace AppData.Migrations
                     b.Navigation("Role");
                 });
 
-=======
->>>>>>> hauhoang
+
             modelBuilder.Entity("WebModels.Models.DiaChiNhanHang", b =>
                 {
                     b.HasOne("WebModels.Models.ApplicationUser", "User")
@@ -1017,14 +1007,13 @@ namespace AppData.Migrations
                     b.Navigation("SanPham");
                 });
 
-<<<<<<< HEAD
+
             modelBuilder.Entity("WebModels.Models.ApplicationRole", b =>
                 {
                     b.Navigation("Users");
                 });
 
-=======
->>>>>>> hauhoang
+
             modelBuilder.Entity("WebModels.Models.ApplicationUser", b =>
                 {
                     b.Navigation("DiaChiNhanHangs");
