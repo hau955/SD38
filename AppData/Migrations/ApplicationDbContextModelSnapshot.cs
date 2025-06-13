@@ -139,9 +139,18 @@ namespace AppData.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<DateTime>("NgaySua")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("NgayTao")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("TrangThai")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -189,6 +198,9 @@ namespace AppData.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<Guid>("IDRole")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -229,6 +241,8 @@ namespace AppData.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IDRole");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -828,6 +842,17 @@ namespace AppData.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("WebModels.Models.ApplicationUser", b =>
+                {
+                    b.HasOne("WebModels.Models.ApplicationRole", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("IDRole")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("WebModels.Models.DiaChiNhanHang", b =>
                 {
                     b.HasOne("WebModels.Models.ApplicationUser", "User")
@@ -975,6 +1000,11 @@ namespace AppData.Migrations
                     b.Navigation("GiamGia");
 
                     b.Navigation("SanPham");
+                });
+
+            modelBuilder.Entity("WebModels.Models.ApplicationRole", b =>
+                {
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("WebModels.Models.ApplicationUser", b =>
