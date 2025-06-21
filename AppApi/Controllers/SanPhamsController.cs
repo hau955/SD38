@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AppApi.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,99 +10,102 @@ using WebModels.Models;
 
 namespace AppApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/SanPham")]
     [ApiController]
     public class SanPhamsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-
-        public SanPhamsController(ApplicationDbContext context)
+        private readonly ISanPhamService _sanPhamService;
+        public SanPhamsController(ISanPhamService sanPhamService)
         {
-            _context = context;
+            _sanPhamService = sanPhamService;
         }
 
         // GET: api/SanPhams
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SanPham>>> GetSanPhams()
+        public async Task<IActionResult> GetAll()
         {
-            return await _context.SanPhams.ToListAsync();
+            var list = await _sanPhamService.GetAll();
+            return Ok(new
+            {
+                message = "Lấy danh sách sản phẩm thành công.",
+                data = list
+            });
         }
 
-        // GET: api/SanPhams/5
+        // GET: api/SanPham/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<SanPham>> GetSanPham(Guid id)
+        public async Task<IActionResult> GetById(Guid id)
         {
-            var sanPham = await _context.SanPhams.FindAsync(id);
+            var result = await _sanPhamService.GetByID(id);
+            if (result == null)
+                return NotFound(new { message = "Không tìm thấy sản phẩm." });
 
-            if (sanPham == null)
+            return Ok(new
             {
-                return NotFound();
-            }
-
-            return sanPham;
+                message = "Lấy sản phẩm theo ID thành công.",
+                data = result
+            });
         }
 
-        // PUT: api/SanPhams/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutSanPham(Guid id, SanPham sanPham)
-        {
-            if (id != sanPham.IDSanPham)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(sanPham).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SanPhamExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/SanPhams
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // POST: api/SanPham
         [HttpPost]
-        public async Task<ActionResult<SanPham>> PostSanPham(SanPham sanPham)
+        public async Task<IActionResult> Create([FromForm] SanPham sanPham)
         {
-            _context.SanPhams.Add(sanPham);
-            await _context.SaveChangesAsync();
+            if (!ModelState.IsValid)
+                return BadRequest(new { message = "Dữ liệu không hợp lệ.", errors = ModelState });
 
-            return CreatedAtAction("GetSanPham", new { id = sanPham.IDSanPham }, sanPham);
-        }
+            var created = await _sanPhamService.Create(sanPham);
 
-        // DELETE: api/SanPhams/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSanPham(Guid id)
-        {
-            var sanPham = await _context.SanPhams.FindAsync(id);
-            if (sanPham == null)
+            return CreatedAtAction(nameof(GetById), new { id = created.IDSanPham }, new
             {
-                return NotFound();
-            }
-
-            _context.SanPhams.Remove(sanPham);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+                message = "Tạo sản phẩm thành công.",
+                data = created
+            });
         }
 
-        private bool SanPhamExists(Guid id)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromForm] SanPham sanPham)
         {
-            return _context.SanPhams.Any(e => e.IDSanPham == id);
+            if (!ModelState.IsValid)
+                return BadRequest(new { message = "Dữ liệu không hợp lệ.", errors = ModelState });
+
+            var existing = await _sanPhamService.GetByID(id);
+            if (existing == null)
+                return NotFound(new { message = "Không tìm thấy sản phẩm để cập nhật." });
+
+            // Giữ nguyên ảnh cũ nếu không có xử lý upload mới
+            sanPham.HinhAnh = existing.HinhAnh;
+
+            var updated = await _sanPhamService.Update(id, sanPham);
+            return Ok(new
+            {
+                message = "Cập nhật sản phẩm thành công.",
+                data = updated
+            });
+        }
+
+
+
+        // DELETE: api/SanPham/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var result = await _sanPhamService.Detele(id);
+            if (!result)
+                return NotFound(new { message = "Không tìm thấy sản phẩm để xoá." });
+
+            return Ok(new { message = "Xoá sản phẩm thành công." });
+        }
+
+        // PATCH: api/SanPham/ToggleStatus/{id}
+        [HttpPatch("ToggleStatus/{id}")]
+        public async Task<IActionResult> ToggleStatus(Guid id)
+        {
+            var message = await _sanPhamService.Toggle(id);
+            if (message.Contains("không tồn tại"))
+                return NotFound(new { message });
+
+            return Ok(new { message });
         }
     }
 }

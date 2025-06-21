@@ -12,5 +12,8 @@ namespace WebModels.Models
             Name = name;
         }
 
+        // Quan hệ 1 - N: 1 Role → N User
+        [JsonIgnore]
+        public virtual ICollection<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
     }
 }

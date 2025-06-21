@@ -12,8 +12,8 @@ using WebModels.Models;
 namespace AppData.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250613015018_hau")]
-    partial class hau
+    [Migration("20250613035444_Minh")]
+    partial class Minh
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -165,6 +165,9 @@ namespace AppData.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("ApplicationRoleId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -232,6 +235,8 @@ namespace AppData.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationRoleId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -831,6 +836,13 @@ namespace AppData.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("WebModels.Models.ApplicationUser", b =>
+                {
+                    b.HasOne("WebModels.Models.ApplicationRole", null)
+                        .WithMany("Users")
+                        .HasForeignKey("ApplicationRoleId");
+                });
+
             modelBuilder.Entity("WebModels.Models.DiaChiNhanHang", b =>
                 {
                     b.HasOne("WebModels.Models.ApplicationUser", "User")
@@ -978,6 +990,11 @@ namespace AppData.Migrations
                     b.Navigation("GiamGia");
 
                     b.Navigation("SanPham");
+                });
+
+            modelBuilder.Entity("WebModels.Models.ApplicationRole", b =>
+                {
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("WebModels.Models.ApplicationUser", b =>
