@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AppData.Migrations
 {
     /// <inheritdoc />
-    public partial class hau : Migration
+    public partial class AA : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -23,37 +23,6 @@ namespace AppData.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetRoles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AspNetUsers",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    HoTen = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    GioiTinh = table.Column<bool>(type: "bit", nullable: true),
-                    NgaySinh = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    DiaChi = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    HinhAnh = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    TrangThai = table.Column<bool>(type: "bit", nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -205,6 +174,125 @@ namespace AppData.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AspNetUsers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    HoTen = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    GioiTinh = table.Column<bool>(type: "bit", nullable: true),
+                    NgaySinh = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DiaChi = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    HinhAnh = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    TrangThai = table.Column<bool>(type: "bit", nullable: false),
+                    ApplicationRoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUsers_AspNetRoles_ApplicationRoleId",
+                        column: x => x.ApplicationRoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SanPhamGiamGias",
+                columns: table => new
+                {
+                    IDSPGiamGia = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IDSanPham = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IDGiamGia = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DonGia = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    SoTienConLai = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    NgaySua = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TrangThai = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SanPhamGiamGias", x => x.IDSPGiamGia);
+                    table.ForeignKey(
+                        name: "FK_SanPhamGiamGias_GiamGias_IDGiamGia",
+                        column: x => x.IDGiamGia,
+                        principalTable: "GiamGias",
+                        principalColumn: "IDGiamGia",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SanPhamGiamGias_SanPhams_IDSanPham",
+                        column: x => x.IDSanPham,
+                        principalTable: "SanPhams",
+                        principalColumn: "IDSanPham",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SanPhamChiTiets",
+                columns: table => new
+                {
+                    IDSanPhamCT = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IDSanPham = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IDMauSac = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IDSize = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IDCoAo = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IDTaAo = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SoLuongTonKho = table.Column<int>(type: "int", nullable: false),
+                    GiaBan = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    HinhAnh = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    NgaySua = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TrangThai = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SanPhamChiTiets", x => x.IDSanPhamCT);
+                    table.ForeignKey(
+                        name: "FK_SanPhamChiTiets_CoAos_IDCoAo",
+                        column: x => x.IDCoAo,
+                        principalTable: "CoAos",
+                        principalColumn: "IDCoAo",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_SanPhamChiTiets_MauSacs_IDMauSac",
+                        column: x => x.IDMauSac,
+                        principalTable: "MauSacs",
+                        principalColumn: "IDMauSac",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_SanPhamChiTiets_SanPhams_IDSanPham",
+                        column: x => x.IDSanPham,
+                        principalTable: "SanPhams",
+                        principalColumn: "IDSanPham",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SanPhamChiTiets_Sizes_IDSize",
+                        column: x => x.IDSize,
+                        principalTable: "Sizes",
+                        principalColumn: "IDSize",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_SanPhamChiTiets_TaAos_IDTaAo",
+                        column: x => x.IDTaAo,
+                        principalTable: "TaAos",
+                        principalColumn: "IDTaAo",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetUserClaims",
                 columns: table => new
                 {
@@ -329,88 +417,6 @@ namespace AppData.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SanPhamGiamGias",
-                columns: table => new
-                {
-                    IDSPGiamGia = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IDSanPham = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IDGiamGia = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DonGia = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    SoTienConLai = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    NgaySua = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TrangThai = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SanPhamGiamGias", x => x.IDSPGiamGia);
-                    table.ForeignKey(
-                        name: "FK_SanPhamGiamGias_GiamGias_IDGiamGia",
-                        column: x => x.IDGiamGia,
-                        principalTable: "GiamGias",
-                        principalColumn: "IDGiamGia",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_SanPhamGiamGias_SanPhams_IDSanPham",
-                        column: x => x.IDSanPham,
-                        principalTable: "SanPhams",
-                        principalColumn: "IDSanPham",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SanPhamChiTiets",
-                columns: table => new
-                {
-                    IDSanPhamCT = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IDSanPham = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IDMauSac = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IDSize = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IDCoAo = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IDTaAo = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SoLuongTonKho = table.Column<int>(type: "int", nullable: false),
-                    GiaBan = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    HinhAnh = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    NgaySua = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TrangThai = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SanPhamChiTiets", x => x.IDSanPhamCT);
-                    table.ForeignKey(
-                        name: "FK_SanPhamChiTiets_CoAos_IDCoAo",
-                        column: x => x.IDCoAo,
-                        principalTable: "CoAos",
-                        principalColumn: "IDCoAo",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_SanPhamChiTiets_MauSacs_IDMauSac",
-                        column: x => x.IDMauSac,
-                        principalTable: "MauSacs",
-                        principalColumn: "IDMauSac",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_SanPhamChiTiets_SanPhams_IDSanPham",
-                        column: x => x.IDSanPham,
-                        principalTable: "SanPhams",
-                        principalColumn: "IDSanPham",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_SanPhamChiTiets_Sizes_IDSize",
-                        column: x => x.IDSize,
-                        principalTable: "Sizes",
-                        principalColumn: "IDSize",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_SanPhamChiTiets_TaAos_IDTaAo",
-                        column: x => x.IDTaAo,
-                        principalTable: "TaAos",
-                        principalColumn: "IDTaAo",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -549,6 +555,11 @@ namespace AppData.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_ApplicationRoleId",
+                table: "AspNetUsers",
+                column: "ApplicationRoleId");
+
+            migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
@@ -662,9 +673,6 @@ namespace AppData.Migrations
                 name: "SanPhamGiamGias");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
-
-            migrationBuilder.DropTable(
                 name: "GioHangs");
 
             migrationBuilder.DropTable(
@@ -696,6 +704,9 @@ namespace AppData.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "AspNetRoles");
         }
     }
 }

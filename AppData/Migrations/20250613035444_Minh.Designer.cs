@@ -12,8 +12,8 @@ using WebModels.Models;
 namespace AppData.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250610092535_hauhoangg")]
-    partial class hauhoangg
+    [Migration("20250613035444_Minh")]
+    partial class Minh
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -142,18 +142,9 @@ namespace AppData.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<DateTime>("NgaySua")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("NgayTao")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("TrangThai")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -173,6 +164,9 @@ namespace AppData.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
+
+                    b.Property<Guid?>("ApplicationRoleId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -200,9 +194,6 @@ namespace AppData.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<Guid>("IDRole")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -245,7 +236,7 @@ namespace AppData.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IDRole");
+                    b.HasIndex("ApplicationRoleId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -847,13 +838,9 @@ namespace AppData.Migrations
 
             modelBuilder.Entity("WebModels.Models.ApplicationUser", b =>
                 {
-                    b.HasOne("WebModels.Models.ApplicationRole", "Role")
+                    b.HasOne("WebModels.Models.ApplicationRole", null)
                         .WithMany("Users")
-                        .HasForeignKey("IDRole")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Role");
+                        .HasForeignKey("ApplicationRoleId");
                 });
 
             modelBuilder.Entity("WebModels.Models.DiaChiNhanHang", b =>
