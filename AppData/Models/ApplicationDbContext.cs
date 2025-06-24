@@ -14,7 +14,7 @@ namespace WebModels.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=HAU-2005;Database=AoDaiModel;User Id=sa;Password=Hauhoang0905!;TrustServerCertificate=true;");
+            optionsBuilder.UseSqlServer("Server=QUOC-AN\\QUOC_AN;Database=AoDaiModel;User Id=SA;Password=An344763;TrustServerCertificate=true;");
         }
         public DbSet<GioHang> GioHangs { get; set; }
         public DbSet<GioHangCT> GioHangChiTiets { get; set; }
