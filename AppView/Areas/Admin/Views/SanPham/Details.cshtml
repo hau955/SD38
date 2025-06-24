@@ -1,0 +1,50 @@
+﻿@model WebModels.Models.SanPham
+
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">@Model.TenSanPham</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Giới tính</dt>
+                <dd class="col-sm-9">
+                    @(Model.GioiTinh == null ? "Unisex" : (Model.GioiTinh.Value ? "Nam" : "Nữ"))
+                </dd>
+
+                <dt class="col-sm-3">Trọng lượng</dt>
+                <dd class="col-sm-9">
+                    @(Model.TrongLuong.HasValue ? $"{Model.TrongLuong} gram" : "Chưa có thông tin")
+                </dd>
+
+                <dt class="col-sm-3">Mô tả</dt>
+                <dd class="col-sm-9">
+                    @Model.MoTa
+                </dd>
+
+                <dt class="col-sm-3">Trạng thái</dt>
+                <dd class="col-sm-9">
+                    <span class="badge @(Model.TrangThai ? "badge-success" : "badge-secondary")">
+                        @(Model.TrangThai ? "Hoạt động" : "Không hoạt động")
+                    </span>
+                </dd>
+
+                <dt class="col-sm-3">Ngày tạo</dt>
+                <dd class="col-sm-9">
+                    @Model.NgayTao.ToString("dd/MM/yyyy")
+                </dd>
+            </dl>
+        </div>
+        <div class="card-footer text-right">
+            <a class="btn btn-secondary" href="@Url.Action("Index")">
+                <i class="fas fa-arrow-left"></i> Quay lại danh sách
+            </a>
+        </div>
+    </div>
+</div>

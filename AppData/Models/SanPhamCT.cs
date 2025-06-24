@@ -37,6 +37,9 @@ namespace WebModels.Models
         [MaxLength(500)]
         public string? HinhAnh { get; set; }
 
+        [NotMapped]
+        public IFormFile? ImageFile { get; set; }
+
         public DateTime NgayTao { get; set; } = DateTime.UtcNow;
         public DateTime NgaySua { get; set; } = DateTime.UtcNow;
         public bool TrangThai { get; set; }
