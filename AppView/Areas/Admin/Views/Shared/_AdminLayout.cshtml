@@ -240,6 +240,14 @@
                     <div class="container">
                         <main role="main" class="pb-3">
                             @RenderBody()
+                            @if (TempData["Success"] != null)
+                            {
+                                <div class="alert alert-success">@TempData["Success"]</div>
+                            }
+                            @if (TempData["Message"] != null)
+                            {
+                                <div class="alert alert-info">@TempData["Message"]</div>
+                            }
                         </main>
                     </div>
 

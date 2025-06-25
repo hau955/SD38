@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AppApi\AppApi.csproj" />
-    <ProjectReference Include="..\AppData\AppData.csproj" />
   </ItemGroup>
 
 </Project>

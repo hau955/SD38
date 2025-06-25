@@ -1,21 +1,25 @@
-﻿using AppView.Repository;
-
+﻿using AppView.Areas.Admin.Repository;
+using AppView.Areas.Auth.Repository;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
+// Đăng ký Session
+builder.Services.AddSession();
 
+// Đăng ký HttpClient
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
-
-// Cấu hình HttpClient cho gọi API
 builder.Services.AddHttpClient<ISanPhamRepo, SanPhamRepo>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
+builder.Services.AddHttpClient<IAuthRepository, AuthRepository>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
 
-// (Không cần dòng AddScoped nữa!)
-
-// CORS (nếu có gọi từ web domain khác)
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -28,32 +32,34 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 else
 {
-    app.UseDeveloperExceptionPage(); // Hữu ích cho debug
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseRouting();
+app.UseSession();
 
+app.UseRouting();
 app.UseCors("AllowAll");
 
 app.UseAuthorization();
+
+// Routing mặc định
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+     name: "default",
+    pattern: "{area=Auth}/{controller=Auth}/{action=Login}/{id?}");
 
 app.Run();
