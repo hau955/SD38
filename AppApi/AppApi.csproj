@@ -1,12 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+	<PropertyGroup>
 		<EnableCompressionInStaticWebAssets>false</EnableCompressionInStaticWebAssets>
 	</PropertyGroup>
-
 	<ItemGroup>
 		<PackageReference Include="MailKit" Version="4.12.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.16" />
@@ -22,6 +23,10 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\AppData\AppData.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="wwwroot\uploads\" />
 	</ItemGroup>
 
 </Project>
