@@ -26,6 +26,7 @@ namespace WebModels.Models
         public string? HinhAnh { get; set; }
 
         [NotMapped]
+        [JsonIgnore]
         public IFormFile? ImageFile { get; set; }
 
         public DateTime NgayTao { get; set; } = DateTime.UtcNow;

@@ -15,6 +15,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddScoped<ISanPhamService, SanPhamService>();
+builder.Services.AddScoped<IMauSacService, MauSacService>();
+builder.Services.AddScoped<ISizeService , SizeService>();
+builder.Services.AddScoped<ICoAoService, CoAoService>();
+builder.Services.AddScoped<ITaAoService, TaAoService>();
+builder.Services.AddScoped<ISanPhamCTService, SanPhamCTService>();
 
 builder.Services.AddCors(options =>
 {

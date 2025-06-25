@@ -14,7 +14,7 @@ namespace WebModels.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=HAU-2005;Database=AoDaiModel;User Id=sa;Password=Hauhoang0905!;TrustServerCertificate=true;");//"Server=DESKTOP-A99GQBL;Database=AoDaiModel;Trusted_Connection=True;TrustServerCertificate=True"); 
+            optionsBuilder.UseSqlServer("Server=DESKTOP-A99GQBL;Database=AoDaiModel;Trusted_Connection=True;TrustServerCertificate=True"); //"Server=HAU-2005;Database=AoDaiModel;User Id=sa;Password=Hauhoang0905!;TrustServerCertificate=true;"); 
         }
         public DbSet<GioHang> GioHangs { get; set; }
         public DbSet<GioHangCT> GioHangChiTiets { get; set; }
@@ -104,7 +104,7 @@ namespace WebModels.Models
 
             // 1-n: Size - SanPhamChiTiet
             builder.Entity<SanPhamCT>()
-                .HasOne(spct => spct.Size)
+                .HasOne(spct => spct.SizeAo)
                 .WithMany(sz => sz.SanPhamChiTiets)
                 .HasForeignKey(spct => spct.IDSize)
                 .OnDelete(DeleteBehavior.Restrict);

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace WebModels.Models
 {
@@ -35,7 +36,7 @@ namespace WebModels.Models
         public DateTime NgaySua { get; set; } = DateTime.UtcNow;
 
         public bool TrangThai { get; set; } = true;
-
+        [JsonIgnore]
         public virtual ICollection<SanPhamCT> SanPhamChiTiets { get; set; }
 
         public TaAo()
