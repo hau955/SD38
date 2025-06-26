@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace WebModels.Models
 {
@@ -18,6 +19,7 @@ namespace WebModels.Models
         public bool TrangThai { get; set; } = true;
 
         // Quan hệ 1 MauSac có nhiều SanPhamChiTiet
+        [JsonIgnore]
         public virtual ICollection<SanPhamCT> SanPhamChiTiets { get; set; }
 
         public MauSac()

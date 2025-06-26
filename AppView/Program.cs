@@ -1,14 +1,39 @@
-﻿using AppView.Repository;
+﻿using AppView.Areas.Admin.Repository;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddHttpContextAccessor();
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
 
 // Cấu hình HttpClient cho gọi API
 builder.Services.AddHttpClient<ISanPhamRepo, SanPhamRepo>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+// Cấu hình HttpClient cho từng repo gọi API
+builder.Services.AddHttpClient<IMauSacRepo, MauSacRepo>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+
+builder.Services.AddHttpClient<ISizeRepo, SizeRepo>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+
+builder.Services.AddHttpClient<ICoAoRepo, CoAoRepo>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+
+builder.Services.AddHttpClient<ITaAoRepo, TaAoRepo>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+builder.Services.AddHttpClient<ISanPhamCTRepo, SanPhamCTRepo>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });

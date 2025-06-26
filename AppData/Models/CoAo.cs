@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace WebModels.Models
 {
@@ -30,6 +31,7 @@ namespace WebModels.Models
         public bool TrangThai { get; set; } = true;
 
         // Navigation properties
+        [JsonIgnore]
         public virtual ICollection<SanPhamCT> SanPhamChiTiets { get; set; }
 
         public CoAo()

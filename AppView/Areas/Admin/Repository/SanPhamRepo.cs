@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+﻿using AppView.Areas.Admin.ViewModels;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using WebModels.Models;
 
@@ -11,37 +13,43 @@ namespace AppView.Areas.Admin.Repository
         {
             _httpClient = httpClient;
         }
-        public async Task<SanPham> Create(SanPham sanpham)
+        public async Task<SanPham> Create(SanPhamCTViewModel model)
         {
             using var content = new MultipartFormDataContent();
 
-            // Các field dạng chuỗi/số
-            content.Add(new StringContent(sanpham.TenSanPham ?? ""), "TenSanPham");
-            content.Add(new StringContent(sanpham.MoTa ?? ""), "MoTa");
-            content.Add(new StringContent(sanpham.TrongLuong.ToString()), "TrongLuong");
-            content.Add(new StringContent(sanpham.GioiTinh.ToString()), "GioiTinh");
+            content.Add(new StringContent(model.TenSanPham ?? ""), "TenSanPham");
+            content.Add(new StringContent(model.MoTa ?? ""), "MoTa");
+            content.Add(new StringContent(model.TrongLuong.ToString()), "TrongLuong");
+            content.Add(new StringContent(model.GioiTinh.ToString()), "GioiTinh");
 
-            // Gửi file nếu có
-            if (sanpham.ImageFile != null && sanpham.ImageFile.Length > 0)
+            content.Add(new StringContent(model.IdSize.ToString()), "IDSize");
+            content.Add(new StringContent(model.IdMauSac.ToString()), "IDMauSac");
+            content.Add(new StringContent(model.IdCoAo.ToString()), "IDCoAo");
+            content.Add(new StringContent(model.IdTaAo.ToString()), "IDTaAo");
+
+            content.Add(new StringContent(model.GiaBan.ToString()), "GiaBan");
+            content.Add(new StringContent(model.SoLuongTonKho.ToString()), "SoLuongTonKho");
+
+            if (model.ImageFile != null && model.ImageFile.Length > 0)
             {
-                var fileStream = sanpham.ImageFile.OpenReadStream();
-                var fileContent = new StreamContent(fileStream);
-                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(sanpham.ImageFile.ContentType);
-                content.Add(fileContent, "ImageFile", sanpham.ImageFile.FileName);
+                var streamContent = new StreamContent(model.ImageFile.OpenReadStream());
+                streamContent.Headers.ContentType = new MediaTypeHeaderValue(model.ImageFile.ContentType);
+                content.Add(streamContent, "ImageFile", model.ImageFile.FileName);
             }
 
             var response = await _httpClient.PostAsync("api/SanPham", content);
-            response.EnsureSuccessStatusCode();
 
-            var createdResponse = await response.Content.ReadFromJsonAsync<ApiResponse<SanPham>>();
-            if (createdResponse == null)
-                throw new Exception("Không nhận được dữ liệu tạo sản phẩm.");
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception("Tạo sản phẩm thất bại: " + error);
+            }
 
-            return createdResponse.Data;
+            var result = await response.Content.ReadFromJsonAsync<ApiResponse<SanPham>>();
+
+            return result?.Data ?? throw new Exception("Không nhận được dữ liệu từ API.");
         }
-
-
-        public async Task<bool> Detele(Guid id)
+            public async Task<bool> Delete(Guid id)
         {
             var response = await _httpClient.DeleteAsync($"api/SanPham/{id}");
             return response.IsSuccessStatusCode;
@@ -58,7 +66,6 @@ namespace AppView.Areas.Admin.Repository
             var response = await _httpClient.GetFromJsonAsync<ApiResponse<SanPham?>>($"api/SanPham/{id}");
             return response?.Data;
         }
-
         public async Task<string> Toggle(Guid id)
         {
             var response = await _httpClient.PatchAsync($"api/SanPham/ToggleStatus/{id}", null);
@@ -84,7 +91,7 @@ namespace AppView.Areas.Admin.Repository
 
 
 
-        public async Task<SanPham?> Update(Guid id, SanPham sanpham)
+        public async Task<SanPham?> Update(SanPhamCTViewModel sanpham)
         {
             using var form = new MultipartFormDataContent();
 
@@ -95,14 +102,17 @@ namespace AppView.Areas.Admin.Repository
             form.Add(new StringContent(sanpham.MoTa ?? ""), "MoTa");
             form.Add(new StringContent(sanpham.TrangThai.ToString()), "TrangThai");
 
-            // Nếu có ảnh được chọn thì thêm vào
+            // ✅ BỔ SUNG đường dẫn ảnh nếu có
+            form.Add(new StringContent(sanpham.HinhAnh ?? ""), "HinhAnh");
+
+            // Nếu có ảnh được chọn thì thêm vào (ưu tiên file ảnh mới nếu có)
             if (sanpham.ImageFile != null && sanpham.ImageFile.Length > 0)
             {
                 var streamContent = new StreamContent(sanpham.ImageFile.OpenReadStream());
                 form.Add(streamContent, "ImageFile", sanpham.ImageFile.FileName);
             }
 
-            var response = await _httpClient.PutAsync($"api/SanPham/{id}", form);
+            var response = await _httpClient.PutAsync($"api/SanPham/{sanpham.IDSanPham}", form);
 
             if (!response.IsSuccessStatusCode) return null;
 
@@ -110,15 +120,17 @@ namespace AppView.Areas.Admin.Repository
             return updatedResponse?.Data;
         }
 
-        private class ApiResponse<T>
-        {
-            public string Message { get; set; } = string.Empty;
-            public T Data { get; set; } = default!;
-        }
 
-        private class MessageResponse
-        {
-            public string Message { get; set; } = string.Empty;
-        }
+
+    private class ApiResponse<T>
+    {
+        public string Message { get; set; } = string.Empty;
+        public T Data { get; set; } = default!;
     }
+
+    private class MessageResponse
+    {
+        public string Message { get; set; } = string.Empty;
+    }
+}
 }

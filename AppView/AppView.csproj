@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="PagedList" Version="1.17.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\AppApi\AppApi.csproj" />
     <ProjectReference Include="..\AppData\AppData.csproj" />
   </ItemGroup>

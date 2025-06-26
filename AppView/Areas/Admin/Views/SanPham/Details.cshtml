@@ -1,50 +1,53 @@
-﻿@model WebModels.Models.SanPham
+﻿@model AppView.Areas.Admin.ViewModels.SanPhamCTViewModel
 
 @{
     ViewData["Title"] = "Chi tiết sản phẩm";
 }
 
 <div class="container mt-4">
-    <h2 class="mb-4">@ViewData["Title"]</h2>
+    <h2>@ViewData["Title"]</h2>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">Tên sản phẩm</dt>
+        <dd class="col-sm-9">@Model.TenSanPham</dd>
 
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">@Model.TenSanPham</h4>
-        </div>
-        <div class="card-body">
-            <dl class="row">
-                <dt class="col-sm-3">Giới tính</dt>
-                <dd class="col-sm-9">
-                    @(Model.GioiTinh == null ? "Unisex" : (Model.GioiTinh.Value ? "Nam" : "Nữ"))
-                </dd>
+        <dt class="col-sm-3">Giới tính</dt>
+        <dd class="col-sm-9">@((Model.GioiTinh == true) ? "Nam" : (Model.GioiTinh == false ? "Nữ" : "Unisex"))</dd>
 
-                <dt class="col-sm-3">Trọng lượng</dt>
-                <dd class="col-sm-9">
-                    @(Model.TrongLuong.HasValue ? $"{Model.TrongLuong} gram" : "Chưa có thông tin")
-                </dd>
+        <dt class="col-sm-3">Trọng lượng</dt>
+        <dd class="col-sm-9">@Model.TrongLuong gram</dd>
 
-                <dt class="col-sm-3">Mô tả</dt>
-                <dd class="col-sm-9">
-                    @Model.MoTa
-                </dd>
+        <dt class="col-sm-3">Mô tả</dt>
+        <dd class="col-sm-9">@Model.MoTa</dd>
 
-                <dt class="col-sm-3">Trạng thái</dt>
-                <dd class="col-sm-9">
-                    <span class="badge @(Model.TrangThai ? "badge-success" : "badge-secondary")">
-                        @(Model.TrangThai ? "Hoạt động" : "Không hoạt động")
-                    </span>
-                </dd>
+        <dt class="col-sm-3">Trạng thái</dt>
+        <dd class="col-sm-9">@(Model.TrangThai ? "Đang bán" : "Ngừng bán")</dd>
 
-                <dt class="col-sm-3">Ngày tạo</dt>
-                <dd class="col-sm-9">
-                    @Model.NgayTao.ToString("dd/MM/yyyy")
-                </dd>
-            </dl>
-        </div>
-        <div class="card-footer text-right">
-            <a class="btn btn-secondary" href="@Url.Action("Index")">
-                <i class="fas fa-arrow-left"></i> Quay lại danh sách
-            </a>
-        </div>
-    </div>
+        <dt class="col-sm-3">Hình ảnh</dt>
+        <dd class="col-sm-9">
+            @if (!string.IsNullOrEmpty(Model.HinhAnh))
+            {
+                <img src="@Model.HinhAnh" alt="Ảnh sản phẩm" style="max-width: 200px;" />
+            }
+            else
+            {
+                <span class="text-muted">Chưa có ảnh</span>
+            }
+        </dd>
+
+        <dt>Size</dt>
+        <dd>@Model.SizeList?.FirstOrDefault(s => s.Value == Model.IdSize.ToString())?.Text</dd>
+
+        <dt>Màu sắc</dt>
+        <dd>@Model.MauSacList?.FirstOrDefault(s => s.Value == Model.IdMauSac.ToString())?.Text</dd>
+
+        <dt>Cổ áo</dt>
+        <dd>@Model.CoAoList?.FirstOrDefault(s => s.Value == Model.IdCoAo.ToString())?.Text</dd>
+
+        <dt>Tà áo</dt>
+        <dd>@Model.TaAoList?.FirstOrDefault(s => s.Value == Model.IdTaAo.ToString())?.Text</dd>
+
+    </dl>
+
+    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Quay lại</a>
 </div>

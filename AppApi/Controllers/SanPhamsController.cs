@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AppApi.Service;
+﻿using AppApi.Service;
+using AppView.Areas.Admin.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using WebModels.Models;
 
 namespace AppApi.Controllers
@@ -36,30 +37,35 @@ namespace AppApi.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var result = await _sanPhamService.GetByID(id);
-            if (result == null)
-                return NotFound(new { message = "Không tìm thấy sản phẩm." });
-
-            return Ok(new
+            try
             {
-                message = "Lấy sản phẩm theo ID thành công.",
-                data = result
-            });
+                var sanPham = await _sanPhamService.GetByIDWithDetails(id);
+
+                if (sanPham == null)
+                    return NotFound(new { message = "Không tìm thấy sản phẩm", data = (object?)null });
+
+                return Ok(new { message = "Thành công", data = sanPham });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi server: " + ex.Message, detail = ex.StackTrace });
+            }
         }
 
-        // POST: api/SanPham
+
+
         [HttpPost]
-        public async Task<IActionResult> Create([FromForm] SanPham sanPham)
+        public async Task<IActionResult> Create([FromForm] SanPhamCTViewModel model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(new { message = "Dữ liệu không hợp lệ.", errors = ModelState });
+                return BadRequest(new { message = "Dữ liệu không hợp lệ" });
 
-            var created = await _sanPhamService.Create(sanPham);
+            var sanPham = await _sanPhamService.Create(model);
 
-            return CreatedAtAction(nameof(GetById), new { id = created.IDSanPham }, new
+            return Ok(new ApiResponse<SanPham>
             {
-                message = "Tạo sản phẩm thành công.",
-                data = created
+                Message = "Tạo sản phẩm thành công (chưa lưu DB)",
+                Data = sanPham
             });
         }
 
@@ -73,8 +79,26 @@ namespace AppApi.Controllers
             if (existing == null)
                 return NotFound(new { message = "Không tìm thấy sản phẩm để cập nhật." });
 
-            // Giữ nguyên ảnh cũ nếu không có xử lý upload mới
-            sanPham.HinhAnh = existing.HinhAnh;
+            // ✅ Nếu có ảnh mới thì xử lý lưu ảnh và cập nhật đường dẫn
+            if (sanPham.ImageFile != null && sanPham.ImageFile.Length > 0)
+            {
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(sanPham.ImageFile.FileName)}";
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", fileName);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await sanPham.ImageFile.CopyToAsync(stream);
+                }
+
+                sanPham.HinhAnh = "/images/" + fileName;
+            }
+            else
+            {
+                // ✅ Nếu không có ảnh mới thì giữ ảnh cũ
+                sanPham.HinhAnh = existing.HinhAnh;
+            }
 
             var updated = await _sanPhamService.Update(id, sanPham);
             return Ok(new
@@ -84,13 +108,11 @@ namespace AppApi.Controllers
             });
         }
 
-
-
         // DELETE: api/SanPham/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var result = await _sanPhamService.Detele(id);
+            var result = await _sanPhamService.Delete(id);
             if (!result)
                 return NotFound(new { message = "Không tìm thấy sản phẩm để xoá." });
 

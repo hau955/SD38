@@ -1,4 +1,5 @@
-﻿using WebModels.Models;
+﻿using AppView.Areas.Admin.ViewModels;
+using WebModels.Models;
 
 namespace AppApi.Service
 {
@@ -6,9 +7,10 @@ namespace AppApi.Service
     {
         Task<List<SanPham>> GetAll();
         Task<SanPham?> GetByID(Guid id);
-        Task<SanPham> Create(SanPham sanpham);
+        Task<SanPham?> GetByIDWithDetails(Guid id);
+        Task<SanPham> Create(SanPhamCTViewModel sanpham);
         Task<SanPham?> Update(Guid id, SanPham Updatesanpham);
-        Task<bool> Detele(Guid id);
+        Task<bool> Delete(Guid id);
         Task<string> Toggle(Guid id);
     }
 }

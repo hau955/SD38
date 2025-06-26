@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Drawing;
+using System.Text.Json.Serialization;
 
 namespace WebModels.Models
 {
@@ -11,23 +11,28 @@ namespace WebModels.Models
 
         [ForeignKey("SanPham")]
         public Guid IDSanPham { get; set; }
-        public virtual SanPham SanPham { get; set; }
+        [JsonIgnore]
+        public virtual SanPham? SanPham { get; set; }
 
         [ForeignKey("MauSac")]
         public Guid IDMauSac { get; set; }
-        public virtual MauSac MauSac { get; set; }
+        [JsonIgnore]
+        public virtual MauSac? MauSac { get; set; }
 
-        [ForeignKey("Size")]
+        [ForeignKey("SizeAo")]
         public Guid IDSize { get; set; }
-        public virtual Size Size { get; set; }
+        [JsonIgnore]
+        public virtual Size? SizeAo { get; set; }
 
         [ForeignKey("CoAo")]
         public Guid IDCoAo { get; set; }
-        public virtual CoAo CoAo { get; set; }
+        [JsonIgnore]
+        public virtual CoAo? CoAo { get; set; }
 
         [ForeignKey("TaAo")]
         public Guid IDTaAo { get; set; }
-        public virtual TaAo TaAo { get; set; }
+        [JsonIgnore]
+        public virtual TaAo? TaAo { get; set; }
 
         public int SoLuongTonKho { get; set; }
 
