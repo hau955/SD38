@@ -1,10 +1,11 @@
-﻿using AppView.Repository;
+﻿
+using AppView.Areas.Admin.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddHttpContextAccessor();
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
 
 // Cấu hình HttpClient cho gọi API
