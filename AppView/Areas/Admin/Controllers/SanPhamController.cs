@@ -1,5 +1,12 @@
-﻿using AppView.Areas.Admin.Repository;
+﻿using AppView.Areas.Admin.IRepo;
+using AppView.Areas.Admin.Repository;
+using AppView.Areas.Admin.ViewModels;
+using AppView.Areas.Admin.ViewModels.SanPhamViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using PagedList;
+using System.Net.Http;
+using System.Text.Json;
 using WebModels.Models;
 
 namespace AppView.Areas.Admin.Controllers
@@ -7,180 +14,118 @@ namespace AppView.Areas.Admin.Controllers
     [Area("Admin")]
     public class SanPhamController : Controller
     {
-        private readonly ISanPhamRepo _sanPhamRepo;
-        public SanPhamController(ISanPhamRepo sanPhamRepo)
+        private readonly ISanPhamRepo _repo;
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        public SanPhamController(IHttpClientFactory httpClientFactory, ISanPhamRepo repo)
         {
-            _sanPhamRepo = sanPhamRepo;
+            _httpClientFactory = httpClientFactory; _repo = repo;
         }
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                var list = await _sanPhamRepo.GetAll();
-                ViewBag.Message = "Lấy danh sách sản phẩm thành công.";
-                return View(list);
-            }
-            catch (Exception ex)
-            {
-                ViewBag.Message = "Lỗi khi lấy danh sách sản phẩm: " + ex.Message;
-                return View(new List<SanPham>());
-            }
+            var sanPhams = await _repo.GetAllSanPhamAsync();
+            return View(sanPhams);
         }
-        public async Task<IActionResult> Details(Guid id)
+        [HttpGet]
+        public async Task<IActionResult> Create()
         {
-            // Kiểm tra ID có hợp lệ không
-            if (id == Guid.Empty)
-            {
-                TempData["Error"] = "ID sản phẩm không hợp lệ.";
-                return RedirectToAction("Index");
-            }
+            var viewModel = new SanPhamCreateViewModel();
 
-            try
-            {
-                // Gọi repo để lấy sản phẩm theo ID
-                var sanPham = await _sanPhamRepo.GetByID(id);
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.GetAsync("https://localhost:7221/api/DanhMucs");
 
-                if (sanPham == null)
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var danhMucs = JsonSerializer.Deserialize<List<DanhMucResponse>>(json, new JsonSerializerOptions
                 {
-                    TempData["Error"] = "Không tìm thấy sản phẩm.";
-                    return RedirectToAction("Index");
-                }
+                    PropertyNameCaseInsensitive = true
+                });
 
-                // Trả về view với sản phẩm
-                return View(sanPham);
+                viewModel.DanhMucList = danhMucs?.Select(dm => new SelectListItem
+                {
+                    Value = dm.DanhMucId.ToString(),
+                    Text = dm.TenDanhMuc
+                }).ToList();
             }
-            catch (Exception ex)
+            else
             {
-                TempData["Error"] = $"Lỗi khi lấy thông tin sản phẩm: {ex.Message}";
-                return RedirectToAction("Index");
+                viewModel.DanhMucList = new List<SelectListItem>(); // fallback
             }
+
+            return View(viewModel);
         }
 
-        // Create GET
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // Create POST
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(SanPham sanPham)
+        public async Task<IActionResult> Create(SanPhamCreateViewModel model)
+        {
+            Console.WriteLine(">> DanhMucID = " + model.DanhMucID);
+            if (!ModelState.IsValid)
+            {
+                // Gọi lại danh mục nếu có lỗi form
+                model.DanhMucList = await LoadDanhMucList();
+                return View(model);
+            }
+            model.NgayTao = DateTime.Now;
+            model.NgaySua = DateTime.Now;
+            var result = await _repo.CreateSanPhamAsync(model);
+            if (result)
+                return RedirectToAction("Index");
+
+            ModelState.AddModelError("", "Thêm sản phẩm thất bại");
+            model.DanhMucList = await LoadDanhMucList();
+            return View(model);
+        }
+
+        private async Task<List<SelectListItem>> LoadDanhMucList()
+        {
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.GetAsync("https://localhost:7221/api/DanhMucs");
+
+            if (!response.IsSuccessStatusCode) return new List<SelectListItem>();
+
+            var json = await response.Content.ReadAsStringAsync();
+            var danhMucs = JsonSerializer.Deserialize<List<DanhMucResponse>>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            return danhMucs?.Select(dm => new SelectListItem
+            {
+                Value = dm.DanhMucId.ToString(),
+                Text = dm.TenDanhMuc
+            }).ToList() ?? new List<SelectListItem>();
+        }
+        [HttpGet]
+        public async Task<IActionResult> Update(Guid id)
+        {
+            var model = await _repo.GetByIdAsync(id);
+            if (model == null)
+                return NotFound();
+
+            model.DanhMucList = await LoadDanhMucList();
+            return View(model);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Update(SanPhamCreateViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                return View(sanPham);
+                // Nếu lỗi form thì load lại danh mục để giữ dropdown
+                model.DanhMucList = await LoadDanhMucList();
+                return View(model);
             }
 
-            try
-            {
-                // ❌ Không còn xử lý ảnh
+            var success = await _repo.UpdateSanPhamAsync(model);
+            if (success)
+                return RedirectToAction("Index"); // hoặc Redirect về Danh sách
 
-                // Gửi sản phẩm qua API
-                var created = await _sanPhamRepo.Create(sanPham);
-
-                TempData["Message"] = "Tạo sản phẩm thành công!";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", "Lỗi khi tạo sản phẩm: " + ex.Message);
-                return View(sanPham);
-            }
-        }
-
-        // Edit GET
-        public async Task<IActionResult> Edit(Guid id)
-        {
-            var sanPham = await _sanPhamRepo.GetByID(id);
-            if (sanPham == null)
-            {
-                return NotFound("Không tìm thấy sản phẩm.");
-            }
-            return View(sanPham);
-        }
-
-        // Edit POST
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, SanPham sanPham)
-        {
-            if (id != sanPham.IDSanPham)
-            {
-                return BadRequest("ID không khớp.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return View(sanPham);
-            }
-
-            try
-            {
-                // ❌ Bỏ phần gán ImageFile
-                var updated = await _sanPhamRepo.Update(id, sanPham);
-                if (updated == null)
-                {
-                    return NotFound("Không tìm thấy sản phẩm để cập nhật.");
-                }
-
-                TempData["Message"] = "Cập nhật sản phẩm thành công!";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", "Lỗi khi cập nhật sản phẩm: " + ex.Message);
-                return View(sanPham);
-            }
-        }
-
-
-
-        // GET: /SanPham/Delete/{id}
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var sanPham = await _sanPhamRepo.GetByID(id);
-            if (sanPham == null)
-            {
-                return NotFound("Không tìm thấy sản phẩm.");
-            }
-            return View(sanPham);
-        }
-
-        // POST: /SanPham/Delete/{id}
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
-        {
-            try
-            {
-                var result = await _sanPhamRepo.Detele(id);
-                if (!result)
-                {
-                    return NotFound("Không tìm thấy sản phẩm để xoá.");
-                }
-                TempData["Message"] = "Xoá sản phẩm thành công!";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = "Lỗi khi xoá sản phẩm: " + ex.Message;
-                return RedirectToAction(nameof(Index));
-            }
-        }
-        public async Task<IActionResult> ToggleStatus(Guid id)
-        {
-            try
-            {
-                var message = await _sanPhamRepo.Toggle(id); // Trả về thông báo từ API
-                TempData["Message"] = message;
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = "Lỗi khi cập nhật trạng thái sản phẩm: " + ex.Message;
-            }
-
-            return RedirectToAction("Index");
+            TempData["Error"] = "Cập nhật thất bại!";
+            model.DanhMucList = await LoadDanhMucList(); // load lại danh sách
+            return View(model);
         }
 
     }

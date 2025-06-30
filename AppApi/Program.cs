@@ -1,4 +1,5 @@
-﻿using AppApi.Service;
+﻿using AppApi.IService;
+using AppApi.Service;
 using Microsoft.EntityFrameworkCore;
 using WebModels.Models;
 
@@ -15,7 +16,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddScoped<ISanPhamService, SanPhamService>();
-
+builder.Services.AddScoped<IMauSacService, MauSacService>();
+builder.Services.AddScoped<ISizeService , SizeService>();
+builder.Services.AddScoped<ICoAoService, CoAoService>();
+builder.Services.AddScoped<ITaAoService, TaAoService>();
+builder.Services.AddScoped<ISanPhamCTService, SanPhamCTService>();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>

@@ -31,13 +31,13 @@ namespace WebModels.Models
         [Required]
         public bool LoaiGiamGia { get; set; } // false = Percentage, true = Fixed Amount
 
-        [Required]
-        public DateTime NgayTao { get; set; } = DateTime.UtcNow;
+       
+        public DateTime NgayTao { get; set; } 
 
-        [Required]
-        public DateTime NgaySua { get; set; } = DateTime.UtcNow;
+      
+        public DateTime NgaySua { get; set; } 
 
-        [Required]
+      
         public bool TrangThai { get; set; } // Active, Expired, Draft, v.v.
 
         // Navigation property

@@ -26,13 +26,13 @@ namespace WebModels.Models
         [Column(TypeName = "decimal(18, 2)")]
         public decimal? SoTienConLai { get; set; }
 
-        [Required]
-        public DateTime NgayTao { get; set; } = DateTime.UtcNow;
+        
+        public DateTime NgayTao { get; set; } 
 
-        [Required]
-        public DateTime NgaySua { get; set; } = DateTime.UtcNow;
+       
+        public DateTime NgaySua { get; set; } 
 
-        [Required]
+        
         public bool TrangThai { get; set; }
     }
 }

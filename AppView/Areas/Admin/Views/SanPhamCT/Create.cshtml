@@ -1,0 +1,55 @@
+﻿@model WebModels.Models.SanPhamCT
+@{
+    ViewData["Title"] = "Thêm Sản phẩm chi tiết";
+}
+
+<div class="container mt-4">
+    <h2>@ViewData["Title"]</h2>
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="IDSanPham">Sản phẩm</label>
+                <select asp-for="IDSanPham" asp-items="ViewBag.SanPhams" class="form-control"></select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="IDSize">Size</label>
+                <select asp-for="IDSize" asp-items="ViewBag.Sizes" class="form-control"></select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="IDMauSac">Màu sắc</label>
+                <select asp-for="IDMauSac" asp-items="ViewBag.MauSacs" class="form-control"></select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="IDCoAo">Cổ áo</label>
+                <select asp-for="IDCoAo" asp-items="ViewBag.CoAos" class="form-control"></select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="IDTaAo">Tà áo</label>
+                <select asp-for="IDTaAo" asp-items="ViewBag.TaAos" class="form-control"></select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="GiaBan"></label>
+                <input asp-for="GiaBan" class="form-control" />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="SoLuongTonKho"></label>
+                <input asp-for="SoLuongTonKho" class="form-control" />
+            </div>
+           @*  <div class="col-md-6 mb-3">
+                <label asp-for="ImageFile">Hình ảnh</label>
+                <input asp-for="ImageFile" type="file" class="form-control" />
+            </div> *@
+            <div class="form-check mb-3">
+                <input asp-for="TrangThai" class="form-check-input" />
+                <label asp-for="TrangThai" class="form-check-label">Hoạt động</label>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a asp-action="Index" class="btn btn-secondary">Huỷ</a>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

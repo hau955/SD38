@@ -1,0 +1,31 @@
+﻿@model WebModels.Models.MauSac
+
+@{
+    ViewData["Title"] = "Xoá Màu Sắc";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-danger">@ViewData["Title"]</h2>
+
+    <div class="alert alert-warning border border-danger">
+        <i class="fas fa-exclamation-triangle"></i>
+        Bạn có chắc chắn muốn xoá màu:
+        <strong class="text-danger">@Model.TenMau</strong>?
+    </div>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="IDMauSac" />
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash-alt"></i> Xoá
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Huỷ
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
