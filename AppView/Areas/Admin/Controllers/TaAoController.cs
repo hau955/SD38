@@ -1,4 +1,4 @@
-﻿using AppView.Areas.Admin.Repository;
+﻿using AppView.Areas.Admin.IRepo;
 using Microsoft.AspNetCore.Mvc;
 using WebModels.Models;
 

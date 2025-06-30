@@ -53,9 +53,9 @@ namespace WebModels.Models
         [MaxLength(50)]
         public string TrangThaiThanhToan { get; set; }
 
-        public DateTime NgayTao { get; set; } = DateTime.UtcNow;
+        public DateTime NgayTao { get; set; }
 
-        public DateTime NgaySua { get; set; } = DateTime.UtcNow;
+        public DateTime NgaySua { get; set; } 
 
         // 1 Hóa đơn có nhiều chi tiết hóa đơn
         public virtual ICollection<HoaDonCT> HoaDonChiTiets { get; set; } = new List<HoaDonCT>();

@@ -1,9 +1,12 @@
-﻿using AppView.Areas.Admin.Repository;
+﻿using AppView.Areas.Admin.IRepo;
+using AppView.Areas.Admin.Repository;
 using AppView.Areas.Admin.ViewModels;
+using AppView.Areas.Admin.ViewModels.SanPhamViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using PagedList;
 using System.Net.Http;
+using System.Text.Json;
 using WebModels.Models;
 
 namespace AppView.Areas.Admin.Controllers
@@ -11,237 +14,119 @@ namespace AppView.Areas.Admin.Controllers
     [Area("Admin")]
     public class SanPhamController : Controller
     {
-        private readonly ISanPhamRepo _sanPhamRepo;
-        private readonly ISizeRepo _sizeRepo;
-        private readonly IMauSacRepo _mauSacRepo;
-        private readonly ICoAoRepo _coAoRepo;
-        private readonly ITaAoRepo _taAoRepo;
-        private readonly ISanPhamCTRepo _sanPhamCTRepo;
+        private readonly ISanPhamRepo _repo;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public SanPhamController(
-            ISanPhamRepo sanPhamRepo,
-            ISizeRepo sizeRepo,
-            IMauSacRepo mauSacRepo,
-            ICoAoRepo coAoRepo,
-            ITaAoRepo taAoRepo,
-            ISanPhamCTRepo sanPhamCTRepo)
+        public SanPhamController(IHttpClientFactory httpClientFactory, ISanPhamRepo repo)
         {
-            _sanPhamRepo = sanPhamRepo;
-            _sizeRepo = sizeRepo;
-            _mauSacRepo = mauSacRepo;
-            _coAoRepo = coAoRepo;
-            _taAoRepo = taAoRepo;
-            _sanPhamCTRepo = sanPhamCTRepo;
+            _httpClientFactory = httpClientFactory; _repo = repo;
         }
-
-        public async Task<IActionResult> Index(int? page, string sortOrder, string currentFilter, string searchString)
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            ViewBag.CurrentSort = sortOrder;
-            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-            ViewBag.DateSortParm = sortOrder == "Date" ? "date_desc" : "Date";
-
-            if (searchString != null)
-                page = 1;
-            else
-                searchString = currentFilter;
-
-            ViewBag.CurrentFilter = searchString;
-
-            var sanPhams = await _sanPhamRepo.GetAll();
-
-            if (!String.IsNullOrEmpty(searchString))
-                sanPhams = sanPhams.Where(s => s.TenSanPham.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
-
-            sanPhams = sortOrder switch
-            {
-                "name_desc" => sanPhams.OrderByDescending(s => s.TenSanPham).ToList(),
-                "Date" => sanPhams.OrderBy(s => s.NgayTao).ToList(),
-                "date_desc" => sanPhams.OrderByDescending(s => s.NgayTao).ToList(),
-                _ => sanPhams.OrderBy(s => s.TenSanPham).ToList(),
-            };
-
-            int pageSize = 5;
-            int pageNumber = page ?? 1;
-
-            return View(sanPhams.ToPagedList(pageNumber, pageSize));
+            var sanPhams = await _repo.GetAllSanPhamAsync();
+            return View(sanPhams);
         }
-
-        public async Task<IActionResult> Details(Guid id)
-        {
-            var sanPham = await _sanPhamRepo.GetByID(id);
-            if (sanPham == null)
-            {
-                TempData["Error"] = "Không tìm thấy sản phẩm.";
-                return RedirectToAction("Index");
-            }
-
-            var chiTiet = sanPham.SanPhamChiTiets?.FirstOrDefault();
-            if (chiTiet == null)
-            {
-                TempData["Error"] = "Sản phẩm chưa có thông tin chi tiết.";
-                return RedirectToAction("Index");
-            }
-
-            var model = new SanPhamCTViewModel
-            {
-                IDSanPham = sanPham.IDSanPham,
-                TenSanPham = sanPham.TenSanPham,
-                MoTa = sanPham.MoTa,
-                TrongLuong = sanPham.TrongLuong,
-                GioiTinh = sanPham.GioiTinh,
-                TrangThai = sanPham.TrangThai,
-                HinhAnh = sanPham.HinhAnh,
-                IdSize = chiTiet.IDSize,
-                IdMauSac = chiTiet.IDMauSac,
-                IdCoAo = chiTiet.IDCoAo,
-                IdTaAo = chiTiet.IDTaAo
-            };
-
-            await LoadDropdowns(model); // Gán SizeList, CoAoList, TaAoList, MauSacList
-            return View(model);
-        }
-
+        [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var model = new SanPhamCTViewModel();
-            await LoadDropdowns(model);
-            return View(model);
-        }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(SanPhamCTViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                await LoadDropdowns(model);
-                return View(model);
-            }
+            var viewModel = new SanPhamCreateViewModel();
 
-            try
-            {
-                var created = await _sanPhamRepo.Create(model);
-                TempData["Message"] = "Tạo sản phẩm thành công!";
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", "Lỗi khi tạo: " + ex.Message);
-                await LoadDropdowns(model);
-                return View(model);
-            }
-        }
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.GetAsync("https://localhost:7221/api/DanhMucs");
 
-        public async Task<IActionResult> Edit(Guid id)
-        {
-            var sanPham = await _sanPhamRepo.GetByID(id);
-            if (sanPham == null) return NotFound();
-
-            // Nếu bạn muốn dùng ViewModel cho Edit:
-            var model = new SanPhamCTViewModel
+            if (response.IsSuccessStatusCode)
             {
-                IDSanPham = sanPham.IDSanPham,
-                TenSanPham = sanPham.TenSanPham,
-                MoTa = sanPham.MoTa,
-                TrongLuong = sanPham.TrongLuong,
-                GioiTinh = sanPham.GioiTinh,
-                TrangThai = sanPham.TrangThai,
-                HinhAnh = sanPham.HinhAnh
-                // Gán các ID chi tiết nếu cần
-            };
-
-            await LoadDropdowns(model);
-            return View(model);
-        }
-
-        // POST: Edit
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, SanPhamCTViewModel model)
-        {
-            if (id != model.IDSanPham) return BadRequest("ID không khớp.");
-            if (!ModelState.IsValid)
-            {
-                await LoadDropdowns(model);
-                return View(model);
-            }
-
-            try
-            {
-                // xử lý ảnh nếu có
-                if (model.ImageFile != null && model.ImageFile.Length > 0)
+                var json = await response.Content.ReadAsStringAsync();
+                var danhMucs = JsonSerializer.Deserialize<List<DanhMucResponse>>(json, new JsonSerializerOptions
                 {
-                    var fileName = $"{Guid.NewGuid()}{Path.GetExtension(model.ImageFile.FileName)}";
-                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", fileName);
-                    Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+                    PropertyNameCaseInsensitive = true
+                });
 
-                    using var stream = new FileStream(filePath, FileMode.Create);
-                    await model.ImageFile.CopyToAsync(stream);
-                    model.HinhAnh = "/images/" + fileName;
-                }
-
-                var updated = await _sanPhamRepo.Update(model);
-                if (updated == null) return NotFound();
-
-                TempData["Message"] = "Cập nhật sản phẩm thành công!";
-                return RedirectToAction(nameof(Index));
+                viewModel.DanhMucList = danhMucs?.Select(dm => new SelectListItem
+                {
+                    Value = dm.DanhMucId.ToString(),
+                    Text = dm.TenDanhMuc
+                }).ToList();
             }
-            catch (Exception ex)
+            else
             {
-                ModelState.AddModelError("", "Lỗi khi cập nhật: " + ex.Message);
-                await LoadDropdowns(model);
+                viewModel.DanhMucList = new List<SelectListItem>(); // fallback
+            }
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(SanPhamCreateViewModel model)
+        {
+            Console.WriteLine(">> DanhMucID = " + model.DanhMucID);
+            if (!ModelState.IsValid)
+            {
+                // Gọi lại danh mục nếu có lỗi form
+                model.DanhMucList = await LoadDanhMucList();
                 return View(model);
             }
+            model.NgayTao = DateTime.Now;
+            model.NgaySua = DateTime.Now;
+            var result = await _repo.CreateSanPhamAsync(model);
+            if (result)
+                return RedirectToAction("Index");
+
+            ModelState.AddModelError("", "Thêm sản phẩm thất bại");
+            model.DanhMucList = await LoadDanhMucList();
+            return View(model);
         }
 
-        public async Task<IActionResult> Delete(Guid id)
+        private async Task<List<SelectListItem>> LoadDanhMucList()
         {
-            var sanPham = await _sanPhamRepo.GetByID(id);
-            return sanPham == null ? NotFound() : View(sanPham);
-        }
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.GetAsync("https://localhost:7221/api/DanhMucs");
 
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+            if (!response.IsSuccessStatusCode) return new List<SelectListItem>();
+
+            var json = await response.Content.ReadAsStringAsync();
+            var danhMucs = JsonSerializer.Deserialize<List<DanhMucResponse>>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            return danhMucs?.Select(dm => new SelectListItem
+            {
+                Value = dm.DanhMucId.ToString(),
+                Text = dm.TenDanhMuc
+            }).ToList() ?? new List<SelectListItem>();
+        }
+        [HttpGet]
+        public async Task<IActionResult> Update(Guid id)
         {
-            try
-            {
-                var result = await _sanPhamRepo.Delete(id);
-                if (!result) return NotFound();
+            var model = await _repo.GetByIdAsync(id);
+            if (model == null)
+                return NotFound();
 
-                TempData["Message"] = "Xoá sản phẩm thành công!";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = "Lỗi khi xoá sản phẩm: " + ex.Message;
-                return RedirectToAction(nameof(Index));
-            }
+            model.DanhMucList = await LoadDanhMucList();
+            return View(model);
         }
 
-        public async Task<IActionResult> ToggleStatus(Guid id)
+
+        [HttpPost]
+        public async Task<IActionResult> Update(SanPhamCreateViewModel model)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                TempData["Message"] = await _sanPhamRepo.Toggle(id);
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = "Lỗi khi cập nhật trạng thái: " + ex.Message;
+                // Nếu lỗi form thì load lại danh mục để giữ dropdown
+                model.DanhMucList = await LoadDanhMucList();
+                return View(model);
             }
 
-            return RedirectToAction("Index");
-        }
-        private async Task LoadDropdowns(SanPhamCTViewModel model)
-        {
-            var sizes = await _sizeRepo.GetAll() ?? new List<Size>();
-            var coAos = await _coAoRepo.GetAll() ?? new List<CoAo>();
-            var taAos = await _taAoRepo.GetAll() ?? new List<TaAo>();
-            var mauSacs = await _mauSacRepo.GetAll() ?? new List<MauSac>();
+            var success = await _repo.UpdateSanPhamAsync(model);
+            if (success)
+                return RedirectToAction("Index"); // hoặc Redirect về Danh sách
 
-            model.SizeList = sizes.Select(x => new SelectListItem { Value = x.IDSize.ToString(), Text = x.SoSize }).ToList();
-            model.CoAoList = coAos.Select(x => new SelectListItem { Value = x.IDCoAo.ToString(), Text = x.TenCoAo }).ToList();
-            model.TaAoList = taAos.Select(x => new SelectListItem { Value = x.IDTaAo.ToString(), Text = x.TenTaAo }).ToList();
-            model.MauSacList = mauSacs.Select(x => new SelectListItem { Value = x.IDMauSac.ToString(), Text = x.TenMau }).ToList();
+            TempData["Error"] = "Cập nhật thất bại!";
+            model.DanhMucList = await LoadDanhMucList(); // load lại danh sách
+            return View(model);
         }
+
     }
 }

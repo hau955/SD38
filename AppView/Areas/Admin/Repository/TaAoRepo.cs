@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using AppView.Areas.Admin.IRepo;
+using System.Text.Json;
 using WebModels.Models;
 
 namespace AppView.Areas.Admin.Repository
@@ -13,19 +14,19 @@ namespace AppView.Areas.Admin.Repository
 
         public async Task<List<TaAo>> GetAll()
         {
-            var res = await _httpClient.GetFromJsonAsync<ApiResponse<List<TaAo>>>("api/TaAo");
+            var res = await _httpClient.GetFromJsonAsync<ApiResponse<List<TaAo>>>("https://localhost:7221/api/TaAo");
             return res?.Data ?? new List<TaAo>();
         }
 
         public async Task<TaAo?> GetByID(Guid id)
         {
-            var res = await _httpClient.GetFromJsonAsync<ApiResponse<TaAo>>($"api/TaAo/{id}");
+            var res = await _httpClient.GetFromJsonAsync<ApiResponse<TaAo>>($"https://localhost:7221/api/TaAo/{id}");
             return res?.Data;
         }
 
         public async Task<TaAo> Create(TaAo taao)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/TaAo", taao);
+            var response = await _httpClient.PostAsJsonAsync("https://localhost:7221/api/TaAo", taao);
             response.EnsureSuccessStatusCode();
 
             var result = await response.Content.ReadFromJsonAsync<ApiResponse<TaAo>>();
@@ -34,7 +35,7 @@ namespace AppView.Areas.Admin.Repository
 
         public async Task<TaAo?> Update(Guid id, TaAo taao)
         {
-            var response = await _httpClient.PutAsJsonAsync($"api/TaAo/{id}", taao);
+            var response = await _httpClient.PutAsJsonAsync($"https://localhost:7221/api/TaAo/{id}", taao);
             return response.IsSuccessStatusCode
                 ? (await response.Content.ReadFromJsonAsync<ApiResponse<TaAo?>>())?.Data
                 : null;
@@ -42,13 +43,13 @@ namespace AppView.Areas.Admin.Repository
 
         public async Task<bool> Delete(Guid id)
         {
-            var response = await _httpClient.DeleteAsync($"api/TaAo/{id}");
+            var response = await _httpClient.DeleteAsync($"https://localhost:7221/api/TaAo/{id}");
             return response.IsSuccessStatusCode;
         }
 
         public async Task<string> Toggle(Guid id)
         {
-            var response = await _httpClient.PatchAsync($"api/TaAo/ToggleStatus/{id}", null);
+            var response = await _httpClient.PatchAsync($"https://localhost:7221/api/TaAo/ToggleStatus/{id}", null);
             var content = await response.Content.ReadAsStringAsync();
             var json = JsonSerializer.Deserialize<Dictionary<string, string>>(content);
             return json != null && json.ContainsKey("message") ? json["message"] : "Thành công";

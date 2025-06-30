@@ -1,4 +1,7 @@
-﻿using AppView.Areas.Admin.Repository;
+﻿using AppApi.IService;
+using AppView.Areas.Admin.IRepo;
+using AppView.Areas.Admin.ViewModels.SanPhamChiTietViewModels;
+using AppView.Areas.Admin.ViewModels.SanPhamViewModels;
 using Microsoft.AspNetCore.Mvc;
 using WebModels.Models;
 
@@ -7,136 +10,80 @@ namespace AppView.Areas.Admin.Controllers
     [Area("Admin")]
     public class SanPhamCTController : Controller
     {
-        private readonly ISanPhamCTRepo _repo;
+        private readonly ISanPhamCTRepo _service;
 
-        public SanPhamCTController(ISanPhamCTRepo repo)
+        public SanPhamCTController(ISanPhamCTRepo service)
         {
-            _repo = repo;
+            _service = service;
+        }
+        public async Task<IActionResult> ThemChiTiet(Guid idSanPham)
+        {
+            ViewBag.IDSanPham = idSanPham;
+            ViewBag.MauSacs = await _service.GetMauSacsAsync();
+            ViewBag.Sizes = await _service.GetSizesAsync();
+            ViewBag.CoAos = await _service.GetCoAosAsync();
+            ViewBag.TaAos = await _service.GetTaAosAsync();
+
+            return View(new List<SanPhamCT> { new SanPhamCT { IDSanPham = idSanPham } });
         }
 
-        // GET: SanPhamCT
-        public async Task<IActionResult> Index()
+
+        public async Task<IActionResult> DanhSach(Guid idSanPham)
         {
-            var list = await _repo.GetAll();
+            var list = await _service.GetBySanPhamIdAsync(idSanPham);
+            var mauSacs = await _service.GetMauSacsAsync();
+            var sizes = await _service.GetSizesAsync();
+            var coAos = await _service.GetCoAosAsync();
+            var taAos = await _service.GetTaAosAsync();
+
+            // Join dữ liệu
+            foreach (var item in list)
+            {
+                item.MauSac = mauSacs.FirstOrDefault(m => m.IDMauSac == item.IDMauSac);
+                item.SizeAo = sizes.FirstOrDefault(s => s.IDSize == item.IDSize);
+                item.CoAo = coAos.FirstOrDefault(c => c.IDCoAo == item.IDCoAo);
+                item.TaAo = taAos.FirstOrDefault(t => t.IDTaAo == item.IDTaAo);
+               
+            }
+
             return View(list);
         }
 
-        // GET: SanPhamCT/Create
-        public IActionResult Create() => View();
 
-        // POST: SanPhamCT/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(SanPhamCT model)
+        public async Task<IActionResult> CreateMultiple(List<SanPhamCT> list)
         {
-            if (!ModelState.IsValid)
-                return View(model);
+            var success = await _service.CreateMultipleAsync(list);
+            if (success)
+                return RedirectToAction("DanhSach", new { idSanPham = list.First().IDSanPham });
 
-            try
-            {
-                model.NgayTao = DateTime.Now;
-                model.NgaySua = DateTime.Now;
+            TempData["Error"] = "Thêm thất bại!";
+            return RedirectToAction("ThemChiTiet", new { idSanPham = list.First().IDSanPham });
+        }
+        [HttpGet]
+        public async Task<IActionResult> CapNhat(Guid id)
+        {
+            var model = await _service.GetByIdAsync(id);
+            if (model == null) return NotFound();
 
-                var result = await _repo.Create(model);
-                if (result == null)
-                {
-                    ModelState.AddModelError("", "Không thể tạo sản phẩm chi tiết.");
-                    return View(model);
-                }
+            ViewBag.MauSacs = await _service.GetMauSacsAsync();
+            ViewBag.Sizes = await _service.GetSizesAsync();
+            ViewBag.CoAos = await _service.GetCoAosAsync();
+            ViewBag.TaAos = await _service.GetTaAosAsync();
 
-                TempData["Message"] = "✅ Tạo sản phẩm chi tiết thành công!";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", "❌ Lỗi khi tạo: " + ex.Message);
-                return View(model);
-            }
+            return View(model);
         }
 
-        // GET: SanPhamCT/Edit
-        public async Task<IActionResult> Edit(Guid id)
-        {
-            var item = await _repo.GetByID(id);
-            return item == null ? NotFound() : View(item);
-        }
-
-        // POST: SanPhamCT/Edit
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, SanPhamCT model)
+        public async Task<IActionResult> CapNhat(SanPhamCT model)
         {
-            if (id != model.IDSanPhamCT)
-                return BadRequest("ID không khớp.");
+            var success = await _service.UpdateAsync(model);
+            if (success)
+                return RedirectToAction("DanhSach", new { idSanPham = model.IDSanPham });
 
-            if (!ModelState.IsValid)
-                return View(model);
-
-            try
-            {
-                model.NgaySua = DateTime.Now;
-                var result = await _repo.Update(id, model);
-                if (result == null)
-                {
-                    ModelState.AddModelError("", "Không tìm thấy sản phẩm chi tiết để cập nhật.");
-                    return View(model);
-                }
-
-                TempData["Message"] = "✅ Cập nhật thành công!";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", "❌ Lỗi khi cập nhật: " + ex.Message);
-                return View(model);
-            }
+            TempData["Error"] = "Cập nhật thất bại!";
+            return View(model);
         }
 
-        // GET: SanPhamCT/Delete
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var item = await _repo.GetByID(id);
-            return item == null ? NotFound() : View(item);
-        }
-
-        // POST: SanPhamCT/Delete
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ConfirmDelete(Guid id)
-        {
-            try
-            {
-                var result = await _repo.Delete(id);
-                if (!result)
-                {
-                    TempData["Error"] = "Không thể xoá sản phẩm chi tiết.";
-                    return RedirectToAction(nameof(Index));
-                }
-
-                TempData["Message"] = "✅ Xoá thành công!";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = "❌ Lỗi khi xoá: " + ex.Message;
-                return RedirectToAction(nameof(Index));
-            }
-        }
-
-        // PATCH: SanPhamCT/ToggleStatus
-        public async Task<IActionResult> ToggleStatus(Guid id)
-        {
-            try
-            {
-                var msg = await _repo.Toggle(id);
-                TempData["Message"] = msg;
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = "❌ Lỗi khi đổi trạng thái: " + ex.Message;
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
     }
 }

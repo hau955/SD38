@@ -1,4 +1,5 @@
-﻿using AppApi.Service;
+﻿using AppApi.IService;
+using AppApi.Service;
 using Microsoft.EntityFrameworkCore;
 using WebModels.Models;
 
@@ -20,7 +21,7 @@ builder.Services.AddScoped<ISizeService , SizeService>();
 builder.Services.AddScoped<ICoAoService, CoAoService>();
 builder.Services.AddScoped<ITaAoService, TaAoService>();
 builder.Services.AddScoped<ISanPhamCTService, SanPhamCTService>();
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>

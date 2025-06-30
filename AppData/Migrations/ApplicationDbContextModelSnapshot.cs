@@ -22,6 +22,35 @@ namespace AppData.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("AppData.Models.DanhMuc", b =>
+                {
+                    b.Property<Guid>("DanhMucId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("MoTa")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime?>("NgayCapNhat")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("NgayTao")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TenDanhMuc")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("TrangThai")
+                        .HasColumnType("bit");
+
+                    b.HasKey("DanhMucId");
+
+                    b.ToTable("DanhMucs");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
@@ -162,9 +191,6 @@ namespace AppData.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("ApplicationRoleId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -233,8 +259,6 @@ namespace AppData.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationRoleId");
-
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -294,22 +318,20 @@ namespace AppData.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("DiaChiChiTiet")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("HoTenNguoiNhan")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid>("IDUser")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("NgaySua")
+                    b.Property<DateTime?>("NgaySua")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("NgayTao")
+                    b.Property<DateTime?>("NgayTao")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("SoDienThoai")
@@ -582,6 +604,9 @@ namespace AppData.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("DanhMucId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool?>("GioiTinh")
                         .HasColumnType("bit");
 
@@ -612,6 +637,8 @@ namespace AppData.Migrations
 
                     b.HasKey("IDSanPham");
 
+                    b.HasIndex("DanhMucId");
+
                     b.ToTable("SanPhams");
                 });
 
@@ -623,10 +650,6 @@ namespace AppData.Migrations
 
                     b.Property<decimal>("GiaBan")
                         .HasColumnType("decimal(18, 2)");
-
-                    b.Property<string>("HinhAnh")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid>("IDCoAo")
                         .HasColumnType("uniqueidentifier");
@@ -833,13 +856,6 @@ namespace AppData.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("WebModels.Models.ApplicationUser", b =>
-                {
-                    b.HasOne("WebModels.Models.ApplicationRole", null)
-                        .WithMany("Users")
-                        .HasForeignKey("ApplicationRoleId");
-                });
-
             modelBuilder.Entity("WebModels.Models.DiaChiNhanHang", b =>
                 {
                     b.HasOne("WebModels.Models.ApplicationUser", "User")
@@ -927,6 +943,17 @@ namespace AppData.Migrations
                     b.Navigation("SanPham");
                 });
 
+            modelBuilder.Entity("WebModels.Models.SanPham", b =>
+                {
+                    b.HasOne("AppData.Models.DanhMuc", "DanhMuc")
+                        .WithMany("SanPhams")
+                        .HasForeignKey("DanhMucId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DanhMuc");
+                });
+
             modelBuilder.Entity("WebModels.Models.SanPhamCT", b =>
                 {
                     b.HasOne("WebModels.Models.CoAo", "CoAo")
@@ -947,7 +974,7 @@ namespace AppData.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WebModels.Models.Size", "Size")
+                    b.HasOne("WebModels.Models.Size", "SizeAo")
                         .WithMany("SanPhamChiTiets")
                         .HasForeignKey("IDSize")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -965,7 +992,7 @@ namespace AppData.Migrations
 
                     b.Navigation("SanPham");
 
-                    b.Navigation("Size");
+                    b.Navigation("SizeAo");
 
                     b.Navigation("TaAo");
                 });
@@ -989,9 +1016,9 @@ namespace AppData.Migrations
                     b.Navigation("SanPham");
                 });
 
-            modelBuilder.Entity("WebModels.Models.ApplicationRole", b =>
+            modelBuilder.Entity("AppData.Models.DanhMuc", b =>
                 {
-                    b.Navigation("Users");
+                    b.Navigation("SanPhams");
                 });
 
             modelBuilder.Entity("WebModels.Models.ApplicationUser", b =>

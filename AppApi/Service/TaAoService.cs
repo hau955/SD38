@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AppApi.IService;
+using Microsoft.EntityFrameworkCore;
 using WebModels.Models;
 
 namespace AppApi.Service

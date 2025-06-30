@@ -15,23 +15,23 @@ namespace WebModels.Models
         public virtual ApplicationUser User { get; set; }
 
         // Thông tin địa chỉ nhận hàng
-        [Required]
+       
         [MaxLength(500)]
-        public string DiaChiChiTiet { get; set; } = string.Empty;
+        public string? DiaChiChiTiet { get; set; } 
 
-        [Required]
+       
         [MaxLength(20)]
-        public string SoDienThoai { get; set; } = string.Empty;
+        public string SoDienThoai { get; set; } 
 
-        [Required]
+       
         [MaxLength(100)]
-        public string HoTenNguoiNhan { get; set; } = string.Empty;
+        public string? HoTenNguoiNhan { get; set; } 
 
-        [Required]
-        public DateTime NgayTao { get; set; } = DateTime.UtcNow;
+        
+        public DateTime? NgayTao { get; set; } 
 
-        [Required]
-        public DateTime NgaySua { get; set; } = DateTime.UtcNow;
+  
+        public DateTime? NgaySua { get; set; } 
 
         [Required]
         public bool TrangThai { get; set; } = true;

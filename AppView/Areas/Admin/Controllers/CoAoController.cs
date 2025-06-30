@@ -1,4 +1,4 @@
-﻿using AppView.Areas.Admin.Repository;
+﻿using AppView.Areas.Admin.IRepo;
 using Microsoft.AspNetCore.Mvc;
 using WebModels.Models;
 
@@ -21,8 +21,7 @@ namespace AppView.Areas.Admin.Controllers
             return View(list);
         }
 
-        // GET: CoAo/Create
-        public IActionResult Create() => View();
+       
 
         // POST: CoAo/Create
         [HttpPost]

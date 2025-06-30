@@ -1,95 +1,69 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebModels.Models;
-using AppApi.Service;
+using AppApi.IService;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppApi.Controllers
 {
-    [Route("api/SanPhamCT")]
+    [Route("api/[controller]")]
     [ApiController]
     public class SanPhamCTController : ControllerBase
     {
-        private readonly ISanPhamCTService _service;
+        private readonly ISanPhamCTService _sanPhamCTService;
 
-        public SanPhamCTController(ISanPhamCTService service)
+        public SanPhamCTController(ISanPhamCTService sanPhamCTService)
         {
-            _service = service;
+            _sanPhamCTService = sanPhamCTService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        
+        [HttpPost("create-multiple")]
+        public async Task<IActionResult> CreateMultipleSanPhamCT([FromBody] List<SanPhamCT> list)
         {
-            var result = await _service.GetAllAsync();
-            return Ok(new ApiResponse<List<SanPhamCT>>
+            if (list == null || !list.Any())
+                return BadRequest("Danh sách sản phẩm chi tiết rỗng.");
+
+            await _sanPhamCTService.AddRangeAsync(list);
+            return Ok(new { message = "Tạo nhiều sản phẩm chi tiết thành công!" });
+        }
+
+
+
+
+        [HttpGet("by-sanpham/{id}")]
+        public async Task<IActionResult> GetBySanPhamId(Guid id)
+        {
+            try
             {
-                Message = "Lấy danh sách sản phẩm chi tiết thành công",
-                Data = result.ToList()
-            });
+                var result = await _sanPhamCTService.GetBySanPhamIdAsync(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
-
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var result = await _service.GetByIdAsync(id);
-            if (result == null)
-                return NotFound(new ApiResponse<SanPhamCT> { Message = "Không tìm thấy sản phẩm chi tiết" });
+            var item = await _sanPhamCTService.GetByIdAsync(id);
+            if (item == null)
+                return NotFound();
 
-            return Ok(new ApiResponse<SanPhamCT>
-            {
-                Message = "Lấy sản phẩm chi tiết thành công",
-                Data = result
-            });
+            return Ok(item);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] SanPhamCT spct)
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateSanPhamCT([FromBody] SanPhamCT model)
         {
-            var created = await _service.CreateAsync(spct);
-            if (created == null)
-                return BadRequest(new ApiResponse<string> { Message = "Tạo thất bại, kiểm tra dữ liệu liên kết" });
+            if (model == null || model.IDSanPhamCT == Guid.Empty)
+                return BadRequest("Dữ liệu không hợp lệ.");
 
-            return Ok(new ApiResponse<SanPhamCT>
-            {
-                Message = "Tạo sản phẩm chi tiết thành công",
-                Data = created
-            });
-        }
+            var result = await _sanPhamCTService.UpdateAsync(model);
+            if (!result)
+                return NotFound("Không tìm thấy sản phẩm chi tiết để cập nhật.");
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] SanPhamCT spct)
-        {
-            var updated = await _service.UpdateAsync(id, spct);
-            if (!updated)
-                return NotFound(new ApiResponse<string> { Message = "Không tìm thấy sản phẩm để cập nhật" });
-
-            var updatedItem = await _service.GetByIdAsync(id);
-            return Ok(new ApiResponse<SanPhamCT>
-            {
-                Message = "Cập nhật thành công",
-                Data = updatedItem!
-            });
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var deleted = await _service.DeleteAsync(id);
-            return deleted
-                ? Ok(new ApiResponse<string> { Message = "Xoá sản phẩm chi tiết thành công", Data = "OK" })
-                : NotFound(new ApiResponse<string> { Message = "Không tìm thấy sản phẩm để xoá" });
-        }
-
-        [HttpGet("by-sanpham/{idSanPham}")]
-        public async Task<IActionResult> GetBySanPhamId(Guid idSanPham)
-        {
-            // ⚠️ Có thể bạn đang dùng sai hàm. Nếu cần lấy danh sách theo ID sản phẩm cha, hãy viết hàm riêng trong service.
-            var allItems = await _service.GetAllAsync();
-            var filtered = allItems.Where(x => x.IDSanPham == idSanPham).ToList();
-
-            return Ok(new ApiResponse<List<SanPhamCT>>
-            {
-                Message = $"Lấy danh sách sản phẩm chi tiết của sản phẩm {idSanPham} thành công",
-                Data = filtered
-            });
+            return Ok(new { message = "Cập nhật thành công!" });
         }
     }
 

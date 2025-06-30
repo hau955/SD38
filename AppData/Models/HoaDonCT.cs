@@ -35,9 +35,9 @@ namespace WebModels.Models
         [Column(TypeName = "decimal(18, 2)")]
         public decimal GiaSauGiamGia { get; set; }
 
-        public DateTime NgayTao { get; set; } = DateTime.UtcNow;
+        public DateTime NgayTao { get; set; }
 
-        public DateTime NgaySua { get; set; } = DateTime.UtcNow;
+        public DateTime NgaySua { get; set; } 
 
         public bool TrangThai { get; set; } = true; // Có thể thêm giá trị mặc định
     }

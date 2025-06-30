@@ -39,14 +39,14 @@
                 <input asp-for="SoLuongTonKho" class="form-control" />
             </div>
             <div class="col-md-6 mb-3">
-                <label asp-for="ImageFile">Hình ảnh</label>
+              @*   <label asp-for="ImageFile">Hình ảnh</label>
                 <input asp-for="ImageFile" type="file" class="form-control" />
                 @if (!string.IsNullOrEmpty(Model.HinhAnh))
                 {
                     <div class="mt-2">
                         <img src="@Model.HinhAnh" width="80" />
                     </div>
-                }
+                } *@
             </div>
             <div class="form-check mb-3">
                 <input asp-for="TrangThai" class="form-check-input" />

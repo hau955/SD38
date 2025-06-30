@@ -1,4 +1,5 @@
-﻿using AppView.Areas.Admin.Repository;
+﻿using AppView.Areas.Admin.IRepo;
+using AppView.Areas.Admin.Repository;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,36 +8,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<ISanPhamRepo,SanPhamRepo>();
 
-// Cấu hình HttpClient cho gọi API
-builder.Services.AddHttpClient<ISanPhamRepo, SanPhamRepo>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
 // Cấu hình HttpClient cho từng repo gọi API
-builder.Services.AddHttpClient<IMauSacRepo, MauSacRepo>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
+builder.Services.AddScoped<IMauSacRepo, MauSacRepo>();
 
-builder.Services.AddHttpClient<ISizeRepo, SizeRepo>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
+builder.Services.AddScoped<ISizeRepo, SizeRepo>();
 
-builder.Services.AddHttpClient<ICoAoRepo, CoAoRepo>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
+builder.Services.AddScoped<ICoAoRepo, CoAoRepo>();
 
-builder.Services.AddHttpClient<ITaAoRepo, TaAoRepo>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
-builder.Services.AddHttpClient<ISanPhamCTRepo, SanPhamCTRepo>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
+builder.Services.AddScoped<ITaAoRepo, TaAoRepo>();
+builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
+
 
 // (Không cần dòng AddScoped nữa!)
 
@@ -66,10 +50,10 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
 
 app.UseRouting();
-
+app.UseStaticFiles();
 app.UseCors("AllowAll");
 
 app.UseAuthorization();

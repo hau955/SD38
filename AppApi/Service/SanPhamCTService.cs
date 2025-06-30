@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AppApi.IService;
+using Microsoft.EntityFrameworkCore;
 using WebModels.Models;
 
 namespace AppApi.Service
@@ -12,86 +13,64 @@ namespace AppApi.Service
             _db = db;
         }
 
-        public async Task<IEnumerable<SanPhamCT>> GetAllAsync()
-        {
-            return await _db.SanPhamChiTiets
-                .Include(spct => spct.SanPham)
-                .Include(spct => spct.SizeAo)
-                .Include(spct => spct.MauSac)
-                .Include(spct => spct.CoAo)
-                .Include(spct => spct.TaAo)
-                .ToListAsync();
-        }
 
         public async Task<SanPhamCT?> GetByIdAsync(Guid id)
         {
+            return await _db.SanPhamChiTiets.FindAsync(id);
+        }
+
+        public async Task<bool> UpdateAsync(SanPhamCT model)
+        {
+            var existing = await _db.SanPhamChiTiets.FindAsync(model.IDSanPhamCT);
+            if (existing == null) return false;
+
+            existing.IDMauSac = model.IDMauSac;
+            existing.IDSize = model.IDSize;
+            existing.IDCoAo = model.IDCoAo;
+            existing.IDTaAo = model.IDTaAo;
+            existing.SoLuongTonKho = model.SoLuongTonKho;
+            existing.GiaBan = model.GiaBan;
+            existing.TrangThai = model.TrangThai;
+            existing.NgaySua = DateTime.Now;
+
+            _db.SanPhamChiTiets.Update(existing);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task AddAsync(SanPhamCT model)
+        {
+            model.IDSanPhamCT = Guid.NewGuid();
+            model.NgayTao = DateTime.Now;
+            model.NgaySua = DateTime.Now;
+            _db.SanPhamChiTiets.Add(model);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task<List<SanPhamCT>> GetBySanPhamIdAsync(Guid sanPhamId)
+        {
             return await _db.SanPhamChiTiets
-                .Include(spct => spct.SanPham)
-                .Include(spct => spct.SizeAo)
-                .Include(spct => spct.MauSac)
-                .Include(spct => spct.CoAo)
-                .Include(spct => spct.TaAo)
-                .FirstOrDefaultAsync(spct => spct.IDSanPhamCT == id);
+                 .Include(x => x.MauSac)
+                 .Include(x => x.SizeAo)
+                 .Include(x => x.CoAo)
+                 .Include(x => x.TaAo)
+                 .Where(x => x.IDSanPham == sanPhamId)
+                 .ToListAsync();
         }
 
-        public async Task<SanPhamCT?> CreateAsync(SanPhamCT spct)
+        public async Task AddRangeAsync(List<SanPhamCT> models)
         {
-            // Kiểm tra tồn tại FK
-            var isValid = await ValidateForeignKeys(spct);
-            if (!isValid) return null;
+            foreach (var item in models)
+            {
+                item.IDSanPhamCT = Guid.NewGuid();
+                item.NgayTao = DateTime.Now;
+                item.NgaySua = DateTime.Now;
+            }
 
-            spct.IDSanPhamCT = Guid.NewGuid();
-            spct.NgayTao = DateTime.UtcNow;
-            spct.NgaySua = DateTime.UtcNow;
-            spct.TrangThai = true;
-
-            _db.SanPhamChiTiets.Add(spct);
+            await _db.SanPhamChiTiets.AddRangeAsync(models);
             await _db.SaveChangesAsync();
-            return spct;
         }
 
-        public async Task<bool> UpdateAsync(Guid id, SanPhamCT spct)
-        {
-            var existing = await _db.SanPhamChiTiets.FindAsync(id);
-            if (existing == null) return false;
-
-            var isValid = await ValidateForeignKeys(spct);
-            if (!isValid) return false;
-
-            existing.IDSanPham = spct.IDSanPham;
-            existing.IDSize = spct.IDSize;
-            existing.IDCoAo = spct.IDCoAo;
-            existing.IDTaAo = spct.IDTaAo;
-            existing.IDMauSac = spct.IDMauSac;
-            existing.SoLuongTonKho = spct.SoLuongTonKho;
-            existing.GiaBan = spct.GiaBan;
-            existing.HinhAnh = spct.HinhAnh;
-            existing.NgaySua = DateTime.UtcNow;
-            existing.TrangThai = spct.TrangThai;
-
-            await _db.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<bool> DeleteAsync(Guid id)
-        {
-            var existing = await _db.SanPhamChiTiets.FindAsync(id);
-            if (existing == null) return false;
-
-            _db.SanPhamChiTiets.Remove(existing);
-            await _db.SaveChangesAsync();
-            return true;
-        }
-
-        private async Task<bool> ValidateForeignKeys(SanPhamCT spct)
-        {
-            var sizeExists = await _db.Sizes.AnyAsync(x => x.IDSize == spct.IDSize);
-            var coAoExists = await _db.CoAos.AnyAsync(x => x.IDCoAo == spct.IDCoAo);
-            var taAoExists = await _db.TaAos.AnyAsync(x => x.IDTaAo == spct.IDTaAo);
-            var mauSacExists = await _db.MauSacs.AnyAsync(x => x.IDMauSac == spct.IDMauSac);
-            var sanPhamExists = await _db.SanPhams.AnyAsync(x => x.IDSanPham == spct.IDSanPham);
-
-            return sizeExists && coAoExists && taAoExists && mauSacExists && sanPhamExists;
-        }
+      
     }
 }

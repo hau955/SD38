@@ -12,9 +12,9 @@ namespace WebModels.Models
         [MaxLength(20, ErrorMessage = "Số size không được vượt quá 20 ký tự.")]
         public string SoSize { get; set; } = null!;
 
-        public DateTime NgayTao { get; set; } = DateTime.UtcNow;
+        public DateTime NgayTao { get; set; }
 
-        public DateTime NgaySua { get; set; } = DateTime.UtcNow;
+        public DateTime NgaySua { get; set; } 
 
         public bool TrangThai { get; set; } = true;
         [JsonIgnore]

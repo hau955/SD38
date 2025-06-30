@@ -24,9 +24,9 @@ namespace WebModels.Models
         [MaxLength(50, ErrorMessage = "Màu sắc không được vượt quá 50 ký tự.")]
         public string? MauSac { get; set; }
 
-        public DateTime NgayTao { get; set; } = DateTime.UtcNow;
+        public DateTime NgayTao { get; set; } 
 
-        public DateTime NgaySua { get; set; } = DateTime.UtcNow;
+        public DateTime NgaySua { get; set; } 
 
         public bool TrangThai { get; set; } = true;
 

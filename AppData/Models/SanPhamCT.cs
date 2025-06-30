@@ -39,14 +39,9 @@ namespace WebModels.Models
         [Column(TypeName = "decimal(18, 2)")]
         public decimal GiaBan { get; set; }
 
-        [MaxLength(500)]
-        public string? HinhAnh { get; set; }
 
-        [NotMapped]
-        public IFormFile? ImageFile { get; set; }
-
-        public DateTime NgayTao { get; set; } = DateTime.UtcNow;
-        public DateTime NgaySua { get; set; } = DateTime.UtcNow;
+        public DateTime NgayTao { get; set; } 
+        public DateTime NgaySua { get; set; } 
         public bool TrangThai { get; set; }
     }
 }

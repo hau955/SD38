@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Quản lý Size";
-    Layout = "_Layout"; // Nếu bạn có layout chung
+    Layout = "_AdminLayout"; // Nếu bạn có layout chung
 }
 
 <div class="container mt-4">
@@ -17,9 +17,10 @@
         <div class="alert alert-danger">@TempData["Error"]</div>
     }
 
-    <a class="btn btn-success mb-3" asp-action="Create">
+    <a class="btn btn-success mb-3" asp-area="Admin" asp-controller="Size" asp-action="Create">
         <i class="fas fa-plus"></i> Thêm mới
     </a>
+
 
     @if (Model != null && Model.Any())
     {

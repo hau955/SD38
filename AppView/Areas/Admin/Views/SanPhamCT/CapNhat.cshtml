@@ -1,0 +1,85 @@
+﻿@model WebModels.Models.SanPhamCT
+
+@{
+    ViewData["Title"] = "Cập nhật sản phẩm chi tiết";
+    var mauSacs = ViewBag.MauSacs as List<WebModels.Models.MauSac>;
+    var sizes = ViewBag.Sizes as List<WebModels.Models.Size>;
+    var coAos = ViewBag.CoAos as List<WebModels.Models.CoAo>;
+    var taAos = ViewBag.TaAos as List<WebModels.Models.TaAo>;
+}
+
+<h2>Cập nhật sản phẩm chi tiết</h2>
+
+<form asp-action="CapNhat" method="post">
+    <input type="hidden" asp-for="IDSanPhamCT" />
+    <input type="hidden" asp-for="IDSanPham" />
+
+    <div class="form-group">
+        <label>Màu sắc</label>
+        <select asp-for="IDMauSac" class="form-control">
+            @foreach (var item in mauSacs)
+            {
+                <option value="@item.IDMauSac" selected="@(Model.IDMauSac == item.IDMauSac)">
+                    @item.TenMau
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Size</label>
+        <select asp-for="IDSize" class="form-control">
+            @foreach (var item in sizes)
+            {
+                <option value="@item.IDSize" selected="@(Model.IDSize == item.IDSize)">
+                    @item.SoSize
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Cổ áo</label>
+        <select asp-for="IDCoAo" class="form-control">
+            @foreach (var item in coAos)
+            {
+                <option value="@item.IDCoAo" selected="@(Model.IDCoAo == item.IDCoAo)">
+                    @item.TenCoAo
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Tà áo</label>
+        <select asp-for="IDTaAo" class="form-control">
+            @foreach (var item in taAos)
+            {
+                <option value="@item.IDTaAo" selected="@(Model.IDTaAo == item.IDTaAo)">
+                    @item.TenTaAo
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Số lượng tồn kho</label>
+        <input asp-for="SoLuongTonKho" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label>Giá bán</label>
+        <input asp-for="GiaBan" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label>Trạng thái</label>
+        <select asp-for="TrangThai" class="form-control">
+            <option value="true" selected="@Model.TrangThai">Còn hàng</option>
+            <option value="false" selected="!@Model.TrangThai">Hết hàng</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="DanhSach" asp-route-idSanPham="@Model.IDSanPham" class="btn btn-secondary">Quay lại</a>
+</form>

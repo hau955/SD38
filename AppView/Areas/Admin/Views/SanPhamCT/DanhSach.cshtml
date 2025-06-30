@@ -1,0 +1,39 @@
+﻿@model List<WebModels.Models.SanPhamCT>
+<h2>Chi tiết sản phẩm</h2>
+<p>@ViewBag.IdSanPham</p> <!-- check thử xem có truyền ID lên đúng không -->
+@if (Model == null || !Model.Any())
+{
+    <div>Không có dữ liệu nào được tìm thấy.</div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Màu</th>
+                <th>Size</th>
+                <th>Cổ áo</th>
+                <th>Tà ao</th>
+                <th>Giá bán</th>
+                <th>Số Lượng</th>
+                <th>TrangThai</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.MauSac?.TenMau</td>
+                    <td>@item.SizeAo?.SoSize</td>
+                    <td>@item.CoAo?.TenCoAo</td>
+                    <td>@item.TaAo?.TenTaAo</td>
+                    <td>@item.GiaBan.ToString("N0") đ</td>
+                    <td>@item.SoLuongTonKho.ToString("N0") cái</td>
+                    <td>@(item.TrangThai ? "Còn hàng" : "Hết hàng")</td>
+                    <td><a asp-action="CapNhat" asp-route-id="@item.IDSanPhamCT" class="btn btn-sm btn-warning">Sửa</a></td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+}

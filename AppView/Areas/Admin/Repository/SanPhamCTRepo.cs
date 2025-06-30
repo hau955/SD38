@@ -1,4 +1,7 @@
-﻿using System.Net.Http.Json;
+﻿using AppView.Areas.Admin.IRepo;
+using Newtonsoft.Json;
+using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using WebModels.Models;
 
@@ -6,96 +9,92 @@ namespace AppView.Areas.Admin.Repository
 {
     public class SanPhamCTRepo : ISanPhamCTRepo
     {
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public SanPhamCTRepo(HttpClient httpClient)
+        public SanPhamCTRepo(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClient;
+            _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<List<SanPhamCT>> GetAll()
+        public async Task<bool> CreateMultipleAsync(List<SanPhamCT> list)
         {
-            var response = await _httpClient.GetFromJsonAsync<ApiResponse<List<SanPhamCT>>>("api/SanPhamCT");
-            return response?.Data ?? new List<SanPhamCT>();
-        }
-
-        public async Task<SanPhamCT?> GetByID(Guid id)
-        {
-            var response = await _httpClient.GetFromJsonAsync<ApiResponse<SanPhamCT>>($"api/SanPhamCT/{id}");
-            return response?.Data;
-        }
-
-        public async Task<SanPhamCT> Create(SanPhamCT sanPhamCT)
-        {
-            using var form = new MultipartFormDataContent();
-
-            form.Add(new StringContent(sanPhamCT.IDSanPham.ToString()), "IdSanPham");
-            form.Add(new StringContent(sanPhamCT.IDMauSac.ToString()), "IdMauSac");
-            form.Add(new StringContent(sanPhamCT.IDSize.ToString()), "IdSize");
-            form.Add(new StringContent(sanPhamCT.IDCoAo.ToString()), "IdCoAo");
-            form.Add(new StringContent(sanPhamCT.IDTaAo.ToString()), "IdTaAo");
-            form.Add(new StringContent(sanPhamCT.SoLuongTonKho.ToString()), "SoLuongTonKho");
-            form.Add(new StringContent(sanPhamCT.GiaBan.ToString()), "GiaBan");
-            form.Add(new StringContent(sanPhamCT.TrangThai.ToString()), "TrangThai");
-
-            if (sanPhamCT.ImageFile != null && sanPhamCT.ImageFile.Length > 0)
-            {
-                var stream = new StreamContent(sanPhamCT.ImageFile.OpenReadStream());
-                form.Add(stream, "ImageFile", sanPhamCT.ImageFile.FileName);
-            }
-
-            var response = await _httpClient.PostAsync("api/SanPhamCT", form);
-            response.EnsureSuccessStatusCode();
-
-            var result = await response.Content.ReadFromJsonAsync<ApiResponse<SanPhamCT>>();
-            return result!.Data;
-        }
-
-        public async Task<SanPhamCT?> Update(Guid id, SanPhamCT sanPhamCT)
-        {
-            using var form = new MultipartFormDataContent();
-
-            form.Add(new StringContent(sanPhamCT.IDSanPham.ToString()), "IdSanPham");
-            form.Add(new StringContent(sanPhamCT.IDMauSac.ToString()), "IdMauSac");
-            form.Add(new StringContent(sanPhamCT.IDSize.ToString()), "IdSize");
-            form.Add(new StringContent(sanPhamCT.IDCoAo.ToString()), "IdCoAo");
-            form.Add(new StringContent(sanPhamCT.IDTaAo.ToString()), "IdTaAo");
-            form.Add(new StringContent(sanPhamCT.SoLuongTonKho.ToString()), "SoLuongTonKho");
-            form.Add(new StringContent(sanPhamCT.GiaBan.ToString()), "GiaBan");
-            form.Add(new StringContent(sanPhamCT.TrangThai.ToString()), "TrangThai");
-            form.Add(new StringContent(sanPhamCT.HinhAnh ?? ""), "HinhAnh");
-
-            if (sanPhamCT.ImageFile != null && sanPhamCT.ImageFile.Length > 0)
-            {
-                var stream = new StreamContent(sanPhamCT.ImageFile.OpenReadStream());
-                form.Add(stream, "ImageFile", sanPhamCT.ImageFile.FileName);
-            }
-
-            var response = await _httpClient.PutAsync($"api/SanPhamCT/{id}", form);
-            if (!response.IsSuccessStatusCode) return null;
-
-            var result = await response.Content.ReadFromJsonAsync<ApiResponse<SanPhamCT>>();
-            return result?.Data;
-        }
-
-        public async Task<bool> Delete(Guid id)
-        {
-            var response = await _httpClient.DeleteAsync($"api/SanPhamCT/{id}");
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.PostAsJsonAsync("https://localhost:7221/api/SanPhamCT/create-multiple", list);
             return response.IsSuccessStatusCode;
         }
 
-        public async Task<string> Toggle(Guid id)
+        public async Task<List<CoAo>> GetCoAosAsync()
         {
-            var response = await _httpClient.PatchAsync($"api/SanPhamCT/ToggleStatus/{id}", null);
-            var content = await response.Content.ReadAsStringAsync();
-            var json = JsonSerializer.Deserialize<Dictionary<string, string>>(content);
-            return json != null && json.ContainsKey("message") ? json["message"] : "Thành công";
+            var client = _httpClientFactory.CreateClient();
+            var res = await client.GetAsync("https://localhost:7221/api/CoAo");
+
+            if (!res.IsSuccessStatusCode)
+                return new();
+
+            var response = await res.Content.ReadFromJsonAsync<ApiResponse<List<CoAo>>>();
+            return response?.Data ?? new();
         }
 
-        private class ApiResponse<T>
+        public async Task<List<MauSac>> GetMauSacsAsync()
         {
-            public string Message { get; set; } = string.Empty;
-            public T Data { get; set; } = default!;
+            var client = _httpClientFactory.CreateClient();
+            var res = await client.GetAsync("https://localhost:7221/api/MauSac");
+
+            if (!res.IsSuccessStatusCode)
+                return new();
+
+            var response = await res.Content.ReadFromJsonAsync<ApiResponse<List<MauSac>>>();
+            return response?.Data ?? new();
         }
+
+        public async Task<List<Size>> GetSizesAsync()
+        {
+            var client = _httpClientFactory.CreateClient();
+            var res = await client.GetAsync("https://localhost:7221/api/Size");
+
+            if (!res.IsSuccessStatusCode)
+                return new();
+
+            var response = await res.Content.ReadFromJsonAsync<ApiResponse<List<Size>>>();
+            return response?.Data ?? new();
+        }
+
+        public async Task<List<TaAo>> GetTaAosAsync()
+        {
+            var client = _httpClientFactory.CreateClient();
+            var res = await client.GetAsync("https://localhost:7221/api/TaAo");
+
+            if (!res.IsSuccessStatusCode)
+                return new();
+
+            var response = await res.Content.ReadFromJsonAsync<ApiResponse<List<TaAo>>>();
+            return response?.Data ?? new();
+        }
+        public async Task<List<SanPhamCT>> GetBySanPhamIdAsync(Guid idSanPham)
+        {
+            var client = _httpClientFactory.CreateClient();
+            var res = await client.GetAsync($"https://localhost:7221/api/SanPhamCT/by-sanpham/{idSanPham}");
+
+            return res.IsSuccessStatusCode
+                ? await res.Content.ReadFromJsonAsync<List<SanPhamCT>>() ?? new()
+                : new();
+        }
+        public async Task<SanPhamCT?> GetByIdAsync(Guid id)
+        {
+            var client = _httpClientFactory.CreateClient();
+            var res = await client.GetAsync($"https://localhost:7221/api/SanPhamCT/{id}");
+            return res.IsSuccessStatusCode
+                ? await res.Content.ReadFromJsonAsync<SanPhamCT>()
+                : null;
+        }
+
+        public async Task<bool> UpdateAsync(SanPhamCT model)
+        {
+            var client = _httpClientFactory.CreateClient();
+            var res = await client.PutAsJsonAsync("https://localhost:7221/api/SanPhamCT/update", model);
+            return res.IsSuccessStatusCode;
+        }
+
+
     }
 }
