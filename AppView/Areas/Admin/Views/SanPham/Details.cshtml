@@ -1,53 +1,57 @@
-﻿@model AppView.Areas.Admin.ViewModels.SanPhamCTViewModel
+﻿@model AppView.Areas.Admin.ViewModels.SanPhamViewModels.SanPhamCreateViewModel
 
-@{
-    ViewData["Title"] = "Chi tiết sản phẩm";
+<h2>Cập nhật sản phẩm</h2>
+
+<form asp-action="Update" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="IDSanPham" />
+
+    <div class="form-group">
+        <label asp-for="TenSanPham"></label>
+        <input asp-for="TenSanPham" class="form-control" />
+        <span asp-validation-for="TenSanPham" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="MoTa"></label>
+        <textarea asp-for="MoTa" class="form-control"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="TrongLuong"></label>
+        <input asp-for="TrongLuong" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="GioiTinh"></label>
+        <select asp-for="GioiTinh" class="form-control">
+            <option value="true">Nam</option>
+            <option value="false">Nữ</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="TrangThai"></label>
+        <select asp-for="TrangThai" class="form-control">
+            <option value="true">Hoạt động</option>
+            <option value="false">Ngừng bán</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="DanhMucID">Danh mục</label>
+        <select asp-for="DanhMucID" asp-items="Model.DanhMucList" class="form-control">
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Ảnh sản phẩm</label>
+        <input asp-for="ImageFile" type="file" class="form-control" />
+    </div>
+
+  
+    <a asp-action="DanhSach" class="btn btn-secondary">Quay lại</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }
-
-<div class="container mt-4">
-    <h2>@ViewData["Title"]</h2>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-3">Tên sản phẩm</dt>
-        <dd class="col-sm-9">@Model.TenSanPham</dd>
-
-        <dt class="col-sm-3">Giới tính</dt>
-        <dd class="col-sm-9">@((Model.GioiTinh == true) ? "Nam" : (Model.GioiTinh == false ? "Nữ" : "Unisex"))</dd>
-
-        <dt class="col-sm-3">Trọng lượng</dt>
-        <dd class="col-sm-9">@Model.TrongLuong gram</dd>
-
-        <dt class="col-sm-3">Mô tả</dt>
-        <dd class="col-sm-9">@Model.MoTa</dd>
-
-        <dt class="col-sm-3">Trạng thái</dt>
-        <dd class="col-sm-9">@(Model.TrangThai ? "Đang bán" : "Ngừng bán")</dd>
-
-        <dt class="col-sm-3">Hình ảnh</dt>
-        <dd class="col-sm-9">
-            @if (!string.IsNullOrEmpty(Model.HinhAnh))
-            {
-                <img src="@Model.HinhAnh" alt="Ảnh sản phẩm" style="max-width: 200px;" />
-            }
-            else
-            {
-                <span class="text-muted">Chưa có ảnh</span>
-            }
-        </dd>
-
-        <dt>Size</dt>
-        <dd>@Model.SizeList?.FirstOrDefault(s => s.Value == Model.IdSize.ToString())?.Text</dd>
-
-        <dt>Màu sắc</dt>
-        <dd>@Model.MauSacList?.FirstOrDefault(s => s.Value == Model.IdMauSac.ToString())?.Text</dd>
-
-        <dt>Cổ áo</dt>
-        <dd>@Model.CoAoList?.FirstOrDefault(s => s.Value == Model.IdCoAo.ToString())?.Text</dd>
-
-        <dt>Tà áo</dt>
-        <dd>@Model.TaAoList?.FirstOrDefault(s => s.Value == Model.IdTaAo.ToString())?.Text</dd>
-
-    </dl>
-
-    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Quay lại</a>
-</div>

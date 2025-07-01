@@ -107,7 +107,16 @@ namespace AppView.Areas.Admin.Controllers
             model.DanhMucList = await LoadDanhMucList();
             return View(model);
         }
+        [HttpGet]
+        public async Task<IActionResult> Details(Guid id)
+        {
+            var model = await _repo.GetByIdAsync(id);
+            if (model == null)
+                return NotFound();
 
+            model.DanhMucList = await LoadDanhMucList();
+            return View(model);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Update(SanPhamCreateViewModel model)
