@@ -1,0 +1,66 @@
+﻿@model List<AppView.ViewModels.SanPham.SanPhamView>
+
+<section class="container mt-5">
+    <h2 class="text-center fw-bold mb-4">Danh sách sản phẩm</h2>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            var sp = Model[i];
+            var modalId = $"modalChiTiet_{i}";
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="@sp.HinhAnh?.Split(';').FirstOrDefault()" class="card-img-top" style="height: 300px; object-fit: cover; cursor: pointer;" alt="ảnh sản phẩm"
+                         data-bs-toggle="modal" data-bs-target="#@modalId">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-primary">@sp.TenSanPham</h5>
+                        <p class="card-text text-muted">@sp.MoTa</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal hiển thị chi tiết sản phẩm -->
+            <div class="modal fade" id="@modalId" tabindex="-1" aria-labelledby="@($"{modalId}_Label")"aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="@($"{modalId}_Label")">Chi tiết: @sp.TenSanPham</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                        </div>
+                        <div class="modal-body">
+                            <img src="@sp.HinhAnh?.Split(';').FirstOrDefault()" class="img-fluid mb-3 rounded" style="max-height: 400px;" alt="ảnh chi tiết" />
+                            <table class="table table-bordered text-center align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Màu</th>
+                                        <th>Size</th>
+                                        <th>Cổ áo</th>
+                                        <th>Tà áo</th>
+                                        <th>Giá</th>
+                                        <th>Tồn kho</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var ct in sp.ChiTiets)
+                                    {
+                                        <tr>
+                                            <td>@ct.MauSac</td>
+                                            <td>@ct.Size</td>
+                                            <td>@ct.CoAo</td>
+                                            <td>@ct.TaAo</td>
+                                            <td>@ct.GiaBan.ToString("N0")₫</td>
+                                            <td class="@(ct.SoLuongTonKho < 0 ? "text-danger" : "")">@ct.SoLuongTonKho</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>

@@ -42,8 +42,13 @@ namespace AppApi.Controllers
             }
         }
 
+        [HttpGet("with-chi-tiet")]
+        public async Task<IActionResult> Get()
+        {
+            var result = await _sanPhamService.GetAllSanPhamsAsync();
+            return Ok(result);
+        }
 
-       
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {

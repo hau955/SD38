@@ -1,6 +1,7 @@
-﻿using AppView.Areas.Admin.ViewModels;
+﻿
+using AppView.ViewModels;
 
-namespace AppApi.ViewModels.SanPham
+namespace AppView.ViewModels.SanPham
 {
     public class SanPhamView
     {
