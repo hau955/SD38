@@ -1,34 +1,107 @@
 ﻿@model List<AppView.ViewModels.SanPham.SanPhamView>
 
-<section class="container mt-5">
-    <h2 class="text-center fw-bold mb-4">Danh sách sản phẩm</h2>
+<style>
+    .form-wrapper {
+        background: #fffaf0;
+        border-radius: 1rem;
+        padding: 2rem 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h2 {
+        color: #8B0000;
+        font-weight: 600;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .btn-success {
+        background-color: #d4af37;
+        border: none;
+        font-weight: 500;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background-color: #b8941f;
+    }
+
+    .btn-secondary {
+        background-color: #8B0000;
+        border: none;
+        color: white;
+        font-weight: 500;
+    }
+
+    .btn-secondary:hover {
+        background-color: #a52a2a;
+    }
+
+    .card-title {
+        font-weight: 600;
+        color: #8B0000;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        transition: 0.3s ease;
+    }
+
+    .modal-header {
+        background-color: #fffaf0;
+    }
+
+    .modal-content {
+        border-radius: 1rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .card-img-top {
+        border-top-left-radius: 1rem;
+        border-top-right-radius: 1rem;
+    }
+</style>
+
+<section class="container mt-5 form-wrapper">
+    <h2 class="text-center">Danh sách sản phẩm</h2>
 
     <div class="row row-cols-1 row-cols-md-3 g-4">
         @for (int i = 0; i < Model.Count; i++)
         {
             var sp = Model[i];
             var modalId = $"modalChiTiet_{i}";
+            var anhDaiDien = sp.HinhAnh?.Split(';').FirstOrDefault() ?? "/images/default.jpg";
             <div class="col">
                 <div class="card h-100 shadow-sm border-0">
-                    <img src="@sp.HinhAnh?.Split(';').FirstOrDefault()" class="card-img-top" style="height: 300px; object-fit: cover; cursor: pointer;" alt="ảnh sản phẩm"
+                    <img src="@anhDaiDien" class="card-img-top" style="height: 300px; object-fit: cover; cursor: pointer;" alt="ảnh sản phẩm"
                          data-bs-toggle="modal" data-bs-target="#@modalId">
                     <div class="card-body">
-                        <h5 class="card-title fw-bold text-primary">@sp.TenSanPham</h5>
+                        <h5 class="card-title">@sp.TenSanPham</h5>
                         <p class="card-text text-muted">@sp.MoTa</p>
                     </div>
                 </div>
             </div>
 
             <!-- Modal hiển thị chi tiết sản phẩm -->
-            <div class="modal fade" id="@modalId" tabindex="-1" aria-labelledby="@($"{modalId}_Label")"aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal fade"
+                 id="@modalId"
+                 tabindex="-1"
+                 aria-labelledby="@($"{modalId}_Label")"
+                 aria-hidden="true"
+                 data-bs-backdrop="static"
+                 data-bs-keyboard="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="@($"{modalId}_Label")">Chi tiết: @sp.TenSanPham</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                         </div>
                         <div class="modal-body">
-                            <img src="@sp.HinhAnh?.Split(';').FirstOrDefault()" class="img-fluid mb-3 rounded" style="max-height: 400px;" alt="ảnh chi tiết" />
+                            <img src="@anhDaiDien" class="img-fluid mb-3 rounded" style="max-height: 400px;" alt="ảnh chi tiết" />
+
                             <table class="table table-bordered text-center align-middle">
                                 <thead class="table-light">
                                     <tr>
@@ -41,22 +114,37 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var ct in sp.ChiTiets)
+                                    @if (sp.ChiTiets != null && sp.ChiTiets.Any())
+                                    {
+                                        foreach (var ct in sp.ChiTiets)
+                                        {
+                                            <tr>
+                                                <td>@ct.MauSac</td>
+                                                <td>@ct.Size</td>
+                                                <td>@ct.CoAo</td>
+                                                <td>@ct.TaAo</td>
+                                                <td>@ct.GiaBan.ToString("N0")₫</td>
+                                                <td class="@(ct.SoLuongTonKho < 0 ? "text-danger" : "")">@ct.SoLuongTonKho</td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
                                     {
                                         <tr>
-                                            <td>@ct.MauSac</td>
-                                            <td>@ct.Size</td>
-                                            <td>@ct.CoAo</td>
-                                            <td>@ct.TaAo</td>
-                                            <td>@ct.GiaBan.ToString("N0")₫</td>
-                                            <td class="@(ct.SoLuongTonKho < 0 ? "text-danger" : "")">@ct.SoLuongTonKho</td>
+                                            <td colspan="6" class="text-center text-muted">Chưa có dữ liệu chi tiết</td>
                                         </tr>
                                     }
                                 </tbody>
                             </table>
                         </div>
-                        <div class="modal-footer">
+                        <div class="modal-footer d-flex justify-content-between">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            <form asp-controller="GioHang" asp-action="ThemVaoGio" method="post">
+                                <input type="hidden" name="SanPhamId" value="@sp.IDSanPham" />
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ hàng
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -64,3 +152,11 @@
         }
     </div>
 </section>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="@Url.Content("~/js/bootstrap.bundle.min.js")"></script>
+    <script>
+        console.log("✅ Bootstrap modal scripts loaded.");
+    </script>
+}

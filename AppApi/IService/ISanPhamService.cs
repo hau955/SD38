@@ -1,6 +1,6 @@
 ﻿using AppApi.ViewModels.SanPham;
 using AppView.Areas.Admin.ViewModels;
-using WebModels.Models;
+using AppData.Models;
 
 namespace AppApi.IService
 {

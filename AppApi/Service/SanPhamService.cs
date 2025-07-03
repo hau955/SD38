@@ -3,7 +3,7 @@ using AppApi.ViewModels.SanPham;
 using AppView.Areas.Admin.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using WebModels.Models;
+using AppData.Models;
 
 namespace AppApi.Service
 {

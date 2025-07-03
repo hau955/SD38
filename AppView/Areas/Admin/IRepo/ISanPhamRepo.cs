@@ -1,5 +1,5 @@
 ﻿using AppView.Areas.Admin.ViewModels.SanPhamViewModels;
-using WebModels.Models;
+using AppData.Models;
 
 namespace AppView.Areas.Admin.IRepo
 {

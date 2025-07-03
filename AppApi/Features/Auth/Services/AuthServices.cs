@@ -4,7 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.WebUtilities;
-using WebModels.Models;
+using AppData.Models;
 using AppApi.Features.DTOs;
 
 namespace AppApi.Features.Services

@@ -1,118 +1,202 @@
-﻿@using WebModels.Models
-@model List<WebModels.Models.SanPhamCT>
+﻿@using AppData.Models
+@model List<SanPhamCT>
+
 @{
+    ViewData["Title"] = "Thêm Chi Tiết Sản Phẩm";
     var idSanPham = ViewBag.IDSanPham;
+    var mauSacs = ViewBag.MauSacs as List<MauSac>;
+    var sizes = ViewBag.Sizes as List<Size>;
+    var coAos = ViewBag.CoAos as List<CoAo>;
+    var taAos = ViewBag.TaAos as List<TaAo>;
 }
 
-<h2>Thêm Chi Tiết Sản Phẩm</h2>
+<style>
+    .form-wrapper {
+        background: #fffaf0;
+        border-radius: 1rem;
+        padding: 2rem 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        font-family: 'Segoe UI', sans-serif;
+    }
 
-<form asp-action="CreateMultiple" method="post">
-    <table class="table" id="spctTable">
-        <thead>
-            <tr>
-                <th>Màu</th>
-                <th>Size</th>
-                <th>Cổ áo</th>
-                <th>Tà áo</th>
-                <th>Số lượng</th>
-                <th>Giá bán</th>
-                <th>Trạng thái</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @{
-                var mauSacs = ViewBag.MauSacs as List<MauSac>;
-                var sizes = ViewBag.Sizes as List<Size>;
-                var coAos = ViewBag.CoAos as List<CoAo>;
-                var taAos = ViewBag.TaAos as List<TaAo>;
-            }
+    h2 {
+        color: #8B0000;
+        font-weight: 600;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
 
-            @for (int i = 0; i < Model.Count; i++)
-            {
-        <tr>
-            <td>
-                <select name="[@i].IDMauSac" class="form-control">
-                            @foreach (var item in mauSacs)
-                            {
-                            <option value="@item.IDMauSac">@item.TenMau</option>
-                            }
-                </select>
-            </td>
-            <td>
-                <select name="[@i].IDSize" class="form-control">
-                            @foreach (var item in sizes)
-                            {
-                            <option value="@item.IDSize">@item.SoSize</option>
-                            }
-                </select>
-            </td>
-            <td>
-                <select name="[@i].IDCoAo" class="form-control">
-                            @foreach (var item in coAos)
-                            {
-                            <option value="@item.IDCoAo">@item.TenCoAo</option>
-                            }
-                </select>
-            </td>
-            <td>
-                <select name="[@i].IDTaAo" class="form-control">
-                            @foreach (var item in taAos)
-                            {
-                            <option value="@item.IDTaAo">@item.TenTaAo</option>
-                            }
-                </select>
-            </td>
-            <td><input name="[@i].SoLuongTonKho" class="form-control" /></td>
-            <td><input name="[@i].GiaBan" class="form-control" /></td>
-            <td>
-                <select name="[@i].TrangThai" class="form-control">
-                    <option value="true">Còn hàng</option>
-                    <option value="false">Hết hàng</option>
-                </select>
-            </td>
-            <td><button type="button" class="btn btn-danger remove-row">X</button></td>
-                    <input type="hidden" name="[@(i)].IDSanPham" value="@ViewBag.IDSanPham" />
+    .btn-success {
+        background-color: #d4af37;
+        border: none;
+        font-weight: 500;
+        color: white;
+    }
 
-        </tr>
-            }
+        .btn-success:hover {
+            background-color: #b8941f;
+        }
 
-        </tbody>
-    </table>
-    <a asp-action="DanhSach" asp-route-idSanPham="@ViewBag.IDSanPham" class="btn btn-primary">Xem danh sách sản phẩm chi tiết</a>
+    .btn-secondary {
+        background-color: #8B0000;
+        border: none;
+        color: white;
+        font-weight: 500;
+    }
 
-    <button type="button" class="btn btn-secondary" id="addRow">+ Thêm dòng</button>
-    <button type="submit" class="btn btn-success">Lưu</button>
-</form>
+        .btn-secondary:hover {
+            background-color: #a00000;
+        }
+
+    .btn-outline-primary {
+        border-color: #8B0000;
+        color: #8B0000;
+    }
+
+        .btn-outline-primary:hover {
+            background-color: #8B0000;
+            color: white;
+        }
+
+    .table th, .table td {
+        vertical-align: middle;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="form-wrapper">
+        <h2><i class="fas fa-plus-circle me-2"></i>@ViewData["Title"]</h2>
+
+        <form asp-action="CreateMultiple" method="post">
+            <div class="table-responsive mb-3">
+                <table class="table table-bordered table-striped align-middle text-center" id="spctTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Màu</th>
+                            <th>Size</th>
+                            <th>Cổ áo</th>
+                            <th>Tà áo</th>
+                            <th>Số lượng</th>
+                            <th>Giá bán</th>
+                            <th>Trạng thái</th>
+                            <th>Xoá</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    <select name="[@i].IDMauSac" class="form-select">
+                                        @foreach (var item in mauSacs)
+                                        {
+                                            <option value="@item.IDMauSac">@item.TenMau</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    <select name="[@i].IDSize" class="form-select">
+                                        @foreach (var item in sizes)
+                                        {
+                                            <option value="@item.IDSize">@item.SoSize</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    <select name="[@i].IDCoAo" class="form-select">
+                                        @foreach (var item in coAos)
+                                        {
+                                            <option value="@item.IDCoAo">@item.TenCoAo</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    <select name="[@i].IDTaAo" class="form-select">
+                                        @foreach (var item in taAos)
+                                        {
+                                            <option value="@item.IDTaAo">@item.TenTaAo</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td><input name="[@i].SoLuongTonKho" class="form-control text-end" /></td>
+                                <td><input name="[@i].GiaBan" class="form-control text-end" /></td>
+                                <td>
+                                    <select name="[@i].TrangThai" class="form-select">
+                                        <option value="true">Còn hàng</option>
+                                        <option value="false">Hết hàng</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger remove-row">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                                <input type="hidden" name="[@i].IDSanPham" value="@idSanPham" />
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a asp-action="DanhSach" asp-route-idSanPham="@idSanPham" class="btn btn-secondary">
+                    <i class="fas fa-list"></i> Xem danh sách
+                </a>
+                <button type="button" class="btn btn-outline-primary" id="addRow">
+                    <i class="fas fa-plus"></i> Thêm dòng
+                </button>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Lưu tất cả
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 @section Scripts {
     <script>
-               let index = @Model.Count;
+        let index = @Model.Count;
 
         document.getElementById("addRow").addEventListener("click", function () {
             const tbody = document.querySelector("#spctTable tbody");
-            const clone = tbody.rows[0].cloneNode(true);
+            const rowClone = tbody.rows[0].cloneNode(true);
 
-            // Cập nhật name theo index mới
-            clone.innerHTML = clone.innerHTML.replaceAll(/\[\d+\]/g, `[${index}]`);
-
-            // Reset giá trị
-            clone.querySelectorAll("input").forEach(input => {
-                // reset input trừ IDSanPham
+            // Reset input values
+            rowClone.querySelectorAll("input").forEach(input => {
                 if (!input.name.includes("IDSanPham")) {
                     input.value = "";
                 }
             });
 
-            // Gán lại value cho input hidden IDSanPham
-            const hiddenInput = clone.querySelector(`input[name="[${index}].IDSanPham"]`);
+            rowClone.querySelectorAll("select").forEach(select => {
+                select.selectedIndex = 0;
+            });
+
+            // Cập nhật lại name
+            rowClone.innerHTML = rowClone.innerHTML.replace(/\[\d+\]/g, `[${index}]`);
+
+            // Gán lại ID sản phẩm
+            const hiddenInput = rowClone.querySelector(`input[name="[${index}].IDSanPham"]`);
             if (hiddenInput) {
-                hiddenInput.value = "@idSanPham"; // Razor inject
+                hiddenInput.value = "@idSanPham";
             }
 
-            tbody.appendChild(clone);
+            tbody.appendChild(rowClone);
             index++;
         });
 
+        document.addEventListener("click", function (e) {
+            if (e.target.closest(".remove-row")) {
+                const row = e.target.closest("tr");
+                const tbody = document.querySelector("#spctTable tbody");
+
+                if (tbody.rows.length > 1) {
+                    row.remove();
+                } else {
+                    alert("Cần ít nhất một dòng!");
+                }
+            }
+        });
     </script>
 }

@@ -3,7 +3,7 @@ using AppView.Areas.Admin.IRepo;
 using AppView.Areas.Admin.ViewModels.SanPhamChiTietViewModels;
 using AppView.Areas.Admin.ViewModels.SanPhamViewModels;
 using Microsoft.AspNetCore.Mvc;
-using WebModels.Models;
+using AppData.Models;
 
 namespace AppView.Areas.Admin.Controllers
 {

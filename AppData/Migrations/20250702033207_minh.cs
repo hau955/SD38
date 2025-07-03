@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AppData.Migrations
 {
     /// <inheritdoc />
-    public partial class hau : Migration
+    public partial class minh : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -1,6 +1,6 @@
 ﻿using AppView.Areas.Admin.IRepo;
 using Microsoft.AspNetCore.Mvc;
-using WebModels.Models;
+using AppData.Models;
 
 namespace AppView.Areas.Admin.Controllers
 {
@@ -21,11 +21,7 @@ namespace AppView.Areas.Admin.Controllers
             return View(list);
         }
 
-        public async Task<IActionResult> Create()
-        {
-            //await LoadSizeListAsync();
-            return View();
-        }
+        public IActionResult Create() => View();
 
         // POST: CoAo/Create
         [HttpPost]
