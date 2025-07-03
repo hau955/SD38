@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace WebModels.Models
+namespace AppData.Models
 {
     public class SanPhamCT
     {

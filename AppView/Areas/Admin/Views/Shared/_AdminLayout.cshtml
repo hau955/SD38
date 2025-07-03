@@ -157,6 +157,24 @@
                             <div data-i18n="Basic">Size</div>
                         </a>
                     </li>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "MauSac" ? "active" : "")">
+                        <a href="/Admin/MauSac/Index" class="menu-link">
+                            <i class="menu-icon tf-icons bx bxs-user-account"></i>
+                            <div data-i18n="Basic">MauSac</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "TaAo" ? "active" : "")">
+                        <a href="/Admin/TaAo/Index" class="menu-link">
+                            <i class="menu-icon tf-icons bx bxs-user-account"></i>
+                            <div data-i18n="Basic">TaAo</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "CoAo" ? "active" : "")">
+                        <a href="/Admin/CoAo/Index" class="menu-link">
+                            <i class="menu-icon tf-icons bx bxs-user-account"></i>
+                            <div data-i18n="Basic">CoAo</div>
+                        </a>
+                    </li>
                 </ul>
             </aside>
             <!-- / Menu -->

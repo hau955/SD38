@@ -1,6 +1,6 @@
 ﻿using AppView.Areas.Admin.IRepo;
 using System.Text.Json;
-using WebModels.Models;
+using AppData.Models;
 
 namespace AppView.Areas.Admin.Repository
 {

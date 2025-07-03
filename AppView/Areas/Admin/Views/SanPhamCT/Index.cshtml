@@ -1,23 +1,23 @@
-﻿@model List<WebModels.Models.SanPhamCT>
+﻿@model List<AppData.Models.SanPhamCT>
 @{
     ViewData["Title"] = "Quản lý Sản phẩm chi tiết";
 }
 
 <div class="container mt-4">
     <h2 class="mb-4 text-primary">
-        <i class="fas fa-list"></i> @ViewData["Title"]
+        <i class="fas fa-layer-group"></i> @ViewData["Title"]
     </h2>
 
-    <a class="btn btn-success mb-3" asp-action="Create">
+    <a class="btn btn-success mb-3" asp-area="Admin" asp-controller="SanPhamCT" asp-action="Create">
         <i class="fas fa-plus"></i> Thêm mới
     </a>
 
     @if (Model != null && Model.Any())
     {
         <div class="table-responsive">
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-light">
-                    <tr class="text-center">
+            <table class="table table-bordered table-hover align-middle shadow-sm">
+                <thead class="table-primary text-center">
+                    <tr>
                         <th>Ảnh</th>
                         <th>Sản phẩm</th>
                         <th>Màu sắc</th>
@@ -35,30 +35,42 @@
                     {
                         <tr>
                             <td class="text-center">
-                              
+                                @if (!string.IsNullOrEmpty(item.SanPham?.HinhAnh))
+                                {
+                                    <img src="@item.SanPham.HinhAnh" alt="Ảnh sản phẩm" width="70" height="70" style="object-fit:cover;" class="rounded border" />
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">Không có ảnh</span>
+                                }
                             </td>
                             <td>@item.SanPham?.TenSanPham</td>
-                            <td>@item.MauSac?.TenMau</td>
-                            <td>@item.SizeAo?.SoSize</td>
-                            <td>@item.CoAo?.TenCoAo</td>
-                            <td>@item.TaAo?.TenTaAo</td>
-                            <td class="text-end">@item.GiaBan.ToString("N0") đ</td>
+                            <td class="text-center">@item.MauSac?.TenMau</td>
+                            <td class="text-center">@item.SizeAo?.SoSize</td>
+                            <td class="text-center">@item.CoAo?.TenCoAo</td>
+                            <td class="text-center">@item.TaAo?.TenTaAo</td>
+                            <td class="text-end text-nowrap">@item.GiaBan.ToString("N0") đ</td>
                             <td class="text-center">@item.SoLuongTonKho</td>
                             <td class="text-center">
-                                <span class="badge @(item.TrangThai ? "bg-success" : "bg-secondary")">
-                                    @(item.TrangThai ? "Hoạt động" : "Không hoạt động")
+                                <span class="badge rounded-pill @(item.TrangThai ? "bg-success" : "bg-secondary")">
+                                    @(item.TrangThai ? "Hoạt động" : "Ẩn")
                                 </span>
                             </td>
                             <td class="text-center">
-                                <a asp-action="Edit" asp-route-id="@item.IDSanPhamCT" class="btn btn-sm btn-primary me-1">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a asp-action="ToggleStatus" asp-route-id="@item.IDSanPhamCT" class="btn btn-sm btn-warning me-1">
-                                    <i class="fas fa-sync-alt"></i>
-                                </a>
-                                <a asp-action="Delete" asp-route-id="@item.IDSanPhamCT" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">
-                                    <i class="fas fa-trash-alt"></i>
-                                </a>
+                                <div class="d-flex justify-content-center gap-1">
+                                    <a asp-action="Edit" asp-route-id="@item.IDSanPhamCT" class="btn btn-sm btn-primary" title="Sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a asp-action="ToggleStatus" asp-route-id="@item.IDSanPhamCT" class="btn btn-sm btn-warning" title="Chuyển trạng thái">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.IDSanPhamCT"
+                                       class="btn btn-sm btn-danger"
+                                       onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm chi tiết này?');"
+                                       title="Xóa">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     }

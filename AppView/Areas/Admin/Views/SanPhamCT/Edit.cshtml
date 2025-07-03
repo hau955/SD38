@@ -1,10 +1,13 @@
-﻿@model WebModels.Models.SanPhamCT
+﻿@model AppData.Models.SanPhamCT
+
 @{
     ViewData["Title"] = "Chỉnh sửa Sản phẩm chi tiết";
 }
 
 <div class="container mt-4">
-    <h2>@ViewData["Title"]</h2>
+    <h2 class="mb-4 text-primary">
+        <i class="fas fa-edit"></i> @ViewData["Title"]
+    </h2>
 
     <form asp-action="Edit" method="post" enctype="multipart/form-data">
         <input type="hidden" asp-for="IDSanPhamCT" />
@@ -31,31 +34,42 @@
                 <select asp-for="IDTaAo" asp-items="ViewBag.TaAos" class="form-control"></select>
             </div>
             <div class="col-md-6 mb-3">
-                <label asp-for="GiaBan"></label>
+                <label asp-for="GiaBan" class="form-label">Giá bán</label>
                 <input asp-for="GiaBan" class="form-control" />
+                <span asp-validation-for="GiaBan" class="text-danger"></span>
             </div>
             <div class="col-md-6 mb-3">
-                <label asp-for="SoLuongTonKho"></label>
+                <label asp-for="SoLuongTonKho" class="form-label">Số lượng tồn kho</label>
                 <input asp-for="SoLuongTonKho" class="form-control" />
+                <span asp-validation-for="SoLuongTonKho" class="text-danger"></span>
             </div>
-            <div class="col-md-6 mb-3">
-              @*   <label asp-for="ImageFile">Hình ảnh</label>
+
+            @* Ảnh sản phẩm nếu cần dùng lại thì bỏ comment *@
+            @* <div class="col-md-6 mb-3">
+                <label asp-for="ImageFile" class="form-label">Hình ảnh</label>
                 <input asp-for="ImageFile" type="file" class="form-control" />
                 @if (!string.IsNullOrEmpty(Model.HinhAnh))
                 {
                     <div class="mt-2">
-                        <img src="@Model.HinhAnh" width="80" />
+                        <img src="@Model.HinhAnh" alt="Hình ảnh" width="100" style="object-fit:cover;" />
                     </div>
-                } *@
-            </div>
-            <div class="form-check mb-3">
+                }
+            </div> *@
+
+            <div class="col-md-12 mb-3 form-check">
                 <input asp-for="TrangThai" class="form-check-input" />
                 <label asp-for="TrangThai" class="form-check-label">Hoạt động</label>
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Cập nhật</button>
-        <a asp-action="Index" class="btn btn-secondary">Huỷ</a>
+        <div class="mt-3">
+            <button type="submit" class="btn btn-success me-2">
+                <i class="fas fa-save"></i> Cập nhật
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Huỷ
+            </a>
+        </div>
     </form>
 </div>
 

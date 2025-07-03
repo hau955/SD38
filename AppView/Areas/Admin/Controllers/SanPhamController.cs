@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using PagedList;
 using System.Net.Http;
 using System.Text.Json;
-using WebModels.Models;
+using AppData.Models;
 
 namespace AppView.Areas.Admin.Controllers
 {

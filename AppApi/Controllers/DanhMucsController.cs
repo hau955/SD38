@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AppData.Models;
-using WebModels.Models;
+using AppData.Models;
 
 namespace AppApi.Controllers
 {

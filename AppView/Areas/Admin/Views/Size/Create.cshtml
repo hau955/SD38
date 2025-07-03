@@ -1,35 +1,86 @@
-﻿@model WebModels.Models.Size
+﻿@model AppData.Models.Size
 
 @{
     ViewData["Title"] = "Thêm Size mới";
-    Layout = "_AdminLayout"; // nếu bạn đang dùng layout
+    Layout = "_AdminLayout";
 }
 
-<div class="container mt-5">
-    <h2 class="mb-4">@ViewData["Title"]</h2>
+<style>
+    .form-wrapper {
+        background: #fffaf0;
+        border-radius: 1rem;
+        padding: 2rem 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        font-family: 'Segoe UI', sans-serif;
+    }
 
-    <form asp-action="Create" method="post" class="needs-validation" novalidate>
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    h2 {
+        color: #8B0000;
+        font-weight: 600;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
 
-        <div class="form-floating mb-3">
-            <input asp-for="SoSize" class="form-control" placeholder="Nhập tên size" />
-            <label asp-for="SoSize">Tên Size</label>
-            <span asp-validation-for="SoSize" class="text-danger small"></span>
-        </div>
+    .btn-success {
+        background-color: #d4af37;
+        border: none;
+        font-weight: 500;
+        color: white;
+    }
 
-        <div class="form-check form-switch mb-4">
-            <input asp-for="TrangThai" class="form-check-input" />
-            <label asp-for="TrangThai" class="form-check-label">Hoạt động</label>
-        </div>
+        .btn-success:hover {
+            background-color: #b8941f;
+        }
 
-        <button type="submit" class="btn btn-success me-2">
-            <i class="fas fa-save"></i> Lưu
-        </button>
+    .btn-secondary {
+        background-color: #8B0000;
+        border: none;
+        color: white;
+        font-weight: 500;
+    }
 
-        <a asp-action="Index" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Quay lại
-        </a>
-    </form>
+        .btn-secondary:hover {
+            background-color: #a52a2a;
+        }
+
+    .form-check-label, .form-label {
+        font-weight: 500;
+    }
+
+    .text-danger {
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="col-md-6 mx-auto form-wrapper">
+        <h2><i class="fas fa-plus-circle me-2"></i> @ViewData["Title"]</h2>
+
+        <form asp-controller="Size" asp-action="Create" method="post" class="needs-validation" novalidate>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="SoSize" class="form-control" placeholder="Nhập tên size" />
+                <label asp-for="SoSize">Tên Size</label>
+                <span asp-validation-for="SoSize" class="text-danger small"></span>
+            </div>
+
+            <div class="form-check form-switch mb-4">
+                <input asp-for="TrangThai" class="form-check-input" />
+                <label asp-for="TrangThai" class="form-check-label">Hoạt động</label>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-success px-4">
+                    <i class="fas fa-save"></i> Lưu
+                </button>
+                <a asp-action="Index" class="btn btn-secondary px-4">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
 
 @section Scripts {

@@ -1,57 +1,90 @@
 ﻿@model AppView.Areas.Admin.ViewModels.SanPhamViewModels.SanPhamCreateViewModel
 
-<h2>Cập nhật sản phẩm</h2>
-
-<form asp-action="Update" method="post" enctype="multipart/form-data">
-    <input type="hidden" asp-for="IDSanPham" />
-
-    <div class="form-group">
-        <label asp-for="TenSanPham"></label>
-        <input asp-for="TenSanPham" class="form-control" />
-        <span asp-validation-for="TenSanPham" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="MoTa"></label>
-        <textarea asp-for="MoTa" class="form-control"></textarea>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="TrongLuong"></label>
-        <input asp-for="TrongLuong" class="form-control" />
-    </div>
-
-    <div class="form-group">
-        <label asp-for="GioiTinh"></label>
-        <select asp-for="GioiTinh" class="form-control">
-            <option value="true">Nam</option>
-            <option value="false">Nữ</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="TrangThai"></label>
-        <select asp-for="TrangThai" class="form-control">
-            <option value="true">Hoạt động</option>
-            <option value="false">Ngừng bán</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="DanhMucID">Danh mục</label>
-        <select asp-for="DanhMucID" asp-items="Model.DanhMucList" class="form-control">
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Ảnh sản phẩm</label>
-        <input asp-for="ImageFile" type="file" class="form-control" />
-    </div>
-
-  
-    <a asp-action="DanhSach" class="btn btn-secondary">Quay lại</a>
-</form>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
 }
+
+<style>
+    .detail-wrapper {
+        background: #fffaf0;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h2 {
+        color: #8B0000;
+        font-weight: bold;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .form-control[readonly], .form-control:disabled {
+        background-color: #f8f9fa;
+        color: #000;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="col-md-8 mx-auto detail-wrapper">
+        <h2><i class="fas fa-info-circle me-2"></i>@ViewData["Title"]</h2>
+
+        <div class="mb-3">
+            <label class="form-label">Tên sản phẩm</label>
+            <input class="form-control" value="@Model.TenSanPham" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Mô tả</label>
+            <textarea class="form-control" rows="3" readonly>@Model.MoTa</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Trọng lượng (gram)</label>
+            <input class="form-control" value="@Model.TrongLuong" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Giới tính</label>
+            <input class="form-control" value="@(Model.GioiTinh ? "Nam" : "Nữ")" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Trạng thái</label>
+            <input class="form-control" value="@(Model.TrangThai ? "Hoạt động" : "Ngừng bán")" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Danh mục</label>
+            @{
+                var selectedCategory = Model.DanhMucList.FirstOrDefault(x => x.Value == Model.DanhMucID.ToString())?.Text;
+            }
+            <input class="form-control" value="@selectedCategory" readonly />
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Ảnh sản phẩm</label><br />
+            @if (Model.HinhAnh != null)
+            {
+                <img src="@Model.HinhAnh" alt="Ảnh sản phẩm" class="img-thumbnail" style="max-width: 200px;" />
+            }
+            else
+            {
+                <p class="text-muted fst-italic">Không có ảnh</p>
+            }
+        </div>
+
+        <div class="text-end">
+            <a asp-action="DanhSach" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+</div>
