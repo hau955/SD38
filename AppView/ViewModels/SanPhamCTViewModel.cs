@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
-namespace AppView.Areas.Admin.ViewModels
+namespace AppView.ViewModels
 {
     public class SanPhamCTViewModel
     {

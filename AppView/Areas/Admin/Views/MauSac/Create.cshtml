@@ -7,7 +7,7 @@
 <div class="container mt-4">
     <h2>@ViewData["Title"]</h2>
 
-    <form asp-action="Create" method="post">
+    <form asp-area="Admin" asp-controller="MauSac" asp-action="Create" method="post">
         <div class="form-group mb-3">
             <label asp-for="TenMau" class="form-label">Tên Màu</label>
             <input asp-for="TenMau" class="form-control" placeholder="Nhập tên màu" />

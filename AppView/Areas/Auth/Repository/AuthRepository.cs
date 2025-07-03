@@ -12,25 +12,25 @@ namespace AppView.Areas.Auth.Repository
         }
         public async Task<ApiResponse<object>> RegisterAsync(RegisterDto model)
         {
-            var response = await _httpClient.PostAsJsonAsync("/api/auths/register", model);
+            var response = await _httpClient.PostAsJsonAsync("https://localhost:7221/api/auths/register", model);
             return await ParseApiResponse<object>(response);
         }
 
         public async Task<ApiResponse<AuthResponseDto>> LoginAsync(LoginDto model)
         {
-            var response = await _httpClient.PostAsJsonAsync("/api/auths/login", model);
+            var response = await _httpClient.PostAsJsonAsync("https://localhost:7221/api/auths/login", model);
             return await ParseApiResponse<AuthResponseDto>(response);
         }
 
         public async Task<ApiResponse<object>> ForgotPasswordAsync(ForgotPasswordDto model)
         {
-            var response = await _httpClient.PostAsJsonAsync("/api/auths/forgot-password", model);
+            var response = await _httpClient.PostAsJsonAsync("https://localhost:7221/api/auths/forgot-password", model);
             return await ParseApiResponse<object>(response);
         }
 
         public async Task<ApiResponse<object>> ResetPasswordAsync(ResetPasswordDto model)
         {
-            var response = await _httpClient.PostAsJsonAsync("/api/auths/reset-password", model);
+            var response = await _httpClient.PostAsJsonAsync("https://localhost:7221/api/auths/reset-password", model);
             return await ParseApiResponse<object>(response);
         }
 

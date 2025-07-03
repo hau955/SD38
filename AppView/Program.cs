@@ -23,12 +23,13 @@ builder.Services.AddHttpClient<IAuthRepository, AuthRepository>(client =>
 // Cấu hình HttpClient cho từng repo gọi API
 
 builder.Services.AddScoped<ICoAoRepo, CoAoRepo>();
-builder.Services.AddScoped<IMauSacService, MauSacService>();
-builder.Services.AddScoped<ISizeService, SizeService>();
-builder.Services.AddScoped<ITaAoService, TaAoService>();
-builder.Services.AddScoped<ISanPhamCTService, SanPhamCTService>();
+builder.Services.AddScoped<IMauSacRepo, MauSacRepo>();
+builder.Services.AddScoped<ISizeRepo, SizeRepo>();
+//builder.Services.AddScoped<ITaAoService, TaAoService>();
+builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
 builder.Services.AddScoped<ITaAoRepo, TaAoRepo>();
 builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 // Thêm dịch vụ cần thiết cho session
 builder.Services.AddDistributedMemoryCache();
@@ -84,6 +85,6 @@ app.MapControllerRoute(
 
 app.MapControllerRoute(
      name: "default",
-    pattern: "{area=Auth}/{controller=Auth}/{action=Login}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
