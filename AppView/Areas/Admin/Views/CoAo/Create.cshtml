@@ -5,7 +5,7 @@
 <div class="container mt-4">
     <h2>@ViewData["Title"]</h2>
 
-    <form asp-action="Create" method="post">
+    <form asp-area="Admin" asp-controller="CoAo" asp-action="Create" method="post">
         <div class="form-group mb-3">
             <label asp-for="TenCoAo" class="form-label">Tên cổ áo</label>
             <input asp-for="TenCoAo" class="form-control" placeholder="Nhập tên cổ áo" />

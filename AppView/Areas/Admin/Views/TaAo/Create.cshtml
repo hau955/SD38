@@ -9,7 +9,7 @@
         <i class="fas fa-plus-circle"></i> @ViewData["Title"]
     </h2>
 
-    <form asp-action="Create" method="post" class="needs-validation" novalidate>
+    <form asp-area="Admin" asp-controller="TaAo" asp-action="Create" method="post">
         <div class="form-group mb-3">
             <label asp-for="TenTaAo" class="form-label">Tên Tà Áo</label>
             <input asp-for="TenTaAo" class="form-control" placeholder="Nhập tên tà áo..." />
