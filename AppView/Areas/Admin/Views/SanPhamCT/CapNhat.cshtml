@@ -8,10 +8,52 @@
     var taAos = ViewBag.TaAos as List<AppData.Models.TaAo>;
 }
 
+<style>
+    h2 {
+        color: #8B0000;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+    }
+
+    label {
+        font-weight: 600;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #d4af37;
+        box-shadow: 0 0 0 0.15rem rgba(212, 175, 55, 0.4);
+    }
+
+    .btn-success {
+        background-color: #8B0000;
+        border: none;
+    }
+
+        .btn-success:hover {
+            background-color: #a00000;
+        }
+
+    .btn-secondary {
+        background-color: #aaa;
+        border: none;
+    }
+
+        .btn-secondary:hover {
+            background-color: #888;
+        }
+
+    .container {
+        background-color: #fffaf0;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+</style>
+
 <div class="container mt-4">
-    <h2 class="mb-4 text-primary">
-        <i class="fas fa-edit"></i> @ViewData["Title"]
-    </h2>
+    <h2><i class="fas fa-edit me-2"></i> @ViewData["Title"]</h2>
 
     <form asp-action="CapNhat" method="post" class="row g-3">
         <input type="hidden" asp-for="IDSanPhamCT" />
@@ -89,10 +131,10 @@
 
         <div class="col-12 mt-3 d-flex gap-2">
             <button type="submit" class="btn btn-success">
-                <i class="fas fa-save"></i> Lưu thay đổi
+                <i class="fas fa-save me-1"></i> Lưu thay đổi
             </button>
-            <a asp-action="DanhSach" asp-route-idSanPham="@Model.IDSanPham" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Quay lại
+            <a asp-controller="SanPham" asp-action="Index" asp-route-idSanPham="@Model.IDSanPham" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Quay lại
             </a>
         </div>
     </form>

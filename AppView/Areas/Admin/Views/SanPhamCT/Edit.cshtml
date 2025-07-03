@@ -4,73 +4,144 @@
     ViewData["Title"] = "Chỉnh sửa Sản phẩm chi tiết";
 }
 
+<style>
+    h2 {
+        color: #8B0000;
+        font-weight: bold;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    label {
+        font-weight: 600;
+    }
+
+    .form-control:focus {
+        border-color: #d4af37;
+        box-shadow: 0 0 0 0.15rem rgba(212, 175, 55, 0.25);
+    }
+
+    .form-check-input:checked {
+        background-color: #d4af37;
+        border-color: #d4af37;
+    }
+
+    .btn-success {
+        background-color: #d4af37;
+        border: none;
+        color: white;
+        font-weight: 500;
+    }
+
+        .btn-success:hover {
+            background-color: #b8941f;
+        }
+
+    .btn-secondary {
+        background-color: #8B0000;
+        color: white;
+        font-weight: 500;
+        border: none;
+    }
+
+        .btn-secondary:hover {
+            background-color: #a00000;
+        }
+
+    .form-wrapper {
+        background-color: #fffaf0;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .text-danger {
+        font-size: 0.9rem;
+    }
+
+    .preview-img {
+        object-fit: cover;
+        border: 1px solid #ccc;
+        border-radius: 0.5rem;
+    }
+</style>
+
 <div class="container mt-4">
-    <h2 class="mb-4 text-primary">
-        <i class="fas fa-edit"></i> @ViewData["Title"]
-    </h2>
+    <div class="form-wrapper">
+        <h2><i class="fas fa-edit me-2"></i>@ViewData["Title"]</h2>
 
-    <form asp-action="Edit" method="post" enctype="multipart/form-data">
-        <input type="hidden" asp-for="IDSanPhamCT" />
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+            <input type="hidden" asp-for="IDSanPhamCT" />
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label>Sản phẩm</label>
-                <select asp-for="IDSanPham" asp-items="ViewBag.SanPhams" class="form-control"></select>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label>Size</label>
-                <select asp-for="IDSize" asp-items="ViewBag.Sizes" class="form-control"></select>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label>Màu sắc</label>
-                <select asp-for="IDMauSac" asp-items="ViewBag.MauSacs" class="form-control"></select>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label>Cổ áo</label>
-                <select asp-for="IDCoAo" asp-items="ViewBag.CoAos" class="form-control"></select>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label>Tà áo</label>
-                <select asp-for="IDTaAo" asp-items="ViewBag.TaAos" class="form-control"></select>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label asp-for="GiaBan" class="form-label">Giá bán</label>
-                <input asp-for="GiaBan" class="form-control" />
-                <span asp-validation-for="GiaBan" class="text-danger"></span>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label asp-for="SoLuongTonKho" class="form-label">Số lượng tồn kho</label>
-                <input asp-for="SoLuongTonKho" class="form-control" />
-                <span asp-validation-for="SoLuongTonKho" class="text-danger"></span>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label>Sản phẩm</label>
+                    <select asp-for="IDSanPham" asp-items="ViewBag.SanPhams" class="form-control"></select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Size</label>
+                    <select asp-for="IDSize" asp-items="ViewBag.Sizes" class="form-control"></select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Màu sắc</label>
+                    <select asp-for="IDMauSac" asp-items="ViewBag.MauSacs" class="form-control"></select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Cổ áo</label>
+                    <select asp-for="IDCoAo" asp-items="ViewBag.CoAos" class="form-control"></select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Tà áo</label>
+                    <select asp-for="IDTaAo" asp-items="ViewBag.TaAos" class="form-control"></select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="GiaBan" class="form-label">Giá bán</label>
+                    <input asp-for="GiaBan" class="form-control" />
+                    <span asp-validation-for="GiaBan" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="SoLuongTonKho" class="form-label">Số lượng tồn kho</label>
+                    <input asp-for="SoLuongTonKho" class="form-control" />
+                    <span asp-validation-for="SoLuongTonKho" class="text-danger"></span>
+                </div>
+
+                @* Nếu bạn có ảnh, bỏ comment đoạn dưới *@
+                @* 
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ImageFile" class="form-label">Hình ảnh</label>
+                    <input asp-for="ImageFile" type="file" class="form-control" />
+                    @if (!string.IsNullOrEmpty(Model.HinhAnh))
+                    {
+                        <div class="mt-2">
+                            <img src="@Model.HinhAnh" alt="Hình ảnh" width="100" class="preview-img" />
+                        </div>
+                    }
+                </div>
+                *@
+
+                <div class="col-12 form-check mb-4">
+                    <input asp-for="TrangThai" class="form-check-input" />
+                    <label asp-for="TrangThai" class="form-check-label">Hoạt động</label>
+                </div>
             </div>
 
-            @* Ảnh sản phẩm nếu cần dùng lại thì bỏ comment *@
-            @* <div class="col-md-6 mb-3">
-                <label asp-for="ImageFile" class="form-label">Hình ảnh</label>
-                <input asp-for="ImageFile" type="file" class="form-control" />
-                @if (!string.IsNullOrEmpty(Model.HinhAnh))
-                {
-                    <div class="mt-2">
-                        <img src="@Model.HinhAnh" alt="Hình ảnh" width="100" style="object-fit:cover;" />
-                    </div>
-                }
-            </div> *@
-
-            <div class="col-md-12 mb-3 form-check">
-                <input asp-for="TrangThai" class="form-check-input" />
-                <label asp-for="TrangThai" class="form-check-label">Hoạt động</label>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save me-1"></i> Cập nhật
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-times me-1"></i> Huỷ
+                </a>
             </div>
-        </div>
-
-        <div class="mt-3">
-            <button type="submit" class="btn btn-success me-2">
-                <i class="fas fa-save"></i> Cập nhật
-            </button>
-            <a asp-action="Index" class="btn btn-secondary">
-                <i class="fas fa-times"></i> Huỷ
-            </a>
-        </div>
-    </form>
+        </form>
+    </div>
 </div>
 
 @section Scripts {

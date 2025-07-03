@@ -1,0 +1,52 @@
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
+
+namespace AppView.ViewModels
+{
+    public class SanPhamCTViewModel
+    {
+        // Dữ liệu sản phẩm chính
+        public Guid IDSanPhamCT { get; set; }
+        public Guid IDSanPham { get; set; }
+
+        [Required]
+        public string TenSanPham { get; set; }
+
+        public string? MoTa { get; set; }
+
+        public double? TrongLuong { get; set; }
+
+        public bool? GioiTinh { get; set; }
+
+        public bool TrangThai { get; set; }
+
+        public IFormFile? ImageFile { get; set; }
+
+        public string HinhAnh { get; set; }
+
+        public Guid IdMauSac { get; set; }
+        public string? MauSac { get; set; }
+
+        public Guid IdSize { get; set; }
+        public string? Size { get; set; }
+
+        public Guid IdCoAo { get; set; }
+        public string? CoAo { get; set; }
+
+        public Guid? IdTaAo { get; set; }
+        public string? TaAo { get; set; }
+
+        [Required]
+        public decimal GiaBan { get; set; }
+
+        [Required]
+        public int SoLuongTonKho { get; set; }
+
+        // Dữ liệu cho dropdown
+        public List<SelectListItem>? SizeList { get; set; }
+        public List<SelectListItem>? MauSacList { get; set; }
+        public List<SelectListItem>? CoAoList { get; set; }
+        public List<SelectListItem>? TaAoList { get; set; }
+    }
+
+}

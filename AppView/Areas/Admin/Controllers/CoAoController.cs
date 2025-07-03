@@ -21,7 +21,7 @@ namespace AppView.Areas.Admin.Controllers
             return View(list);
         }
 
-       
+        public IActionResult Create() => View();
 
         // POST: CoAo/Create
         [HttpPost]

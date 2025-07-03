@@ -47,7 +47,7 @@ namespace AppView.Areas.Admin.Controllers
 
                 await _sizeRepo.Create(model);
                 TempData["Message"] = "✅ Tạo size thành công!";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {

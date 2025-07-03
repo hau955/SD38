@@ -51,9 +51,9 @@ namespace AppApi.Service
             return await _db.MauSacs.AnyAsync(e => e.IDMauSac == id);
         }
 
-        public async Task<bool> UpdateMauSacAsync(MauSac mauSac)
+        public async Task<bool> UpdateMauSacAsync(Guid id,MauSac mauSac)
         {
-            var existingMauSac = await _db.MauSacs.FindAsync(mauSac.IDMauSac);
+            var existingMauSac = await _db.MauSacs.FindAsync(id);
             if (existingMauSac == null)
             {
                 return false; 

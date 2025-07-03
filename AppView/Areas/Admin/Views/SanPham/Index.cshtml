@@ -4,20 +4,66 @@
     ViewData["Title"] = "Danh sách sản phẩm";
 }
 
-<div class="container mt-4">
+<style>
+    .table-wrapper {
+        background: #fffaf0;
+        border-radius: 1rem;
+        padding: 2rem 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h2 {
+        color: #8B0000;
+        font-weight: 600;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-success {
+        background-color: #d4af37;
+        border: none;
+        font-weight: 500;
+        color: white;
+    }
+
+        .btn-success:hover {
+            background-color: #b8941f;
+        }
+
+    .btn-secondary {
+        background-color: #8B0000;
+        border: none;
+        color: white;
+        font-weight: 500;
+    }
+
+        .btn-secondary:hover {
+            background-color: #a52a2a;
+        }
+
+    .badge-custom {
+        font-size: 0.85rem;
+        padding: 0.4em 0.6em;
+        border-radius: 0.5rem;
+    }
+</style>
+
+<div class="container mt-4 table-wrapper">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="text-primary">
-            <i class="fas fa-list"></i> @ViewData["Title"]
+        <h2>
+            <i class="fas fa-list me-2"></i>@ViewData["Title"]
         </h2>
-        <a class="btn btn-success mb-3" asp-area="Admin" asp-controller="SanPham" asp-action="Create">
-            <i class="fas fa-plus"></i> Thêm mới
+        <a class="btn btn-success" asp-area="Admin" asp-controller="SanPham" asp-action="Create">
+            <i class="fas fa-plus me-1"></i> Thêm mới
         </a>
     </div>
 
     @if (TempData["Message"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle"></i> @TempData["Message"]
+            <i class="fas fa-check-circle me-1"></i> @TempData["Message"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
@@ -41,16 +87,16 @@
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td class="fw-bold text-start">@item.TenSanPham</td>
+                        <td class="fw-semibold text-start">@item.TenSanPham</td>
                         <td class="text-start">@item.MoTa</td>
                         <td>@item.TrongLuong</td>
                         <td>
-                            <span class="badge bg-info text-dark">
+                            <span class="badge badge-custom bg-info text-dark">
                                 @(item.GioiTinh ? "Nam" : "Nữ")
                             </span>
                         </td>
                         <td>
-                            <span class="badge @(item.TrangThai ? "bg-success" : "bg-secondary")">
+                            <span class="badge badge-custom @(item.TrangThai ? "bg-success" : "bg-secondary")">
                                 @(item.TrangThai ? "Còn hàng" : "Hết hàng")
                             </span>
                         </td>
@@ -58,7 +104,7 @@
                         <td>
                             @if (!string.IsNullOrEmpty(item.HinhAnh))
                             {
-                                <img src="@item.HinhAnh" class="rounded" width="80" height="80" style="object-fit:cover;" />
+                                <img src="@item.HinhAnh" class="rounded" width="70" height="70" style="object-fit:cover;" />
                             }
                             else
                             {
@@ -71,18 +117,18 @@
                                asp-controller="SanPhamCT"
                                asp-action="ThemChiTiet"
                                asp-route-idSanPham="@item.IDSanPham"
-                               class="btn btn-sm btn-primary">
-                                <i class="fas fa-plus"></i> Chi tiết
+                               class="btn btn-sm btn-secondary">
+                                <i class="fas fa-plus"></i>
                             </a>
                         </td>
                         <td>
                             <a asp-action="Update" asp-route-id="@item.IDSanPham" class="btn btn-sm btn-warning text-white">
-                                <i class="fas fa-edit"></i> Sửa
+                                <i class="fas fa-edit"></i>
                             </a>
                         </td>
                         <td>
                             <a asp-action="Details" asp-route-id="@item.IDSanPham" class="btn btn-sm btn-info text-white">
-                                <i class="fas fa-eye"></i> Xem
+                                <i class="fas fa-eye"></i>
                             </a>
                         </td>
                     </tr>
@@ -94,7 +140,7 @@
 
 @section Scripts {
     <script>
-        // Optional: Tự động ẩn alert sau 5s
+        // Tự động ẩn alert sau 5s
         setTimeout(() => {
             const alert = document.querySelector('.alert');
             if (alert) alert.remove();

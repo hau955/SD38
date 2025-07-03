@@ -5,70 +5,54 @@
     Layout = "_AdminLayout";
 }
 
+<!-- Custom Style -->
 <style>
-    .card {
-        font-family: 'Segoe UI', sans-serif;
+    .form-wrapper {
+        background: #fffaf0;
         border-radius: 1rem;
-        border: 1px solid #d4af37;
-        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
-    }
-
-    .card-header {
-        background-color: #d4af37 !important;
-        color: white;
-        border-radius: 1rem 1rem 0 0;
-        padding: 1.25rem 1.5rem;
-    }
-
-    .card-body {
-        background-color: #fffef5;
-        border-radius: 0 0 1rem 1rem;
         padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h2 {
+        color: #8B0000;
+        font-weight: 600;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    label, .form-check-label {
+        font-weight: 500;
+        color: #333;
     }
 
     .form-control {
         font-size: 1rem;
-        border-radius: 0.5rem;
-        border: 1px solid #ccc;
     }
 
-    .form-label, .form-check-label {
-        font-weight: 600;
-        color: #333;
-    }
-
-    .btn-gold {
+    .btn-save {
         background-color: #d4af37;
         border: none;
+        font-weight: 500;
         color: white;
-        font-weight: 600;
-        padding: 0.5rem 1.25rem;
-        border-radius: 0.5rem;
-        transition: 0.2s;
     }
 
-        .btn-gold:hover {
+        .btn-save:hover {
             background-color: #b8941f;
         }
 
-    .btn-maroon {
+    .btn-back {
         background-color: #8B0000;
         border: none;
         color: white;
-        font-weight: 600;
-        padding: 0.5rem 1.25rem;
-        border-radius: 0.5rem;
-        transition: 0.2s;
+        font-weight: 500;
     }
 
-        .btn-maroon:hover {
+        .btn-back:hover {
             background-color: #a52a2a;
         }
-
-    .form-check-input {
-        width: 2rem;
-        height: 1rem;
-    }
 
     .text-danger {
         font-size: 0.9rem;
@@ -76,36 +60,34 @@
 </style>
 
 <div class="container mt-5">
-    <div class="card">
-        <div class="card-header">
-            <h4 class="mb-0">
-                <i class="fas fa-edit me-2"></i> @ViewData["Title"]
-            </h4>
-        </div>
-        <div class="card-body">
-            <form asp-action="Edit" method="post" class="needs-validation" novalidate>
-                <input type="hidden" asp-for="IDTaAo" />
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="form-wrapper">
+                <h2>@ViewData["Title"]</h2>
+                <form asp-action="Edit" method="post" class="needs-validation" novalidate>
+                    <input type="hidden" asp-for="IDTaAo" />
 
-                <div class="form-floating mb-3">
-                    <input asp-for="TenTaAo" class="form-control" placeholder="Nhập tên tà áo..." />
-                    <label asp-for="TenTaAo">Tên Tà Áo</label>
-                    <span asp-validation-for="TenTaAo" class="text-danger small"></span>
-                </div>
+                    <div class="mb-3">
+                        <label asp-for="TenTaAo" class="form-label">Tên Tà Áo</label>
+                        <input asp-for="TenTaAo" class="form-control" placeholder="Nhập tên tà áo..." />
+                        <span asp-validation-for="TenTaAo" class="text-danger"></span>
+                    </div>
 
-                <div class="form-check form-switch mb-4">
-                    <input asp-for="TrangThai" class="form-check-input" />
-                    <label asp-for="TrangThai" class="form-check-label">Hoạt động</label>
-                </div>
+                    <div class="form-check form-switch mb-4">
+                        <input asp-for="TrangThai" class="form-check-input" />
+                        <label asp-for="TrangThai" class="form-check-label">Hoạt động</label>
+                    </div>
 
-                <div class="d-flex justify-content-start">
-                    <button type="submit" class="btn btn-gold me-2">
-                        <i class="fas fa-save"></i> Cập nhật
-                    </button>
-                    <a asp-action="Index" class="btn btn-maroon">
-                        <i class="fas fa-arrow-left"></i> Quay lại
-                    </a>
-                </div>
-            </form>
+                    <div class="d-flex justify-content-start">
+                        <button type="submit" class="btn btn-save me-2 px-4">
+                            <i class="fas fa-save"></i> Cập nhật
+                        </button>
+                        <a asp-action="Index" class="btn btn-back px-4">
+                            <i class="fas fa-arrow-left"></i> Quay lại
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

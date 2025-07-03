@@ -5,6 +5,7 @@ using AppData.Models;
 namespace AppView.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    
     public class MauSacController : Controller
     {
         private readonly IMauSacRepo _mauSacRepo;
@@ -41,14 +42,10 @@ namespace AppView.Areas.Admin.Controllers
                 model.NgaySua = DateTime.Now;
 
                 var created = await _mauSacRepo.Create(model);
-                if (created == null)
-                {
-                    ModelState.AddModelError("", "Không thể tạo màu sắc.");
-                    return View(model);
-                }
+               
 
                 TempData["Message"] = "✅ Tạo màu sắc thành công!";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
@@ -58,6 +55,7 @@ namespace AppView.Areas.Admin.Controllers
         }
 
         // GET: MauSac/Edit
+        
         public async Task<IActionResult> Edit(Guid id)
         {
             var item = await _mauSacRepo.GetByID(id);

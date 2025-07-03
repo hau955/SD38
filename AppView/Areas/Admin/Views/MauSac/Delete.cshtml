@@ -60,18 +60,17 @@
             <strong>@Model.TenMau</strong>?
         </div>
 
-        <form asp-action="Delete" method="post">
-            <input type="hidden" asp-for="IDMauSac" />
-            <div class="d-flex justify-content-between">
-                <button type="submit" class="btn btn-danger px-4">
-                    <i class="fas fa-trash-alt"></i> Xoá
-                </button>
-                <a asp-action="Index" class="btn btn-secondary px-4">
-                    <i class="fas fa-arrow-left"></i> Huỷ
-                </a>
-            </div>
-        </form>
-    </div>
+    <form asp-area="Admin" asp-controller="MauSac" asp-action="Delete" method="post">
+        <input type="hidden" asp-for="IDMauSac" />
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash-alt"></i> Xoá
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Huỷ
+            </a>
+        </div>
+    </form>
 </div>
 
 @section Scripts {

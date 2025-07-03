@@ -1,5 +1,8 @@
-﻿using AppView.Areas.Admin.IRepo;
+﻿using AppApi.IService;
+using AppApi.Service;
+using AppView.Areas.Admin.IRepo;
 using AppView.Areas.Admin.Repository;
+using AppView.Areas.Auth.Repository;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,20 +11,35 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
-builder.Services.AddHttpClient();
-builder.Services.AddScoped<ISanPhamRepo,SanPhamRepo>();
+builder.Services.AddHttpClient<ISanPhamRepo, SanPhamRepo>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+builder.Services.AddHttpClient<IAuthRepository, AuthRepository>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
 
 // Cấu hình HttpClient cho từng repo gọi API
-builder.Services.AddScoped<IMauSacRepo, MauSacRepo>();
-
-builder.Services.AddScoped<ISizeRepo, SizeRepo>();
 
 builder.Services.AddScoped<ICoAoRepo, CoAoRepo>();
-
+builder.Services.AddScoped<IMauSacRepo, MauSacRepo>();
+builder.Services.AddScoped<ISizeRepo, SizeRepo>();
+builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
 builder.Services.AddScoped<ITaAoRepo, TaAoRepo>();
 builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
+// Thêm dịch vụ cần thiết cho session
+builder.Services.AddDistributedMemoryCache();
 
+builder.Services.AddSession(options =>
+{
+    // Cấu hình các tùy chọn cho session
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Thời gian session tồn tại
+    options.Cookie.HttpOnly = true; // Đảm bảo cookie chỉ được truy cập bởi máy chủ
+    options.Cookie.IsEssential = true; // Đánh dấu cookie là cần thiết cho ứng dụng
+});
 // (Không cần dòng AddScoped nữa!)
 
 // CORS (nếu có gọi từ web domain khác)
@@ -50,19 +68,22 @@ else
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
+app.UseSession();
 
 app.UseRouting();
-app.UseStaticFiles();
 app.UseCors("AllowAll");
 
 app.UseAuthorization();
+
+// Routing mặc định
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
-    name: "default",
+     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

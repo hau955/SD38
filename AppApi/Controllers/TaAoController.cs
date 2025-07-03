@@ -78,14 +78,14 @@ namespace AppApi.Controllers
             });
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            return StatusCode(501, new ApiResponse<string>
-            {
-                Message = "Xoá tà áo chưa được cài đặt.",
-                Data = "Not implemented"
-            });
-        }
+        //[HttpDelete("{id}")]
+        //public Task<IActionResult> Delete(Guid id)
+        //{
+        //    return StatusCode(501, new ApiResponse<string>
+        //    {
+        //        Message = "Xoá tà áo chưa được cài đặt.",
+        //        Data = "Not implemented"
+        //    });
+        //}
     }
 }
