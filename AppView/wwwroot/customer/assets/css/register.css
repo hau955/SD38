@@ -1,0 +1,94 @@
+﻿.register-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    overflow: hidden;
+}
+
+    .register-card .card-header {
+        background: linear-gradient(135deg, #d946ef 0%, #9333ea 100%);
+        padding: 40px 30px 30px;
+        text-align: center;
+    }
+
+    .register-card .brand-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+    }
+
+        .register-card .brand-icon i {
+            font-size: 32px;
+            color: white;
+        }
+
+    .register-card .card-title {
+        font-family: 'Playfair Display', serif;
+        color: white;
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .register-card .card-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 14px;
+    }
+
+    .register-card .card-body {
+        padding: 40px 30px;
+    }
+
+    .register-card .form-group {
+        margin-bottom: 25px;
+        position: relative;
+    }
+
+    .register-card .form-control {
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px 20px 16px 50px;
+        background: #fafafa;
+        width: 100%;
+    }
+
+        .register-card .form-control:focus {
+            border-color: #9333ea;
+            box-shadow: 0 0 0 4px rgba(147, 51, 234, 0.1);
+        }
+
+    .register-card .input-icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+    }
+
+    .register-card .form-group:focus-within .input-icon {
+        color: #9333ea;
+    }
+
+    .register-card .btn-register {
+        width: 100%;
+        background: linear-gradient(135deg, #9333ea 0%, #d946ef 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 16px;
+        font-size: 16px;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+        .register-card .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(147, 51, 234, 0.4);
+        }

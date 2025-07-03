@@ -7,28 +7,26 @@ using WebModels.Models;
 
 namespace AppView.Areas.Admin.Repository
 {
-
     public class SanPhamRepo : ISanPhamRepo
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly HttpClient _httpClient;
 
         public SanPhamRepo(IHttpClientFactory httpClientFactory)
         {
-            _httpClientFactory = httpClientFactory;
+            _httpClient = httpClientFactory.CreateClient();
+            _httpClient.BaseAddress = new Uri("https://localhost:7221/");
         }
 
         public async Task<bool> CreateSanPhamAsync(SanPhamCreateViewModel model)
         {
-            var client = _httpClientFactory.CreateClient();
             using var content = new MultipartFormDataContent();
-
             content.Add(new StringContent(model.TenSanPham), "TenSanPham");
             content.Add(new StringContent(model.MoTa ?? ""), "MoTa");
             content.Add(new StringContent(model.TrongLuong.ToString()), "TrongLuong");
             content.Add(new StringContent(model.GioiTinh.ToString().ToLower()), "GioiTinh");
-            content.Add(new StringContent(model.TrangThai.ToString().ToLower()), "TrangThai"); // Assuming TrangThai is true by default
-           
+            content.Add(new StringContent(model.TrangThai.ToString().ToLower()), "TrangThai");
             content.Add(new StringContent(model.DanhMucID.ToString()), "DanhMucID");
+
             if (model.ImageFile != null && model.ImageFile.Length > 0)
             {
                 var fileStream = model.ImageFile.OpenReadStream();
@@ -37,21 +35,19 @@ namespace AppView.Areas.Admin.Repository
                 content.Add(fileContent, "ImageFile", model.ImageFile.FileName);
             }
 
-            var response = await client.PostAsync("https://localhost:7221/api/SanPham/create", content);
+            var response = await _httpClient.PostAsync("api/SanPham/create", content);
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API lỗi: {error}");
             }
-            return response.IsSuccessStatusCode;
 
+            return true;
         }
 
         public async Task<List<SanPhamView>> GetAllSanPhamAsync()
         {
-            var client = _httpClientFactory.CreateClient();
-            var response = await client.GetAsync("https://localhost:7221/api/SanPham");
-
+            var response = await _httpClient.GetAsync("api/SanPham");
             if (!response.IsSuccessStatusCode)
                 return new List<SanPhamView>();
 
@@ -64,17 +60,14 @@ namespace AppView.Areas.Admin.Repository
 
         public async Task<SanPhamCreateViewModel?> GetByIdAsync(Guid id)
         {
-            var client = _httpClientFactory.CreateClient();
-            var res = await client.GetAsync($"https://localhost:7221/api/SanPham/{id}");
-
-            if (!res.IsSuccessStatusCode)
+            var response = await _httpClient.GetAsync($"api/SanPham/{id}");
+            if (!response.IsSuccessStatusCode)
             {
-                var error = await res.Content.ReadAsStringAsync();
+                var error = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API lỗi: {error}");
             }
 
-            // Đọc phần wrapper chứa "data"
-            var content = await res.Content.ReadAsStringAsync();
+            var content = await response.Content.ReadAsStringAsync();
             var apiResult = JsonSerializer.Deserialize<ApiResult<SanPham>>(content, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
@@ -92,19 +85,14 @@ namespace AppView.Areas.Admin.Repository
                 GioiTinh = sanPham.GioiTinh ?? false,
                 TrangThai = sanPham.TrangThai,
                 DanhMucID = sanPham.DanhMucId,
-                HinhAnh = sanPham.HinhAnh // để hiển thị ảnh nếu cần
+                HinhAnh = sanPham.HinhAnh
             };
         }
 
-
-
-
         public async Task<bool> UpdateSanPhamAsync(SanPhamCreateViewModel model)
         {
-            var client = _httpClientFactory.CreateClient();
             using var content = new MultipartFormDataContent();
-
-            content.Add(new StringContent(model.IDSanPham.ToString()), "IDSanPham"); // Cần ID để update
+            content.Add(new StringContent(model.IDSanPham.ToString()), "IDSanPham");
             content.Add(new StringContent(model.TenSanPham), "TenSanPham");
             content.Add(new StringContent(model.MoTa ?? ""), "MoTa");
             content.Add(new StringContent(model.TrongLuong.ToString()), "TrongLuong");
@@ -120,16 +108,15 @@ namespace AppView.Areas.Admin.Repository
                 content.Add(fileContent, "ImageFile", model.ImageFile.FileName);
             }
 
-            var response = await client.PutAsync("https://localhost:7221/api/SanPham/update", content);
+            var response = await _httpClient.PutAsync("api/SanPham/update", content);
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API lỗi: {error}");
             }
 
-            return response.IsSuccessStatusCode;
+            return true;
         }
-
 
         public class ApiResult<T>
         {

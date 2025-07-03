@@ -1,6 +1,9 @@
 ﻿using AppApi.Features.DTOs;
 using AppView.Areas.Auth.Repository;
+using Humanizer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using WebModels.Models;
 
 namespace AppView.Areas.Auth.Controllers
 {
@@ -8,10 +11,14 @@ namespace AppView.Areas.Auth.Controllers
     public class AuthController : Controller
     {
         private readonly IAuthRepository _authRepository;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public AuthController(IAuthRepository authRepository)
+        public AuthController(IAuthRepository authRepository, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
         {
             _authRepository = authRepository;
+            _signInManager = signInManager;
+            _userManager = userManager;
         }
 
         // ========== Register ==========
@@ -41,24 +48,29 @@ namespace AppView.Areas.Auth.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginDto model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+                return PartialView("_LoginPartial", model);
+
 
             var result = await _authRepository.LoginAsync(model);
+
             if (!result.IsSuccess)
             {
                 ModelState.AddModelError("", result.Message ?? "Đăng nhập thất bại.");
-                return View(model);
+                return PartialView("_LoginPartial", model);
             }
 
-            // Lưu token + email + roles vào session
-            HttpContext.Session.SetString("Token", result.Data.Token);
-            HttpContext.Session.SetString("Email", result.Data.Email);
-            HttpContext.Session.SetString("Roles", string.Join(",", result.Data.Roles));
+           
 
             TempData["Success"] = "Đăng nhập thành công";
 
             if (result.Data.Roles.Contains("Admin"))
-                return RedirectToAction("Index", "Home", new { area = "Admin" });
+            {
+                return RedirectToAction("Index", "SanPham", new { area = "Admin" });
+            }
+            HttpContext.Session.SetString("Token", result.Data.Token);
+            HttpContext.Session.SetString("Email", result.Data.Email);
+            HttpContext.Session.SetString("Roles", string.Join(",", result.Data.Roles));
             return RedirectToAction("Index", "Home", new { area = "" });
         }
 
@@ -112,7 +124,7 @@ namespace AppView.Areas.Auth.Controllers
         {
             HttpContext.Session.Clear();
             TempData["Success"] = "Đăng xuất thành công.";
-            return RedirectToAction("Login");
+            return RedirectToAction("Index", "Home");
         }
     }
 }

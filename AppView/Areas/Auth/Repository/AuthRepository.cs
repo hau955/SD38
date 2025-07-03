@@ -41,15 +41,29 @@ namespace AppView.Areas.Auth.Repository
             var result = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();
             return result ?? ApiResponse<object>.Fail("Lỗi xác nhận.");
         }
-
-
         private async Task<ApiResponse<T>> ParseApiResponse<T>(HttpResponseMessage response)
         {
             var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<ApiResponse<T>>(json, new JsonSerializerOptions
+
+            try
             {
-                PropertyNameCaseInsensitive = true
-            })!;
+                var result = JsonSerializer.Deserialize<ApiResponse<T>>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (result == null)
+                {
+                    return ApiResponse<T>.Fail("Không đọc được phản hồi từ API.");
+                }
+
+                return result;
+            }
+            catch (JsonException ex)
+            {
+                // Trả về lỗi rõ ràng nếu response không đúng định dạng
+                return ApiResponse<T>.Fail($"Lỗi đọc JSON từ API: {ex.Message}\nResponse:\n{json}");
+            }
         }
     }
 }

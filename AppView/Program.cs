@@ -3,34 +3,39 @@ using AppApi.Service;
 using AppView.Areas.Admin.IRepo;
 using AppView.Areas.Admin.Repository;
 using AppView.Areas.Auth.Repository;
-
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using WebModels.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
+);
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
-// Add services to the container.
+// Cho phép sử dụng các Razor Pages của Identity (nếu bạn dùng Identity UI)
+builder.Services.AddRazorPages();
+var isDev = builder.Environment.IsDevelopment();
+var apiBaseUrl = isDev
+    ? "https://localhost:7221/"
+    : "https://your-production-api.com/";
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
-var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
-builder.Services.AddHttpClient<ISanPhamRepo, SanPhamRepo>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
 builder.Services.AddHttpClient<IAuthRepository, AuthRepository>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
+builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
 
-// Cấu hình HttpClient cho từng repo gọi API
 
 builder.Services.AddScoped<ICoAoRepo, CoAoRepo>();
-builder.Services.AddScoped<IMauSacService, MauSacService>();
-builder.Services.AddScoped<ISizeService, SizeService>();
-builder.Services.AddScoped<ITaAoService, TaAoService>();
-builder.Services.AddScoped<ISanPhamCTService, SanPhamCTService>();
 builder.Services.AddScoped<ITaAoRepo, TaAoRepo>();
-builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
+builder.Services.AddScoped<IMauSacRepo, MauSacRepo>();
+builder.Services.AddScoped<ISizeRepo, SizeRepo>();
 
-// Thêm dịch vụ cần thiết cho session
 builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddSession(options =>
@@ -74,7 +79,7 @@ app.UseSession();
 
 app.UseRouting();
 app.UseCors("AllowAll");
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 // Routing mặc định
@@ -84,6 +89,6 @@ app.MapControllerRoute(
 
 app.MapControllerRoute(
      name: "default",
-    pattern: "{area=Auth}/{controller=Auth}/{action=Login}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.Run();
+app.Run(); 
