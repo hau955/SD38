@@ -1,4 +1,5 @@
 ﻿@model List<AppView.ViewModels.SanPham.SanPhamView>
+@using System.Text.Json
 
 <style>
     .form-wrapper {
@@ -68,84 +69,165 @@
 <section class="container mt-5 form-wrapper">
     <h2 class="text-center">Danh sách sản phẩm</h2>
 
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        @for (int i = 0; i < Model.Count; i++)
+    <style>
+        .product-box {
+            position: relative;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 0;
+        }
+
+            .product-box:hover {
+                transform: translateY(-5px);
+            }
+
+            .product-box img {
+                width: 100%;
+                height: 250px;
+                object-fit: cover;
+                object-position: top center;
+            }
+
+        .product-details {
+            padding: 16px 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .product-details h1 {
+                font-size: 1.3rem;
+                font-weight: bold;
+                color: #4E4E4E;
+            }
+
+            .product-details p {
+                font-size: 0.9rem;
+                margin: 5px 0 10px;
+                color: #4E4E4E;
+            }
+
+        .btn-group {
+            margin-top: auto;
+            display: flex;
+            gap: 8px;
+        }
+
+            .btn-group .btn-detail {
+                background-color: #C3A1A0;
+                padding: 10px 16px;
+                flex-grow: 1;
+                border-radius: 6px;
+                font-size: 0.9rem;
+                border: none;
+                color: white;
+                cursor: pointer;
+            }
+
+        #product-detail-modal {
+            display: none;
+            position: fixed;
+            top: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 700px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            padding: 20px;
+            z-index: 1000;
+        }
+
+            #product-detail-modal .sizes {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, 40px);
+                grid-gap: 6px;
+                margin-bottom: 15px;
+                width: 100%;
+            }
+
+        .size {
+            padding: 8px;
+            border: 1px solid #E0C9CB;
+            font-size: 0.8rem;
+            text-align: center;
+            cursor: pointer;
+            color: #BA7E7E;
+            transition: all .3s ease-in-out;
+        }
+
+            .size:hover, .size.focus {
+                background-color: #BA7E7E;
+                color: #fff;
+            }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }.btn-detail,
+.btn-add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.btn-detail {
+    background-color: #f1f1f1;
+    color: #333;
+}
+
+.btn-detail:hover {
+    background-color: #ddd;
+    color: #000;
+}
+
+.btn-add {
+    background-color: #C3A1A0;
+    color: #fff;
+}
+
+.btn-add:hover {
+    background-color: #a2807e;
+}
+
+
+    </style>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var sp in Model)
         {
-            var sp = Model[i];
-            var modalId = $"modalChiTiet_{i}";
-            var anhDaiDien = sp.HinhAnh?.Split(';').FirstOrDefault() ?? "/images/default.jpg";
             <div class="col">
-                <div class="card h-100 shadow-sm border-0">
-                    <img src="@anhDaiDien" class="card-img-top" style="height: 300px; object-fit: cover; cursor: pointer;" alt="ảnh sản phẩm"
-                         data-bs-toggle="modal" data-bs-target="#@modalId">
-                    <div class="card-body">
-                        <h5 class="card-title">@sp.TenSanPham</h5>
-                        <p class="card-text text-muted">@sp.MoTa</p>
-                    </div>
-                </div>
-            </div>
+                <div class="product-box">
+                    <img src="@sp.HinhAnh?.Split(';').FirstOrDefault()" alt="Ảnh sản phẩm" />
+                    <div class="product-details">
+                        <h1>@sp.TenSanPham</h1>
+                        <p>@sp.MoTa</p>
 
-            <!-- Modal hiển thị chi tiết sản phẩm -->
-            <div class="modal fade"
-                 id="@modalId"
-                 tabindex="-1"
-                 aria-labelledby="@($"{modalId}_Label")"
-                 aria-hidden="true"
-                 data-bs-backdrop="static"
-                 data-bs-keyboard="true">
-                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="@($"{modalId}_Label")">Chi tiết: @sp.TenSanPham</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-                        </div>
-                        <div class="modal-body">
-                            <img src="@anhDaiDien" class="img-fluid mb-3 rounded" style="max-height: 400px;" alt="ảnh chi tiết" />
-
-                            <table class="table table-bordered text-center align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Màu</th>
-                                        <th>Size</th>
-                                        <th>Cổ áo</th>
-                                        <th>Tà áo</th>
-                                        <th>Giá</th>
-                                        <th>Tồn kho</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if (sp.ChiTiets != null && sp.ChiTiets.Any())
-                                    {
-                                        foreach (var ct in sp.ChiTiets)
-                                        {
-                                            <tr>
-                                                <td>@ct.MauSac</td>
-                                                <td>@ct.Size</td>
-                                                <td>@ct.CoAo</td>
-                                                <td>@ct.TaAo</td>
-                                                <td>@ct.GiaBan.ToString("N0")₫</td>
-                                                <td class="@(ct.SoLuongTonKho < 0 ? "text-danger" : "")">@ct.SoLuongTonKho</td>
-                                            </tr>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <tr>
-                                            <td colspan="6" class="text-center text-muted">Chưa có dữ liệu chi tiết</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="modal-footer d-flex justify-content-between">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                            <form asp-controller="GioHang" asp-action="ThemVaoGio" method="post">
-                                <input type="hidden" name="SanPhamId" value="@sp.IDSanPham" />
-                                <button type="submit" class="btn btn-success">
-                                    <i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ hàng
-                                </button>
-                            </form>
-                        </div>
+                        <button class="btn-detail"
+                                onclick='showDetail(@Html.Raw(JsonSerializer.Serialize(sp, new JsonSerializerOptions { PropertyNamingPolicy = null })))'>
+                            Xem chi tiết
+                        </button>
                     </div>
                 </div>
             </div>
@@ -153,10 +235,68 @@
     </div>
 </section>
 
-@section Scripts {
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="@Url.Content("~/js/bootstrap.bundle.min.js")"></script>
-    <script>
-        console.log("✅ Bootstrap modal scripts loaded.");
-    </script>
-}
+<!-- Overlay & Modal -->
+<div id="overlay"></div>
+
+<div id="product-detail-modal">
+    <button onclick="closeModal()" style="float:right;font-size:1.2rem;">✖</button>
+    <h3 id="detail-title"></h3>
+    <img id="detail-img" src="" style="width: 100%; height: 250px; object-fit: contain;" />
+
+    <p id="detail-description"></p>
+
+    <div id="detail-sizes"></div>
+    <div id="detail-mau"></div>
+    <div id="detail-coao"></div>
+    <div id="detail-taao"></div>
+
+    <button class="btn-add">Thêm vào giỏ hàng</button>
+</div>
+
+<script>
+    function showDetail(sp) {
+        // Hiển thị modal
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('product-detail-modal').style.display = 'block';
+
+        // Hiển thị dữ liệu
+        document.getElementById('detail-title').innerText = sp.TenSanPham;
+        document.getElementById('detail-img').src = (sp.HinhAnh || '').split(';')[0];
+        document.getElementById('detail-description').innerText = sp.MoTa || '';
+
+        // Lọc sản phẩm còn hàng
+        const chiTiets = sp.ChiTiets.filter(c => c.TrangThai);
+
+        function renderOptions(label, list, key, containerId) {
+            const unique = [...new Set(list.map(x => x[key]).filter(x => !!x))];
+            if (unique.length > 0) {
+                document.getElementById(containerId).innerHTML =
+                    `<p><strong>${label}</strong></p><div class="sizes">` +
+                    unique.map(val => `<div class="size">${val}</div>`).join('') +
+                    `</div>`;
+            } else {
+                document.getElementById(containerId).innerHTML = '';
+            }
+        }
+
+        renderOptions("Chọn size", chiTiets, "Size", "detail-sizes");
+        renderOptions("Chọn màu sắc", chiTiets, "MauSac", "detail-mau");
+        renderOptions("Chọn cổ áo", chiTiets, "CoAo", "detail-coao");
+        renderOptions("Chọn tà áo", chiTiets, "TaAo", "detail-taao");
+    }
+
+    function closeModal() {
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('product-detail-modal').style.display = 'none';
+    }
+
+    // Kích hoạt chọn size
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('size')) {
+            const parent = e.target.closest('.sizes');
+            parent.querySelectorAll('.size').forEach(el => el.classList.remove('focus'));
+            e.target.classList.add('focus');
+        }
+    });
+</script>
+

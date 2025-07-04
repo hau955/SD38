@@ -15,7 +15,7 @@ namespace AppData.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=DESKTOP-A99GQBL;Database=AoDaiModell;Trusted_Connection=True;TrustServerCertificate=True"); //"Server=HAU-2005;Database=AoDaiModel;User Id=sa;Password=Hauhoang0905!;TrustServerCertificate=true;");
+            optionsBuilder.UseSqlServer( "Server=HAU-2005;Database=AoDaiModel;User Id=sa;Password=Hauhoang0905!;TrustServerCertificate=true;");//"Server=DESKTOP-A99GQBL;Database=AoDaiModell;Trusted_Connection=True;TrustServerCertificate=True");
         }
         public DbSet<GioHang> GioHangs { get; set; }
         public DbSet<GioHangCT> GioHangChiTiets { get; set; }
