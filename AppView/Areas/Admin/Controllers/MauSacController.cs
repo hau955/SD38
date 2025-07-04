@@ -1,6 +1,6 @@
 ﻿using AppView.Areas.Admin.IRepo;
 using Microsoft.AspNetCore.Mvc;
-using WebModels.Models;
+using AppData.Models;
 
 namespace AppView.Areas.Admin.Controllers
 {

@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using WebModels.Models;
+using AppData.Models;
 
 namespace AppView.Areas.Admin.Repository
 {

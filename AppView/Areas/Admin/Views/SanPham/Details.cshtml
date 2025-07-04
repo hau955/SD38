@@ -1,79 +1,90 @@
 ﻿@model AppView.Areas.Admin.ViewModels.SanPhamViewModels.SanPhamCreateViewModel
 
 @{
-    ViewData["Title"] = "Cập nhật sản phẩm";
+    ViewData["Title"] = "Chi tiết sản phẩm";
 }
 
-<div class="container mt-5">
-    <div class="card shadow">
-        <div class="card-header bg-warning text-dark fw-bold fs-4">
-            ✏️ CẬP NHẬT SẢN PHẨM
+<style>
+    .detail-wrapper {
+        background: #fffaf0;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h2 {
+        color: #8B0000;
+        font-weight: bold;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .form-control[readonly], .form-control:disabled {
+        background-color: #f8f9fa;
+        color: #000;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="col-md-8 mx-auto detail-wrapper">
+        <h2><i class="fas fa-info-circle me-2"></i>@ViewData["Title"]</h2>
+
+        <div class="mb-3">
+            <label class="form-label">Tên sản phẩm</label>
+            <input class="form-control" value="@Model.TenSanPham" readonly />
         </div>
 
-        <div class="card-body">
-            <form asp-action="Update" method="post" enctype="multipart/form-data">
-                <input type="hidden" asp-for="IDSanPham" />
+        <div class="mb-3">
+            <label class="form-label">Mô tả</label>
+            <textarea class="form-control" rows="3" readonly>@Model.MoTa</textarea>
+        </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="TenSanPham" class="form-label fw-bold">📌 Tên sản phẩm</label>
-                        <input asp-for="TenSanPham" class="form-control" placeholder="Nhập tên sản phẩm..." />
-                        <span asp-validation-for="TenSanPham" class="text-danger"></span>
-                    </div>
+        <div class="mb-3">
+            <label class="form-label">Trọng lượng (gram)</label>
+            <input class="form-control" value="@Model.TrongLuong" readonly />
+        </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="TrongLuong" class="form-label fw-bold">⚖️ Trọng lượng (g)</label>
-                        <input asp-for="TrongLuong" class="form-control" placeholder="Nhập trọng lượng..." />
-                        <span asp-validation-for="TrongLuong" class="text-danger"></span>
-                    </div>
-                </div>
+        <div class="mb-3">
+            <label class="form-label">Giới tính</label>
+            <input class="form-control" value="@(Model.GioiTinh ? "Nam" : "Nữ")" readonly />
+        </div>
 
-                <div class="mb-3">
-                    <label asp-for="MoTa" class="form-label fw-bold">📝 Mô tả</label>
-                    <textarea asp-for="MoTa" class="form-control" rows="4" placeholder="Nhập mô tả chi tiết..."></textarea>
-                </div>
+        <div class="mb-3">
+            <label class="form-label">Trạng thái</label>
+            <input class="form-control" value="@(Model.TrangThai ? "Hoạt động" : "Ngừng bán")" readonly />
+        </div>
 
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="GioiTinh" class="form-label fw-bold">👕 Giới tính</label>
-                        <select asp-for="GioiTinh" class="form-select">
-                            <option value="true">Nam</option>
-                            <option value="false">Nữ</option>
-                        </select>
-                    </div>
+        <div class="mb-3">
+            <label class="form-label">Danh mục</label>
+            @{
+                var selectedCategory = Model.DanhMucList.FirstOrDefault(x => x.Value == Model.DanhMucID.ToString())?.Text;
+            }
+            <input class="form-control" value="@selectedCategory" readonly />
+        </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="TrangThai" class="form-label fw-bold">📦 Trạng thái</label>
-                        <select asp-for="TrangThai" class="form-select">
-                            <option value="true">Hoạt động</option>
-                            <option value="false">Ngừng bán</option>
-                        </select>
-                    </div>
+        <div class="mb-4">
+            <label class="form-label">Ảnh sản phẩm</label><br />
+            @if (Model.HinhAnh != null)
+            {
+                <img src="@Model.HinhAnh" alt="Ảnh sản phẩm" class="img-thumbnail" style="max-width: 200px;" />
+            }
+            else
+            {
+                <p class="text-muted fst-italic">Không có ảnh</p>
+            }
+        </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="DanhMucID" class="form-label fw-bold">🗂️ Danh mục</label>
-                        <select asp-for="DanhMucID" asp-items="Model.DanhMucList" class="form-select">
-                            <option disabled selected>-- Chọn danh mục --</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold">🖼️ Ảnh sản phẩm</label>
-                    <input asp-for="ImageFile" type="file" class="form-control" />
-                </div>
-
-                <div class="d-flex justify-content-between mt-4">
-                    <a asp-action="DanhSach" class="btn btn-outline-secondary">
-                        ⬅️ Quay lại
-                    </a>
-                   
-                </div>
-            </form>
+        <div class="text-end">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}

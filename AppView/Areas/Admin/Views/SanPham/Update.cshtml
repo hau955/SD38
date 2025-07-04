@@ -4,73 +4,121 @@
     ViewData["Title"] = "Cập nhật sản phẩm";
 }
 
-<div class="container mt-5">
-    <div class="card shadow">
-        <div class="card-header bg-warning text-dark fw-bold fs-4">
-            ✏️ CẬP NHẬT SẢN PHẨM
-        </div>
+<style>
+    .form-wrapper {
+        background: #fffaf0;
+        border-radius: 1rem;
+        padding: 2rem 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        font-family: 'Segoe UI', sans-serif;
+    }
 
-        <div class="card-body">
-            <form asp-action="Update" method="post" enctype="multipart/form-data">
-                <input type="hidden" asp-for="IDSanPham" />
+    h2 {
+        color: #8B0000;
+        font-weight: 600;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="TenSanPham" class="form-label fw-bold">📌 Tên sản phẩm</label>
-                        <input asp-for="TenSanPham" class="form-control" placeholder="Nhập tên sản phẩm..." />
-                        <span asp-validation-for="TenSanPham" class="text-danger"></span>
-                    </div>
+    label {
+        font-weight: 500;
+    }
 
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="TrongLuong" class="form-label fw-bold">⚖️ Trọng lượng (g)</label>
-                        <input asp-for="TrongLuong" class="form-control" placeholder="Nhập trọng lượng..." />
-                        <span asp-validation-for="TrongLuong" class="text-danger"></span>
-                    </div>
-                </div>
+    .form-control:focus, .form-select:focus {
+        box-shadow: 0 0 0 0.15rem rgba(212, 175, 55, 0.25);
+        border-color: #d4af37;
+    }
 
-                <div class="mb-3">
-                    <label asp-for="MoTa" class="form-label fw-bold">📝 Mô tả</label>
-                    <textarea asp-for="MoTa" class="form-control" rows="4" placeholder="Nhập mô tả chi tiết..."></textarea>
-                </div>
+    .btn-success {
+        background-color: #d4af37;
+        border: none;
+        font-weight: 500;
+        color: white;
+    }
 
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="GioiTinh" class="form-label fw-bold">👕 Giới tính</label>
-                        <select asp-for="GioiTinh" class="form-select">
-                            <option value="true">Nam</option>
-                            <option value="false">Nữ</option>
-                        </select>
-                    </div>
+        .btn-success:hover {
+            background-color: #b8941f;
+        }
 
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="TrangThai" class="form-label fw-bold">📦 Trạng thái</label>
-                        <select asp-for="TrangThai" class="form-select">
-                            <option value="true">Hoạt động</option>
-                            <option value="false">Ngừng bán</option>
-                        </select>
-                    </div>
+    .btn-secondary {
+        background-color: #8B0000;
+        border: none;
+        color: white;
+        font-weight: 500;
+    }
 
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="DanhMucID" class="form-label fw-bold">🗂️ Danh mục</label>
-                        <select asp-for="DanhMucID" asp-items="Model.DanhMucList" class="form-select">
-                            <option disabled selected>-- Chọn danh mục --</option>
-                        </select>
-                    </div>
-                </div>
+        .btn-secondary:hover {
+            background-color: #a00000;
+        }
 
-                <div class="mb-3">
-                    <label class="form-label fw-bold">🖼️ Ảnh sản phẩm</label>
-                    <input asp-for="ImageFile" type="file" class="form-control" />
-                </div>
+    .text-danger {
+        font-size: 0.875rem;
+    }
+</style>
 
-                <div class="d-flex justify-content-between mt-4">
-                    <a asp-action="DanhSach" class="btn btn-outline-secondary">
-                        ⬅️ Quay lại
-                    </a>
+<div class="container mt-4">
+    <div class="form-wrapper">
+        <h2><i class="fas fa-edit me-2"></i>@ViewData["Title"]</h2>
 
-                </div>
-            </form>
-        </div>
+        <form asp-action="Update" method="post" enctype="multipart/form-data" class="row g-3">
+            <input type="hidden" asp-for="IDSanPham" />
+
+            <div class="col-md-6">
+                <label asp-for="TenSanPham" class="form-label">Tên sản phẩm</label>
+                <input asp-for="TenSanPham" class="form-control" placeholder="Nhập tên sản phẩm" />
+                <span asp-validation-for="TenSanPham" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="TrongLuong" class="form-label">Trọng lượng (gram)</label>
+                <input asp-for="TrongLuong" class="form-control" placeholder="VD: 500" />
+                <span asp-validation-for="TrongLuong" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-12">
+                <label asp-for="MoTa" class="form-label">Mô tả</label>
+                <textarea asp-for="MoTa" class="form-control" rows="3" placeholder="Nhập mô tả chi tiết..."></textarea>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="GioiTinh" class="form-label">Giới tính</label>
+                <select asp-for="GioiTinh" class="form-select">
+                    <option value="true">Nam</option>
+                    <option value="false">Nữ</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="TrangThai" class="form-label">Trạng thái</label>
+                <select asp-for="TrangThai" class="form-select">
+                    <option value="true">Hoạt động</option>
+                    <option value="false">Ngừng bán</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="DanhMucID" class="form-label">Danh mục</label>
+                <select asp-for="DanhMucID" asp-items="Model.DanhMucList" class="form-select">
+                    <option value="">-- Chọn danh mục --</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Ảnh sản phẩm</label>
+                <input asp-for="ImageFile" type="file" class="form-control" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+
+            <div class="col-12 mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save me-1"></i> Lưu thay đổi
+                </button>
+                <a asp-controller="SanPham" asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Quay lại
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 

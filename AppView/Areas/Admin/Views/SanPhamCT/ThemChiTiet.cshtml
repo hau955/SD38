@@ -1,7 +1,11 @@
 ﻿@model AppView.Areas.Admin.ViewModels.SanPhamChiTietViewModels.CreateSanPhamCTViewModel
-
+@using AppData.Models;
 @{
     ViewData["Title"] = "Thêm chi tiết sản phẩm";
+    var mauSacs = ViewBag.MauSacs as List<MauSac>;
+    var sizes = ViewBag.Sizes as List<Size>;
+    var coAos = ViewBag.CoAos as List<CoAo>;
+    var taAos = ViewBag.TaAos as List<TaAo>;
 }
 
 <div class="container mt-5">

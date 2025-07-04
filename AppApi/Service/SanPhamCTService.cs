@@ -1,7 +1,6 @@
 ﻿using AppApi.IService;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http;
-using WebModels.Models;
+using AppData.Models;
 
 namespace AppApi.Service
 {
