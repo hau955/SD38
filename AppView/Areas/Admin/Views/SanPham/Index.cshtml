@@ -1,58 +1,89 @@
 ﻿@model List<AppView.Areas.Admin.ViewModels.SanPhamViewModels.SanPhamView>
 
-<h2>Danh sách sản phẩm</h2>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Tên sản phẩm</th>
-            <th>Mô tả</th>
-            <th>Trọng lượng</th>
-            <th>Giới tính</th>
-            <th>Trạng thái</th>
-            <th>Danh mục</th>
-            <th>Hình ảnh</th>
-            <th>Ngày tạo</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.TenSanPham</td>
-                <td>@item.MoTa</td>
-                <td>@item.TrongLuong</td>
-                <td>@(item.GioiTinh ? "Nam" : "Nữ")</td>
-                <td>@(item.TrangThai ? "Còn hàng" : "Hết hàng")</td>
-                <td>@item.TenDanhMuc</td>
-                <td>
-                    @if (!string.IsNullOrEmpty(item.HinhAnh))
+@{
+    ViewData["Title"] = "Danh sách sản phẩm";
+}
+
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white fw-bold text-center fs-4">
+            🛍️ DANH SÁCH SẢN PHẨM
+        </div>
+
+        <div class="card-body">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light text-center">
+                    <tr>
+                        <th>Tên sản phẩm</th>
+                        <th>Mô tả</th>
+                        <th>Trọng lượng (g)</th>
+                        <th>Giới tính</th>
+                        <th>Trạng thái</th>
+                        <th>Danh mục</th>
+                        <th>Hình ảnh</th>
+                        <th>Ngày tạo</th>
+                        <th colspan="3">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
                     {
-                        <img src="@item.HinhAnh" width="100" height="100" />
+                        <tr>
+                            <td>@item.TenSanPham</td>
+                            <td>@item.MoTa</td>
+                            <td class="text-center">@item.TrongLuong</td>
+                            <td class="text-center">@((item.GioiTinh) ? "Nam" : "Nữ")</td>
+                            <td class="text-center">
+                                <span class="badge bg-@(item.TrangThai ? "success" : "secondary")">
+                                    @(item.TrangThai ? "Còn hàng" : "Hết hàng")
+                                </span>
+                            </td>
+                            <td>@item.TenDanhMuc</td>
+                            <td class="text-center">
+                                @if (!string.IsNullOrEmpty(item.HinhAnh))
+                                {
+                                    <img src="@item.HinhAnh"
+                                         alt="Ảnh sản phẩm"
+                                         class="rounded border shadow-sm"
+                                         style="width: 80px; height: 80px; object-fit: cover; aspect-ratio: 1;" />
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">Không có ảnh</span>
+                                }
+                            </td>
 
+                            <td>@item.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
 
+                            <td class="text-center">
+                                <a asp-area="Admin"
+                                   asp-controller="SanPhamCT"
+                                   asp-action="ThemChiTiet"
+                                   asp-route-idSanPham="@item.IDSanPham"
+                                   class="btn btn-sm btn-primary">
+                                    ➕ Chi tiết
+                                </a>
+                            </td>
+
+                            <td class="text-center">
+                                <a asp-action="Update"
+                                   asp-route-id="@item.IDSanPham"
+                                   class="btn btn-sm btn-warning">
+                                    ✏️ Sửa
+                                </a>
+                            </td>
+
+                            <td class="text-center">
+                                <a asp-action="Details"
+                                   asp-route-id="@item.IDSanPham"
+                                   class="btn btn-sm btn-info text-white">
+                                    👁️ Xem
+                                </a>
+                            </td>
+                        </tr>
                     }
-                </td>
-                <td>@item.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
-                <td>
-                    <a asp-area="Admin"
-                       asp-controller="SanPhamCT"
-                       asp-action="ThemChiTiet"
-                       asp-route-idSanPham="@item.IDSanPham"
-                       class="btn btn-primary">Thêm chi tiết</a>
-                </td>
-                <td>
-                    <a asp-action="Update" asp-route-id="@item.IDSanPham" class="btn btn-warning btn-sm">Sửa</a>
-                </td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@item.IDSanPham" class="btn btn-warning btn-sm">Xem</a>
-                </td>
-
-            </tr>
-             <tr>
-               
-                
-
-    </tr>
-        }
-    </tbody>
-</table>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

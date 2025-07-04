@@ -1,5 +1,6 @@
 ﻿using AppApi.IService;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http;
 using WebModels.Models;
 
 namespace AppApi.Service
@@ -71,6 +72,16 @@ namespace AppApi.Service
             await _db.SaveChangesAsync();
         }
 
-      
+       
+
+        public async Task<bool> ExistsAsync(Guid idSanPham, Guid idMauSac, Guid idSize, Guid idCoAo, Guid idTaAo)
+        {
+            return await _db.SanPhamChiTiets.AnyAsync(x =>
+                x.IDSanPham == idSanPham &&
+                x.IDMauSac == idMauSac &&
+                x.IDSize == idSize &&
+                x.IDCoAo == idCoAo &&
+                x.IDTaAo == idTaAo);
+        }
     }
 }

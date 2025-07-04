@@ -3,6 +3,8 @@ using AppView.Areas.Admin.IRepo;
 using AppView.Areas.Admin.ViewModels.SanPhamChiTietViewModels;
 using AppView.Areas.Admin.ViewModels.SanPhamViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using WebModels.Models;
 
 namespace AppView.Areas.Admin.Controllers
@@ -18,13 +20,24 @@ namespace AppView.Areas.Admin.Controllers
         }
         public async Task<IActionResult> ThemChiTiet(Guid idSanPham)
         {
-            ViewBag.IDSanPham = idSanPham;
-            ViewBag.MauSacs = await _service.GetMauSacsAsync();
-            ViewBag.Sizes = await _service.GetSizesAsync();
-            ViewBag.CoAos = await _service.GetCoAosAsync();
-            ViewBag.TaAos = await _service.GetTaAosAsync();
+            var model = new CreateSanPhamCTViewModel
+            {
+                IDSanPham = idSanPham,
+                MauSacList = (await _service.GetMauSacsAsync())
+                                .Select(x => new SelectListItem { Value = x.IDMauSac.ToString(), Text = x.TenMau })
+                                .ToList(),
+                SizeList = (await _service.GetSizesAsync())
+                                .Select(x => new SelectListItem { Value = x.IDSize.ToString(), Text = x.SoSize })
+                                .ToList(),
+                CoAoList = (await _service.GetCoAosAsync())
+                                .Select(x => new SelectListItem { Value = x.IDCoAo.ToString(), Text = x.TenCoAo })
+                                .ToList(),
+                TaAoList = (await _service.GetTaAosAsync())
+                                .Select(x => new SelectListItem { Value = x.IDTaAo.ToString(), Text = x.TenTaAo })
+                                .ToList()
+            };
 
-            return View(new List<SanPhamCT> { new SanPhamCT { IDSanPham = idSanPham } });
+            return View(model);
         }
 
 
@@ -51,15 +64,81 @@ namespace AppView.Areas.Admin.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> CreateMultiple(List<SanPhamCT> list)
+        public async Task<IActionResult> CreateMultiple(CreateSanPhamCTViewModel vm)
         {
-            var success = await _service.CreateMultipleAsync(list);
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Vui lòng điền đầy đủ thông tin và chọn ít nhất 1 lựa chọn cho mỗi mục.";
+                // Load lại danh sách để hiển thị lại
+                vm.MauSacList = (await _service.GetMauSacsAsync())
+     .Select(x => new SelectListItem
+     {
+         Value = x.IDMauSac.ToString(),
+         Text = x.TenMau
+     }).ToList();
+
+                vm.SizeList = (await _service.GetSizesAsync())
+                    .Select(x => new SelectListItem
+                    {
+                        Value = x.IDSize.ToString(),
+                        Text = x.SoSize.ToString()
+                    }).ToList();
+
+                vm.CoAoList = (await _service.GetCoAosAsync())
+                    .Select(x => new SelectListItem
+                    {
+                        Value = x.IDCoAo.ToString(),
+                        Text = x.TenCoAo
+                    }).ToList();
+
+                vm.TaAoList = (await _service.GetTaAosAsync())
+                    .Select(x => new SelectListItem
+                    {
+                        Value = x.IDTaAo.ToString(),
+                        Text = x.TenTaAo
+                    }).ToList();
+                return View("ThemChiTiet", vm);
+            }
+            var combinations = from mau in vm.SelectedMauSacs
+                               from size in vm.SelectedSizes
+                               from coao in vm.SelectedCoAos
+                               from taao in vm.SelectedTaAos
+                               select new SanPhamCT
+                               {
+                                   IDSanPham = vm.IDSanPham,
+                                   IDMauSac = mau,
+                                   IDSize = size,
+                                   IDCoAo = coao,
+                                   IDTaAo = taao,
+                                   GiaBan = vm.GiaBan,
+                                   SoLuongTonKho = vm.SoLuongTonKho,
+                                   TrangThai = true
+                               };
+
+            var resultList = new List<SanPhamCT>();
+            foreach (var item in combinations)
+            {
+                var exists = await _service.ExistsAsync(item.IDSanPham, item.IDMauSac, item.IDSize, item.IDCoAo, item.IDTaAo);
+                if (!exists)
+                    resultList.Add(item);
+            }
+
+            if (resultList.Count == 0)
+            {
+                TempData["Error"] = "Tất cả các tổ hợp đều đã tồn tại.";
+                return RedirectToAction("ThemChiTiet", new { idSanPham = vm.IDSanPham });
+            }
+
+            var success = await _service.CreateMultipleAsync(resultList);
+
             if (success)
-                return RedirectToAction("DanhSach", new { idSanPham = list.First().IDSanPham });
+                return RedirectToAction("DanhSach", new { idSanPham = vm.IDSanPham });
 
             TempData["Error"] = "Thêm thất bại!";
-            return RedirectToAction("ThemChiTiet", new { idSanPham = list.First().IDSanPham });
+            return RedirectToAction("ThemChiTiet", new { idSanPham = vm.IDSanPham });
         }
+
+
         [HttpGet]
         public async Task<IActionResult> CapNhat(Guid id)
         {
@@ -84,6 +163,7 @@ namespace AppView.Areas.Admin.Controllers
             TempData["Error"] = "Cập nhật thất bại!";
             return View(model);
         }
+       
 
     }
 }

@@ -57,6 +57,8 @@ builder.Services.AddScoped<IMauSacService, MauSacService>();
 builder.Services.AddScoped<ITaAoService, TaAoService>();
 builder.Services.AddScoped<ISizeService, SizeService>();
 builder.Services.AddScoped<ICoAoService, CoAoService>();
+builder.Services.AddScoped<ISanPhamCTService, SanPhamCTService>();
+
 
 builder.Services.AddCors(options =>
 {

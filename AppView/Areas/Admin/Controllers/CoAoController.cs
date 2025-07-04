@@ -21,11 +21,11 @@ namespace AppView.Areas.Admin.Controllers
             return View(list);
         }
 
-        public async Task<IActionResult> Create()
-        {
-            //await LoadSizeListAsync();
-            return View();
-        }
+        //public asyncTask<IActionResult> Create()
+        //{
+        //    //await LoadSizeListAsync();
+        //    return View();
+        //}
 
         // POST: CoAo/Create
         [HttpPost]
