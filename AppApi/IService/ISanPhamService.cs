@@ -1,6 +1,6 @@
 ﻿using AppApi.ViewModels.SanPham;
 using AppView.Areas.Admin.ViewModels;
-using WebModels.Models;
+using AppData.Models;
 
 namespace AppApi.IService
 {
@@ -8,7 +8,7 @@ namespace AppApi.IService
     {
         Task<List<SanPhamView>> GetAll();
         Task<SanPham?> GetByID(Guid id);
-
+        Task<List<SanPhamView>> GetAllSanPhamsAsync();
         Task<SanPham> Create(SanPhamCreateRequest sanpham);
         Task<SanPham> Update(SanPhamCreateRequest sanpham);
 

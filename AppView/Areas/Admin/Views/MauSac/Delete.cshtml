@@ -1,19 +1,66 @@
-﻿@model WebModels.Models.MauSac
+﻿@model AppData.Models.MauSac
 
 @{
     ViewData["Title"] = "Xoá Màu Sắc";
 }
 
+<!-- Custom Style -->
+<style>
+    .delete-wrapper {
+        background: #fffaf0;
+        border-radius: 1rem;
+        padding: 2rem 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h2 {
+        color: #8B0000;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+    }
+
+    .alert-custom {
+        background-color: #fff0e6;
+        border: 1px solid #dc3545;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        color: #8B0000;
+        font-weight: 500;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+    }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border: none;
+    }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+</style>
+
 <div class="container mt-4">
-    <h2 class="mb-4 text-danger">@ViewData["Title"]</h2>
+    <div class="col-md-6 mx-auto delete-wrapper">
+        <h2><i class="fas fa-trash-alt me-2"></i>@ViewData["Title"]</h2>
 
-    <div class="alert alert-warning border border-danger">
-        <i class="fas fa-exclamation-triangle"></i>
-        Bạn có chắc chắn muốn xoá màu:
-        <strong class="text-danger">@Model.TenMau</strong>?
-    </div>
+        <div class="alert-custom mb-4">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Bạn có chắc chắn muốn xoá màu:
+            <strong>@Model.TenMau</strong>?
+        </div>
 
-    <form asp-action="Delete" method="post">
+    <form asp-area="Admin" asp-controller="MauSac" asp-action="Delete" method="post">
         <input type="hidden" asp-for="IDMauSac" />
         <div class="d-flex gap-2">
             <button type="submit" class="btn btn-danger">

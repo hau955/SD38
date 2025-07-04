@@ -1,4 +1,4 @@
-﻿using WebModels.Models;
+﻿using AppData.Models;
 
 namespace AppApi.IService
 {
@@ -9,6 +9,7 @@ namespace AppApi.IService
         Task<List<SanPhamCT>> GetBySanPhamIdAsync(Guid sanPhamId);
         Task<SanPhamCT?> GetByIdAsync(Guid id);
         Task<bool> UpdateAsync(SanPhamCT model);
+        Task<bool> ExistsAsync(Guid idSanPham, Guid idMauSac, Guid idSize, Guid idCoAo, Guid idTaAo);
 
     }
 }

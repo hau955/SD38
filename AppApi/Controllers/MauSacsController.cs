@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebModels.Models;
+using AppData.Models;
 using AppApi.IService;
 
 namespace AppApi.Controllers
@@ -30,9 +30,15 @@ namespace AppApi.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var result = await _service.GetMauSacByIdAsync(id);
-            if (result == null) return NotFound();
-            return Ok(result);
+            var size = await _service.GetMauSacByIdAsync(id);
+            if (size == null)
+                return NotFound(new ApiResponse<Size> { Message = "Không tìm thấy size" });
+
+            return Ok(new ApiResponse<Size>
+            {
+                Message = "Lấy size thành công",
+                
+            });
         }
 
         [HttpPost]
@@ -48,7 +54,7 @@ namespace AppApi.Controllers
             if (id != mauSac.IDMauSac)
                 return BadRequest("ID không khớp.");
 
-            var updated = await _service.UpdateMauSacAsync(mauSac);
+            var updated = await _service.UpdateMauSacAsync(id,mauSac);
             return updated ? Ok() : NotFound();
         }
 

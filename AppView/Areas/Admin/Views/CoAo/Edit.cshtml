@@ -1,27 +1,81 @@
-﻿@model WebModels.Models.CoAo
+﻿@model AppData.Models.CoAo
 @{
     ViewData["Title"] = "Chỉnh sửa Cổ Áo";
 }
+
+<!-- Custom Style -->
+<style>
+    .form-wrapper {
+        background: #fffaf0;
+        border-radius: 1rem;
+        padding: 2rem 2.5rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h2 {
+        color: #8B0000;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    label {
+        font-weight: 500;
+        color: #333;
+    }
+
+    .btn-primary {
+        background-color: #d4af37;
+        border: none;
+        color: white;
+        font-weight: 500;
+    }
+
+        .btn-primary:hover {
+            background-color: #b8941f;
+        }
+
+    .btn-secondary {
+        background-color: #8B0000;
+        border: none;
+        color: white;
+        font-weight: 500;
+    }
+
+        .btn-secondary:hover {
+            background-color: #a52a2a;
+        }
+</style>
+
 <div class="container mt-4">
-    <h2>@ViewData["Title"]</h2>
+    <div class="col-md-6 mx-auto form-wrapper">
+        <h2><i class="fas fa-edit me-1"></i> @ViewData["Title"]</h2>
 
-    <form asp-action="Edit" method="post">
-        <input type="hidden" asp-for="IDCoAo" />
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="IDCoAo" />
 
-        <div class="form-group mb-3">
-            <label asp-for="TenCoAo" class="form-label">Tên cổ áo</label>
-            <input asp-for="TenCoAo" class="form-control" />
-            <span asp-validation-for="TenCoAo" class="text-danger"></span>
-        </div>
+            <div class="form-group mb-3">
+                <label asp-for="TenCoAo" class="form-label">Tên cổ áo</label>
+                <input asp-for="TenCoAo" class="form-control" placeholder="Ví dụ: Cổ trụ, Cổ sen, Cổ thuyền..." />
+                <span asp-validation-for="TenCoAo" class="text-danger"></span>
+            </div>
 
-        <div class="form-check mb-3">
-            <input asp-for="TrangThai" class="form-check-input" />
-            <label asp-for="TrangThai" class="form-check-label">Hoạt động</label>
-        </div>
+            <div class="form-check form-switch mb-4">
+                <input asp-for="TrangThai" class="form-check-input" />
+                <label asp-for="TrangThai" class="form-check-label">Hoạt động</label>
+            </div>
 
-        <button type="submit" class="btn btn-primary">Cập nhật</button>
-        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
-    </form>
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="fas fa-save"></i> Cập nhật
+                </button>
+                <a asp-action="Index" class="btn btn-secondary px-4">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
 
 @section Scripts {

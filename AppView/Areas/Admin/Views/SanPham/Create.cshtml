@@ -1,47 +1,113 @@
 ﻿@using AppView.Areas.Admin.ViewModels.SanPhamViewModels
 @model SanPhamCreateViewModel
 
-@using (Html.BeginForm("Create", "SanPham", FormMethod.Post, new { enctype = "multipart/form-data" }))
-{
-    <div>
-        <label>Tên sản phẩm</label>
-        @Html.TextBoxFor(m => m.TenSanPham)
+@{
+    ViewData["Title"] = "Thêm Sản Phẩm";
+}
+
+<!-- ✅ CSS tùy chỉnh -->
+<style>
+    .form-wrapper {
+        background-color: #fffaf0;
+        border-radius: 1rem;
+        padding: 2rem 2.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    h2 {
+        color: #8B0000;
+        font-weight: bold;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-primary {
+        background-color: #d4af37;
+        border: none;
+        font-weight: 600;
+        padding: 0.5rem 1.5rem;
+    }
+
+    .btn-primary:hover {
+        background-color: #b8941f;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="col-md-8 mx-auto form-wrapper">
+        <h2><i class="fas fa-plus-circle me-2"></i>@ViewData["Title"]</h2>
+
+        @using (Html.BeginForm("Create", "SanPham", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <div class="mb-3">
+                <label>Tên sản phẩm</label>
+                @Html.TextBoxFor(m => m.TenSanPham, new { @class = "form-control", placeholder = "Nhập tên sản phẩm..." })
+                @Html.ValidationMessageFor(m => m.TenSanPham, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="mb-3">
+                <label>Mô tả</label>
+                @Html.TextBoxFor(m => m.MoTa, new { @class = "form-control", placeholder = "Mô tả ngắn gọn..." })
+                @Html.ValidationMessageFor(m => m.MoTa, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="mb-3">
+                <label>Trọng lượng (gram)</label>
+                @Html.TextBoxFor(m => m.TrongLuong, new { @class = "form-control", placeholder = "Ví dụ: 500" })
+                @Html.ValidationMessageFor(m => m.TrongLuong, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="mb-3">
+                <label>Giới tính</label><br />
+                <div class="form-check form-check-inline">
+                    @Html.RadioButtonFor(m => m.GioiTinh, true, new { @class = "form-check-input", id = "GioiTinhNam" })
+                    <label class="form-check-label" for="GioiTinhNam">Nam</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    @Html.RadioButtonFor(m => m.GioiTinh, false, new { @class = "form-check-input", id = "GioiTinhNu" })
+                    <label class="form-check-label" for="GioiTinhNu">Nữ</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label>Trạng Thái</label><br />
+                <div class="form-check form-check-inline">
+                    @Html.RadioButtonFor(m => m.TrangThai, true, new { @class = "form-check-input", id = "TrangThaiCon" })
+                    <label class="form-check-label" for="TrangThaiCon">Còn bán</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    @Html.RadioButtonFor(m => m.TrangThai, false, new { @class = "form-check-input", id = "TrangThaiNgung" })
+                    <label class="form-check-label" for="TrangThaiNgung">Ngừng bán</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label>Ảnh sản phẩm</label>
+                <input type="file" name="ImageFile" class="form-control" />
+            </div>
+
+            <div class="mb-4">
+                <label>Danh mục</label>
+                @Html.DropDownListFor(model => model.DanhMucID, Model.DanhMucList, "Chọn danh mục", new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.DanhMucID, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Tạo sản phẩm
+                </button>
+            </div>
+        }
     </div>
+</div>
 
-    <div>
-        <label>Mô tả</label>
-        @Html.TextBoxFor(m => m.MoTa)
-    </div>
-
-    <div>
-        <label>Trọng lượng</label>
-        @Html.TextBoxFor(m => m.TrongLuong)
-    </div>
-
-    <div class="form-group">
-        <label>Giới tính:</label><br />
-        @Html.RadioButtonFor(m => m.GioiTinh, true) Nam
-        @Html.RadioButtonFor(m => m.GioiTinh, false) Nữ
-    </div>
-
-    <div class="form-group">
-        <label>Trạng Thái:</label><br />
-        @Html.RadioButtonFor(m => m.TrangThai, true) Còn bán
-        @Html.RadioButtonFor(m => m.TrangThai, false) Ngừng bán
-    </div>
-
-    <div>
-        <label>Ảnh sản phẩm</label>
-        <input type="file" name="ImageFile" />
-    </div>
-
-    <div class="form-group">
-        <label>Danh mục</label>
-        @Html.DropDownListFor(model => model.DanhMucID, Model.DanhMucList, "Chọn danh mục", new { @class = "form-control" })
-        @Html.ValidationMessageFor(model => model.DanhMucID, "", new { @class = "text-danger" })
-    </div>
-
-
-
-    <button type="submit">Tạo sản phẩm</button>
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }

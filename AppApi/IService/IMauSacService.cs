@@ -1,4 +1,4 @@
-﻿using WebModels.Models;
+﻿using AppData.Models;
 
 namespace AppApi.IService
 {
@@ -7,7 +7,7 @@ namespace AppApi.IService
         Task<IEnumerable<MauSac>> GetAllMauSacsAsync();
         Task<MauSac> GetMauSacByIdAsync(Guid id);
         Task<MauSac> CreateMauSacAsync(MauSac mauSac);
-        Task<bool> UpdateMauSacAsync(MauSac mauSac);
+        Task<bool> UpdateMauSacAsync(Guid id,MauSac mauSac);
         Task<bool> DeleteMauSacAsync(Guid id);
         Task<bool> MauSacExistsAsync(Guid id);
     }

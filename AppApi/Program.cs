@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using WebModels.Models;
+using AppData.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
@@ -54,6 +54,11 @@ builder.Services.AddScoped<IAuthServices, AuthServices>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISanPhamService, SanPhamService>();
 builder.Services.AddScoped<IDanhMucSPService, DanhMucSPService>();
+builder.Services.AddScoped<IMauSacService, MauSacService>();
+builder.Services.AddScoped<ITaAoService, TaAoService>();
+builder.Services.AddScoped<ISizeService, SizeService>();
+builder.Services.AddScoped<ICoAoService, CoAoService>();
+builder.Services.AddScoped<ISanPhamCTService, SanPhamCTService>();
 
 builder.Services.AddCors(options =>
 {

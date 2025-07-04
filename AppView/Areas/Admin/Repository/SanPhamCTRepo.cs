@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using WebModels.Models;
+using AppData.Models;
 
 namespace AppView.Areas.Admin.Repository
 {
@@ -95,6 +95,17 @@ namespace AppView.Areas.Admin.Repository
             return res.IsSuccessStatusCode;
         }
 
+        public async Task<bool> ExistsAsync(Guid idSanPham, Guid idMauSac, Guid idSize, Guid idCoAo, Guid idTaAo)
+        {
+            var client = _httpClientFactory.CreateClient();
+            var url = $"https://localhost:7221/api/SanPhamCT/exists?idSanPham={idSanPham}&idMau={idMauSac}&idSize={idSize}&idCoAo={idCoAo}&idTaAo={idTaAo}";
 
+            var res = await client.GetAsync(url);
+            if (!res.IsSuccessStatusCode)
+                return false;
+
+            var result = await res.Content.ReadFromJsonAsync<bool>();
+            return result;
+        }
     }
 }

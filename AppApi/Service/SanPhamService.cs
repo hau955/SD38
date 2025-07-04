@@ -3,7 +3,7 @@ using AppApi.ViewModels.SanPham;
 using AppView.Areas.Admin.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using WebModels.Models;
+using AppData.Models;
 
 namespace AppApi.Service
 {
@@ -189,5 +189,50 @@ namespace AppApi.Service
             TenDanhMuc = sp.DanhMuc!.TenDanhMuc
         }).ToListAsync();
         }
+
+        public async Task<List<SanPhamView>> GetAllSanPhamsAsync()
+        {
+            var result = await _context.SanPhams
+                  .Include(sp => sp.SanPhamChiTiets)
+                      .ThenInclude(ct => ct.MauSac)
+                  .Include(sp => sp.SanPhamChiTiets)
+                      .ThenInclude(ct => ct.SizeAo)
+                  .Include(sp => sp.SanPhamChiTiets)
+                      .ThenInclude(ct => ct.CoAo)
+                  .Include(sp => sp.SanPhamChiTiets)
+                      .ThenInclude(ct => ct.TaAo)
+                  .Include(sp => sp.DanhMuc)
+                  .Select(sp => new SanPhamView
+                  {
+                      IDSanPham = sp.IDSanPham,
+                      TenSanPham = sp.TenSanPham,
+                      MoTa = sp.MoTa,
+                      HinhAnh = sp.HinhAnh,
+                      TenDanhMuc = sp.DanhMuc.TenDanhMuc,
+                      TrangThai=sp.TrangThai,
+                      ChiTiets = sp.SanPhamChiTiets.Select(ct => new SanPhamCTViewModel
+                      {
+                          IDSanPhamCT = ct.IDSanPhamCT,
+                          IdMauSac = ct.IDMauSac,
+                          MauSac = ct.MauSac != null ? ct.MauSac.TenMau : null,
+
+                          IdSize = ct.IDSize,
+                          Size = ct.SizeAo != null ? ct.SizeAo.SoSize : null,
+
+                          IdCoAo = ct.IDCoAo,
+                          CoAo = ct.CoAo != null ? ct.CoAo.TenCoAo : null,
+
+                          IdTaAo = ct.IDTaAo,
+                          TaAo = ct.TaAo != null ? ct.TaAo.TenTaAo : null,
+                          GiaBan = ct.GiaBan,
+                          SoLuongTonKho = ct.SoLuongTonKho,
+                          TrangThai=ct.TrangThai
+                      }).ToList()
+                  })
+                  .ToListAsync();
+
+            return result;
+        
+    }
     }
 }
