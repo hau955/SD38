@@ -1,0 +1,118 @@
+﻿@using WebModels.Models
+@model List<WebModels.Models.SanPhamCT>
+@{
+    var idSanPham = ViewBag.IDSanPham;
+}
+
+<h2>Thêm Chi Tiết Sản Phẩm</h2>
+
+<form asp-action="CreateMultiple" method="post">
+    <table class="table" id="spctTable">
+        <thead>
+            <tr>
+                <th>Màu</th>
+                <th>Size</th>
+                <th>Cổ áo</th>
+                <th>Tà áo</th>
+                <th>Số lượng</th>
+                <th>Giá bán</th>
+                <th>Trạng thái</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var mauSacs = ViewBag.MauSacs as List<MauSac>;
+                var sizes = ViewBag.Sizes as List<Size>;
+                var coAos = ViewBag.CoAos as List<CoAo>;
+                var taAos = ViewBag.TaAos as List<TaAo>;
+            }
+
+            @for (int i = 0; i < Model.Count; i++)
+            {
+        <tr>
+            <td>
+                <select name="[@i].IDMauSac" class="form-control">
+                            @foreach (var item in mauSacs)
+                            {
+                            <option value="@item.IDMauSac">@item.TenMau</option>
+                            }
+                </select>
+            </td>
+            <td>
+                <select name="[@i].IDSize" class="form-control">
+                            @foreach (var item in sizes)
+                            {
+                            <option value="@item.IDSize">@item.SoSize</option>
+                            }
+                </select>
+            </td>
+            <td>
+                <select name="[@i].IDCoAo" class="form-control">
+                            @foreach (var item in coAos)
+                            {
+                            <option value="@item.IDCoAo">@item.TenCoAo</option>
+                            }
+                </select>
+            </td>
+            <td>
+                <select name="[@i].IDTaAo" class="form-control">
+                            @foreach (var item in taAos)
+                            {
+                            <option value="@item.IDTaAo">@item.TenTaAo</option>
+                            }
+                </select>
+            </td>
+            <td><input name="[@i].SoLuongTonKho" class="form-control" /></td>
+            <td><input name="[@i].GiaBan" class="form-control" /></td>
+            <td>
+                <select name="[@i].TrangThai" class="form-control">
+                    <option value="true">Còn hàng</option>
+                    <option value="false">Hết hàng</option>
+                </select>
+            </td>
+            <td><button type="button" class="btn btn-danger remove-row">X</button></td>
+                    <input type="hidden" name="[@(i)].IDSanPham" value="@ViewBag.IDSanPham" />
+
+        </tr>
+            }
+
+        </tbody>
+    </table>
+    <a asp-action="DanhSach" asp-route-idSanPham="@ViewBag.IDSanPham" class="btn btn-primary">Xem danh sách sản phẩm chi tiết</a>
+
+    <button type="button" class="btn btn-secondary" id="addRow">+ Thêm dòng</button>
+    <button type="submit" class="btn btn-success">Lưu</button>
+</form>
+
+@section Scripts {
+    <script>
+               let index = @Model.Count;
+
+        document.getElementById("addRow").addEventListener("click", function () {
+            const tbody = document.querySelector("#spctTable tbody");
+            const clone = tbody.rows[0].cloneNode(true);
+
+            // Cập nhật name theo index mới
+            clone.innerHTML = clone.innerHTML.replaceAll(/\[\d+\]/g, `[${index}]`);
+
+            // Reset giá trị
+            clone.querySelectorAll("input").forEach(input => {
+                // reset input trừ IDSanPham
+                if (!input.name.includes("IDSanPham")) {
+                    input.value = "";
+                }
+            });
+
+            // Gán lại value cho input hidden IDSanPham
+            const hiddenInput = clone.querySelector(`input[name="[${index}].IDSanPham"]`);
+            if (hiddenInput) {
+                hiddenInput.value = "@idSanPham"; // Razor inject
+            }
+
+            tbody.appendChild(clone);
+            index++;
+        });
+
+    </script>
+}

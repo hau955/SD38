@@ -1,0 +1,28 @@
+﻿@model WebModels.Models.TaAo
+
+@{
+    ViewData["Title"] = "Xoá Tà Áo";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-danger">
+        <i class="fas fa-trash-alt"></i> @ViewData["Title"]
+    </h2>
+
+    <div class="alert alert-warning">
+        <strong>⚠️ Xác nhận:</strong> Bạn có chắc chắn muốn xoá tà áo:
+        <strong class="text-danger">@Model.TenTaAo</strong>?
+    </div>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="IDTaAo" />
+
+        <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Xoá
+        </button>
+
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Huỷ
+        </a>
+    </form>
+</div>

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using AppData.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace WebModels.Models
@@ -32,7 +33,7 @@ namespace WebModels.Models
         public DbSet<Size> Sizes { get; set; }
         public DbSet<CoAo> CoAos { get; set; }
         public DbSet<TaAo> TaAos { get; set; }
-
+        public DbSet<DanhMuc> DanhMucs { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder); // Cần thiết cho Identity
@@ -50,7 +51,11 @@ namespace WebModels.Models
                 .WithOne(u => u.GioHang)
                 .HasForeignKey<GioHang>(g => g.IDGioHang)
                 .OnDelete(DeleteBehavior.Cascade);
-
+            builder.Entity<DanhMuc>()
+                .HasMany(d => d.SanPhams)
+                .WithOne(sp => sp.DanhMuc)
+                .HasForeignKey(sp => sp.DanhMucId)
+                .OnDelete(DeleteBehavior.Restrict);
             // 1-n: GioHang - GioHangChiTiet
             builder.Entity<GioHangCT>()
                 .HasOne(ct => ct.GioHang)
@@ -104,7 +109,7 @@ namespace WebModels.Models
 
             // 1-n: Size - SanPhamChiTiet
             builder.Entity<SanPhamCT>()
-                .HasOne(spct => spct.Size)
+                .HasOne(spct => spct.SizeAo)
                 .WithMany(sz => sz.SanPhamChiTiets)
                 .HasForeignKey(spct => spct.IDSize)
                 .OnDelete(DeleteBehavior.Restrict);

@@ -1,0 +1,350 @@
+﻿@using AppApi.Features.DTOs
+@model RegisterDto
+@{
+    ViewData["Title"] = "Đăng ký";
+}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+    .register-page {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px 0;
+    }
+
+    .register-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .register-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1), 0 8px 32px rgba(0, 0, 0, 0.08);
+        max-width: 480px;
+        width: 100%;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.6s ease;
+    }
+
+        .register-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15), 0 12px 40px rgba(0, 0, 0, 0.1);
+        }
+
+    .card-header {
+        background: linear-gradient(135deg, #d946ef 0%, #9333ea 100%);
+        padding: 40px 30px 30px;
+        text-align: center;
+        position: relative;
+    }
+
+    .brand-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+    }
+
+        .brand-icon i {
+            font-size: 32px;
+            color: white;
+        }
+
+    .card-title {
+        font-family: 'Playfair Display', serif;
+        color: white;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .card-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 14px;
+        font-weight: 400;
+    }
+
+    .card-body {
+        padding: 40px 30px;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+        position: relative;
+    }
+
+    .form-control {
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px 20px 16px 50px;
+        font-size: 15px;
+        font-weight: 400;
+        transition: all 0.3s ease;
+        background: #fafafa;
+        width: 100%;
+    }
+
+        .form-control:focus {
+            border-color: #9333ea;
+            box-shadow: 0 0 0 4px rgba(147, 51, 234, 0.1);
+            background: white;
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: #9ca3af;
+            font-weight: 400;
+        }
+
+    .input-icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        font-size: 16px;
+        transition: color 0.3s ease;
+        z-index: 2;
+    }
+
+    .form-group:focus-within .input-icon {
+        color: #9333ea;
+    }
+
+    .text-danger {
+        color: #ef4444 !important;
+        font-size: 12px;
+        margin-top: 6px;
+        font-weight: 500;
+        display: block;
+    }
+
+    .btn-register {
+        width: 100%;
+        background: linear-gradient(135deg, #9333ea 0%, #d946ef 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 16px;
+        font-size: 16px;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(147, 51, 234, 0.4);
+            color: white;
+        }
+
+        .btn-register:active {
+            transform: translateY(0);
+        }
+
+    .validation-summary-errors {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 20px;
+        color: #dc2626;
+        font-size: 14px;
+    }
+
+        .validation-summary-errors ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+    .floating-decoration {
+        position: absolute;
+        color: rgba(255, 255, 255, 0.1);
+        font-size: 60px;
+        pointer-events: none;
+    }
+
+    .decoration-1 {
+        top: 10%;
+        left: 5%;
+    }
+
+    .decoration-2 {
+        top: 70%;
+        right: 5%;
+        font-size: 40px;
+    }
+
+    .decoration-3 {
+        bottom: 20%;
+        left: 10%;
+        font-size: 50px;
+    }
+
+    @@media (max-width: 576px) {
+        .register-container {
+            padding: 15px;
+        }
+
+        .card-header {
+            padding: 30px 20px 25px;
+        }
+
+        .card-body {
+            padding: 30px 20px;
+        }
+
+        .card-title {
+            font-size: 24px;
+        }
+
+        .form-control {
+            padding: 14px 18px 14px 45px;
+        }
+    }
+</style>
+
+<div class="register-page">
+    <div class="floating-decoration decoration-1">🌸</div>
+    <div class="floating-decoration decoration-2">🦋</div>
+    <div class="floating-decoration decoration-3">🏮</div>
+
+    <div class="register-container">
+        <div class="register-card">
+            <div class="card-header">
+                <div class="brand-icon">
+                    <i class="fas fa-tshirt"></i>
+                </div>
+                <h1 class="card-title">Đăng Ký</h1>
+                <p class="card-subtitle">Tham gia cộng đồng yêu áo dài truyền thống</p>
+            </div>
+
+            <div class="card-body">
+                <form asp-action="Register" method="post">
+                    <div asp-validation-summary="All" class="text-danger validation-summary-errors"></div>
+
+                    <div class="form-group">
+                        <i class="fas fa-user input-icon"></i>
+                        <input asp-for="FullName" placeholder="Họ và tên" class="form-control" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input asp-for="Email" placeholder="Địa chỉ email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <i class="fas fa-phone input-icon"></i>
+                        <input asp-for="PhoneNumber" placeholder="Số điện thoại" class="form-control" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <i class="fas fa-map-marker-alt input-icon"></i>
+                        <input asp-for="Address" placeholder="Địa chỉ" class="form-control" />
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input asp-for="Password" type="password" placeholder="Mật khẩu" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input asp-for="ConfirmPassword" type="password" placeholder="Xác nhận mật khẩu" class="form-control" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-register">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Tạo Tài Khoản
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form enhancement
+        const inputs = document.querySelectorAll('.form-control');
+
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+
+            input.addEventListener('blur', function() {
+                if (!this.value) {
+                    this.parentElement.classList.remove('focused');
+                }
+            });
+
+            if (input.value) {
+                input.parentElement.classList.add('focused');
+            }
+        });
+
+        // Phone number formatting for Vietnam
+        const phoneInput = document.querySelector('input[name="PhoneNumber"]');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 0 && !value.startsWith('0') && !value.startsWith('84')) {
+                    value = '0' + value;
+                }
+                e.target.value = value;
+            });
+        }
+
+        // Password confirmation validation
+        const passwordInput = document.querySelector('input[name="Password"]');
+        const confirmPasswordInput = document.querySelector('input[name="ConfirmPassword"]');
+
+        if (confirmPasswordInput && passwordInput) {
+            confirmPasswordInput.addEventListener('input', function() {
+                const password = passwordInput.value;
+                const confirmPassword = this.value;
+                const errorSpan = this.nextElementSibling;
+
+                if (confirmPassword && password !== confirmPassword) {
+                    errorSpan.textContent = 'Mật khẩu xác nhận không khớp';
+                    errorSpan.style.display = 'block';
+                } else {
+                    errorSpan.textContent = '';
+                    errorSpan.style.display = 'none';
+                }
+            });
+        }
+
+        // Form submission enhancement
+        const form = document.querySelector('form');
+        const submitButton = form.querySelector('.btn-register');
+
+        form.addEventListener('submit', function() {
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
+            submitButton.disabled = true;
+        });
+    });
+</script>

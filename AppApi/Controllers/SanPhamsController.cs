@@ -1,11 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AppApi.Service;
+﻿using AppApi.IService;
+using AppApi.ViewModels.SanPham;
+using AppView.Areas.Admin.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using WebModels.Models;
 
 namespace AppApi.Controllers
@@ -24,88 +27,82 @@ namespace AppApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var list = await _sanPhamService.GetAll();
-            return Ok(new
+            try
             {
-                message = "Lấy danh sách sản phẩm thành công.",
-                data = list
-            });
+                var result = await _sanPhamService.GetAll();
+                return Ok(new
+                {
+                    message = "Lấy danh sách sản phẩm thành công.",
+                    data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi server: " + ex.Message });
+            }
         }
 
-        // GET: api/SanPham/{id}
+
+       
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var result = await _sanPhamService.GetByID(id);
-            if (result == null)
-                return NotFound(new { message = "Không tìm thấy sản phẩm." });
-
-            return Ok(new
+            try
             {
-                message = "Lấy sản phẩm theo ID thành công.",
-                data = result
-            });
-        }
+                var sanPham = await _sanPhamService.GetByID(id);
 
-        // POST: api/SanPham
-        [HttpPost]
-        public async Task<IActionResult> Create([FromForm] SanPham sanPham)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(new { message = "Dữ liệu không hợp lệ.", errors = ModelState });
+                if (sanPham == null)
+                    return NotFound(new { message = "Không tìm thấy sản phẩm", data = (object?)null });
 
-            var created = await _sanPhamService.Create(sanPham);
-
-            return CreatedAtAction(nameof(GetById), new { id = created.IDSanPham }, new
+                return Ok(new { message = "Thành công", data = sanPham });
+            }
+            catch (Exception ex)
             {
-                message = "Tạo sản phẩm thành công.",
-                data = created
-            });
+                return StatusCode(500, new { message = "Lỗi server: " + ex.Message, detail = ex.StackTrace });
+            }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromForm] SanPham sanPham)
+
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateSanPham([FromForm] SanPhamCreateRequest model)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(new { message = "Dữ liệu không hợp lệ.", errors = ModelState });
-
-            var existing = await _sanPhamService.GetByID(id);
-            if (existing == null)
-                return NotFound(new { message = "Không tìm thấy sản phẩm để cập nhật." });
-
-            // Giữ nguyên ảnh cũ nếu không có xử lý upload mới
-            sanPham.HinhAnh = existing.HinhAnh;
-
-            var updated = await _sanPhamService.Update(id, sanPham);
-            return Ok(new
+            try
             {
-                message = "Cập nhật sản phẩm thành công.",
-                data = updated
-            });
+                var result = await _sanPhamService.Create(model);
+                return Ok(new
+                {
+                    message = "Thêm sản phẩm thành công!",
+                    data = result
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Lỗi server: " + ex.Message });
+            }
         }
 
 
-
-        // DELETE: api/SanPham/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        [HttpPut("update")]
+        public async Task<IActionResult> Update([FromForm] SanPhamCreateRequest model)
         {
-            var result = await _sanPhamService.Detele(id);
-            if (!result)
-                return NotFound(new { message = "Không tìm thấy sản phẩm để xoá." });
+            if (model.IDSanPham == null)
+                return BadRequest(new { error = "Thiếu ID sản phẩm để cập nhật." });
 
-            return Ok(new { message = "Xoá sản phẩm thành công." });
+            try
+            {
+                var result = await _sanPhamService.Update(model);
+                return Ok(new { message = "Cập nhật sản phẩm thành công!", data = result });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
-        // PATCH: api/SanPham/ToggleStatus/{id}
-        [HttpPatch("ToggleStatus/{id}")]
-        public async Task<IActionResult> ToggleStatus(Guid id)
-        {
-            var message = await _sanPhamService.Toggle(id);
-            if (message.Contains("không tồn tại"))
-                return NotFound(new { message });
-
-            return Ok(new { message });
-        }
+       
     }
 }

@@ -14,8 +14,8 @@ namespace WebModels.Models
         [MaxLength(500, ErrorMessage = "Mô tả không được vượt quá 500 ký tự.")]
         public string? MoTa { get; set; }
 
-        public DateTime NgayTao { get; set; } = DateTime.UtcNow;
-        public DateTime NgaySua { get; set; } = DateTime.UtcNow;
+        public DateTime NgayTao { get; set; } 
+        public DateTime NgaySua { get; set; } 
 
         public bool TrangThai { get; set; } = true;
 

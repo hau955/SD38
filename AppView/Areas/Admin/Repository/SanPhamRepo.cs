@@ -1,124 +1,140 @@
-﻿using System.Net.Http;
+﻿using AppView.Areas.Admin.IRepo;
+using AppView.Areas.Admin.ViewModels.SanPhamViewModels;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using WebModels.Models;
 
 namespace AppView.Areas.Admin.Repository
 {
+
     public class SanPhamRepo : ISanPhamRepo
     {
-        private readonly HttpClient _httpClient;
-        public SanPhamRepo(HttpClient httpClient)
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        public SanPhamRepo(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClient;
+            _httpClientFactory = httpClientFactory;
         }
-        public async Task<SanPham> Create(SanPham sanpham)
+
+        public async Task<bool> CreateSanPhamAsync(SanPhamCreateViewModel model)
         {
+            var client = _httpClientFactory.CreateClient();
             using var content = new MultipartFormDataContent();
 
-            // Các field dạng chuỗi/số
-            content.Add(new StringContent(sanpham.TenSanPham ?? ""), "TenSanPham");
-            content.Add(new StringContent(sanpham.MoTa ?? ""), "MoTa");
-            content.Add(new StringContent(sanpham.TrongLuong.ToString()), "TrongLuong");
-            content.Add(new StringContent(sanpham.GioiTinh.ToString()), "GioiTinh");
-
-            // Gửi file nếu có
-            if (sanpham.ImageFile != null && sanpham.ImageFile.Length > 0)
+            content.Add(new StringContent(model.TenSanPham), "TenSanPham");
+            content.Add(new StringContent(model.MoTa ?? ""), "MoTa");
+            content.Add(new StringContent(model.TrongLuong.ToString()), "TrongLuong");
+            content.Add(new StringContent(model.GioiTinh.ToString().ToLower()), "GioiTinh");
+            content.Add(new StringContent(model.TrangThai.ToString().ToLower()), "TrangThai"); // Assuming TrangThai is true by default
+           
+            content.Add(new StringContent(model.DanhMucID.ToString()), "DanhMucID");
+            if (model.ImageFile != null && model.ImageFile.Length > 0)
             {
-                var fileStream = sanpham.ImageFile.OpenReadStream();
+                var fileStream = model.ImageFile.OpenReadStream();
                 var fileContent = new StreamContent(fileStream);
-                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(sanpham.ImageFile.ContentType);
-                content.Add(fileContent, "ImageFile", sanpham.ImageFile.FileName);
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue(model.ImageFile.ContentType);
+                content.Add(fileContent, "ImageFile", model.ImageFile.FileName);
             }
 
-            var response = await _httpClient.PostAsync("api/SanPham", content);
-            response.EnsureSuccessStatusCode();
+            var response = await client.PostAsync("https://localhost:7221/api/SanPham/create", content);
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"API lỗi: {error}");
+            }
+            return response.IsSuccessStatusCode;
 
-            var createdResponse = await response.Content.ReadFromJsonAsync<ApiResponse<SanPham>>();
-            if (createdResponse == null)
-                throw new Exception("Không nhận được dữ liệu tạo sản phẩm.");
+        }
 
-            return createdResponse.Data;
+        public async Task<List<SanPhamView>> GetAllSanPhamAsync()
+        {
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.GetAsync("https://localhost:7221/api/SanPham");
+
+            if (!response.IsSuccessStatusCode)
+                return new List<SanPhamView>();
+
+            var content = await response.Content.ReadAsStringAsync();
+            var apiResult = JsonSerializer.Deserialize<ApiResult<List<SanPhamView>>>(content,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            return apiResult?.Data ?? new List<SanPhamView>();
+        }
+
+        public async Task<SanPhamCreateViewModel?> GetByIdAsync(Guid id)
+        {
+            var client = _httpClientFactory.CreateClient();
+            var res = await client.GetAsync($"https://localhost:7221/api/SanPham/{id}");
+
+            if (!res.IsSuccessStatusCode)
+            {
+                var error = await res.Content.ReadAsStringAsync();
+                throw new Exception($"API lỗi: {error}");
+            }
+
+            // Đọc phần wrapper chứa "data"
+            var content = await res.Content.ReadAsStringAsync();
+            var apiResult = JsonSerializer.Deserialize<ApiResult<SanPham>>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            var sanPham = apiResult?.Data;
+            if (sanPham == null) return null;
+
+            return new SanPhamCreateViewModel
+            {
+                IDSanPham = sanPham.IDSanPham,
+                TenSanPham = sanPham.TenSanPham,
+                MoTa = sanPham.MoTa,
+                TrongLuong = sanPham.TrongLuong ?? 0,
+                GioiTinh = sanPham.GioiTinh ?? false,
+                TrangThai = sanPham.TrangThai,
+                DanhMucID = sanPham.DanhMucId,
+                HinhAnh = sanPham.HinhAnh // để hiển thị ảnh nếu cần
+            };
         }
 
 
-        public async Task<bool> Detele(Guid id)
+
+
+        public async Task<bool> UpdateSanPhamAsync(SanPhamCreateViewModel model)
         {
-            var response = await _httpClient.DeleteAsync($"api/SanPham/{id}");
+            var client = _httpClientFactory.CreateClient();
+            using var content = new MultipartFormDataContent();
+
+            content.Add(new StringContent(model.IDSanPham.ToString()), "IDSanPham"); // Cần ID để update
+            content.Add(new StringContent(model.TenSanPham), "TenSanPham");
+            content.Add(new StringContent(model.MoTa ?? ""), "MoTa");
+            content.Add(new StringContent(model.TrongLuong.ToString()), "TrongLuong");
+            content.Add(new StringContent(model.GioiTinh.ToString().ToLower()), "GioiTinh");
+            content.Add(new StringContent(model.TrangThai.ToString().ToLower()), "TrangThai");
+            content.Add(new StringContent(model.DanhMucID.ToString()), "DanhMucID");
+
+            if (model.ImageFile != null && model.ImageFile.Length > 0)
+            {
+                var fileStream = model.ImageFile.OpenReadStream();
+                var fileContent = new StreamContent(fileStream);
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue(model.ImageFile.ContentType);
+                content.Add(fileContent, "ImageFile", model.ImageFile.FileName);
+            }
+
+            var response = await client.PutAsync("https://localhost:7221/api/SanPham/update", content);
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"API lỗi: {error}");
+            }
+
             return response.IsSuccessStatusCode;
         }
 
-        public async Task<List<SanPham>> GetAll()
-        {
-            var response = await _httpClient.GetFromJsonAsync<ApiResponse<List<SanPham>>>("api/SanPham");
-            return response?.Data ?? new List<SanPham>();
-        }
 
-        public async Task<SanPham?> GetByID(Guid id)
-        {
-            var response = await _httpClient.GetFromJsonAsync<ApiResponse<SanPham?>>($"api/SanPham/{id}");
-            return response?.Data;
-        }
-
-        public async Task<string> Toggle(Guid id)
-        {
-            var response = await _httpClient.PatchAsync($"api/SanPham/ToggleStatus/{id}", null);
-
-            var content = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                // Deserialize kết quả thành Dictionary để lấy giá trị "message"
-                var result = JsonSerializer.Deserialize<Dictionary<string, string>>(content);
-                return result != null && result.ContainsKey("message")
-                    ? result["message"]
-                    : "Cập nhật thành công.";
-            }
-            else
-            {
-                var error = JsonSerializer.Deserialize<Dictionary<string, string>>(content);
-                throw new Exception(error != null && error.ContainsKey("message")
-                    ? error["message"]
-                    : "Lỗi không xác định.");
-            }
-        }
-
-
-
-        public async Task<SanPham?> Update(Guid id, SanPham sanpham)
-        {
-            using var form = new MultipartFormDataContent();
-
-            // Thêm các trường thông thường
-            form.Add(new StringContent(sanpham.TenSanPham ?? ""), "TenSanPham");
-            form.Add(new StringContent(sanpham.GioiTinh?.ToString() ?? ""), "GioiTinh");
-            form.Add(new StringContent(sanpham.TrongLuong.ToString()), "TrongLuong");
-            form.Add(new StringContent(sanpham.MoTa ?? ""), "MoTa");
-            form.Add(new StringContent(sanpham.TrangThai.ToString()), "TrangThai");
-
-            // Nếu có ảnh được chọn thì thêm vào
-            if (sanpham.ImageFile != null && sanpham.ImageFile.Length > 0)
-            {
-                var streamContent = new StreamContent(sanpham.ImageFile.OpenReadStream());
-                form.Add(streamContent, "ImageFile", sanpham.ImageFile.FileName);
-            }
-
-            var response = await _httpClient.PutAsync($"api/SanPham/{id}", form);
-
-            if (!response.IsSuccessStatusCode) return null;
-
-            var updatedResponse = await response.Content.ReadFromJsonAsync<ApiResponse<SanPham?>>();
-            return updatedResponse?.Data;
-        }
-
-        private class ApiResponse<T>
+        public class ApiResult<T>
         {
             public string Message { get; set; } = string.Empty;
             public T Data { get; set; } = default!;
-        }
-
-        private class MessageResponse
-        {
-            public string Message { get; set; } = string.Empty;
         }
     }
 }

@@ -1,0 +1,77 @@
+﻿@model List<WebModels.Models.MauSac>
+
+@{
+    ViewData["Title"] = "Quản lý Màu Sắc";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-primary">
+        <i class="fas fa-palette"></i> @ViewData["Title"]
+    </h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <a class="btn btn-success mb-3" asp-action="Create">
+        <i class="fas fa-plus-circle"></i> Thêm mới
+    </a>
+
+    @if (Model != null && Model.Any())
+    {
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 50%;">Tên màu</th>
+                    <th style="width: 20%;">Trạng thái</th>
+                    <th style="width: 30%;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.TenMau</td>
+                        <td>
+                            <span class="badge rounded-pill @(item.TrangThai ? "bg-success" : "bg-secondary")">
+                                @(item.TrangThai ? "Hoạt động" : "Không hoạt động")
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@item.IDMauSac">
+                                    <i class="fas fa-edit"></i> Sửa
+                                </a>
+                                <a class="btn btn-sm btn-warning" asp-action="ToggleStatus" asp-route-id="@item.IDMauSac">
+                                    <i class="fas fa-sync-alt"></i> Trạng thái
+                                </a>
+                                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.IDMauSac"
+                                   onclick="return confirm('Bạn có chắc chắn muốn xoá màu này không?');">
+                                    <i class="fas fa-trash"></i> Xoá
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Không có dữ liệu màu sắc nào.
+        </div>
+    }
+</div>
