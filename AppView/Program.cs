@@ -28,7 +28,7 @@ builder.Services.AddScoped<ISizeRepo, SizeRepo>();
 builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
 builder.Services.AddScoped<ITaAoRepo, TaAoRepo>();
 builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
-builder.services.AddScoped<IDanhMucSPService, DanhMucSPService>();
+
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 // Thêm dịch vụ cần thiết cho session

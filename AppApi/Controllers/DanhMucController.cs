@@ -1,7 +1,7 @@
 ﻿using AppApi.IService;
 using AppData.Models;
 using Microsoft.AspNetCore.Mvc;
-using WebModels.Models;
+using AppData.Models;
 
 namespace AppApi.Controllers
 {
