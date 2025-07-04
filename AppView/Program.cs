@@ -28,6 +28,7 @@ builder.Services.AddScoped<ISizeRepo, SizeRepo>();
 builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
 builder.Services.AddScoped<ITaAoRepo, TaAoRepo>();
 builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
+builder.Services.AddHttpClient<IDanhMucRePo, DanhMucRepo>();
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
