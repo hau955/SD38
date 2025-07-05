@@ -1,4 +1,4 @@
-﻿using AppApi.Features.DTOs;
+﻿using AppApi.Features.Auth.DTOs;
 using AppApi.Features.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

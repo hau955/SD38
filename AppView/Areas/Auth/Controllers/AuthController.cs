@@ -1,4 +1,4 @@
-﻿using AppApi.Features.DTOs;
+﻿using AppApi.Features.Auth.Services.DTOs;
 using AppView.Areas.Auth.Repository;
 using Humanizer;
 using Microsoft.AspNetCore.Identity;

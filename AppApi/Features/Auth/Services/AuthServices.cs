@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.WebUtilities;
 using WebModels.Models;
-using AppApi.Features.DTOs;
+using AppApi.Features.Auth.DTOs;
 
 namespace AppApi.Features.Services
 {

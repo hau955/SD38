@@ -1,4 +1,4 @@
-﻿using AppApi.Features.DTOs;
+﻿using AppApi.Features.Auth.DTOs;
 
 namespace AppView.Areas.Auth.Repository
 {
