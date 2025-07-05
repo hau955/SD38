@@ -1,4 +1,6 @@
-﻿using WebModels.Models;
+﻿
+
+using AppData.Models;
 
 namespace AppView.Areas.Admin.IRepo
 {

@@ -1,0 +1,302 @@
+﻿@model List<AppView.ViewModels.SanPham.SanPhamView>
+@using System.Text.Json
+
+<style>
+    .form-wrapper {
+        background: #fffaf0;
+        border-radius: 1rem;
+        padding: 2rem 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h2 {
+        color: #8B0000;
+        font-weight: 600;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .btn-success {
+        background-color: #d4af37;
+        border: none;
+        font-weight: 500;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background-color: #b8941f;
+    }
+
+    .btn-secondary {
+        background-color: #8B0000;
+        border: none;
+        color: white;
+        font-weight: 500;
+    }
+
+    .btn-secondary:hover {
+        background-color: #a52a2a;
+    }
+
+    .card-title {
+        font-weight: 600;
+        color: #8B0000;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        transition: 0.3s ease;
+    }
+
+    .modal-header {
+        background-color: #fffaf0;
+    }
+
+    .modal-content {
+        border-radius: 1rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .card-img-top {
+        border-top-left-radius: 1rem;
+        border-top-right-radius: 1rem;
+    }
+</style>
+
+<section class="container mt-5 form-wrapper">
+    <h2 class="text-center">Danh sách sản phẩm</h2>
+
+    <style>
+        .product-box {
+            position: relative;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 0;
+        }
+
+            .product-box:hover {
+                transform: translateY(-5px);
+            }
+
+            .product-box img {
+                width: 100%;
+                height: 250px;
+                object-fit: cover;
+                object-position: top center;
+            }
+
+        .product-details {
+            padding: 16px 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .product-details h1 {
+                font-size: 1.3rem;
+                font-weight: bold;
+                color: #4E4E4E;
+            }
+
+            .product-details p {
+                font-size: 0.9rem;
+                margin: 5px 0 10px;
+                color: #4E4E4E;
+            }
+
+        .btn-group {
+            margin-top: auto;
+            display: flex;
+            gap: 8px;
+        }
+
+            .btn-group .btn-detail {
+                background-color: #C3A1A0;
+                padding: 10px 16px;
+                flex-grow: 1;
+                border-radius: 6px;
+                font-size: 0.9rem;
+                border: none;
+                color: white;
+                cursor: pointer;
+            }
+
+        #product-detail-modal {
+            display: none;
+            position: fixed;
+            top: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 700px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            padding: 20px;
+            z-index: 1000;
+        }
+
+            #product-detail-modal .sizes {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, 40px);
+                grid-gap: 6px;
+                margin-bottom: 15px;
+                width: 100%;
+            }
+
+        .size {
+            padding: 8px;
+            border: 1px solid #E0C9CB;
+            font-size: 0.8rem;
+            text-align: center;
+            cursor: pointer;
+            color: #BA7E7E;
+            transition: all .3s ease-in-out;
+        }
+
+            .size:hover, .size.focus {
+                background-color: #BA7E7E;
+                color: #fff;
+            }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }.btn-detail,
+.btn-add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.btn-detail {
+    background-color: #f1f1f1;
+    color: #333;
+}
+
+.btn-detail:hover {
+    background-color: #ddd;
+    color: #000;
+}
+
+.btn-add {
+    background-color: #C3A1A0;
+    color: #fff;
+}
+
+.btn-add:hover {
+    background-color: #a2807e;
+}
+
+
+    </style>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var sp in Model)
+        {
+            <div class="col">
+                <div class="product-box">
+                    <img src="@sp.HinhAnh?.Split(';').FirstOrDefault()" alt="Ảnh sản phẩm" />
+                    <div class="product-details">
+                        <h1>@sp.TenSanPham</h1>
+                        <p>@sp.MoTa</p>
+
+                        <button class="btn-detail"
+                                onclick='showDetail(@Html.Raw(JsonSerializer.Serialize(sp, new JsonSerializerOptions { PropertyNamingPolicy = null })))'>
+                            Xem chi tiết
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Overlay & Modal -->
+<div id="overlay"></div>
+
+<div id="product-detail-modal">
+    <button onclick="closeModal()" style="float:right;font-size:1.2rem;">✖</button>
+    <h3 id="detail-title"></h3>
+    <img id="detail-img" src="" style="width: 100%; height: 250px; object-fit: contain;" />
+
+    <p id="detail-description"></p>
+
+    <div id="detail-sizes"></div>
+    <div id="detail-mau"></div>
+    <div id="detail-coao"></div>
+    <div id="detail-taao"></div>
+
+    <button class="btn-add">Thêm vào giỏ hàng</button>
+</div>
+
+<script>
+    function showDetail(sp) {
+        // Hiển thị modal
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('product-detail-modal').style.display = 'block';
+
+        // Hiển thị dữ liệu
+        document.getElementById('detail-title').innerText = sp.TenSanPham;
+        document.getElementById('detail-img').src = (sp.HinhAnh || '').split(';')[0];
+        document.getElementById('detail-description').innerText = sp.MoTa || '';
+
+        // Lọc sản phẩm còn hàng
+        const chiTiets = sp.ChiTiets.filter(c => c.TrangThai);
+
+        function renderOptions(label, list, key, containerId) {
+            const unique = [...new Set(list.map(x => x[key]).filter(x => !!x))];
+            if (unique.length > 0) {
+                document.getElementById(containerId).innerHTML =
+                    `<p><strong>${label}</strong></p><div class="sizes">` +
+                    unique.map(val => `<div class="size">${val}</div>`).join('') +
+                    `</div>`;
+            } else {
+                document.getElementById(containerId).innerHTML = '';
+            }
+        }
+
+        renderOptions("Chọn size", chiTiets, "Size", "detail-sizes");
+        renderOptions("Chọn màu sắc", chiTiets, "MauSac", "detail-mau");
+        renderOptions("Chọn cổ áo", chiTiets, "CoAo", "detail-coao");
+        renderOptions("Chọn tà áo", chiTiets, "TaAo", "detail-taao");
+    }
+
+    function closeModal() {
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('product-detail-modal').style.display = 'none';
+    }
+
+    // Kích hoạt chọn size
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('size')) {
+            const parent = e.target.closest('.sizes');
+            parent.querySelectorAll('.size').forEach(el => el.classList.remove('focus'));
+            e.target.classList.add('focus');
+        }
+    });
+</script>
+

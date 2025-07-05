@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AppApi.Features.Auth.Services.DTOs
+namespace AppApi.Features.Auth.DTOs
 {
     public class ApiResponse<T>
     {

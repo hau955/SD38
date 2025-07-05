@@ -4,8 +4,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.WebUtilities;
-using WebModels.Models;
 using AppApi.Features.Auth.DTOs;
+using AppData.Models;
 
 namespace AppApi.Features.Services
 {

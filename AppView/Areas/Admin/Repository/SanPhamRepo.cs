@@ -3,7 +3,7 @@ using AppView.Areas.Admin.ViewModels.SanPhamViewModels;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
-using WebModels.Models;
+using AppData.Models;
 
 namespace AppView.Areas.Admin.Repository
 {

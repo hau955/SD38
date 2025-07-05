@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace WebModels.Models
+namespace AppData.Models
 {
     public class ApplicationUser : IdentityUser<Guid>
     {

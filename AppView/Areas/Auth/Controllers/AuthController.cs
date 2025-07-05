@@ -1,9 +1,10 @@
-﻿using AppApi.Features.Auth.Services.DTOs;
+﻿
 using AppView.Areas.Auth.Repository;
 using Humanizer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using WebModels.Models;
+using AppData.Models;
+using AppApi.Features.Auth.DTOs;
 
 namespace AppView.Areas.Auth.Controllers
 {

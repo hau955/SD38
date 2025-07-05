@@ -1,4 +1,6 @@
-﻿using AppApi.Features.Auth.Services.DTOs;
+﻿
+
+using AppApi.Features.Auth.DTOs;
 
 namespace AppApi.Features.Services
 {

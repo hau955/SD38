@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace WebModels.Models
+namespace AppData.Models
 {
     public class CoAo
     {

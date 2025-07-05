@@ -1,12 +1,12 @@
 ﻿using AppApi.Features.Services;
 using AppApi.IService;
 using AppApi.Service;
+using AppData.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using WebModels.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();

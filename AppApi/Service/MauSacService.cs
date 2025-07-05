@@ -1,7 +1,7 @@
 ﻿
 using AppApi.IService;
+using AppData.Models;
 using Microsoft.EntityFrameworkCore;
-using WebModels.Models;
 
 namespace AppApi.Service
 {
