@@ -29,7 +29,7 @@ builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
 builder.Services.AddScoped<ITaAoRepo, TaAoRepo>();
 builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
 builder.Services.AddHttpClient<IDanhMucRePo, DanhMucRepo>();
-
+builder.Services.AddScoped<IProfileRepo, ProfileRepo>();
 
 // Thêm dịch vụ cần thiết cho session
 builder.Services.AddDistributedMemoryCache();
