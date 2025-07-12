@@ -1,6 +1,10 @@
 ﻿<!DOCTYPE html>
-@{
-    var avatarPath = Context.Session.GetString("HinhAnh");
+
+  @{
+    var avatarPath = Context.Session.GetString("HinhAnh") ?? "/admin/assets/img/avatars/1.png";
+
+<img src="@avatarPath" alt="Avatar" class="w-px-40 h-auto rounded-circle" />
+
     var hoten = Context.Session.GetString("HoTen");
 }
 

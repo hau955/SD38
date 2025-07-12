@@ -18,9 +18,9 @@ namespace AppData.Models
 
         public bool TrangThai { get; set; }
 
-        public DateTime NgayTao { get; set; }
+        public DateTime? NgayTao { get; set; }
 
-        public DateTime? NgayCapNhat { get; set; }
+        public DateTime? NgaySua { get; set; }
 
        
 

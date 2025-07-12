@@ -25,7 +25,7 @@ namespace AppApi.Service
         public async Task<DanhMuc> CreateDanhMucSPAsync(DanhMuc danhMuc)
         {
             danhMuc.NgayTao = DateTime.Now;
-            danhMuc.NgayCapNhat = DateTime.Now;
+            danhMuc.NgaySua = DateTime.Now;
             danhMuc.TrangThai = true;
             danhMuc.TenDanhMuc = danhMuc.TenDanhMuc.Trim();
 
@@ -44,7 +44,7 @@ namespace AppApi.Service
 
             existingdanhMuc.TenDanhMuc = danhMuc.TenDanhMuc;
             existingdanhMuc.TrangThai = danhMuc.TrangThai;
-            existingdanhMuc.NgayCapNhat = DateTime.Now;
+            existingdanhMuc.NgaySua = DateTime.Now;
             existingdanhMuc.NgayTao = DateTime.Now;
 
             _db.Entry(existingdanhMuc).State = EntityState.Modified;

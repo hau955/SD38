@@ -22,11 +22,10 @@ builder.Services.AddHttpClient<IAuthRepository, AuthRepository>(client =>
 
 // Cấu hình HttpClient cho từng repo gọi API
 
-builder.Services.AddScoped<ICoAoRepo, CoAoRepo>();
 builder.Services.AddScoped<IMauSacRepo, MauSacRepo>();
 builder.Services.AddScoped<ISizeRepo, SizeRepo>();
 builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
-builder.Services.AddScoped<ITaAoRepo, TaAoRepo>();
+
 builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
 builder.Services.AddHttpClient<IDanhMucRePo, DanhMucRepo>();
 builder.Services.AddScoped<IProfileRepo, ProfileRepo>();
