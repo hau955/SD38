@@ -54,7 +54,7 @@ namespace AppView.Areas.Auth.Controllers
             HttpContext.Session.SetString("Token", result.Data.Token);
             HttpContext.Session.SetString("UserId", result.Data.Id.ToString());
             HttpContext.Session.SetString("Email", result.Data.Email);
-            HttpContext.Session.SetString("HinhAnh", result.Data.hinhanh);
+            HttpContext.Session.SetString("HinhAnh", result.Data.hinhanh ?? "/admin/assets/img/avatars/default.png");
             HttpContext.Session.SetString("HoTen", result.Data.hoten);
             HttpContext.Session.SetString("Roles", string.Join(",", result.Data.Roles));
 

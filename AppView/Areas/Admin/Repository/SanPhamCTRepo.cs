@@ -23,18 +23,7 @@ namespace AppView.Areas.Admin.Repository
             return response.IsSuccessStatusCode;
         }
 
-        public async Task<List<CoAo>> GetCoAosAsync()
-        {
-            var client = _httpClientFactory.CreateClient();
-            var res = await client.GetAsync("https://localhost:7221/api/CoAo");
-
-            if (!res.IsSuccessStatusCode)
-                return new();
-
-            var response = await res.Content.ReadFromJsonAsync<ApiResponse<List<CoAo>>>();
-            return response?.Data ?? new();
-        }
-
+       
         public async Task<List<MauSac>> GetMauSacsAsync()
         {
             var client = _httpClientFactory.CreateClient();
@@ -59,17 +48,17 @@ namespace AppView.Areas.Admin.Repository
             return response?.Data ?? new();
         }
 
-        public async Task<List<TaAo>> GetTaAosAsync()
-        {
-            var client = _httpClientFactory.CreateClient();
-            var res = await client.GetAsync("https://localhost:7221/api/TaAo");
+        //public async Task<List<TaAo>> GetTaAosAsync()
+        //{
+        //    var client = _httpClientFactory.CreateClient();
+        //    var res = await client.GetAsync("https://localhost:7221/api/TaAo");
 
-            if (!res.IsSuccessStatusCode)
-                return new();
+        //    if (!res.IsSuccessStatusCode)
+        //        return new();
 
-            var response = await res.Content.ReadFromJsonAsync<ApiResponse<List<TaAo>>>();
-            return response?.Data ?? new();
-        }
+        //    var response = await res.Content.ReadFromJsonAsync<ApiResponse<List<TaAo>>>();
+        //    return response?.Data ?? new();
+        //}
         public async Task<List<SanPhamCT>> GetBySanPhamIdAsync(Guid idSanPham)
         {
             var client = _httpClientFactory.CreateClient();
@@ -95,10 +84,10 @@ namespace AppView.Areas.Admin.Repository
             return res.IsSuccessStatusCode;
         }
 
-        public async Task<bool> ExistsAsync(Guid idSanPham, Guid idMauSac, Guid idSize, Guid idCoAo, Guid idTaAo)
+        public async Task<bool> ExistsAsync(Guid idSanPham, Guid idMauSac, Guid idSize)
         {
             var client = _httpClientFactory.CreateClient();
-            var url = $"https://localhost:7221/api/SanPhamCT/exists?idSanPham={idSanPham}&idMau={idMauSac}&idSize={idSize}&idCoAo={idCoAo}&idTaAo={idTaAo}";
+            var url = $"https://localhost:7221/api/SanPhamCT/exists?idSanPham={idSanPham}&idMau={idMauSac}&idSize={idSize}";
 
             var res = await client.GetAsync(url);
             if (!res.IsSuccessStatusCode)

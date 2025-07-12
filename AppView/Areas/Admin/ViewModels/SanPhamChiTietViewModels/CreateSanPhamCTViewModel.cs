@@ -27,8 +27,7 @@ namespace AppView.Areas.Admin.ViewModels.SanPhamChiTietViewModels
 
         public List<SelectListItem> MauSacList { get; set; } = new();
         public List<SelectListItem> SizeList { get; set; } = new();
-        public List<SelectListItem> CoAoList { get; set; } = new();
-        public List<SelectListItem> TaAoList { get; set; } = new();
+      
 
     }
 }

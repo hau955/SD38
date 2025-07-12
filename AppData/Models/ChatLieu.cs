@@ -3,16 +3,16 @@ using System.Text.Json.Serialization;
 
 namespace AppData.Models
 {
-    public class MauSac
+    public class ChatLieu
     {
         [Key]
-        public Guid IDMauSac { get; set; }
+        public Guid IDChatLieu { get; set; }
 
         [Required(ErrorMessage = "Tên màu không được để trống.")]
         [MaxLength(50, ErrorMessage = "Tên màu không được vượt quá 50 ký tự.")]
-        public string TenMau { get; set; } = null!;
+        public string TenChatLieu { get; set; } = null!;
 
-        public DateTime? NgayTao { get; set; } 
+        public DateTime? NgayTao { get; set; }
 
         public DateTime? NgaySua { get; set; }
 
@@ -22,7 +22,7 @@ namespace AppData.Models
         [JsonIgnore]
         public virtual ICollection<SanPhamCT> SanPhamChiTiets { get; set; }
 
-        public MauSac()
+        public ChatLieu()
         {
             SanPhamChiTiets = new HashSet<SanPhamCT>();
         }

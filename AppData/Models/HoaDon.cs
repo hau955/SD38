@@ -13,6 +13,10 @@ namespace AppData.Models
         [ForeignKey("User")]
         public Guid IDUser { get; set; }
         public virtual ApplicationUser User { get; set; }
+        [Required]
+        [ForeignKey("User2")]
+        public Guid? IDNguoiTao { get; set; }
+        public virtual ApplicationUser? User2 { get; set; }
 
         // Hóa đơn sử dụng 1 địa chỉ nhận hàng trong số các địa chỉ của User
         [Required]
@@ -53,9 +57,9 @@ namespace AppData.Models
         [MaxLength(50)]
         public string TrangThaiThanhToan { get; set; }
 
-        public DateTime NgayTao { get; set; }
+        public DateTime? NgayTao { get; set; }
 
-        public DateTime NgaySua { get; set; } 
+        public DateTime? NgaySua { get; set; } 
 
         // 1 Hóa đơn có nhiều chi tiết hóa đơn
         public virtual ICollection<HoaDonCT> HoaDonChiTiets { get; set; } = new List<HoaDonCT>();

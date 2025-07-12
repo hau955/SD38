@@ -29,12 +29,12 @@ namespace AppView.Areas.Admin.Controllers
                 SizeList = (await _service.GetSizesAsync())
                                 .Select(x => new SelectListItem { Value = x.IDSize.ToString(), Text = x.SoSize })
                                 .ToList(),
-                CoAoList = (await _service.GetCoAosAsync())
-                                .Select(x => new SelectListItem { Value = x.IDCoAo.ToString(), Text = x.TenCoAo })
-                                .ToList(),
-                TaAoList = (await _service.GetTaAosAsync())
-                                .Select(x => new SelectListItem { Value = x.IDTaAo.ToString(), Text = x.TenTaAo })
-                                .ToList()
+                //CoAoList = (await _service.GetCoAosAsync())
+                //                .Select(x => new SelectListItem { Value = x.IDCoAo.ToString(), Text = x.TenCoAo })
+                //                .ToList(),
+                //TaAoList = (await _service.GetTaAosAsync())
+                //                .Select(x => new SelectListItem { Value = x.IDTaAo.ToString(), Text = x.TenTaAo })
+                               // .ToList()
             };
 
             return View(model);
@@ -46,16 +46,16 @@ namespace AppView.Areas.Admin.Controllers
             var list = await _service.GetBySanPhamIdAsync(idSanPham);
             var mauSacs = await _service.GetMauSacsAsync();
             var sizes = await _service.GetSizesAsync();
-            var coAos = await _service.GetCoAosAsync();
-            var taAos = await _service.GetTaAosAsync();
+           // var coAos = await _service.GetCoAosAsync();
+            //var taAos = await _service.GetTaAosAsync();
 
             // Join dữ liệu
             foreach (var item in list)
             {
                 item.MauSac = mauSacs.FirstOrDefault(m => m.IDMauSac == item.IDMauSac);
                 item.SizeAo = sizes.FirstOrDefault(s => s.IDSize == item.IDSize);
-                item.CoAo = coAos.FirstOrDefault(c => c.IDCoAo == item.IDCoAo);
-                item.TaAo = taAos.FirstOrDefault(t => t.IDTaAo == item.IDTaAo);
+              //  item.CoAo = coAos.FirstOrDefault(c => c.IDCoAo == item.IDCoAo);
+                //item.TaAo = taAos.FirstOrDefault(t => t.IDTaAo == item.IDTaAo);
                
             }
 
@@ -84,32 +84,30 @@ namespace AppView.Areas.Admin.Controllers
                         Text = x.SoSize.ToString()
                     }).ToList();
 
-                vm.CoAoList = (await _service.GetCoAosAsync())
-                    .Select(x => new SelectListItem
-                    {
-                        Value = x.IDCoAo.ToString(),
-                        Text = x.TenCoAo
-                    }).ToList();
+                //vm.CoAoList = (await _service.GetCoAosAsync())
+                //    .Select(x => new SelectListItem
+                //    {
+                //        Value = x.IDCoAo.ToString(),
+                //        Text = x.TenCoAo
+                //    }).ToList();
 
-                vm.TaAoList = (await _service.GetTaAosAsync())
-                    .Select(x => new SelectListItem
-                    {
-                        Value = x.IDTaAo.ToString(),
-                        Text = x.TenTaAo
-                    }).ToList();
+                //vm.TaAoList = (await _service.GetTaAosAsync())
+                //    .Select(x => new SelectListItem
+                //    {
+                //        Value = x.IDTaAo.ToString(),
+                //        Text = x.TenTaAo
+                //    }).ToList();
                 return View("ThemChiTiet", vm);
             }
             var combinations = from mau in vm.SelectedMauSacs
                                from size in vm.SelectedSizes
-                               from coao in vm.SelectedCoAos
-                               from taao in vm.SelectedTaAos
+                               
                                select new SanPhamCT
                                {
                                    IDSanPham = vm.IDSanPham,
                                    IDMauSac = mau,
                                    IDSize = size,
-                                   IDCoAo = coao,
-                                   IDTaAo = taao,
+                                  
                                    GiaBan = vm.GiaBan,
                                    SoLuongTonKho = vm.SoLuongTonKho,
                                    TrangThai = true
@@ -118,7 +116,7 @@ namespace AppView.Areas.Admin.Controllers
             var resultList = new List<SanPhamCT>();
             foreach (var item in combinations)
             {
-                var exists = await _service.ExistsAsync(item.IDSanPham, item.IDMauSac, item.IDSize, item.IDCoAo, item.IDTaAo);
+                var exists = await _service.ExistsAsync(item.IDSanPham, item.IDMauSac, item.IDSize );
                 if (!exists)
                     resultList.Add(item);
             }
@@ -147,8 +145,8 @@ namespace AppView.Areas.Admin.Controllers
 
             ViewBag.MauSacs = await _service.GetMauSacsAsync();
             ViewBag.Sizes = await _service.GetSizesAsync();
-            ViewBag.CoAos = await _service.GetCoAosAsync();
-            ViewBag.TaAos = await _service.GetTaAosAsync();
+           // ViewBag.CoAos = await _service.GetCoAosAsync();
+           // ViewBag.TaAos = await _service.GetTaAosAsync();
 
             return View(model);
         }
