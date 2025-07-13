@@ -18,21 +18,15 @@ namespace AppData.Models
         public Guid IDMauSac { get; set; }
         [JsonIgnore]
         public virtual MauSac? MauSac { get; set; }
+        [ForeignKey("ChatLieu")]
+        public Guid IdChatLieu { get; set; }
+        [JsonIgnore]
+        public virtual ChatLieu? ChatLieu { get; set; }
 
         [ForeignKey("SizeAo")]
         public Guid IDSize { get; set; }
         [JsonIgnore]
         public virtual Size? SizeAo { get; set; }
-
-        [ForeignKey("CoAo")]
-        public Guid IDCoAo { get; set; }
-        [JsonIgnore]
-        public virtual CoAo? CoAo { get; set; }
-
-        [ForeignKey("TaAo")]
-        public Guid IDTaAo { get; set; }
-        [JsonIgnore]
-        public virtual TaAo? TaAo { get; set; }
 
         public int SoLuongTonKho { get; set; }
 
@@ -40,8 +34,8 @@ namespace AppData.Models
         public decimal GiaBan { get; set; }
 
 
-        public DateTime NgayTao { get; set; } 
-        public DateTime NgaySua { get; set; } 
+        public DateTime? NgayTao { get; set; } 
+        public DateTime? NgaySua { get; set; } 
         public bool TrangThai { get; set; }
     }
 }

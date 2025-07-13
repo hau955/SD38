@@ -51,10 +51,13 @@ namespace AppApi.Features.DTOs
 
     public class AuthResponseDto
     {
+        public Guid Id { get; set; }
         public string Token { get; set; }
         public DateTime Expiration { get; set; }
         public string Email { get; set; }
         public IList<string> Roles { get; set; }
+       public string? hinhanh { get; set; }
+        public string hoten { get; set; }
     }
 
     public class ForgotPasswordDto

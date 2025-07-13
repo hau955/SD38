@@ -55,10 +55,10 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISanPhamService, SanPhamService>();
 builder.Services.AddScoped<IDanhMucSPService, DanhMucSPService>();
 builder.Services.AddScoped<IMauSacService, MauSacService>();
-builder.Services.AddScoped<ITaAoService, TaAoService>();
 builder.Services.AddScoped<ISizeService, SizeService>();
-builder.Services.AddScoped<ICoAoService, CoAoService>();
+
 builder.Services.AddScoped<ISanPhamCTService, SanPhamCTService>();
+builder.Services.AddScoped<IProfileServive, ProfileService>();
 
 builder.Services.AddCors(options =>
 {

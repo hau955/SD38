@@ -30,11 +30,7 @@ namespace AppView.Areas.Admin.ViewModels
         public Guid IdSize { get; set; }
         public string? Size { get; set; }
 
-        public Guid IdCoAo { get; set; }
-        public string? CoAo { get; set; }
-
-        public Guid? IdTaAo { get; set; }
-        public string? TaAo { get; set; }
+        
 
         [Required]
         public decimal GiaBan { get; set; }

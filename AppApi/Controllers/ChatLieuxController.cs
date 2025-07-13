@@ -6,53 +6,52 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AppData.Models;
-using AppData.Models;
 
 namespace AppApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DanhMucsController : ControllerBase
+    public class ChatLieuxController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public DanhMucsController(ApplicationDbContext context)
+        public ChatLieuxController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/DanhMucs
+        // GET: api/ChatLieux
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DanhMuc>>> GetDanhMucs()
+        public async Task<ActionResult<IEnumerable<ChatLieu>>> GetChatLieus()
         {
-            return await _context.DanhMucs.ToListAsync();
+            return await _context.ChatLieus.ToListAsync();
         }
 
-        // GET: api/DanhMucs/5
+        // GET: api/ChatLieux/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<DanhMuc>> GetDanhMuc(Guid id)
+        public async Task<ActionResult<ChatLieu>> GetChatLieu(Guid id)
         {
-            var danhMuc = await _context.DanhMucs.FindAsync(id);
+            var chatLieu = await _context.ChatLieus.FindAsync(id);
 
-            if (danhMuc == null)
+            if (chatLieu == null)
             {
                 return NotFound();
             }
 
-            return danhMuc;
+            return chatLieu;
         }
 
-        // PUT: api/DanhMucs/5
+        // PUT: api/ChatLieux/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDanhMuc(Guid id, DanhMuc danhMuc)
+        public async Task<IActionResult> PutChatLieu(Guid id, ChatLieu chatLieu)
         {
-            if (id != danhMuc.DanhMucId)
+            if (id != chatLieu.IDChatLieu)
             {
                 return BadRequest();
             }
 
-            _context.Entry(danhMuc).State = EntityState.Modified;
+            _context.Entry(chatLieu).State = EntityState.Modified;
 
             try
             {
@@ -60,7 +59,7 @@ namespace AppApi.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!DanhMucExists(id))
+                if (!ChatLieuExists(id))
                 {
                     return NotFound();
                 }
@@ -73,37 +72,36 @@ namespace AppApi.Controllers
             return NoContent();
         }
 
-        // POST: api/DanhMucs
+        // POST: api/ChatLieux
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<DanhMuc>> PostDanhMuc(DanhMuc danhMuc)
+        public async Task<ActionResult<ChatLieu>> PostChatLieu(ChatLieu chatLieu)
         {
-            danhMuc.DanhMucId = Guid.NewGuid(); // Ensure a new ID is generated
-            _context.DanhMucs.Add(danhMuc);
+            _context.ChatLieus.Add(chatLieu);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetDanhMuc", new { id = danhMuc.DanhMucId }, danhMuc);
+            return CreatedAtAction("GetChatLieu", new { id = chatLieu.IDChatLieu }, chatLieu);
         }
 
-        // DELETE: api/DanhMucs/5
+        // DELETE: api/ChatLieux/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDanhMuc(Guid id)
+        public async Task<IActionResult> DeleteChatLieu(Guid id)
         {
-            var danhMuc = await _context.DanhMucs.FindAsync(id);
-            if (danhMuc == null)
+            var chatLieu = await _context.ChatLieus.FindAsync(id);
+            if (chatLieu == null)
             {
                 return NotFound();
             }
 
-            _context.DanhMucs.Remove(danhMuc);
+            _context.ChatLieus.Remove(chatLieu);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool DanhMucExists(Guid id)
+        private bool ChatLieuExists(Guid id)
         {
-            return _context.DanhMucs.Any(e => e.DanhMucId == id);
+            return _context.ChatLieus.Any(e => e.IDChatLieu == id);
         }
     }
 }

@@ -13,23 +13,22 @@ builder.Services.AddHttpContextAccessor();
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
 builder.Services.AddHttpClient<ISanPhamRepo, SanPhamRepo>(client =>
 {
-    client.BaseAddress = new Uri(apiBaseUrl);
+    client.BaseAddress = new Uri("https://localhost:7221/");
 });
 builder.Services.AddHttpClient<IAuthRepository, AuthRepository>(client =>
 {
-    client.BaseAddress = new Uri(apiBaseUrl);
+    client.BaseAddress = new Uri("https://localhost:7221/");
 });
 
 // Cấu hình HttpClient cho từng repo gọi API
 
-builder.Services.AddScoped<ICoAoRepo, CoAoRepo>();
 builder.Services.AddScoped<IMauSacRepo, MauSacRepo>();
 builder.Services.AddScoped<ISizeRepo, SizeRepo>();
 builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
-builder.Services.AddScoped<ITaAoRepo, TaAoRepo>();
-builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
 
-builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
+builder.Services.AddHttpClient<IDanhMucRePo, DanhMucRepo>();
+builder.Services.AddScoped<IProfileRepo, ProfileRepo>();
 
 // Thêm dịch vụ cần thiết cho session
 builder.Services.AddDistributedMemoryCache();

@@ -26,8 +26,8 @@ namespace AppApi.Service
 
             existing.IDMauSac = model.IDMauSac;
             existing.IDSize = model.IDSize;
-            existing.IDCoAo = model.IDCoAo;
-            existing.IDTaAo = model.IDTaAo;
+           // existing.IdChatLieu = model.IdChatLieu;
+           
             existing.SoLuongTonKho = model.SoLuongTonKho;
             existing.GiaBan = model.GiaBan;
             existing.TrangThai = model.TrangThai;
@@ -52,8 +52,8 @@ namespace AppApi.Service
             return await _db.SanPhamChiTiets
                  .Include(x => x.MauSac)
                  .Include(x => x.SizeAo)
-                 .Include(x => x.CoAo)
-                 .Include(x => x.TaAo)
+                 
+                // .Include(x => x.ChatLieu)
                  .Where(x => x.IDSanPham == sanPhamId)
                  .ToListAsync();
         }
@@ -73,14 +73,12 @@ namespace AppApi.Service
 
        
 
-        public async Task<bool> ExistsAsync(Guid idSanPham, Guid idMauSac, Guid idSize, Guid idCoAo, Guid idTaAo)
+        public async Task<bool> ExistsAsync(Guid idSanPham, Guid idMauSac, Guid idSize)
         {
             return await _db.SanPhamChiTiets.AnyAsync(x =>
                 x.IDSanPham == idSanPham &&
                 x.IDMauSac == idMauSac &&
-                x.IDSize == idSize &&
-                x.IDCoAo == idCoAo &&
-                x.IDTaAo == idTaAo);
+                x.IDSize == idSize );
         }
     }
 }

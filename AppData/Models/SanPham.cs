@@ -23,22 +23,23 @@ namespace AppData.Models
         [MaxLength(2000)]
         public string? MoTa { get; set; }
 
-        [MaxLength(500)]
-        public string? HinhAnh { get; set; }
+      
 
         [NotMapped]
        
         public IFormFile? ImageFile { get; set; }
 
-        public DateTime NgayTao { get; set; } 
+        public DateTime? NgayTao { get; set; } 
 
-        public DateTime NgaySua { get; set; } 
+        public DateTime? NgaySua { get; set; } 
 
         public bool TrangThai { get; set; } = true;
 
         // 1 sản phẩm có thể có nhiều chi tiết (ví dụ size, màu)
         [JsonIgnore]
         public virtual ICollection<SanPhamCT> SanPhamChiTiets { get; set; } = new List<SanPhamCT>();
+        [JsonIgnore]
+        public virtual ICollection<AnhSanPham> AnhSanPhams { get; set; } = new List<AnhSanPham>();
         [JsonIgnore]
         // 1 sản phẩm có thể có nhiều record giảm giá khác nhau (theo thời gian hoặc sự kiện)
         public virtual ICollection<SanPhamGG> SanPhamGiamGias { get; set; } = new List<SanPhamGG>();
@@ -50,6 +51,7 @@ namespace AppData.Models
         public Guid DanhMucId { get; set; }  // Khóa ngoại đến DanhMuc
 
         public DanhMuc DanhMuc { get; set; } = null!;
+        
 
     }
 }

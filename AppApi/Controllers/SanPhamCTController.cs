@@ -66,9 +66,9 @@ namespace AppApi.Controllers
             return Ok(new { message = "Cập nhật thành công!" });
         }
         [HttpGet("exists")]
-        public async Task<IActionResult> CheckExists(Guid idSanPham, Guid idMau, Guid idSize, Guid idCoAo, Guid idTaAo)
+        public async Task<IActionResult> CheckExists(Guid idSanPham, Guid idMau, Guid idSize)
         {
-            var exists = await _sanPhamCTService.ExistsAsync(idSanPham, idMau, idSize, idCoAo, idTaAo);
+            var exists = await _sanPhamCTService.ExistsAsync(idSanPham, idMau, idSize);
             return Ok(exists);
         }
     }

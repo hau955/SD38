@@ -36,11 +36,15 @@ namespace AppView.Areas.Auth.Repository
 
         public async Task<ApiResponse<object>> ConfirmEmailAsync(string email, string token)
         {
-            var url = $"api/auths/confirm-email?email={email}&token={token}";
+            var emailEncoded = Uri.EscapeDataString(email);
+            var tokenEncoded = Uri.EscapeDataString(token);
+            var url = $"/api/auths/confirm-email?email={emailEncoded}&token={tokenEncoded}";
+
             var response = await _httpClient.GetAsync(url);
             var result = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();
             return result ?? ApiResponse<object>.Fail("Lỗi xác nhận.");
         }
+
 
 
         private async Task<ApiResponse<T>> ParseApiResponse<T>(HttpResponseMessage response)

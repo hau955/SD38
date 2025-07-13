@@ -97,7 +97,7 @@
                         {
                             <tr>
                                 <td>
-                                    @if (!string.IsNullOrEmpty(item.SanPham?.HinhAnh))
+                                   @*  @if (!string.IsNullOrEmpty(item.SanPham?.HinhAnh))
                                     {
                                         <img src="@item.SanPham.HinhAnh"
                                              alt="Ảnh sản phẩm"
@@ -108,13 +108,13 @@
                                     else
                                     {
                                         <span class="text-muted fst-italic">Không có ảnh</span>
-                                    }
+                                    } *@
                                 </td>
                                 <td>@item.SanPham?.TenSanPham</td>
                                 <td>@item.MauSac?.TenMau</td>
                                 <td>@item.SizeAo?.SoSize</td>
-                                <td>@item.CoAo?.TenCoAo</td>
-                                <td>@item.TaAo?.TenTaAo</td>
+                                @* <td>@item.CoAo?.TenCoAo</td>
+                                <td>@item.TaAo?.TenTaAo</td> *@
                                 <td class="text-end text-nowrap">@item.GiaBan.ToString("N0") đ</td>
                                 <td>@item.SoLuongTonKho</td>
                                 <td>
