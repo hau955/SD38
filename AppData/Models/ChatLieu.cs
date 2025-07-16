@@ -8,8 +8,8 @@ namespace AppData.Models
         [Key]
         public Guid IDChatLieu { get; set; }
 
-        [Required(ErrorMessage = "Tên màu không được để trống.")]
-        [MaxLength(50, ErrorMessage = "Tên màu không được vượt quá 50 ký tự.")]
+        [Required(ErrorMessage = "Tên chất liệu không được để trống.")]
+        [MaxLength(50, ErrorMessage = "Tên chất liệu không được vượt quá 50 ký tự.")]
         public string TenChatLieu { get; set; } = null!;
 
         public DateTime? NgayTao { get; set; }
@@ -18,7 +18,7 @@ namespace AppData.Models
 
         public bool TrangThai { get; set; } = true;
 
-        // Quan hệ 1 MauSac có nhiều SanPhamChiTiet
+        // Quan hệ 1 chatlieu có nhiều SanPhamChiTiet
         [JsonIgnore]
         public virtual ICollection<SanPhamCT> SanPhamChiTiets { get; set; }
 
