@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250712172243_hauhoangducsdfghjk")]
-    partial class hauhoangducsdfghjk
+    [Migration("20250716143640_ngat")]
+    partial class ngat
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
