@@ -77,6 +77,7 @@ namespace AppApi.Controllers
         [HttpPost]
         public async Task<ActionResult<ChatLieu>> PostChatLieu(ChatLieu chatLieu)
         {
+            chatLieu.IDChatLieu = new Guid();
             _context.ChatLieus.Add(chatLieu);
             await _context.SaveChangesAsync();
 

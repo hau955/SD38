@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AppData.Migrations
 {
     /// <inheritdoc />
-    public partial class hauhoangducsdfghjk : Migration
+    public partial class hauhoang : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -332,10 +332,10 @@ namespace AppData.Migrations
                 columns: table => new
                 {
                     IDHoaDon = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IDUser = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IDUser = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     IDNguoiTao = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IDDiaChiNhanHang = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IDHinhThucTT = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IDDiaChiNhanHang = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IDHinhThucTT = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     TongTienTruocGiam = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     TongTienSauGiam = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     TienGiam = table.Column<decimal>(type: "decimal(18,2)", nullable: false),

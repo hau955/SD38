@@ -390,7 +390,8 @@ namespace AppData.Migrations
                         .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IDUser")
+                    b.Property<Guid?>("IDUser")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("NgaySua")

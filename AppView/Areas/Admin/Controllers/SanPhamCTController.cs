@@ -29,9 +29,9 @@ namespace AppView.Areas.Admin.Controllers
                 SizeList = (await _service.GetSizesAsync())
                                 .Select(x => new SelectListItem { Value = x.IDSize.ToString(), Text = x.SoSize })
                                 .ToList(),
-                //CoAoList = (await _service.GetCoAosAsync())
-                //                .Select(x => new SelectListItem { Value = x.IDCoAo.ToString(), Text = x.TenCoAo })
-                //                .ToList(),
+                ChatLieuList = (await _service.GetChatLieuAsync())
+                                .Select(x => new SelectListItem { Value = x.IDChatLieu.ToString(), Text = x.TenChatLieu })
+                                .ToList(),
                 //TaAoList = (await _service.GetTaAosAsync())
                 //                .Select(x => new SelectListItem { Value = x.IDTaAo.ToString(), Text = x.TenTaAo })
                                // .ToList()
@@ -46,7 +46,7 @@ namespace AppView.Areas.Admin.Controllers
             var list = await _service.GetBySanPhamIdAsync(idSanPham);
             var mauSacs = await _service.GetMauSacsAsync();
             var sizes = await _service.GetSizesAsync();
-           // var coAos = await _service.GetCoAosAsync();
+            var chatlieus = await _service.GetChatLieuAsync();
             //var taAos = await _service.GetTaAosAsync();
 
             // Join dữ liệu
@@ -54,7 +54,7 @@ namespace AppView.Areas.Admin.Controllers
             {
                 item.MauSac = mauSacs.FirstOrDefault(m => m.IDMauSac == item.IDMauSac);
                 item.SizeAo = sizes.FirstOrDefault(s => s.IDSize == item.IDSize);
-              //  item.CoAo = coAos.FirstOrDefault(c => c.IDCoAo == item.IDCoAo);
+               item.ChatLieu = chatlieus.FirstOrDefault(c => c.IDChatLieu == item.IdChatLieu);
                 //item.TaAo = taAos.FirstOrDefault(t => t.IDTaAo == item.IDTaAo);
                
             }
@@ -84,30 +84,26 @@ namespace AppView.Areas.Admin.Controllers
                         Text = x.SoSize.ToString()
                     }).ToList();
 
-                //vm.CoAoList = (await _service.GetCoAosAsync())
-                //    .Select(x => new SelectListItem
-                //    {
-                //        Value = x.IDCoAo.ToString(),
-                //        Text = x.TenCoAo
-                //    }).ToList();
+                vm.ChatLieuList = (await _service.GetChatLieuAsync())
+                    .Select(x => new SelectListItem
+                    {
+                        Value = x.IDChatLieu.ToString(),
+                        Text = x.TenChatLieu
+                    }).ToList();
 
-                //vm.TaAoList = (await _service.GetTaAosAsync())
-                //    .Select(x => new SelectListItem
-                //    {
-                //        Value = x.IDTaAo.ToString(),
-                //        Text = x.TenTaAo
-                //    }).ToList();
+               
                 return View("ThemChiTiet", vm);
             }
             var combinations = from mau in vm.SelectedMauSacs
                                from size in vm.SelectedSizes
-                               
+                               from Chatlieu in vm.SelectedChatlieus
+
                                select new SanPhamCT
                                {
                                    IDSanPham = vm.IDSanPham,
                                    IDMauSac = mau,
                                    IDSize = size,
-                                  
+                                  IdChatLieu=Chatlieu,
                                    GiaBan = vm.GiaBan,
                                    SoLuongTonKho = vm.SoLuongTonKho,
                                    TrangThai = true
@@ -116,7 +112,7 @@ namespace AppView.Areas.Admin.Controllers
             var resultList = new List<SanPhamCT>();
             foreach (var item in combinations)
             {
-                var exists = await _service.ExistsAsync(item.IDSanPham, item.IDMauSac, item.IDSize );
+                var exists = await _service.ExistsAsync(item.IDSanPham, item.IDMauSac, item.IDSize ,item.IdChatLieu);
                 if (!exists)
                     resultList.Add(item);
             }
@@ -145,7 +141,7 @@ namespace AppView.Areas.Admin.Controllers
 
             ViewBag.MauSacs = await _service.GetMauSacsAsync();
             ViewBag.Sizes = await _service.GetSizesAsync();
-           // ViewBag.CoAos = await _service.GetCoAosAsync();
+            ViewBag.ChatLieus = await _service.GetChatLieuAsync();
            // ViewBag.TaAos = await _service.GetTaAosAsync();
 
             return View(model);

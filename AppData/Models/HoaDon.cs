@@ -11,8 +11,8 @@ namespace AppData.Models
         // Hóa đơn thuộc về 1 User (Khách hàng)
         [Required]
         [ForeignKey("User")]
-        public Guid IDUser { get; set; }
-        public virtual ApplicationUser User { get; set; }
+        public Guid? IDUser { get; set; }
+        public virtual ApplicationUser? User { get; set; }
         [Required]
         [ForeignKey("User2")]
         public Guid? IDNguoiTao { get; set; }

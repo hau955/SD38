@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250712172243_hauhoangducsdfghjk")]
-    partial class hauhoangducsdfghjk
+    [Migration("20250716074727_hauhoang")]
+    partial class hauhoang
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -393,7 +393,8 @@ namespace AppData.Migrations
                         .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IDUser")
+                    b.Property<Guid?>("IDUser")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("NgaySua")

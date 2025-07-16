@@ -29,8 +29,9 @@ namespace AppView.Areas.Admin.ViewModels
 
         public Guid IdSize { get; set; }
         public string? Size { get; set; }
+        public Guid IDChatLieu { get; set; }
+        public string? ChatLieu { get; set; }
 
-        
 
         [Required]
         public decimal GiaBan { get; set; }
@@ -41,8 +42,8 @@ namespace AppView.Areas.Admin.ViewModels
         // Dữ liệu cho dropdown
         public List<SelectListItem>? SizeList { get; set; }
         public List<SelectListItem>? MauSacList { get; set; }
-        public List<SelectListItem>? CoAoList { get; set; }
-        public List<SelectListItem>? TaAoList { get; set; }
+        public List<SelectListItem>? ChatLieuList { get; set; }
+        
     }
 
 }
