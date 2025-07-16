@@ -380,18 +380,16 @@ namespace AppData.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<Guid>("IDDiaChiNhanHang")
+                    b.Property<Guid?>("IDDiaChiNhanHang")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IDHinhThucTT")
+                    b.Property<Guid?>("IDHinhThucTT")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("IDNguoiTao")
-                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("IDUser")
-                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("NgaySua")
@@ -817,26 +815,22 @@ namespace AppData.Migrations
                     b.HasOne("AppData.Models.DiaChiNhanHang", "DiaChiNhanHang")
                         .WithMany("HoaDons")
                         .HasForeignKey("IDDiaChiNhanHang")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("AppData.Models.HinhThucTT", "HinhThucTT")
                         .WithMany("HoaDons")
                         .HasForeignKey("IDHinhThucTT")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("AppData.Models.ApplicationUser", "User2")
                         .WithMany("HoaDonsAsNguoiTao")
                         .HasForeignKey("IDNguoiTao")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("AppData.Models.ApplicationUser", "User")
                         .WithMany("HoaDonsAsKhachHang")
                         .HasForeignKey("IDUser")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("DiaChiNhanHang");
 

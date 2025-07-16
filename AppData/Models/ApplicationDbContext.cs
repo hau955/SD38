@@ -15,7 +15,7 @@ namespace AppData.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer( "Server=HAU-2005;Database=AoDaiModel;User Id=sa;Password=Hauhoang0905!;TrustServerCertificate=true;");// "Server=KHUATNGAT201;Database=AoDaiModel;User Id=sa;Password=123456;TrustServerCertificate=true;"//"Server=DESKTOP-A99GQBL;Database=AoDaiModell;Trusted_Connection=True;TrustServerCertificate=True");
+            optionsBuilder.UseSqlServer("Server=HAU-2005;Database=AoDaiModel;User Id=sa;Password=Hauhoang0905!;TrustServerCertificate=true;");//Server=KHUATNGAT201;Database=AoDaiModel;User Id=sa;Password=123456;TrustServerCertificate=true;");/*"Server=DESKTOP-A99GQBL;Database=AoDaiModell;Trusted_Connection=True;TrustServerCertificate=True")*/
         }
         public DbSet<GioHang> GioHangs { get; set; }
         public DbSet<GioHangCT> GioHangChiTiets { get; set; }
@@ -27,13 +27,13 @@ namespace AppData.Models
         public DbSet<SanPham> SanPhams { get; set; }
         public DbSet<ChatLieu> ChatLieus { get; set; }
         public DbSet<AnhSanPham> AnhSanPham { get; set; }
-       
+
         public DbSet<SanPhamGG> SanPhamGiamGias { get; set; }
         public DbSet<GiamGia> GiamGias { get; set; }
         public DbSet<SanPhamCT> SanPhamChiTiets { get; set; }
         public DbSet<MauSac> MauSacs { get; set; }
         public DbSet<Size> Sizes { get; set; }
-       
+
         public DbSet<DanhMuc> DanhMucs { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -57,7 +57,7 @@ namespace AppData.Models
                 .WithOne(sp => sp.DanhMuc)
                 .HasForeignKey(sp => sp.DanhMucId)
                 .OnDelete(DeleteBehavior.Restrict);
-            
+
             // 1-n: GioHang - GioHangChiTiet
             builder.Entity<GioHangCT>()
                 .HasOne(ct => ct.GioHang)
@@ -137,7 +137,7 @@ namespace AppData.Models
                 .OnDelete(DeleteBehavior.Restrict);
 
             // 1-n: TaAo - SanPhamChiTiet
-          
+
 
             // Kiểu decimal mặc định là (18,2)
             foreach (var property in builder.Model.GetEntityTypes()

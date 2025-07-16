@@ -22,8 +22,8 @@ namespace AppApi.Service
                 var hoaDon = new HoaDon
                 {
                     IDHoaDon = Guid.NewGuid(),
-                    IDUser = request.IDUser,                     // Có thể null
-                    IDNguoiTao = request.IDNguoiTao,             // Có thể null
+                    //IDUser = request.IDUser,                     // Có thể null
+                    //IDNguoiTao = request.IDNguoiTao,             // Có thể null
                    // IDHinhThucTT = request.IDHinhThucTT,
                     //IDDiaChiNhanHang = request.IDDiaChiNhanHang,
                     NgayTao = DateTime.Now,
@@ -60,7 +60,8 @@ namespace AppApi.Service
                         SoLuongSanPham = sp.SoLuong,
                         GiaSanPham = sanPhamCT.GiaBan,
                         GiaSauGiamGia = sanPhamCT.GiaBan,
-                        NgayTao = DateTime.Now
+                        NgayTao = DateTime.Now,
+                        TrangThai = true
                     });
                 }
 
@@ -80,11 +81,18 @@ namespace AppApi.Service
 
                 return (true, "Bán hàng thành công", hoaDon.IDHoaDon);
             }
+            catch (DbUpdateException ex)
+            {
+                var innerMessage = ex.InnerException?.Message ?? ex.Message;
+                await transaction.RollbackAsync();
+                return (false, $"Lỗi khi lưu dữ liệu: {innerMessage}", null);
+            }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                return (false, $"Lỗi: {ex.Message}", null);
+                return (false, $"Lỗi không xác định: {ex.Message}", null);
             }
+
         }
     }
 }

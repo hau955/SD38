@@ -56,8 +56,8 @@ namespace AppView.Areas.Admin.Repository
             if (!res.IsSuccessStatusCode)
                 return new();
 
-            var response = await res.Content.ReadFromJsonAsync<List<ChatLieu>>();
-            return response ?? new();
+            var response = await res.Content.ReadFromJsonAsync<ApiResponse<List<ChatLieu>>>();
+            return response?.Data ?? new();
         }
 
         public async Task<List<SanPhamCT>> GetBySanPhamIdAsync(Guid idSanPham)

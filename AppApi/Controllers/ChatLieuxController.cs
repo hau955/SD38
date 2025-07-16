@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AppData.Models;
+using AppApi.IService;
 
 namespace AppApi.Controllers
 {
@@ -13,96 +14,68 @@ namespace AppApi.Controllers
     [ApiController]
     public class ChatLieuxController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IChatLieuService _service;
 
-        public ChatLieuxController(ApplicationDbContext context)
+        public ChatLieuxController(IChatLieuService service)
         {
-            _context = context;
+            _service = service;
         }
 
         // GET: api/ChatLieux
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ChatLieu>>> GetChatLieus()
+        public async Task<IActionResult> GetAll()
         {
-            return await _context.ChatLieus.ToListAsync();
+            var result = await _service.GetAllChatLieusAsync();
+            return Ok(new ApiResponse<List<ChatLieu>>
+            {
+                Message = "Lấy danh sách chất liệu thành công",
+                Data = result.ToList()
+            });
         }
 
         // GET: api/ChatLieux/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ChatLieu>> GetChatLieu(Guid id)
+        public async Task<ActionResult<ChatLieu>> GetById(Guid id)
         {
-            var chatLieu = await _context.ChatLieus.FindAsync(id);
-
-            if (chatLieu == null)
-            {
-                return NotFound();
-            }
-
-            return chatLieu;
+            var result = await _service.GetChatLieuByIdAsync(id);
+            if (result == null) return NotFound();
+            return Ok(result);
         }
 
         // PUT: api/ChatLieux/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutChatLieu(Guid id, ChatLieu chatLieu)
+        public async Task<IActionResult> Update(Guid id, [FromBody] ChatLieu chatLieu)
         {
             if (id != chatLieu.IDChatLieu)
-            {
-                return BadRequest();
-            }
+                return BadRequest("ID không khớp.");
 
-            _context.Entry(chatLieu).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ChatLieuExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var updated = await _service.UpdateChatLieuAsync(chatLieu);
+            return updated ? Ok() : NotFound();
         }
+       
 
         // POST: api/ChatLieux
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ChatLieu>> PostChatLieu(ChatLieu chatLieu)
+        public async Task<IActionResult> Create([FromBody] ChatLieu chatLieu)
         {
-            chatLieu.IDChatLieu = new Guid();
-            _context.ChatLieus.Add(chatLieu);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetChatLieu", new { id = chatLieu.IDChatLieu }, chatLieu);
+            chatLieu.IDChatLieu = Guid.NewGuid(); // Tạo ID mới
+            var result = await _service.CreateChatLieuAsync(chatLieu);
+            return Ok(result);
         }
+        
 
         // DELETE: api/ChatLieux/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteChatLieu(Guid id)
+        public async Task<IActionResult> Delete(Guid id)
         {
-            var chatLieu = await _context.ChatLieus.FindAsync(id);
-            if (chatLieu == null)
-            {
-                return NotFound();
-            }
-
-            _context.ChatLieus.Remove(chatLieu);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            var deleted = await _service.DeleteChatLieuAsync(id);
+            return deleted ? Ok() : NotFound();
         }
+       
+        
 
-        private bool ChatLieuExists(Guid id)
-        {
-            return _context.ChatLieus.Any(e => e.IDChatLieu == id);
-        }
+
     }
 }
