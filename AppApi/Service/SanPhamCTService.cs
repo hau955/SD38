@@ -26,7 +26,7 @@ namespace AppApi.Service
 
             existing.IDMauSac = model.IDMauSac;
             existing.IDSize = model.IDSize;
-           // existing.IdChatLieu = model.IdChatLieu;
+            existing.IdChatLieu = model.IdChatLieu;
            
             existing.SoLuongTonKho = model.SoLuongTonKho;
             existing.GiaBan = model.GiaBan;
@@ -73,12 +73,13 @@ namespace AppApi.Service
 
        
 
-        public async Task<bool> ExistsAsync(Guid idSanPham, Guid idMauSac, Guid idSize)
+        public async Task<bool> ExistsAsync(Guid idSanPham, Guid idMauSac, Guid idSize, Guid idChatlieu)
         {
             return await _db.SanPhamChiTiets.AnyAsync(x =>
                 x.IDSanPham == idSanPham &&
                 x.IDMauSac == idMauSac &&
-                x.IDSize == idSize );
+                x.IDSize == idSize &&
+                x.IdChatLieu == idChatlieu);
         }
     }
 }

@@ -198,5 +198,42 @@ namespace AppApi.Features.Services
             return ApiResponse<object>.Success(null, "Đăng ký admin thành công. Vui lòng kiểm tra email để xác thực tài khoản.", 201);
         }
 
+        public async Task<ApiResponse<object>> RegisterEmPloyee(RegisterDto model)
+        {
+            var userExists = await _userManager.FindByEmailAsync(model.Email);
+            if (userExists != null)
+                return ApiResponse<object>.Fail("Email đã được sử dụng.", 409);
+
+            var user = new ApplicationUser
+            {
+                Email = model.Email,
+                UserName = model.Email,
+                DiaChi = model.Address,
+                HoTen = model.FullName,
+                PhoneNumber = model.PhoneNumber,
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return ApiResponse<object>.Fail($"Tạo tài khoản thất bại: {errors}", 500);
+            }
+
+            // Gán quyền Admin thay vì Customer
+            await _userManager.AddToRoleAsync(user, "Employee");
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            var confirmationLink = $"{_configuration["Frontend:EmailConfirmationUrl"]}?email={user.Email}&token={encodedToken}";
+
+            var subject = "Xác thực tài khoản quản trị";
+            var body = $"<p>Chào bạn,</p><p>Vui lòng xác thực tài khoản bằng cách <a href=\"{confirmationLink}\">bấm vào đây</a>.</p>";
+
+            await _emailService.SendEmailAsync(user.Email, subject, body);
+
+            return ApiResponse<object>.Success(null, "Đăng ký admin thành công. Vui lòng kiểm tra email để xác thực tài khoản.", 201);
+        }
     }
 }

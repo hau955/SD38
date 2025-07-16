@@ -25,8 +25,9 @@ builder.Services.AddHttpClient<IAuthRepository, AuthRepository>(client =>
 builder.Services.AddScoped<IMauSacRepo, MauSacRepo>();
 builder.Services.AddScoped<ISizeRepo, SizeRepo>();
 builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
-builder.Services.AddScoped<IChatLieuService, ChatLieuService>();
+
 builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
+builder.Services.AddScoped<IChatLieuRepo, ChatLieuRepo>();
 builder.Services.AddHttpClient<IDanhMucRePo, DanhMucRepo>();
 builder.Services.AddScoped<IProfileRepo, ProfileRepo>();
 
