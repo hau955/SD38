@@ -85,7 +85,7 @@ namespace AppView.Areas.Admin.Repository
                 GioiTinh = sanPham.GioiTinh ?? false,
                 TrangThai = sanPham.TrangThai,
                 DanhMucID = sanPham.DanhMucId,
-                HinhAnh = sanPham.HinhAnh
+                //HinhAnh = sanPham.HinhAnh // để hiển thị ảnh nếu cần
             };
         }
 

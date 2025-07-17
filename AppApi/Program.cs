@@ -122,8 +122,11 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISanPhamService, SanPhamService>();
 builder.Services.AddScoped<IMauSacService, MauSacService>();
 builder.Services.AddScoped<ISizeService, SizeService>();
-builder.Services.AddScoped<ITaAoService, TaAoService>();
+builder.Services.AddScoped<IChatLieuService, ChatLieuService>();
+builder.Services.AddScoped<IBanHangService, BanHangService>();
+
 builder.Services.AddScoped<ISanPhamCTService, SanPhamCTService>();
+builder.Services.AddScoped<IProfileServive, ProfileService>();
 
 // Configure CORS
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();

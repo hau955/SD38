@@ -74,14 +74,10 @@
 
         <div class="col-md-6">
             <label for="IDCoAo" class="form-label">Cổ áo</label>
-            <select asp-for="IDCoAo" asp-items="ViewBag.CoAos" class="form-select"></select>
+            <select asp-for="IdChatLieu" asp-items="ViewBag.ChatLieus" class="form-select"></select>
         </div>
 
-        <div class="col-md-6">
-            <label for="IDTaAo" class="form-label">Tà áo</label>
-            <select asp-for="IDTaAo" asp-items="ViewBag.TaAos" class="form-select"></select>
-        </div>
-
+       
         <div class="col-md-6">
             <label asp-for="GiaBan" class="form-label">Giá bán (VNĐ)</label>
             <input asp-for="GiaBan" class="form-control" placeholder="Nhập giá bán..." />

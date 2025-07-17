@@ -33,21 +33,24 @@ namespace AppView.Areas.Admin.Controllers
             var viewModel = new SanPhamCreateViewModel();
 
             var client = _httpClientFactory.CreateClient();
-            var response = await client.GetAsync("https://localhost:7221/api/DanhMucs");
+            var response = await client.GetAsync("https://localhost:7221/api/DanhMuc");
 
             if (response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();
-                var danhMucs = JsonSerializer.Deserialize<List<DanhMucResponse>>(json, new JsonSerializerOptions
+                var apiResult = JsonSerializer.Deserialize<ApiDanhMucResponse>(json, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
+
+                var danhMucs = apiResult?.Data;
 
                 viewModel.DanhMucList = danhMucs?.Select(dm => new SelectListItem
                 {
                     Value = dm.DanhMucId.ToString(),
                     Text = dm.TenDanhMuc
                 }).ToList();
+
             }
             else
             {
@@ -81,15 +84,18 @@ namespace AppView.Areas.Admin.Controllers
         private async Task<List<SelectListItem>> LoadDanhMucList()
         {
             var client = _httpClientFactory.CreateClient();
-            var response = await client.GetAsync("https://localhost:7221/api/DanhMucs");
+            var response = await client.GetAsync("https://localhost:7221/api/DanhMuc");
 
             if (!response.IsSuccessStatusCode) return new List<SelectListItem>();
 
             var json = await response.Content.ReadAsStringAsync();
-            var danhMucs = JsonSerializer.Deserialize<List<DanhMucResponse>>(json, new JsonSerializerOptions
+
+            var apiResult = JsonSerializer.Deserialize<ApiDanhMucResponse>(json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
+
+            var danhMucs = apiResult?.Data;
 
             return danhMucs?.Select(dm => new SelectListItem
             {
@@ -97,6 +103,7 @@ namespace AppView.Areas.Admin.Controllers
                 Text = dm.TenDanhMuc
             }).ToList() ?? new List<SelectListItem>();
         }
+
         [HttpGet]
         public async Task<IActionResult> Update(Guid id)
         {

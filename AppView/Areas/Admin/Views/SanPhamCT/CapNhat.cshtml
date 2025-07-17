@@ -4,8 +4,8 @@
     ViewData["Title"] = "Cập nhật sản phẩm chi tiết";
     var mauSacs = ViewBag.MauSacs as List<AppData.Models.MauSac>;
     var sizes = ViewBag.Sizes as List<AppData.Models.Size>;
-    var coAos = ViewBag.CoAos as List<AppData.Models.CoAo>;
-    var taAos = ViewBag.TaAos as List<AppData.Models.TaAo>;
+    //var coAos = ViewBag.CoAos as List<AppData.Models.CoAo>;
+    //var taAos = ViewBag.TaAos as List<AppData.Models.TaAo>;
 }
 
 <style>
@@ -85,7 +85,7 @@
             </select>
         </div>
 
-        <div class="col-md-6">
+       @*  <div class="col-md-6">
             <label class="form-label">Cổ áo</label>
             <select asp-for="IDCoAo" class="form-select">
                 <option value="">-- Chọn cổ áo --</option>
@@ -109,7 +109,7 @@
                     </option>
                 }
             </select>
-        </div>
+        </div> *@
 
         <div class="col-md-6">
             <label asp-for="SoLuongTonKho" class="form-label">Số lượng tồn kho</label>

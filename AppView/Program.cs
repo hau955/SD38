@@ -43,15 +43,16 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
     opt.TokenLifespan = TimeSpan.FromDays(2); // 24 giờ
 });
 
-builder.Services.AddScoped<ICoAoRepo, CoAoRepo>();
+// Cấu hình HttpClient cho từng repo gọi API
+
 builder.Services.AddScoped<IMauSacRepo, MauSacRepo>();
 builder.Services.AddScoped<ISizeRepo, SizeRepo>();
 builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
-builder.Services.AddScoped<ITaAoRepo, TaAoRepo>();
-builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
-builder.Services.AddHttpClient<IDanhMucRePo, DanhMucRepo>();
 
-builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
+builder.Services.AddScoped<IChatLieuRepo, ChatLieuRepo>();
+builder.Services.AddHttpClient<IDanhMucRePo, DanhMucRepo>();
+builder.Services.AddScoped<IProfileRepo, ProfileRepo>();
 
 builder.Services.AddDistributedMemoryCache();
 

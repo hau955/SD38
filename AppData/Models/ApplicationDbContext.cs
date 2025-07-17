@@ -25,14 +25,15 @@ namespace AppData.Models
         public DbSet<HoaDon> HoaDons { get; set; }
         public DbSet<HoaDonCT> HoaDonChiTiets { get; set; }
         public DbSet<SanPham> SanPhams { get; set; }
-       
+        public DbSet<ChatLieu> ChatLieus { get; set; }
+        public DbSet<AnhSanPham> AnhSanPham { get; set; }
+
         public DbSet<SanPhamGG> SanPhamGiamGias { get; set; }
         public DbSet<GiamGia> GiamGias { get; set; }
         public DbSet<SanPhamCT> SanPhamChiTiets { get; set; }
         public DbSet<MauSac> MauSacs { get; set; }
         public DbSet<Size> Sizes { get; set; }
-        public DbSet<CoAo> CoAos { get; set; }
-        public DbSet<TaAo> TaAos { get; set; }
+
         public DbSet<DanhMuc> DanhMucs { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -56,6 +57,7 @@ namespace AppData.Models
                 .WithOne(sp => sp.DanhMuc)
                 .HasForeignKey(sp => sp.DanhMucId)
                 .OnDelete(DeleteBehavior.Restrict);
+
             // 1-n: GioHang - GioHangChiTiet
             builder.Entity<GioHangCT>()
                 .HasOne(ct => ct.GioHang)
@@ -78,11 +80,20 @@ namespace AppData.Models
                 .OnDelete(DeleteBehavior.Restrict); // tránh multiple cascade paths
 
             // 1-n: ApplicationUser - HoaDon
+            // Khách hàng đặt đơn
             builder.Entity<HoaDon>()
                 .HasOne(hd => hd.User)
-                .WithMany(u => u.HoaDons)
+                .WithMany(u => u.HoaDonsAsKhachHang)
                 .HasForeignKey(hd => hd.IDUser)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Người tạo đơn (ví dụ là nhân viên tạo thay)
+            builder.Entity<HoaDon>()
+                .HasOne(hd => hd.User2)
+                .WithMany(u => u.HoaDonsAsNguoiTao)
+                .HasForeignKey(hd => hd.IDNguoiTao)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
             // 1-n: HoaDon - HoaDonChiTiet
             builder.Entity<HoaDonCT>()
@@ -91,7 +102,11 @@ namespace AppData.Models
                 .HasForeignKey(ct => ct.IDHoaDon)
                 .OnDelete(DeleteBehavior.Cascade);
 
-          
+            builder.Entity<AnhSanPham>()
+                  .HasOne(spct => spct.SanPham)
+                  .WithMany(sp => sp.AnhSanPhams)
+                  .HasForeignKey(spct => spct.IDSanPham)
+                  .OnDelete(DeleteBehavior.Cascade);
 
             // 1-n: SanPham - SanPhamChiTiet
             builder.Entity<SanPhamCT>()
@@ -116,9 +131,9 @@ namespace AppData.Models
 
             // 1-n: CoAo - SanPhamChiTiet
             builder.Entity<SanPhamCT>()
-                .HasOne(spct => spct.CoAo)
+                .HasOne(spct => spct.ChatLieu)
                 .WithMany(ca => ca.SanPhamChiTiets)
-                .HasForeignKey(spct => spct.IDCoAo)
+                .HasForeignKey(spct => spct.IdChatLieu)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // 1-n: TaAo - SanPhamChiTiet
@@ -127,13 +142,6 @@ namespace AppData.Models
                 .WithMany(ta => ta.SanPhamChiTiets)
                 .HasForeignKey(spct => spct.IDTaAo)
                 .OnDelete(DeleteBehavior.Restrict);
-            builder.Entity<HoaDon>()
-    .Property(h => h.TrangThaiDonHang)
-    .HasConversion<string>();
-
-            builder.Entity<HoaDon>()
-                .Property(h => h.TrangThaiThanhToan)
-                .HasConversion<string>();
 
             // Kiểu decimal mặc định là (18,2)
             foreach (var property in builder.Model.GetEntityTypes()

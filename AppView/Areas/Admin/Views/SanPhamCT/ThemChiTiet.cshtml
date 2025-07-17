@@ -4,8 +4,8 @@
     ViewData["Title"] = "Thêm chi tiết sản phẩm";
     var mauSacs = ViewBag.MauSacs as List<MauSac>;
     var sizes = ViewBag.Sizes as List<Size>;
-    var coAos = ViewBag.CoAos as List<CoAo>;
-    var taAos = ViewBag.TaAos as List<TaAo>;
+    var coAos = ViewBag.ChatLieus as List<ChatLieu>;
+    //var taAos = ViewBag.TaAos as List<TaAo>;
 }
 
 <div class="container mt-5">
@@ -59,28 +59,17 @@
                     <div class="col-md-3">
                         <label class="fw-bold mb-2">👕 Cổ áo:</label>
                         <div class="border rounded p-2 bg-light">
-                            @foreach (var item in Model.CoAoList)
+                            @foreach (var item in Model.ChatLieuList)
                             {
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="SelectedCoAos" value="@item.Value" id="coao_@item.Value" />
-                                    <label class="form-check-label" for="coao_@item.Value">@item.Text</label>
+                                    <input class="form-check-input" type="checkbox" name="SelectedChatlieus" value="@item.Value" id="chatlieu_@item.Value" />
+                                    <label class="form-check-label" for="chatlieu_@item.Value">@item.Text</label>
                                 </div>
                             }
                         </div>
                     </div>
 
-                    <div class="col-md-3">
-                        <label class="fw-bold mb-2">👗 Tà áo:</label>
-                        <div class="border rounded p-2 bg-light">
-                            @foreach (var item in Model.TaAoList)
-                            {
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="SelectedTaAos" value="@item.Value" id="taao_@item.Value" />
-                                    <label class="form-check-label" for="taao_@item.Value">@item.Text</label>
-                                </div>
-                            }
-                        </div>
-                    </div>
+                   
                 </div>
 
                 <div class="row">

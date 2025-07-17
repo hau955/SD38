@@ -44,6 +44,7 @@ namespace AppApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] MauSac mauSac)
         {
+            mauSac.IDMauSac = new Guid();
             var result = await _service.CreateMauSacAsync(mauSac);
             return Ok(result);
         }

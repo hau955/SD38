@@ -14,10 +14,9 @@ namespace AppView.Areas.Admin.ViewModels.SanPhamChiTietViewModels
         public List<Guid> SelectedSizes { get; set; } = new();
 
         [Required(ErrorMessage = "Chọn ít nhất 1 cổ áo")]
-        public List<Guid> SelectedCoAos { get; set; } = new();
+        public List<Guid> SelectedChatlieus { get; set; } = new();
 
-        [Required(ErrorMessage = "Chọn ít nhất 1 tà áo")]
-        public List<Guid> SelectedTaAos { get; set; } = new();
+       
 
         [Range(1, 100000000, ErrorMessage = "Giá bán phải lớn hơn 0")]
         public decimal GiaBan { get; set; }
@@ -26,9 +25,9 @@ namespace AppView.Areas.Admin.ViewModels.SanPhamChiTietViewModels
         public int SoLuongTonKho { get; set; }
 
         public List<SelectListItem> MauSacList { get; set; } = new();
+        public List<SelectListItem> ChatLieuList { get; set; } = new();
         public List<SelectListItem> SizeList { get; set; } = new();
-        public List<SelectListItem> CoAoList { get; set; } = new();
-        public List<SelectListItem> TaAoList { get; set; } = new();
+      
 
     }
 }

@@ -8,20 +8,27 @@ public class HoaDon
     [Key]
     public Guid IDHoaDon { get; set; }
 
-    [Required]
-    [ForeignKey("User")]
-    public Guid IDUser { get; set; }
-    public virtual ApplicationUser User { get; set; }
+        // Hóa đơn thuộc về 1 User (Khách hàng)
+        
+        [ForeignKey("User")]
+        public Guid? IDUser { get; set; }
+        public virtual ApplicationUser? User { get; set; }
+        
+        [ForeignKey("User2")]
+        public Guid? IDNguoiTao { get; set; }
+        public virtual ApplicationUser? User2 { get; set; }
 
-    [Required]
-    [ForeignKey("DiaChiNhanHang")]
-    public Guid IDDiaChiNhanHang { get; set; }
-    public virtual DiaChiNhanHang DiaChiNhanHang { get; set; }
+        // Hóa đơn sử dụng 1 địa chỉ nhận hàng trong số các địa chỉ của User
+        
+        [ForeignKey("DiaChiNhanHang")]
+        public Guid? IDDiaChiNhanHang { get; set; }
+        public virtual DiaChiNhanHang? DiaChiNhanHang { get; set; }
 
-    [Required]
-    [ForeignKey("HinhThucTT")]
-    public Guid IDHinhThucTT { get; set; }
-    public virtual HinhThucTT HinhThucTT { get; set; }
+        // Hóa đơn sử dụng 1 hình thức thanh toán trong số các hình thức của User
+        
+        [ForeignKey("HinhThucTT")]
+        public Guid? IDHinhThucTT { get; set; }
+        public virtual HinhThucTT? HinhThucTT { get; set; }
 
     [Column(TypeName = "decimal(18, 2)")]
     public decimal TongTienTruocGiam { get; set; }
@@ -48,9 +55,9 @@ public class HoaDon
     [Required]
     public TrangThaiThanhToan TrangThaiThanhToan { get; set; }
 
-    public DateTime NgayTao { get; set; }
+        public DateTime? NgayTao { get; set; }
 
-    public DateTime NgaySua { get; set; }
+        public DateTime? NgaySua { get; set; } 
 
     public virtual ICollection<HoaDonCT> HoaDonChiTiets { get; set; } = new List<HoaDonCT>();
 }

@@ -31,7 +31,9 @@ namespace AppData.Models
         public virtual GioHang? GioHang { get; set; }
 
         // Quan hệ 1 - N với Hóa đơn
-        public virtual ICollection<HoaDon> HoaDons { get; set; } = new List<HoaDon>();
+        public virtual ICollection<HoaDon> HoaDonsAsKhachHang { get; set; } = new List<HoaDon>();
+        public virtual ICollection<HoaDon>? HoaDonsAsNguoiTao { get; set; } = new List<HoaDon>();
+
 
         // Quan hệ 1 - N với Địa chỉ nhận hàng
         public virtual ICollection<DiaChiNhanHang> DiaChiNhanHangs { get; set; } = new List<DiaChiNhanHang>();

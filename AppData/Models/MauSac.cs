@@ -12,9 +12,9 @@ namespace AppData.Models
         [MaxLength(50, ErrorMessage = "Tên màu không được vượt quá 50 ký tự.")]
         public string TenMau { get; set; } = null!;
 
-        public DateTime NgayTao { get; set; } 
+        public DateTime? NgayTao { get; set; } 
 
-        public DateTime NgaySua { get; set; }
+        public DateTime? NgaySua { get; set; }
 
         public bool TrangThai { get; set; } = true;
 

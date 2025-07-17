@@ -1,5 +1,26 @@
 ﻿<!DOCTYPE html>
-<html lang="vi"
+
+  @{
+    var avatarPath = Context.Session.GetString("HinhAnh") ?? "/admin/assets/img/avatars/1.png";
+
+<img src="@avatarPath" alt="Avatar" class="w-px-40 h-auto rounded-circle" />
+
+    var hoten = Context.Session.GetString("HoTen");
+}
+
+<!-- =========================================================
+* Sneat - Bootstrap 5 HTML Admin Template - Pro | v1.0.0
+==============================================================
+
+* Product Page: https://themeselection.com/products/sneat-bootstrap-html-admin-template/
+* Created by: ThemeSelection
+* License: You must have a valid license purchased in order to legally use the theme for your project.
+* Copyright ThemeSelection (https://themeselection.com)
+
+=========================================================
+ -->
+<!-- beautify ignore:start -->
+<html lang="en"
       class="light-style layout-menu-fixed"
       dir="ltr"
       data-theme="theme-default"
@@ -418,10 +439,10 @@
                             <div data-i18n="CaiDat">Cài Đặt</div>
                         </a>
                     </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "NguoiDung" ? "active" : "")">
-                        <a href="/Admin/NguoiDung/Index" class="menu-link">
-                            <i class="menu-icon fas fa-user-shield"></i>
-                            <div data-i18n="NguoiDung">Người Dùng</div>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "DanhMuc" ? "active" : "")">
+                        <a href="/Admin/DanhMuc/Index" class="menu-link">
+                            <i class="menu-icon tf-icons bx bxs-user-account"></i>
+                            <div data-i18n="Basic">Danh Mục</div>
                         </a>
                     </li>
       
@@ -486,7 +507,7 @@
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                                     <div class="avatar avatar-online">
-                                        <img src="/admin/assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                                        <img src="@avatarPath" alt class="w-px-40 h-auto rounded-circle" />
                                     </div>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
@@ -495,12 +516,12 @@
                                             <div class="d-flex">
                                                 <div class="flex-shrink-0 me-3">
                                                     <div class="avatar avatar-online">
-                                                        <img src="/admin/assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                                                        <img src="@avatarPath" alt class="w-px-40 h-auto rounded-circle" />
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <span class="fw-semibold d-block">Nguyễn Văn Admin</span>
-                                                    <small class="text-muted">Quản trị viên</small>
+                                                   
+                                                    <small class="text-muted">@hoten</small>
                                                 </div>
                                             </div>
                                         </a>

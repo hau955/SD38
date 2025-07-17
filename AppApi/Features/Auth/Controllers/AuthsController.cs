@@ -34,6 +34,24 @@ namespace AppApi.Features.Controllers
             var result = await _authService.RegisterAsync(model);
             return StatusCode(result.StatusCode, result);
         }
+        [HttpPost("registerAdmin")]
+        public async Task<IActionResult> RegisterAdmin(RegisterDto model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _authService.RegisterAdminAsync(model);
+            return StatusCode(result.StatusCode, result);
+        }
+        [HttpPost("registerEmPloyee")]
+        public async Task<IActionResult> RegisterEmployee(RegisterDto model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _authService.RegisterEmPloyee(model);
+            return StatusCode(result.StatusCode, result);
+        }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto model)

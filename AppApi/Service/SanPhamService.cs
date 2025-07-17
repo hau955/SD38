@@ -69,7 +69,7 @@ namespace AppApi.Service
                 MoTa = model.MoTa,
                 TrongLuong = model.TrongLuong,
                GioiTinh = model.GioiTinh,
-                HinhAnh = imagePath,
+               // HinhAnh = imagePath,
                 TrangThai = model.TrangThai,
                 NgayTao =  DateTime.Now,
                 NgaySua =    DateTime.Now
@@ -145,7 +145,7 @@ namespace AppApi.Service
                 }
 
                 // Gán đường dẫn ảnh mới
-                sanPham.HinhAnh = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/images/{fileName}";
+               // sanPham.HinhAnh = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/images/{fileName}";
             }
 
             // Cập nhật các thông tin khác
@@ -182,9 +182,9 @@ namespace AppApi.Service
             TrongLuong = sp.TrongLuong.Value,
             GioiTinh = sp.GioiTinh.Value,
             TrangThai = sp.TrangThai,
-            NgayTao = sp.NgayTao,
-            NgaySua = sp.NgaySua,
-            HinhAnh = sp.HinhAnh,
+            NgayTao = sp.NgayTao.Value,
+            NgaySua = sp.NgaySua.Value,
+          
             DanhMucID = sp.DanhMucId,
             TenDanhMuc = sp.DanhMuc!.TenDanhMuc
         }).ToListAsync();
@@ -198,16 +198,15 @@ namespace AppApi.Service
                   .Include(sp => sp.SanPhamChiTiets)
                       .ThenInclude(ct => ct.SizeAo)
                   .Include(sp => sp.SanPhamChiTiets)
-                      .ThenInclude(ct => ct.CoAo)
-                  .Include(sp => sp.SanPhamChiTiets)
-                      .ThenInclude(ct => ct.TaAo)
+                      .ThenInclude(ct => ct.ChatLieu)
+                  
                   .Include(sp => sp.DanhMuc)
                   .Select(sp => new SanPhamView
                   {
                       IDSanPham = sp.IDSanPham,
                       TenSanPham = sp.TenSanPham,
                       MoTa = sp.MoTa,
-                      HinhAnh = sp.HinhAnh,
+                     // HinhAnh = sp.HinhAnh,
                       TenDanhMuc = sp.DanhMuc.TenDanhMuc,
                       TrangThai=sp.TrangThai,
                       ChiTiets = sp.SanPhamChiTiets.Select(ct => new SanPhamCTViewModel
@@ -219,11 +218,8 @@ namespace AppApi.Service
                           IdSize = ct.IDSize,
                           Size = ct.SizeAo != null ? ct.SizeAo.SoSize : null,
 
-                          IdCoAo = ct.IDCoAo,
-                          CoAo = ct.CoAo != null ? ct.CoAo.TenCoAo : null,
-
-                          IdTaAo = ct.IDTaAo,
-                          TaAo = ct.TaAo != null ? ct.TaAo.TenTaAo : null,
+                         
+                         
                           GiaBan = ct.GiaBan,
                           SoLuongTonKho = ct.SoLuongTonKho,
                           TrangThai=ct.TrangThai
