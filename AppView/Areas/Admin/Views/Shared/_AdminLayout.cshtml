@@ -31,9 +31,9 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>Dashboard - Analytics | Sneat - Bootstrap 5 HTML Admin Template - Pro</title>
+    <title>Quản Lý Áo Dài Việt Nam | Hệ Thống Bán Hàng</title>
 
-    <meta name="description" content="" />
+    <meta name="description" content="Hệ thống quản lý bán áo dài truyền thống Việt Nam" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/admin/assets/img/favicon/favicon.ico" />
@@ -41,11 +41,11 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
-          rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Icons. Uncomment required icon fonts -->
+
+    <!-- Icons -->
     <link rel="stylesheet" href="/admin/assets/vendor/fonts/boxicons.css" />
 
     <!-- Core CSS -->
@@ -124,78 +124,226 @@
 
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="/admin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-
     <link rel="stylesheet" href="/admin/assets/vendor/libs/apex-charts/apex-charts.css" />
 
-    <!-- Page CSS -->
     <!-- Helpers -->
     <script src="/admin/assets/vendor/js/helpers.js"></script>
-
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="/admin/assets/js/config.js"></script>
+
+    <!-- Custom Vietnamese Style -->
+    <style type="text/css">
+        /* Vietnamese Ao Dai Theme Variables */
+        .ao-dai-theme {
+            --ao-dai-red: #dc2626;
+            --ao-dai-gold: #f59e0b;
+            --ao-dai-cream: #fef3c7;
+            --ao-dai-brown: #92400e;
+            --ao-dai-dark: #1f2937;
+        }
+
+        /* Base Styling */
+        body {
+            font-family: 'Inter', sans-serif !important;
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
+            min-height: 100vh;
+        }
+
+        /* Brand Styling */
+        .app-brand-text {
+            font-family: 'Playfair Display', serif !important;
+            font-weight: 700 !important;
+            background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            background-clip: text !important;
+        }
+
+        /* Menu Styling */
+        .layout-menu {
+            background: linear-gradient(180deg, #fff 0%, #fef3c7 100%) !important;
+            border-right: 3px solid #f59e0b !important;
+            box-shadow: 4px 0 20px rgba(220, 38, 38, 0.1) !important;
+        }
+
+        .menu-item.active > .menu-link {
+            background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%) !important;
+            color: white !important;
+            border-radius: 12px !important;
+            margin: 0 8px !important;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3) !important;
+        }
+
+        .menu-link {
+            padding: 12px 16px !important;
+            border-radius: 8px !important;
+            margin: 2px 8px !important;
+            transition: all 0.3s ease !important;
+            color: #1f2937 !important;
+        }
+
+            .menu-link:hover {
+                background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
+                transform: translateX(4px) !important;
+                box-shadow: 0 2px 10px rgba(220, 38, 38, 0.15) !important;
+            }
+
+        .menu-header-text {
+            color: #92400e !important;
+            font-weight: 600 !important;
+            font-size: 0.75rem !important;
+            letter-spacing: 1px !important;
+        }
+
+        /* Navbar Styling */
+        .layout-navbar {
+            background: white !important;
+            border-bottom: 3px solid #f59e0b !important;
+            box-shadow: 0 2px 20px rgba(220, 38, 38, 0.1) !important;
+        }
+
+        .navbar-brand-logo {
+            width: 40px !important;
+            height: 40px !important;
+            background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%) !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: white !important;
+            font-size: 1.2rem !important;
+        }
+
+        /* Content Styling */
+        .content-wrapper {
+            background: rgba(255, 255, 255, 0.9) !important;
+            backdrop-filter: blur(10px) !important;
+            border-radius: 20px 20px 0 0 !important;
+            margin: 20px !important;
+            box-shadow: 0 8px 32px rgba(220, 38, 38, 0.1) !important;
+        }
+
+        /* Dropdown Styling */
+        .dropdown-menu {
+            border: none !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+            border-radius: 12px !important;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
+            color: #1f2937 !important;
+        }
+
+        /* Footer Styling */
+        .footer {
+            background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%) !important;
+            color: white !important;
+            border-radius: 0 !important;
+        }
+
+            .footer a {
+                color: #fef3c7 !important;
+            }
+
+        /* Search Box Styling */
+        .search-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
+            border: 2px solid #f59e0b !important;
+            border-radius: 25px !important;
+            padding: 8px 20px !important;
+        }
+
+            .search-box input {
+                background: transparent !important;
+                border: none !important;
+                outline: none !important;
+                color: #1f2937 !important;
+            }
+
+                .search-box input::placeholder {
+                    color: #92400e !important;
+                }
+
+        /* Avatar Styling */
+        .avatar {
+            border: 3px solid #f59e0b !important;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2) !important;
+        }
+
+        /* Background Pattern */
+        .lotus-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f59e0b' fill-opacity='0.05'%3E%3Cpath d='M30 30c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20zm0 0c0-11.046 8.954-20 20-20s20 8.954 20 20-8.954 20-20 20-20-8.954-20-20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Animation */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUpAnimation 0.6s ease-out forwards;
+        }
+
+        /* Keyframes at the end to avoid parsing issues */
+        @@keyframes fadeInUpAnimation {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Custom Card Styling */
+        .vietnamese-card {
+            border: none !important;
+            border-radius: 15px !important;
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.1) !important;
+            overflow: hidden !important;
+        }
+
+        .vietnamese-gradient-text {
+            background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            background-clip: text !important;
+        }
+
+        /* Notification Badge */
+        .notification-badge {
+            background: #dc2626 !important;
+            font-size: 0.6rem !important;
+        }
+
+        /* Hover Effects */
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+        }
+
+            .hover-lift:hover {
+                transform: translateY(-5px) !important;
+                box-shadow: 0 12px 35px rgba(220, 38, 38, 0.15) !important;
+            }
+    </style>
 </head>
 
-<body>
-  @*   @{
-        var username = HttpContextAccessor.HttpContext.Session.GetString("Username");
-        var userid = HttpContextAccessor.HttpContext.Session.GetString("UserID");
-    } *@
-
-    <!-- Layout wrapper -->
+<body class="ao-dai-theme">
+    <div class="lotus-pattern"></div>
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
-            <!-- Menu -->
-
             <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-                <div class="app-brand demo">
-                    <a href="index.html" class="app-brand-link">
-                        <span class="app-brand-logo demo">
-                            <svg width="25"
-                                 viewBox="0 0 25 42"
-                                 version="1.1"
-                                 xmlns="http://www.w3.org/2000/svg"
-                                 xmlns:xlink="http://www.w3.org/1999/xlink">
-                                <defs>
-                                    <path d="M13.7918663,0.358365126 L3.39788168,7.44174259 C0.566865006,9.69408886 -0.379795268,12.4788597 0.557900856,15.7960551 C0.68998853,16.2305145 1.09562888,17.7872135 3.12357076,19.2293357 C3.8146334,19.7207684 5.32369333,20.3834223 7.65075054,21.2172976 L7.59773219,21.2525164 L2.63468769,24.5493413 C0.445452254,26.3002124 0.0884951797,28.5083815 1.56381646,31.1738486 C2.83770406,32.8170431 5.20850219,33.2640127 7.09180128,32.5391577 C8.347334,32.0559211 11.4559176,30.0011079 16.4175519,26.3747182 C18.0338572,24.4997857 18.6973423,22.4544883 18.4080071,20.2388261 C17.963753,17.5346866 16.1776345,15.5799961 13.0496516,14.3747546 L10.9194936,13.4715819 L18.6192054,7.984237 L13.7918663,0.358365126 Z"
-                                          id="path-1"></path>
-                                    <path d="M5.47320593,6.00457225 C4.05321814,8.216144 4.36334763,10.0722806 6.40359441,11.5729822 C8.61520715,12.571656 10.0999176,13.2171421 10.8577257,13.5094407 L15.5088241,14.433041 L18.6192054,7.984237 C15.5364148,3.11535317 13.9273018,0.573395879 13.7918663,0.358365126 C13.5790555,0.511491653 10.8061687,2.3935607 5.47320593,6.00457225 Z"
-                                          id="path-3"></path>
-                                    <path d="M7.50063644,21.2294429 L12.3234468,23.3159332 C14.1688022,24.7579751 14.397098,26.4880487 13.008334,28.506154 C11.6195701,30.5242593 10.3099883,31.790241 9.07958868,32.3040991 C5.78142938,33.4346997 4.13234973,34 4.13234973,34 C4.13234973,34 2.75489982,33.0538207 2.37032616e-14,31.1614621 C-0.55822714,27.8186216 -0.55822714,26.0572515 -4.05231404e-15,25.8773518 C0.83734071,25.6075023 2.77988457,22.8248993 3.3049379,22.52991 C3.65497346,22.3332504 5.05353963,21.8997614 7.50063644,21.2294429 Z"
-                                          id="path-4"></path>
-                                    <path d="M20.6,7.13333333 L25.6,13.8 C26.2627417,14.6836556 26.0836556,15.9372583 25.2,16.6 C24.8538077,16.8596443 24.4327404,17 24,17 L14,17 C12.8954305,17 12,16.1045695 12,15 C12,14.5672596 12.1403557,14.1461923 12.4,13.8 L17.4,7.13333333 C18.0627417,6.24967773 19.3163444,6.07059163 20.2,6.73333333 C20.3516113,6.84704183 20.4862915,6.981722 20.6,7.13333333 Z"
-                                          id="path-5"></path>
-                                </defs>
-                                <g id="g-app-brand" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                    <g id="Brand-Logo" transform="translate(-27.000000, -15.000000)">
-                                        <g id="Icon" transform="translate(27.000000, 15.000000)">
-                                            <g id="Mask" transform="translate(0.000000, 8.000000)">
-                                                <mask id="mask-2" fill="white">
-                                                    <use xlink:href="#path-1"></use>
-                                                </mask>
-                                                <use fill="#696cff" xlink:href="#path-1"></use>
-                                                <g id="Path-3" mask="url(#mask-2)">
-                                                    <use fill="#696cff" xlink:href="#path-3"></use>
-                                                    <use fill-opacity="0.2" fill="#FFFFFF" xlink:href="#path-3"></use>
-                                                </g>
-                                                <g id="Path-4" mask="url(#mask-2)">
-                                                    <use fill="#696cff" xlink:href="#path-4"></use>
-                                                    <use fill-opacity="0.2" fill="#FFFFFF" xlink:href="#path-4"></use>
-                                                </g>
-                                            </g>
-                                            <g id="Triangle"
-                                               transform="translate(19.000000, 11.000000) rotate(-300.000000) translate(-19.000000, -11.000000) ">
-                                                <use fill="#696cff" xlink:href="#path-5"></use>
-                                                <use fill-opacity="0.2" fill="#FFFFFF" xlink:href="#path-5"></use>
-                                            </g>
-                                        </g>
-                                    </g>
-                                </g>
-                            </svg>
-                        </span>
-                        <span class="app-brand-text demo menu-text fw-bolder ms-2">Admin</span>
+                <div class="app-brand demo text-center p-3">
+                    <a href="/Admin/Home/Index" class="app-brand-link d-flex align-items-center">
+                        <img src="~/images/logoAoDai.png" alt="Logo Áo Dài VN" style="height: 40px;" />
                     </a>
-
                     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
                         <i class="bx bx-chevron-left bx-sm align-middle"></i>
                     </a>
@@ -207,43 +355,88 @@
                     <!-- Dashboard -->
                     <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
                         <a href="/Admin/Home/Index" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                            <div data-i18n="Analytics">Dashboard</div>
+                            <i class="menu-icon fas fa-chart-line"></i>
+                            <div data-i18n="Analytics">Tổng Quan</div>
                         </a>
                     </li>
 
-                    <!-- Main Functions -->
+                    <!-- Quản lý sản phẩm -->
                     <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Main</span>
+                        <span class="menu-header-text">Quản Lý Sản Phẩm</span>
                     </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "SanPham" ? "active" : "")">
-                        <a href="/Admin/SanPham/Index" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-food-menu"></i>
-                            <div data-i18n="Basic">SanPham</div>
-                        </a>
-                    </li>
-                   
-
-                    <!-- Other Functions -->
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Other</span>
-                    </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Size" ? "active" : "")">
-                        <a href="/Admin/Size/Index" class="menu-link">
-                            <i class="menu-icon tf-icons bx bxs-user-account"></i>
-                            <div data-i18n="Basic">Size</div>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "AoDai" ? "active" : "")">
+                        <a href="/Admin/AoDai/Index" class="menu-link">
+                            <i class="menu-icon fas fa-tshirt"></i>
+                            <div data-i18n="AoDai">Áo Dài</div>
                         </a>
                     </li>
                     <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "MauSac" ? "active" : "")">
                         <a href="/Admin/MauSac/Index" class="menu-link">
-                            <i class="menu-icon tf-icons bx bxs-user-account"></i>
-                            <div data-i18n="Basic">MauSac</div>
+                            <i class="menu-icon fas fa-palette"></i>
+                            <div data-i18n="MauSac">Màu Sắc</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Size" ? "active" : "")">
+                        <a href="/Admin/Size/Index" class="menu-link">
+                            <i class="menu-icon fas fa-ruler"></i>
+                            <div data-i18n="Size">Kích Thước</div>
                         </a>
                     </li>
                     <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ChatLieu" ? "active" : "")">
                         <a href="/Admin/ChatLieu/Index" class="menu-link">
-                            <i class="menu-icon tf-icons bx bxs-user-account"></i>
-                            <div data-i18n="Basic">Chất Liệu</div>
+                            <i class="menu-icon fas fa-leaf"></i>
+                            <div data-i18n="ChatLieu">Chất Liệu</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "TaAo" ? "active" : "")">
+                        <a href="/Admin/TaAo/Index" class="menu-link">
+                            <i class="menu-icon fas fa-tags"></i>
+                            <div data-i18n="DanhMuc">Danh Mục</div>
+                        </a>
+                    </li>
+
+                    <!-- Quản lý đơn hàng -->
+                    <li class="menu-header small text-uppercase">
+                        <span class="menu-header-text">Quản Lý Đơn Hàng</span>
+                    </li>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "DonHang" ? "active" : "")">
+                        <a href="/Admin/DonHang/Index" class="menu-link">
+                            <i class="menu-icon fas fa-shopping-cart"></i>
+                            <div data-i18n="DonHang">Đơn Hàng</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "KhachHang" ? "active" : "")">
+                        <a href="/Admin/KhachHang/Index" class="menu-link">
+                            <i class="menu-icon fas fa-users"></i>
+                            <div data-i18n="KhachHang">Khách Hàng</div>
+                        </a>
+                    </li>
+
+                    <!-- Báo cáo & Thống kê -->
+                    <li class="menu-header small text-uppercase">
+                        <span class="menu-header-text">Báo Cáo & Thống Kê</span>
+                    </li>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "BaoCao" && ViewContext.RouteData.Values["action"]?.ToString() == "DoanhThu" ? "active" : "")">
+                        <a href="/Admin/BaoCao/DoanhThu" class="menu-link">
+                            <i class="menu-icon fas fa-chart-bar"></i>
+                            <div data-i18n="DoanhThu">Doanh Thu</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "BaoCao" && ViewContext.RouteData.Values["action"]?.ToString() == "TonKho" ? "active" : "")">
+                        <a href="/Admin/BaoCao/TonKho" class="menu-link">
+                            <i class="menu-icon fas fa-warehouse"></i>
+                            <div data-i18n="TonKho">Tồn Kho</div>
+                        </a>
+                    </li>
+
+                    <!-- Cài đặt -->
+                    <li class="menu-header small text-uppercase">
+                        <span class="menu-header-text">Hệ Thống</span>
+                    </li>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "CaiDat" ? "active" : "")">
+                        <a href="/Admin/CaiDat/Index" class="menu-link">
+                            <i class="menu-icon fas fa-cog"></i>
+                            <div data-i18n="CaiDat">Cài Đặt</div>
                         </a>
                     </li>
                     <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "DanhMuc" ? "active" : "")">
@@ -252,13 +445,13 @@
                             <div data-i18n="Basic">Danh Mục</div>
                         </a>
                     </li>
+      
                 </ul>
             </aside>
             <!-- / Menu -->
             <!-- Layout container -->
             <div class="layout-page">
                 <!-- Navbar -->
-
                 <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
                      id="layout-navbar">
                     <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
@@ -270,17 +463,46 @@
                     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
                         <!-- Search -->
                         <div class="navbar-nav align-items-center">
-                            <div class="nav-item d-flex align-items-center">
-                                <i class="bx bx-search fs-4 lh-0"></i>
+                            <div class="nav-item d-flex align-items-center search-box">
+                                <i class="fas fa-search fs-5 lh-0 me-2"></i>
                                 <input type="text"
                                        class="form-control border-0 shadow-none"
-                                       placeholder="Search..."
+                                       placeholder="Tìm kiếm áo dài, khách hàng..."
                                        aria-label="Search..." />
                             </div>
                         </div>
                         <!-- /Search -->
 
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
+                            <!-- Notifications -->
+                            <li class="nav-item navbar-dropdown dropdown me-3">
+                                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                                    <i class="fas fa-bell fs-4 text-warning position-relative">
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill notification-badge">
+                                            3
+                                        </span>
+                                    </i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li class="px-3 py-2">
+                                        <h6 class="mb-0">Thông báo mới</h6>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="fas fa-shopping-cart me-2 text-primary"></i>
+                                            Đơn hàng mới #1234
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                                            Sắp hết hàng: Áo dài lụa đỏ
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+
                             <!-- User -->
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
@@ -308,20 +530,24 @@
                                         <div class="dropdown-divider"></div>
                                     </li>
                                     <li>
-                                       @*  <a class="dropdown-item" href="/Admin/Account/Edit?id=@userid"> *@
-                                            <i class="bx bx-user me-2"></i>
-                                            <span class="align-middle">My Profile</span>
+                                        <a class="dropdown-item" href="/Admin/Account/Profile">
+                                            <i class="fas fa-user me-2"></i>
+                                            <span class="align-middle">Hồ Sơ Cá Nhân</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/Admin/Account/Settings">
+                                            <i class="fas fa-cog me-2"></i>
+                                            <span class="align-middle">Cài Đặt</span>
                                         </a>
                                     </li>
                                     <li>
                                         <div class="dropdown-divider"></div>
                                     </li>
-                                    <li>
-                                        <a class="dropdown-item" href="/Account/Logout">
-                                            <i class="bx bx-power-off me-2"></i>
-                                            <span class="align-middle">Log Out</span>
-                                        </a>
-                                    </li>
+                                    <a class="dropdown-item" asp-area="Auth" asp-controller="Auth" asp-action="Logout">
+                                        <i class="fas fa-sign-out-alt me-2"></i>
+                                        <span class="align-middle">Đăng Xuất</span>
+                                    </a>
                                 </ul>
                             </li>
                             <!--/ User -->
@@ -331,25 +557,28 @@
 
                 <!-- / Navbar -->
                 <!-- Content wrapper -->
-                <div class="content-wrapper">
+                <div class="content-wrapper fade-in-up">
                     <!-- Content -->
-                    <div class="container">
-                        <main role="main" class="pb-3">
+                    <div class="container-xxl">
+                        <main role="main" class="py-4">
                             @RenderBody()
                         </main>
                     </div>
-
                     <!-- / Content -->
                     <!-- Footer -->
                     <footer class="content-footer footer bg-footer-theme">
-                        <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+                        <div class="container-xxl d-flex flex-wrap justify-content-between py-3 flex-md-row flex-column">
                             <div class="mb-2 mb-md-0">
                                 ©
                                 <script>
                                     document.write(new Date().getFullYear());
                                 </script>
-                                , made with ❤️ by
-                                <a href="https://themeselection.com" target="_blank" class="footer-link fw-bolder">ThemeSelection</a>
+                                , được tạo với ❤️ bởi
+                                <a href="#" target="_blank" class="footer-link fw-bolder">Đội Ngũ Phát Triển Áo Dài VN</a>
+                            </div>
+                            <div>
+                                <a href="#" class="footer-link me-4">Hỗ Trợ</a>
+                                <a href="#" class="footer-link">Liên Hệ</a>
                             </div>
                         </div>
                     </footer>
@@ -367,56 +596,59 @@
     </div>
     <!-- / Layout wrapper -->
     <!-- Core JS -->
-    <!-- build:js assets/vendor/js/core.js -->
     <script src="/admin/assets/vendor/libs/jquery/jquery.js"></script>
     <script src="/admin/assets/vendor/libs/popper/popper.js"></script>
     <script src="/admin/assets/vendor/js/bootstrap.js"></script>
     <script src="/admin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-
     <script src="/admin/assets/vendor/js/menu.js"></script>
-    <!-- endbuild -->
+
     <!-- Vendors JS -->
     <script src="/admin/assets/vendor/libs/apex-charts/apexcharts.js"></script>
 
     <!-- Main JS -->
     <script src="/admin/assets/js/main.js"></script>
-
-    <!-- Page JS -->
     <script src="/admin/assets/js/dashboards-analytics.js"></script>
 
-    <!-- Place this tag in your head or just before your close body tag. -->
-    <script async defer src="https://buttons.github.io/buttons.js"></script>
-
+    <!-- External Libraries -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Custom Confirmation Script -->
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", function() {
             const forms = document.querySelectorAll("form[data-confirm]");
 
-            forms.forEach(form => {
-                form.addEventListener("submit", (e) => {
+            forms.forEach(function(form) {
+                form.addEventListener("submit", function(e) {
                     e.preventDefault();
-
                     const confirmMessage = form.getAttribute("data-confirm");
 
-                    // Show SweetAlert2 confirm box
                     Swal.fire({
-                        title: 'Are you sure?',
+                        title: 'Bạn có chắc chắn?',
                         text: confirmMessage,
                         icon: 'warning',
                         showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes, proceed!',
-                        cancelButtonText: 'Cancel'
-                    }).then((result) => {
+                        confirmButtonColor: '#dc2626',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Đồng ý',
+                        cancelButtonText: 'Hủy bỏ'
+                    }).then(function(result) {
                         if (result.isConfirmed) {
                             form.submit();
                         }
                     });
+                });
+            });
+
+            // Add smooth menu interactions
+            document.querySelectorAll('.menu-link').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    document.querySelectorAll('.menu-item').forEach(function(item) {
+                        item.classList.remove('active');
+                    });
+                    e.target.closest('.menu-item').classList.add('active');
                 });
             });
         });

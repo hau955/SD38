@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using AppData.Models;
 using AppApi.IService;
 using Microsoft.EntityFrameworkCore;
+using AppData.Models;
 
 namespace AppApi.Controllers
 {

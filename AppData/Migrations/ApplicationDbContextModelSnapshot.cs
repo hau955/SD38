@@ -139,6 +139,10 @@ namespace AppData.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("SoDienThoai")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<bool>("TrangThai")
                         .HasColumnType("bit");
 
@@ -843,7 +847,7 @@ namespace AppData.Migrations
 
             modelBuilder.Entity("AppData.Models.HoaDonCT", b =>
                 {
-                    b.HasOne("AppData.Models.HoaDon", "HoaDon")
+                    b.HasOne("HoaDon", "HoaDon")
                         .WithMany("HoaDonChiTiets")
                         .HasForeignKey("IDHoaDon")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -923,6 +927,33 @@ namespace AppData.Migrations
                     b.Navigation("GiamGia");
 
                     b.Navigation("SanPham");
+                });
+
+            modelBuilder.Entity("HoaDon", b =>
+                {
+                    b.HasOne("AppData.Models.DiaChiNhanHang", "DiaChiNhanHang")
+                        .WithMany("HoaDons")
+                        .HasForeignKey("IDDiaChiNhanHang")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AppData.Models.HinhThucTT", "HinhThucTT")
+                        .WithMany("HoaDons")
+                        .HasForeignKey("IDHinhThucTT")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AppData.Models.ApplicationUser", "User")
+                        .WithMany("HoaDons")
+                        .HasForeignKey("IDUser")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DiaChiNhanHang");
+
+                    b.Navigation("HinhThucTT");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -1015,11 +1046,6 @@ namespace AppData.Migrations
             modelBuilder.Entity("AppData.Models.HinhThucTT", b =>
                 {
                     b.Navigation("HoaDons");
-                });
-
-            modelBuilder.Entity("AppData.Models.HoaDon", b =>
-                {
-                    b.Navigation("HoaDonChiTiets");
                 });
 
             modelBuilder.Entity("AppData.Models.MauSac", b =>
