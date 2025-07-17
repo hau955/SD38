@@ -24,17 +24,34 @@ var apiBaseUrl = isDev
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole(); // 👈 Ghi log ra terminal/console
+builder.Logging.SetMinimumLevel(LogLevel.Information);
 builder.Services.AddHttpClient<IAuthRepository, AuthRepository>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
 });
 builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
-
+builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
+{
+    opt.TokenLifespan = TimeSpan.FromDays(2); // 24 giờ
+});
 
 builder.Services.AddScoped<ICoAoRepo, CoAoRepo>();
-builder.Services.AddScoped<ITaAoRepo, TaAoRepo>();
 builder.Services.AddScoped<IMauSacRepo, MauSacRepo>();
 builder.Services.AddScoped<ISizeRepo, SizeRepo>();
+builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
+builder.Services.AddScoped<ITaAoRepo, TaAoRepo>();
+builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
+builder.Services.AddHttpClient<IDanhMucRePo, DanhMucRepo>();
+
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 builder.Services.AddDistributedMemoryCache();
 
@@ -45,7 +62,6 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true; // Đảm bảo cookie chỉ được truy cập bởi máy chủ
     options.Cookie.IsEssential = true; // Đánh dấu cookie là cần thiết cho ứng dụng
 });
-// (Không cần dòng AddScoped nữa!)
 
 // CORS (nếu có gọi từ web domain khác)
 builder.Services.AddCors(options =>
@@ -91,4 +107,4 @@ app.MapControllerRoute(
      name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.Run(); 
+app.Run();

@@ -8,78 +8,138 @@
     var taAos = ViewBag.TaAos as List<AppData.Models.TaAo>;
 }
 
-<h2>Cập nhật sản phẩm chi tiết</h2>
+<style>
+    h2 {
+        color: #8B0000;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+    }
 
-<form asp-action="CapNhat" method="post">
-    <input type="hidden" asp-for="IDSanPhamCT" />
-    <input type="hidden" asp-for="IDSanPham" />
+    label {
+        font-weight: 600;
+    }
 
-    <div class="form-group">
-        <label>Màu sắc</label>
-        <select asp-for="IDMauSac" class="form-control">
-            @foreach (var item in mauSacs)
-            {
-                <option value="@item.IDMauSac" selected="@(Model.IDMauSac == item.IDMauSac)">
-                    @item.TenMau
-                </option>
-            }
-        </select>
-    </div>
+    .form-control:focus, .form-select:focus {
+        border-color: #d4af37;
+        box-shadow: 0 0 0 0.15rem rgba(212, 175, 55, 0.4);
+    }
 
-    <div class="form-group">
-        <label>Size</label>
-        <select asp-for="IDSize" class="form-control">
-            @foreach (var item in sizes)
-            {
-                <option value="@item.IDSize" selected="@(Model.IDSize == item.IDSize)">
-                    @item.SoSize
-                </option>
-            }
-        </select>
-    </div>
+    .btn-success {
+        background-color: #8B0000;
+        border: none;
+    }
 
-    <div class="form-group">
-        <label>Cổ áo</label>
-        <select asp-for="IDCoAo" class="form-control">
-            @foreach (var item in coAos)
-            {
-                <option value="@item.IDCoAo" selected="@(Model.IDCoAo == item.IDCoAo)">
-                    @item.TenCoAo
-                </option>
-            }
-        </select>
-    </div>
+        .btn-success:hover {
+            background-color: #a00000;
+        }
 
-    <div class="form-group">
-        <label>Tà áo</label>
-        <select asp-for="IDTaAo" class="form-control">
-            @foreach (var item in taAos)
-            {
-                <option value="@item.IDTaAo" selected="@(Model.IDTaAo == item.IDTaAo)">
-                    @item.TenTaAo
-                </option>
-            }
-        </select>
-    </div>
+    .btn-secondary {
+        background-color: #aaa;
+        border: none;
+    }
 
-    <div class="form-group">
-        <label>Số lượng tồn kho</label>
-        <input asp-for="SoLuongTonKho" class="form-control" />
-    </div>
+        .btn-secondary:hover {
+            background-color: #888;
+        }
 
-    <div class="form-group">
-        <label>Giá bán</label>
-        <input asp-for="GiaBan" class="form-control" />
-    </div>
+    .container {
+        background-color: #fffaf0;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+</style>
 
-    <div class="form-group">
-        <label>Trạng thái</label>
-        <select asp-for="TrangThai" class="form-control">
-            <option value="true" selected="@Model.TrangThai">Còn hàng</option>
-            <option value="false" selected="!@Model.TrangThai">Hết hàng</option>
-        </select>
-    </div>
+<div class="container mt-4">
+    <h2><i class="fas fa-edit me-2"></i> @ViewData["Title"]</h2>
 
-    <button type="submit" class="btn btn-primary">Lưu</button>
-    <a asp-action="DanhSach" asp-route-idSanPham="@Model.IDSanPham" class="btn btn-secondary">Quay lại</a>
-</form>
+    <form asp-action="CapNhat" method="post" class="row g-3">
+        <input type="hidden" asp-for="IDSanPhamCT" />
+        <input type="hidden" asp-for="IDSanPham" />
+
+        <div class="col-md-6">
+            <label class="form-label">Màu sắc</label>
+            <select asp-for="IDMauSac" class="form-select">
+                <option value="">-- Chọn màu sắc --</option>
+                @foreach (var item in mauSacs)
+                {
+                    <option value="@item.IDMauSac" selected="@(Model.IDMauSac == item.IDMauSac)">
+                        @item.TenMau
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Size</label>
+            <select asp-for="IDSize" class="form-select">
+                <option value="">-- Chọn size --</option>
+                @foreach (var item in sizes)
+                {
+                    <option value="@item.IDSize" selected="@(Model.IDSize == item.IDSize)">
+                        @item.SoSize
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Cổ áo</label>
+            <select asp-for="IDCoAo" class="form-select">
+                <option value="">-- Chọn cổ áo --</option>
+                @foreach (var item in coAos)
+                {
+                    <option value="@item.IDCoAo" selected="@(Model.IDCoAo == item.IDCoAo)">
+                        @item.TenCoAo
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Tà áo</label>
+            <select asp-for="IDTaAo" class="form-select">
+                <option value="">-- Chọn tà áo --</option>
+                @foreach (var item in taAos)
+                {
+                    <option value="@item.IDTaAo" selected="@(Model.IDTaAo == item.IDTaAo)">
+                        @item.TenTaAo
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="SoLuongTonKho" class="form-label">Số lượng tồn kho</label>
+            <input asp-for="SoLuongTonKho" class="form-control" placeholder="Nhập số lượng..." />
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="GiaBan" class="form-label">Giá bán (VNĐ)</label>
+            <input asp-for="GiaBan" class="form-control" placeholder="Nhập giá bán..." />
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="TrangThai" class="form-label">Trạng thái</label>
+            <select asp-for="TrangThai" class="form-select">
+                <option value="true" selected="@Model.TrangThai">Còn hàng</option>
+                <option value="false" selected="!@Model.TrangThai">Hết hàng</option>
+            </select>
+        </div>
+
+        <div class="col-12 mt-3 d-flex gap-2">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save me-1"></i> Lưu thay đổi
+            </button>
+            <a asp-controller="SanPham" asp-action="Index" asp-route-idSanPham="@Model.IDSanPham" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Quay lại
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

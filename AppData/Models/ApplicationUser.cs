@@ -19,6 +19,8 @@ namespace AppData.Models
 
         [MaxLength(500)]
         public string? HinhAnh { get; set; } // Không bắt buộc
+        [MaxLength(500)]
+        public string? SoDienThoai { get; set; }
 
         [Required]
         public bool TrangThai { get; set; } = true;

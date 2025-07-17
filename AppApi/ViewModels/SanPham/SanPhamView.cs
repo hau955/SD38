@@ -1,4 +1,6 @@
-﻿namespace AppApi.ViewModels.SanPham
+﻿using AppView.Areas.Admin.ViewModels;
+
+namespace AppApi.ViewModels.SanPham
 {
     public class SanPhamView
     {
@@ -13,5 +15,6 @@
         public string? HinhAnh { get; set; }
         public Guid DanhMucID { get; set; }
         public string? TenDanhMuc { get; set; }
+        public List<SanPhamCTViewModel> ChiTiets { get; set; } = new();
     }
 }

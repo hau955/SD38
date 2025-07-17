@@ -1,6 +1,7 @@
 ﻿
 
 using AppApi.Features.Auth.DTOs;
+using AppData.Models;
 
 namespace AppApi.Features.Services
 {
@@ -11,5 +12,6 @@ namespace AppApi.Features.Services
         Task<ApiResponse<object>> ConfirmEmailAsync(string email, string token);
         Task<ApiResponse<object>> ForgotPasswordAsync(ForgotPasswordDto model);
         Task<ApiResponse<object>> ResetPasswordAsync(ResetPasswordDto model);
+        Task<ApiResponse<object>> ResendConfirmEmailAsync(string email);
     }
 }

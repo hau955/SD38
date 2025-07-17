@@ -2,27 +2,34 @@
 
 @{
     ViewData["Title"] = "Xoá Tà Áo";
+    Layout = "_AdminLayout"; // nếu bạn đang dùng layout dùng chung
 }
 
-<div class="container mt-4">
-    <h2 class="mb-4 text-danger">
-        <i class="fas fa-trash-alt"></i> @ViewData["Title"]
-    </h2>
+<div class="container mt-5">
+    <div class="card shadow-sm border-danger">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">
+                <i class="fas fa-trash-alt"></i> @ViewData["Title"]
+            </h4>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle text-danger"></i>
+                Bạn có chắc chắn muốn xoá tà áo:
+                <strong class="text-danger">@Model.TenTaAo</strong>?
+            </div>
 
-    <div class="alert alert-warning">
-        <strong>⚠️ Xác nhận:</strong> Bạn có chắc chắn muốn xoá tà áo:
-        <strong class="text-danger">@Model.TenTaAo</strong>?
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="IDTaAo" />
+
+                <button type="submit" class="btn btn-danger me-2">
+                    <i class="fas fa-trash-alt"></i> Xoá
+                </button>
+
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Huỷ
+                </a>
+            </form>
+        </div>
     </div>
-
-    <form asp-action="Delete" method="post">
-        <input type="hidden" asp-for="IDTaAo" />
-
-        <button type="submit" class="btn btn-danger">
-            <i class="fas fa-trash"></i> Xoá
-        </button>
-
-        <a asp-action="Index" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Huỷ
-        </a>
-    </form>
 </div>

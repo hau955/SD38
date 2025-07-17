@@ -3,8 +3,22 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<EnableCompressionInStaticFilesBuild>false</EnableCompressionInStaticFilesBuild>
+
+		<!-- Các thuộc tính để tắt tính năng nén tài nguyên tĩnh -->
+		<StaticWebAssetPrecompressionEnabled>false</StaticWebAssetPrecompressionEnabled>
+		<EnableCompressionInStaticWebAssets>false</EnableCompressionInStaticWebAssets>
+		<DiscoverPrecompressedAssetsSkipDuplicateItems>true</DiscoverPrecompressedAssetsSkipDuplicateItems>
+		<!-- Tối ưu hóa publish -->
+		<BlazorEnableCompression>false</BlazorEnableCompression>
+		<BlazorWebAssemblyLoadAllGlobalizationData>false</BlazorWebAssemblyLoadAllGlobalizationData>
 	</PropertyGroup>
+
+	<!-- Thêm target để xử lý static assets -->
+	<Target Name="DisablePrecompressedAssets" BeforeTargets="Build">
+		<PropertyGroup>
+			<DisablePrecompressedAssetsDiscovery>true</DisablePrecompressedAssetsDiscovery>
+		</PropertyGroup>
+	</Target>
 
 	<ItemGroup>
 		<PackageReference Include="PagedList" Version="1.17.0" />
@@ -13,6 +27,14 @@
 	<ItemGroup>
 		<ProjectReference Include="..\AppApi\AppApi.csproj" />
 		<ProjectReference Include="..\AppData\AppData.csproj" />
+	</ItemGroup>
+
+	<!-- Cấu hình cho wwwroot -->
+	<ItemGroup>
+		<Content Update="wwwroot\**">
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</Content>
 	</ItemGroup>
 
 </Project>

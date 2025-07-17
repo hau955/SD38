@@ -3,71 +3,152 @@
     ViewData["Title"] = "Quản lý Sản phẩm chi tiết";
 }
 
+<style>
+    .form-wrapper {
+        background: #fffaf0;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h2 {
+        color: #8B0000;
+        font-weight: 600;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-success {
+        background-color: #d4af37;
+        border: none;
+        font-weight: 500;
+        color: white;
+    }
+
+        .btn-success:hover {
+            background-color: #b8941f;
+        }
+
+    .btn-danger, .btn-warning, .btn-primary {
+        font-weight: 500;
+    }
+
+    .btn-warning {
+        background-color: #FFA500;
+        color: white;
+        border: none;
+    }
+
+        .btn-warning:hover {
+            background-color: #e69500;
+        }
+
+    .btn-danger {
+        background-color: #8B0000;
+        border: none;
+        color: white;
+    }
+
+        .btn-danger:hover {
+            background-color: #a00000;
+        }
+
+    .table th, .table td {
+        vertical-align: middle;
+    }
+
+    .rounded-img {
+        object-fit: cover;
+        border-radius: 0.5rem;
+        border: 1px solid #ddd;
+    }
+</style>
+
 <div class="container mt-4">
-    <h2 class="mb-4 text-primary">
-        <i class="fas fa-list"></i> @ViewData["Title"]
-    </h2>
+    <div class="form-wrapper">
+        <h2><i class="fas fa-layer-group me-2"></i>@ViewData["Title"]</h2>
 
-    <a class="btn btn-success mb-3" asp-action="Create">
-        <i class="fas fa-plus"></i> Thêm mới
-    </a>
+        <a class="btn btn-success mb-3" asp-area="Admin" asp-controller="SanPhamCT" asp-action="Create">
+            <i class="fas fa-plus"></i> Thêm mới
+        </a>
 
-    @if (Model != null && Model.Any())
-    {
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-light">
-                    <tr class="text-center">
-                        <th>Ảnh</th>
-                        <th>Sản phẩm</th>
-                        <th>Màu sắc</th>
-                        <th>Size</th>
-                        <th>Cổ áo</th>
-                        <th>Tà áo</th>
-                        <th>Giá bán</th>
-                        <th>Tồn kho</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle shadow-sm text-center">
+                    <thead class="table-light">
                         <tr>
-                            <td class="text-center">
-                              
-                            </td>
-                            <td>@item.SanPham?.TenSanPham</td>
-                            <td>@item.MauSac?.TenMau</td>
-                            <td>@item.SizeAo?.SoSize</td>
-                            <td>@item.CoAo?.TenCoAo</td>
-                            <td>@item.TaAo?.TenTaAo</td>
-                            <td class="text-end">@item.GiaBan.ToString("N0") đ</td>
-                            <td class="text-center">@item.SoLuongTonKho</td>
-                            <td class="text-center">
-                                <span class="badge @(item.TrangThai ? "bg-success" : "bg-secondary")">
-                                    @(item.TrangThai ? "Hoạt động" : "Không hoạt động")
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <a asp-action="Edit" asp-route-id="@item.IDSanPhamCT" class="btn btn-sm btn-primary me-1">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a asp-action="ToggleStatus" asp-route-id="@item.IDSanPhamCT" class="btn btn-sm btn-warning me-1">
-                                    <i class="fas fa-sync-alt"></i>
-                                </a>
-                                <a asp-action="Delete" asp-route-id="@item.IDSanPhamCT" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">
-                                    <i class="fas fa-trash-alt"></i>
-                                </a>
-                            </td>
+                            <th>Ảnh</th>
+                            <th>Sản phẩm</th>
+                            <th>Màu sắc</th>
+                            <th>Size</th>
+                            <th>Cổ áo</th>
+                            <th>Tà áo</th>
+                            <th>Giá bán</th>
+                            <th>Tồn kho</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
-    else
-    {
-        <div class="alert alert-info">Không có sản phẩm chi tiết nào.</div>
-    }
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.SanPham?.HinhAnh))
+                                    {
+                                        <img src="@item.SanPham.HinhAnh"
+                                             alt="Ảnh sản phẩm"
+                                             width="70"
+                                             height="70"
+                                             class="rounded-img" />
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">Không có ảnh</span>
+                                    }
+                                </td>
+                                <td>@item.SanPham?.TenSanPham</td>
+                                <td>@item.MauSac?.TenMau</td>
+                                <td>@item.SizeAo?.SoSize</td>
+                                <td>@item.CoAo?.TenCoAo</td>
+                                <td>@item.TaAo?.TenTaAo</td>
+                                <td class="text-end text-nowrap">@item.GiaBan.ToString("N0") đ</td>
+                                <td>@item.SoLuongTonKho</td>
+                                <td>
+                                    <span class="badge rounded-pill @(item.TrangThai ? "bg-success" : "bg-secondary")">
+                                        @(item.TrangThai ? "Hoạt động" : "Ẩn")
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-center gap-1">
+                                        <a asp-action="Edit" asp-route-id="@item.IDSanPhamCT"
+                                           class="btn btn-sm btn-primary" title="Sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a asp-action="ToggleStatus" asp-route-id="@item.IDSanPhamCT"
+                                           class="btn btn-sm btn-warning" title="Chuyển trạng thái">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.IDSanPhamCT"
+                                           class="btn btn-sm btn-danger"
+                                           onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm chi tiết này?');"
+                                           title="Xóa">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">Không có sản phẩm chi tiết nào.</div>
+        }
+    </div>
 </div>

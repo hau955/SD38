@@ -633,3 +633,92 @@ body {
     position: relative;
     z-index: 1020;
 }
+.btn-loading {
+    position: relative;
+}
+
+    .btn-loading:after {
+        content: "";
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        width: 20px;
+        height: 20px;
+        margin-top: -10px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 1s linear infinite;
+    }
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Đảm bảo modal hiển thị đúng */
+.modal-content {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+    border-bottom: 1px solid #eee;
+    padding: 1.5rem;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+/* Tùy chỉnh radio button */
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+/* Màu icon giới tính */
+.text-pink {
+    color: #e83e8c;
+}
+
+/* Input date custom */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+}
+
+/* Thêm vào site.css */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+    .btn-loading:after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        margin: -10px 0 0 -10px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

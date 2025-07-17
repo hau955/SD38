@@ -1,118 +1,130 @@
-﻿@using AppData.Models
-@model List<AppData.Models.SanPhamCT>
+﻿@model AppView.Areas.Admin.ViewModels.SanPhamChiTietViewModels.CreateSanPhamCTViewModel
+@using AppData.Models;
 @{
-    var idSanPham = ViewBag.IDSanPham;
+    ViewData["Title"] = "Thêm chi tiết sản phẩm";
+    var mauSacs = ViewBag.MauSacs as List<MauSac>;
+    var sizes = ViewBag.Sizes as List<Size>;
+    var coAos = ViewBag.CoAos as List<CoAo>;
+    var taAos = ViewBag.TaAos as List<TaAo>;
 }
 
-<h2>Thêm Chi Tiết Sản Phẩm</h2>
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white text-center fw-bold fs-4">
+            🧵 THÊM CHI TIẾT SẢN PHẨM
+        </div>
 
-<form asp-action="CreateMultiple" method="post">
-    <table class="table" id="spctTable">
-        <thead>
-            <tr>
-                <th>Màu</th>
-                <th>Size</th>
-                <th>Cổ áo</th>
-                <th>Tà áo</th>
-                <th>Số lượng</th>
-                <th>Giá bán</th>
-                <th>Trạng thái</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @{
-                var mauSacs = ViewBag.MauSacs as List<MauSac>;
-                var sizes = ViewBag.Sizes as List<Size>;
-                var coAos = ViewBag.CoAos as List<CoAo>;
-                var taAos = ViewBag.TaAos as List<TaAo>;
-            }
-
-            @for (int i = 0; i < Model.Count; i++)
+        <div class="card-body">
+            @* Thông báo lỗi từ TempData *@
+            @if (TempData["Error"] != null)
             {
-        <tr>
-            <td>
-                <select name="[@i].IDMauSac" class="form-control">
-                            @foreach (var item in mauSacs)
-                            {
-                            <option value="@item.IDMauSac">@item.TenMau</option>
-                            }
-                </select>
-            </td>
-            <td>
-                <select name="[@i].IDSize" class="form-control">
-                            @foreach (var item in sizes)
-                            {
-                            <option value="@item.IDSize">@item.SoSize</option>
-                            }
-                </select>
-            </td>
-            <td>
-                <select name="[@i].IDCoAo" class="form-control">
-                            @foreach (var item in coAos)
-                            {
-                            <option value="@item.IDCoAo">@item.TenCoAo</option>
-                            }
-                </select>
-            </td>
-            <td>
-                <select name="[@i].IDTaAo" class="form-control">
-                            @foreach (var item in taAos)
-                            {
-                            <option value="@item.IDTaAo">@item.TenTaAo</option>
-                            }
-                </select>
-            </td>
-            <td><input name="[@i].SoLuongTonKho" class="form-control" /></td>
-            <td><input name="[@i].GiaBan" class="form-control" /></td>
-            <td>
-                <select name="[@i].TrangThai" class="form-control">
-                    <option value="true">Còn hàng</option>
-                    <option value="false">Hết hàng</option>
-                </select>
-            </td>
-            <td><button type="button" class="btn btn-danger remove-row">X</button></td>
-                    <input type="hidden" name="[@(i)].IDSanPham" value="@ViewBag.IDSanPham" />
-
-        </tr>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
             }
 
-        </tbody>
-    </table>
-    <a asp-action="DanhSach" asp-route-idSanPham="@ViewBag.IDSanPham" class="btn btn-primary">Xem danh sách sản phẩm chi tiết</a>
+            <form asp-action="CreateMultiple" method="post">
+                <input type="hidden" asp-for="IDSanPham" />
+                @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
 
-    <button type="button" class="btn btn-secondary" id="addRow">+ Thêm dòng</button>
-    <button type="submit" class="btn btn-success">Lưu</button>
-</form>
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <label class="fw-bold mb-2">🎨 Màu sắc:</label>
+                        <div class="border rounded p-2 bg-light">
+                            @foreach (var item in Model.MauSacList)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="SelectedMauSacs" value="@item.Value" id="mau_@item.Value" />
+                                    <label class="form-check-label" for="mau_@item.Value">@item.Text</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="fw-bold mb-2">📏 Size:</label>
+                        <div class="border rounded p-2 bg-light">
+                            @foreach (var item in Model.SizeList)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="SelectedSizes" value="@item.Value" id="size_@item.Value" />
+                                    <label class="form-check-label" for="size_@item.Value">@item.Text</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="fw-bold mb-2">👕 Cổ áo:</label>
+                        <div class="border rounded p-2 bg-light">
+                            @foreach (var item in Model.CoAoList)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="SelectedCoAos" value="@item.Value" id="coao_@item.Value" />
+                                    <label class="form-check-label" for="coao_@item.Value">@item.Text</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="fw-bold mb-2">👗 Tà áo:</label>
+                        <div class="border rounded p-2 bg-light">
+                            @foreach (var item in Model.TaAoList)
+                            {
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="SelectedTaAos" value="@item.Value" id="taao_@item.Value" />
+                                    <label class="form-check-label" for="taao_@item.Value">@item.Text</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="GiaBan" class="form-label fw-bold">💰 Giá bán:</label>
+                        <input asp-for="GiaBan" class="form-control" placeholder="Nhập giá bán..." />
+                        <span asp-validation-for="GiaBan" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="SoLuongTonKho" class="form-label fw-bold">📦 Số lượng tồn kho:</label>
+                        <input asp-for="SoLuongTonKho" class="form-control" placeholder="Nhập số lượng tồn..." />
+                        <span asp-validation-for="SoLuongTonKho" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <div class="d-flex gap-2">
+                        <a href="/Admin/SanPham/Index" class="btn btn-outline-secondary d-flex align-items-center">
+                            <i class="bx bx-food-menu me-2"></i>
+                            <span>Quay lại</span>
+                        </a>
+                        <!-- Nút quay lại danh sách sản phẩm chi tiết -->
+                        <a asp-action="DanhSach" asp-route-idSanPham="@Model.IDSanPham" class="btn btn-outline-secondary d-flex align-items-center">
+                            <i class="bx bx-list-ul me-2"></i>
+                            <span>Xem danh sách</span>
+                        </a>
+
+                        <!-- Nút quay lại danh sách sản phẩm chính -->
+                        
+                    </div>
+
+                    
+                    <button type="submit" class="btn btn-success px-4">
+                        ✅ Tạo Chi Tiết Sản Phẩm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
-    <script>
-               let index = @Model.Count;
-
-        document.getElementById("addRow").addEventListener("click", function () {
-            const tbody = document.querySelector("#spctTable tbody");
-            const clone = tbody.rows[0].cloneNode(true);
-
-            // Cập nhật name theo index mới
-            clone.innerHTML = clone.innerHTML.replaceAll(/\[\d+\]/g, `[${index}]`);
-
-            // Reset giá trị
-            clone.querySelectorAll("input").forEach(input => {
-                // reset input trừ IDSanPham
-                if (!input.name.includes("IDSanPham")) {
-                    input.value = "";
-                }
-            });
-
-            // Gán lại value cho input hidden IDSanPham
-            const hiddenInput = clone.querySelector(`input[name="[${index}].IDSanPham"]`);
-            if (hiddenInput) {
-                hiddenInput.value = "@idSanPham"; // Razor inject
-            }
-
-            tbody.appendChild(clone);
-            index++;
-        });
-
-    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

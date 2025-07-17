@@ -25,7 +25,15 @@ namespace AppView.Areas.Auth.ViewModel
         [Required]
         [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
         public string PhoneNumber { get; set; }
+        [Required(ErrorMessage = "Vui lòng chọn giới tính")]
+        public bool IsMale { get; set; }
 
+        [Required(ErrorMessage = "Vui lòng nhập ngày sinh")]
+        [DataType(DataType.Date)]
+        [Display(Name = "Ngày sinh")]
+        public DateTime DateOfBirth { get; set; } = DateTime.Today.AddYears(-18); // Mặc định 18 tuổi
         public string? Address { get; set; }
     }
+  
+
 }

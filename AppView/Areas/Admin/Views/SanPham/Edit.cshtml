@@ -1,127 +1,198 @@
-﻿@model AppView.Areas.Admin.ViewModels.SanPhamCTViewModel
+﻿@using AppView.ViewModels
+@model SanPhamCTViewModel
 
 @{
     ViewData["Title"] = "Sửa sản phẩm";
 }
 
+<style>
+    .form-wrapper {
+        background: #fffaf0;
+        border-radius: 1rem;
+        padding: 2rem 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h2, h4 {
+        color: #8B0000;
+        font-weight: 600;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    label {
+        font-weight: 500;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 0 0.15rem rgba(212, 175, 55, 0.25);
+        border-color: #d4af37;
+    }
+
+    .form-check-input:checked {
+        background-color: #d4af37;
+        border-color: #d4af37;
+    }
+
+    .btn-primary {
+        background-color: #8B0000;
+        border: none;
+        font-weight: 500;
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background-color: #a00000;
+        }
+
+    .btn-secondary {
+        background-color: #d4af37;
+        border: none;
+        font-weight: 500;
+        color: white;
+    }
+
+        .btn-secondary:hover {
+            background-color: #b8941f;
+        }
+
+    .text-danger {
+        font-size: 0.875rem;
+    }
+
+    img.preview-img {
+        object-fit: cover;
+        border: 1px solid #ccc;
+        border-radius: 0.5rem;
+    }
+
+    select.form-control {
+        background-color: #fff;
+    }
+</style>
+
 <div class="container mt-4">
-    <h2 class="mb-4">@ViewData["Title"]</h2>
+    <div class="col-md-12 mx-auto form-wrapper">
+        <h2><i class="fas fa-edit me-2"></i>@ViewData["Title"]</h2>
 
-    <form asp-action="Edit" method="post" enctype="multipart/form-data">
-        <input type="hidden" asp-for="IDSanPham" />
-        <input type="hidden" asp-for="HinhAnh" />
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+            <input type="hidden" asp-for="IDSanPham" />
+            <input type="hidden" asp-for="HinhAnh" />
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label asp-for="TenSanPham" class="form-label">Tên sản phẩm</label>
-                <input asp-for="TenSanPham" class="form-control" />
-                <span asp-validation-for="TenSanPham" class="text-danger"></span>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="TenSanPham" class="form-label">Tên sản phẩm</label>
+                    <input asp-for="TenSanPham" class="form-control" />
+                    <span asp-validation-for="TenSanPham" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="GioiTinh" class="form-label">Giới tính</label>
+                    <select asp-for="GioiTinh" class="form-control">
+                        <option value="">Unisex</option>
+                        <option value="true" selected="@((Model.GioiTinh ?? false) == true)">Nam</option>
+                        <option value="false" selected="@((Model.GioiTinh ?? true) == false)">Nữ</option>
+                    </select>
+                    <span asp-validation-for="GioiTinh" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="TrongLuong" class="form-label">Trọng lượng (gram)</label>
+                    <input asp-for="TrongLuong" class="form-control" />
+                    <span asp-validation-for="TrongLuong" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="MoTa" class="form-label">Mô tả</label>
+                    <textarea asp-for="MoTa" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="MoTa" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>Ảnh hiện tại</label><br />
+                    @if (!string.IsNullOrEmpty(Model.HinhAnh))
+                    {
+                        <img src="@Model.HinhAnh" alt="Ảnh hiện tại" class="preview-img" width="120" height="120" />
+                    }
+                    else
+                    {
+                        <span class="text-muted">Không có ảnh</span>
+                    }
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ImageFile" class="form-label">Chọn ảnh mới</label>
+                    <input asp-for="ImageFile" type="file" class="form-control" />
+                    <span asp-validation-for="ImageFile" class="text-danger"></span>
+                </div>
             </div>
 
-            <div class="col-md-6 mb-3">
-                <label asp-for="GioiTinh" class="form-label">Giới tính</label>
-                <select asp-for="GioiTinh" class="form-control">
-                    <option value="">Unisex</option>
-                    <option value="true" selected="@((Model.GioiTinh ?? false) == true)">Nam</option>
-                    <option value="false" selected="@((Model.GioiTinh ?? true) == false)">Nữ</option>
-                </select>
-                <span asp-validation-for="GioiTinh" class="text-danger"></span>
+            <hr />
+            <h4><i class="fas fa-info-circle me-2"></i>Thông tin chi tiết</h4>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="IdSize" class="form-label">Size</label>
+                    <select asp-for="IdSize" class="form-control" asp-items="Model.SizeList">
+                        <option value="">-- Chọn size --</option>
+                    </select>
+                    <span asp-validation-for="IdSize" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="IdMauSac" class="form-label">Màu sắc</label>
+                    <select asp-for="IdMauSac" class="form-control" asp-items="Model.MauSacList">
+                        <option value="">-- Chọn màu sắc --</option>
+                    </select>
+                    <span asp-validation-for="IdMauSac" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="IdCoAo" class="form-label">Cổ áo</label>
+                    <select asp-for="IdCoAo" class="form-control" asp-items="Model.CoAoList">
+                        <option value="">-- Chọn cổ áo --</option>
+                    </select>
+                    <span asp-validation-for="IdCoAo" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="IdTaAo" class="form-label">Tà áo</label>
+                    <select asp-for="IdTaAo" class="form-control" asp-items="Model.TaAoList">
+                        <option value="">-- Chọn tà áo --</option>
+                    </select>
+                    <span asp-validation-for="IdTaAo" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="GiaBan" class="form-label">Giá bán</label>
+                    <input asp-for="GiaBan" class="form-control" />
+                    <span asp-validation-for="GiaBan" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="SoLuongTonKho" class="form-label">Số lượng tồn kho</label>
+                    <input asp-for="SoLuongTonKho" class="form-control" />
+                    <span asp-validation-for="SoLuongTonKho" class="text-danger"></span>
+                </div>
             </div>
 
-            <div class="col-md-6 mb-3">
-                <label asp-for="TrongLuong" class="form-label">Trọng lượng (gram)</label>
-                <input asp-for="TrongLuong" class="form-control" />
-                <span asp-validation-for="TrongLuong" class="text-danger"></span>
+            <div class="form-check mb-4">
+                <input asp-for="TrangThai" class="form-check-input" />
+                <label asp-for="TrangThai" class="form-check-label">Hoạt động</label>
             </div>
 
-            <div class="col-md-6 mb-3">
-                <label asp-for="MoTa" class="form-label">Mô tả</label>
-                <textarea asp-for="MoTa" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="MoTa" class="text-danger"></span>
+            <div class="mt-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> Cập nhật
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-times me-1"></i> Hủy
+                </a>
             </div>
-
-            <div class="col-md-6 mb-3">
-                <label>Ảnh hiện tại</label><br />
-                @if (!string.IsNullOrEmpty(Model.HinhAnh))
-                {
-                    <img src="@Model.HinhAnh" alt="Ảnh hiện tại" width="120" height="120" style="object-fit:cover;" />
-                }
-                else
-                {
-                    <span class="text-muted">Không có ảnh</span>
-                }
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label asp-for="ImageFile" class="form-label">Chọn ảnh mới</label>
-                <input asp-for="ImageFile" type="file" class="form-control" />
-                <span asp-validation-for="ImageFile" class="text-danger"></span>
-            </div>
-        </div>
-
-        <hr />
-        <h4 class="text-secondary">Thông tin chi tiết</h4>
-
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label asp-for="IdSize" class="form-label">Size</label>
-                <select asp-for="IdSize" class="form-control" asp-items="Model.SizeList">
-                    <option value="">-- Chọn size --</option>
-                </select>
-                <span asp-validation-for="IdSize" class="text-danger"></span>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label asp-for="IdMauSac" class="form-label">Màu sắc</label>
-                <select asp-for="IdMauSac" class="form-control" asp-items="Model.MauSacList">
-                    <option value="">-- Chọn màu sắc --</option>
-                </select>
-                <span asp-validation-for="IdMauSac" class="text-danger"></span>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label asp-for="IdCoAo" class="form-label">Cổ áo</label>
-                <select asp-for="IdCoAo" class="form-control" asp-items="Model.CoAoList">
-                    <option value="">-- Chọn cổ áo --</option>
-                </select>
-                <span asp-validation-for="IdCoAo" class="text-danger"></span>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label asp-for="IdTaAo" class="form-label">Tà áo</label>
-                <select asp-for="IdTaAo" class="form-control" asp-items="Model.TaAoList">
-                    <option value="">-- Chọn tà áo --</option>
-                </select>
-                <span asp-validation-for="IdTaAo" class="text-danger"></span>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label asp-for="GiaBan" class="form-label">Giá bán</label>
-                <input asp-for="GiaBan" class="form-control" />
-                <span asp-validation-for="GiaBan" class="text-danger"></span>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label asp-for="SoLuongTonKho" class="form-label">Số lượng tồn kho</label>
-                <input asp-for="SoLuongTonKho" class="form-control" />
-                <span asp-validation-for="SoLuongTonKho" class="text-danger"></span>
-            </div>
-        </div>
-
-        <div class="form-check mb-3">
-            <input asp-for="TrangThai" class="form-check-input" />
-            <label asp-for="TrangThai" class="form-check-label">Hoạt động</label>
-        </div>
-
-        <div class="mt-3">
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i> Cập nhật
-            </button>
-            <a asp-action="Index" class="btn btn-secondary">
-                <i class="fas fa-times"></i> Hủy
-            </a>
-        </div>
-    </form>
+        </form>
+    </div>
 </div>
 
 @section Scripts {

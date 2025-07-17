@@ -127,6 +127,13 @@ namespace AppData.Models
                 .WithMany(ta => ta.SanPhamChiTiets)
                 .HasForeignKey(spct => spct.IDTaAo)
                 .OnDelete(DeleteBehavior.Restrict);
+            builder.Entity<HoaDon>()
+    .Property(h => h.TrangThaiDonHang)
+    .HasConversion<string>();
+
+            builder.Entity<HoaDon>()
+                .Property(h => h.TrangThaiThanhToan)
+                .HasConversion<string>();
 
             // Kiểu decimal mặc định là (18,2)
             foreach (var property in builder.Model.GetEntityTypes()

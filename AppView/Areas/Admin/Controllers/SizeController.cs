@@ -1,6 +1,7 @@
 ﻿using AppData.Models;
 using AppView.Areas.Admin.IRepo;
 using Microsoft.AspNetCore.Mvc;
+using AppData.Models;
 
 namespace AppView.Areas.Admin.Controllers
 {
@@ -47,7 +48,7 @@ namespace AppView.Areas.Admin.Controllers
 
                 await _sizeRepo.Create(model);
                 TempData["Message"] = "✅ Tạo size thành công!";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {

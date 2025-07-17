@@ -6,6 +6,7 @@ namespace AppView.Areas.Admin.ViewModels
     public class SanPhamCTViewModel
     {
         // Dữ liệu sản phẩm chính
+        public Guid IDSanPhamCT { get; set; }
         public Guid IDSanPham { get; set; }
 
         [Required]
@@ -21,22 +22,22 @@ namespace AppView.Areas.Admin.ViewModels
 
         public IFormFile? ImageFile { get; set; }
 
-        public string? HinhAnh { get; set; } 
+        public string HinhAnh { get; set; }
 
-        [Required]
-        public Guid IdSize { get; set; }
-
-        [Required]
         public Guid IdMauSac { get; set; }
+        public string? MauSac { get; set; }
 
-        [Required]
+        public Guid IdSize { get; set; }
+        public string? Size { get; set; }
+
         public Guid IdCoAo { get; set; }
+        public string? CoAo { get; set; }
+
+        public Guid? IdTaAo { get; set; }
+        public string? TaAo { get; set; }
 
         [Required]
-        public Guid IdTaAo { get; set; }
-
-        [Required]
-        public int GiaBan { get; set; }
+        public decimal GiaBan { get; set; }
 
         [Required]
         public int SoLuongTonKho { get; set; }

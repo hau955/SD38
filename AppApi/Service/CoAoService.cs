@@ -1,6 +1,8 @@
 ﻿using AppApi.IService;
 using AppData.Models;
 using Microsoft.EntityFrameworkCore;
+using AppData.Models;
+
 namespace AppApi.Service
 {
     public class CoAoService : ICoAoService
