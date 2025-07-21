@@ -37,5 +37,8 @@ namespace AppData.Models
         public DateTime? NgayTao { get; set; } 
         public DateTime? NgaySua { get; set; } 
         public bool TrangThai { get; set; }
+        [JsonIgnore]
+        // 1 sản phẩm có thể có nhiều record giảm giá khác nhau (theo thời gian hoặc sự kiện)
+        public virtual ICollection<SanPhamGG> SanPhamGiamGias { get; set; } = new List<SanPhamGG>();
     }
 }

@@ -1,0 +1,135 @@
+﻿@model AppView.Areas.Auth.ViewModel.LoginViewModel
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+<link rel="stylesheet" href="~/css/login.css" />
+<div class="alert alert-warning alert-dismissible fade show d-none" id="emailConfirmationAlert" role="alert">
+    <strong>Vui lòng xác nhận email!</strong>
+    <span id="emailConfirmationMessage"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<div class="modal fade" id="loginModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body" id="loginModalBody">
+                <div class="login-container">
+                    <div class="login-card">
+                        <div class="login-header">
+                            <div class="logo-container">
+                                <i class="fas fa-tshirt"></i>
+                            </div>
+                            <h1 class="login-title">Đăng nhập</h1>
+                            <p class="login-subtitle">Hệ thống quản lý bán hàng áo dài</p>
+                        </div>
+
+                        <div class="login-form">
+                            <form asp-area="Auth" asp-controller="Auth" asp-action="Login" method="post" onsubmit="submitLogin(event) id="loginForm">
+                                <div asp-validation-summary="All" class="validation-summary text-danger"></div>
+
+                                <div class="form-floating">
+                                    <input asp-for="Email" type="email" id="email" placeholder=" " class="form-control" />
+                                    <label for="email">
+                                        <i class="fas fa-envelope me-2"></i>Địa chỉ email
+                                    </label>
+                                    <span asp-validation-for="Email" class="field-validation-error"></span>
+                                </div>
+
+                                <div class="form-floating">
+                                    <input asp-for="Password" type="password" id="password" placeholder=" " class="form-control" />
+                                    <label for="password">
+                                        <i class="fas fa-lock me-2"></i>Mật khẩu
+                                    </label>
+                                    <span class="password-toggle" onclick="togglePassword()">
+                                        <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                                    </span>
+                                    <span asp-validation-for="Password" class="field-validation-error"></span>
+                                </div>
+
+                                <button type="submit" class="btn btn-login" id="loginBtn">
+                                    <i class="fas fa-sign-in-alt me-2"></i> Đăng nhập
+                                </button>
+
+
+                                <div class="forgot-password">
+                                    <a asp-area="Auth" asp-controller="Auth" asp-action="ForgotPassword">
+                                        <i class="fas fa-question-circle me-1"></i>
+                                        Quên mật khẩu?
+                                    </a>
+                                </div>
+                                <div class="forgot-password text-center mt-2">
+                                    <a href="#" id="showRegisterModalBtn" role="button">
+                                        <i class="fas fa-user-plus me-1"></i> Đăng ký ngay!
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="alert alert-warning alert-dismissible fade show d-none" id="emailConfirmationAlert" role="alert">
+    <strong>Vui lòng xác nhận email!</strong>
+    <span id="emailConfirmationMessage"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
+<script>
+    function showEmailConfirmationAlert(email) {
+        const alertDiv = document.getElementById('emailConfirmationAlert');
+        const messageSpan = document.getElementById('emailConfirmationMessage');
+
+        if (alertDiv && messageSpan) {
+            messageSpan.innerHTML = `Kiểm tra hộp thư đến của bạn hoặc
+                <a href="#" onclick="resendConfirmationEmail('${email}')">gửi lại email xác nhận</a>.`;
+            alertDiv.classList.remove('d-none');
+        }
+    }
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1. Tìm nút "Đăng ký ngay!" bằng ID
+        const showRegisterBtn = document.getElementById('showRegisterModalBtn');
+
+        // 2. Chỉ chạy mã nếu nút đó tồn tại trên trang
+        if (showRegisterBtn) {
+            // 3. Thêm sự kiện 'click'
+            showRegisterBtn.addEventListener('click', function (event) {
+                // Ngăn thẻ <a> chuyển trang
+                event.preventDefault();
+
+                // 4. Lấy DOM element của cả hai modal
+                const loginModalEl = document.getElementById('loginModal');
+                const registerModalEl = document.getElementById('registerModal'); // Giả sử modal đăng ký có id này
+
+                if (loginModalEl && registerModalEl) {
+                    // 5. Lấy instance của modal đăng nhập đang mở và ẩn nó đi
+                    const loginModal = bootstrap.Modal.getInstance(loginModalEl);
+                    if (loginModal) {
+                        loginModal.hide();
+                    }
+
+                    // 6. Tạo instance mới cho modal đăng ký và hiển thị nó
+                    const registerModal = new bootstrap.Modal(registerModalEl);
+                    registerModal.show();
+                } else {
+                    console.error('Không tìm thấy Login Modal hoặc Register Modal trên trang.');
+                }
+            });
+        }
+    });
+        function showEmailConfirmationAlert(email) {
+        const alertDiv = document.getElementById('emailConfirmationAlert');
+        const messageSpan = document.getElementById('emailConfirmationMessage');
+
+        if (alertDiv && messageSpan) {
+            messageSpan.innerHTML = `Kiểm tra hộp thư đến của bạn hoặc <a href="#" onclick="resendConfirmationEmail('${email}')">gửi lại email xác nhận</a>.`;
+            alertDiv.classList.remove('d-none');
+        }
+    }
+</script>

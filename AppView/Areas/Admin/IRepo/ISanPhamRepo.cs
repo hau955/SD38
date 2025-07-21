@@ -9,5 +9,6 @@ namespace AppView.Areas.Admin.IRepo
         Task<bool> UpdateSanPhamAsync(SanPhamCreateViewModel model);
         Task<List<SanPhamView>> GetAllSanPhamAsync();
         Task<SanPhamCreateViewModel?> GetByIdAsync(Guid id);
+        
     }
 }

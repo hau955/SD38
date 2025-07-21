@@ -90,18 +90,18 @@
                         <td class="fw-semibold text-start">@item.TenSanPham</td>
                         <td class="text-start">@item.MoTa</td>
                         <td>@item.TrongLuong</td>
-                        <td>
+                         <td>
                             <span class="badge badge-custom bg-info text-dark">
                                 @(item.GioiTinh ? "Nam" : "Nữ")
                             </span>
-                        </td>
+                        </td> 
                         <td>
                             <span class="badge badge-custom @(item.TrangThai ? "bg-success" : "bg-secondary")">
                                 @(item.TrangThai ? "Còn hàng" : "Hết hàng")
                             </span>
                         </td>
                         <td>@item.TenDanhMuc</td>
-                        <td>
+                        @* <td>
                             @if (!string.IsNullOrEmpty(item.HinhAnh))
                             {
                                 <img src="@item.HinhAnh" class="rounded" width="70" height="70" style="object-fit:cover;" />
@@ -110,8 +110,8 @@
                             {
                                 <span class="text-muted">Không có ảnh</span>
                             }
-                        </td>
-                        <td>@item.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                        </td> *@
+                       @*  <td>@item.NgayTao.ToString("dd/MM/yyyy HH:mm")</td> *@
                         <td>
                             <a asp-area="Admin"
                                asp-controller="SanPhamCT"

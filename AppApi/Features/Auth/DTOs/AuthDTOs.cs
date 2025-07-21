@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AppApi.Features.DTOs
+namespace AppApi.Features.Auth.DTOs
 {
     public class ApiResponse<T>
     {
@@ -8,6 +8,7 @@ namespace AppApi.Features.DTOs
         public string Message { get; set; }
         public T Data { get; set; }
         public int StatusCode { get; set; }
+        public Dictionary<string, string[]> Errors { get; set; }
 
         public static ApiResponse<T> Success(T data, string message = "Thành công", int statusCode = 200) =>
             new ApiResponse<T> { IsSuccess = true, Data = data, Message = message, StatusCode = statusCode };
@@ -35,7 +36,10 @@ namespace AppApi.Features.DTOs
         [Required]
         [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
         public string PhoneNumber { get; set; }
-        
+        [Required]
+        public bool Gender { get; set; }
+        [Required]
+        public DateTime DateOfBirth { get; set; }
         public string? Address { get; set; }
     }
 

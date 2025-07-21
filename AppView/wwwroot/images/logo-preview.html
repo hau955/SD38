@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logo Áo Dài Việt Nam</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* Logo chính - Horizontal Layout */
+        .main-logo {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px 60px;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(220, 38, 38, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .logo-icon {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(220, 38, 38, 0.3);
+            flex-shrink: 0;
+        }
+
+        .ao-dai-figure {
+            width: 80%;
+            height: 80%;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .woman-silhouette {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: relative;
+        }
+
+        .woman-silhouette::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15px;
+            height: 15px;
+            background: #dc2626;
+            border-radius: 50%;
+        }
+
+        .woman-silhouette::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 40px;
+            background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        }
+
+        .lotus-decoration {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #fef3c7;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .lotus-1 { top: 10px; right: 15px; animation-delay: 0s; }
+        .lotus-2 { bottom: 15px; left: 10px; animation-delay: 1s; }
+        .lotus-3 { top: 50%; right: 10px; animation-delay: 2s; }
+
+        .logo-text {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .brand-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        .tagline {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.1rem;
+            color: #92400e;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Vertical Layout Alternative */
+        .vertical-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 50px 40px;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(220, 38, 38, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(245, 158, 11, 0.3);
+            text-align: center;
+        }
+
+        .vertical-logo .logo-icon {
+            width: 100px;
+            height: 100px;
+        }
+
+        .vertical-logo .brand-name {
+            font-size: 2.8rem;
+        }
+
+        .vertical-logo .tagline {
+            font-size: 1rem;
+        }
+
+        /* Compact Horizontal Layout */
+        .compact-logo {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 35px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(220, 38, 38, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .compact-logo .logo-icon {
+            width: 60px;
+            height: 60px;
+        }
+
+        .compact-logo .brand-name {
+            font-size: 1.8rem;
+        }
+
+        .compact-logo .tagline {
+            font-size: 0.8rem;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(180deg); }
+        }
+
+        .logo-icon {
+            animation: glow 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 10px 30px rgba(220, 38, 38, 0.3); }
+            to { box-shadow: 0 15px 40px rgba(220, 38, 38, 0.5); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-logo {
+                flex-direction: column;
+                text-align: center;
+                gap: 25px;
+                padding: 30px;
+            }
+
+            .brand-name {
+                font-size: 2.5rem;
+            }
+
+            .tagline {
+                font-size: 0.9rem;
+            }
+        }
+
+        .layout-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .switch-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+        }
+
+        .switch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        }
+
+        .switch-btn.active {
+            background: #92400e;
+        }
+
+        .logo-variant {
+            display: none;
+        }
+
+        .logo-variant.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout-switcher">
+        <button class="switch-btn active" onclick="showLayout('horizontal')">Ngang</button>
+        <button class="switch-btn" onclick="showLayout('vertical')">Dọc</button>
+        <button class="switch-btn" onclick="showLayout('compact')">Gọn</button>
+    </div>
+
+    <div class="logo-container">
+        <!-- Horizontal Layout -->
+        <div class="logo-variant active main-logo" id="horizontal">
+            <div class="logo-icon">
+                <div class="ao-dai-figure">
+                    <div class="woman-silhouette"></div>
+                </div>
+                <div class="lotus-decoration lotus-1"></div>
+                <div class="lotus-decoration lotus-2"></div>
+                <div class="lotus-decoration lotus-3"></div>
+            </div>
+            <div class="logo-text">
+                <div class="brand-name">THE ÁO DÀI</div>
+                <div class="tagline">ÁO DÀI VIỆT - TÔN VINH VẺ ĐẸP TRUYỀN THỐNG</div>
+            </div>
+        </div>
+
+        <!-- Vertical Layout -->
+        <div class="logo-variant vertical-logo" id="vertical">
+            <div class="logo-icon">
+                <div class="ao-dai-figure">
+                    <div class="woman-silhouette"></div>
+                </div>
+                <div class="lotus-decoration lotus-1"></div>
+                <div class="lotus-decoration lotus-2"></div>
+                <div class="lotus-decoration lotus-3"></div>
+            </div>
+            <div class="logo-text">
+                <div class="brand-name">THE ÁO DÀI</div>
+                <div class="tagline">ÁO DÀI VIỆT - TÔN VINH VẺ ĐẸP TRUYỀN THỐNG</div>
+            </div>
+        </div>
+
+        <!-- Compact Layout -->
+        <div class="logo-variant compact-logo" id="compact">
+            <div class="logo-icon">
+                <div class="ao-dai-figure">
+                    <div class="woman-silhouette"></div>
+                </div>
+                <div class="lotus-decoration lotus-1"></div>
+                <div class="lotus-decoration lotus-2"></div>
+            </div>
+            <div class="logo-text">
+                <div class="brand-name">THE ÁO DÀI</div>
+                <div class="tagline">ÁO DÀI VIỆT</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showLayout(layoutType) {
+            // Hide all variants
+            document.querySelectorAll('.logo-variant').forEach(variant => {
+                variant.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.switch-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected variant
+            document.getElementById(layoutType).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

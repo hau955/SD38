@@ -9,10 +9,10 @@ namespace AppData.Models
         public Guid IDSPGiamGia { get; set; }
 
         [Required]
-        public Guid IDSanPham { get; set; }
+        public Guid IDSanPhamCT { get; set; }
 
-        [ForeignKey(nameof(IDSanPham))]
-        public virtual SanPham SanPham { get; set; }
+        [ForeignKey(nameof(IDSanPhamCT))]
+        public virtual SanPhamCT SanPhamCT { get; set; }
 
         [Required]
         public Guid IDGiamGia { get; set; }

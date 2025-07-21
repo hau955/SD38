@@ -1,0 +1,110 @@
+﻿@using AppView.Areas.Auth.ViewModel
+@model RegisterViewModel
+<div class="modal fade" id="registerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body" id="registerModalBody">
+                <div class="login-container">
+                    <div class="modal-content" id="registerModalContent">
+                        <div class="login-card">
+                            <div class="login-header">
+                                <div class="logo-container"><i class="fas fa-tshirt"></i></div>
+                                <h1 class="login-title">Đăng ký</h1>
+                                <p class="login-subtitle">Tham gia cộng đồng yêu áo dài truyền thống</p>
+                            </div>
+                            <div class="login-form">
+                                <form asp-area="Auth" asp-controller="Auth" asp-action="Register"
+                                      method="post" id="registerForm" onsubmit="submitRegistration(event)">
+                                    @Html.AntiForgeryToken()
+                                    <div asp-validation-summary="ModelOnly" class="text-danger validation-summary-errors"></div>
+
+                                    <div class="form-floating">
+                                        <input asp-for="FullName" placeholder="Họ và tên" class="form-control" />
+                                        <label><i class="fas fa-user me-2"></i>Họ và tên</label>
+                                        <span asp-validation-for="FullName" class="field-validation-error"></span>
+                                    </div>
+                                    <div class="form-floating">
+                                        <input asp-for="Email" placeholder="Địa chỉ email" class="form-control" />
+                                        <label><i class="fas fa-envelope me-2"></i>Địa chỉ email</label>
+                                        <span asp-validation-for="Email" class="field-validation-error"></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label"><i class="fas fa-venus-mars me-2"></i>Giới tính</label>
+                                        <div class="d-flex gap-3 mt-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" asp-for="IsMale" value="true" id="male" checked>
+                                                <label class="form-check-label d-flex align-items-center" for="male">
+                                                    <i class="fas fa-mars me-2 text-primary"></i>Nam
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" asp-for="IsMale" value="false" id="female">
+                                                <label class="form-check-label d-flex align-items-center" for="female">
+                                                    <i class="fas fa-venus me-2 text-pink"></i>Nữ
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <span asp-validation-for="IsMale" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="dateOfBirth" class="form-label"><i class="fas fa-birthday-cake me-2"></i>Ngày sinh</label>
+                                        <div class="input-group">
+                                            <input asp-for="DateOfBirth" type="date" class="form-control"
+                                                   id="dateOfBirth"
+                                                   value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                                                   max="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                                            <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                        </div>
+                                        <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="form-floating">
+                                        <input asp-for="PhoneNumber" placeholder="Số điện thoại" class="form-control" />
+                                        <label><i class="fas fa-phone me-2"></i>Số điện thoại</label>
+                                        <span asp-validation-for="PhoneNumber" class="field-validation-error"></span>
+                                    </div>
+                                    <div class="form-floating">
+                                        <input asp-for="Address" placeholder="Địa chỉ" class="form-control" />
+                                        <label><i class="fas fa-map-marker-alt me-2"></i>Địa chỉ</label>
+                                        <span asp-validation-for="Address" class="field-validation-error"></span>
+                                    </div>
+                                    <div class="form-floating">
+                                        <input asp-for="Password" type="password" placeholder="Mật khẩu" class="form-control" />
+                                        <label><i class="fas fa-lock me-2"></i>Mật khẩu</label>
+                                        <span class="password-toggle" onclick="togglePassword(this)"><i class="fas fa-eye"></i></span>
+                                        <span asp-validation-for="Password" class="field-validation-error"></span>
+                                    </div>
+                                    <div class="form-floating">
+                                        <input asp-for="ConfirmPassword" type="password" placeholder="Xác nhận mật khẩu" class="form-control" />
+                                        <label><i class="fas fa-lock me-2"></i>Xác nhận mật khẩu</label>
+                                        <span asp-validation-for="ConfirmPassword" class="field-validation-error"></span>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-login" id="registerBtn">
+                                        <i class="fas fa-user-plus me-2"></i>
+                                        Tạo Tài Khoản
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function togglePassword(icon) {
+        const input = icon.previousElementSibling;
+        if (input.type === "password") {
+            input.type = "text";
+            icon.querySelector('i').classList.remove('fa-eye');
+            icon.querySelector('i').classList.add('fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.querySelector('i').classList.remove('fa-eye-slash');
+            icon.querySelector('i').classList.add('fa-eye');
+        }
+    }
+</script>

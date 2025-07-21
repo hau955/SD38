@@ -1,4 +1,5 @@
-﻿using AppView.Areas.Admin.IRepo;
+﻿using AppData.Models;
+using AppView.Areas.Admin.IRepo;
 using Microsoft.AspNetCore.Mvc;
 using AppData.Models;
 
