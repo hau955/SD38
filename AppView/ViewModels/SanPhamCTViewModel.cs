@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using AppApi.ViewModels.SanPham;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace AppView.ViewModels
@@ -9,8 +10,8 @@ namespace AppView.ViewModels
         public Guid IDSanPhamCT { get; set; }
         public Guid IDSanPham { get; set; }
 
-        [Required]
-        public string TenSanPham { get; set; }
+
+        public string TenSanPham { get; set; } = string.Empty;
 
         public string? MoTa { get; set; }
 
@@ -22,7 +23,7 @@ namespace AppView.ViewModels
 
         public IFormFile? ImageFile { get; set; }
 
-        public string HinhAnh { get; set; }
+       // public string HinhAnh { get; set; }
 
         public Guid IdMauSac { get; set; }
         public string? MauSac { get; set; }
@@ -30,11 +31,9 @@ namespace AppView.ViewModels
         public Guid IdSize { get; set; }
         public string? Size { get; set; }
 
-        public Guid IdCoAo { get; set; }
-        public string? CoAo { get; set; }
+        public Guid IDChatLieu { get; set; }
+        public string? ChatLieu { get; set; }
 
-        public Guid? IdTaAo { get; set; }
-        public string? TaAo { get; set; }
 
         [Required]
         public decimal GiaBan { get; set; }
@@ -45,8 +44,8 @@ namespace AppView.ViewModels
         // Dữ liệu cho dropdown
         public List<SelectListItem>? SizeList { get; set; }
         public List<SelectListItem>? MauSacList { get; set; }
-        public List<SelectListItem>? CoAoList { get; set; }
-        public List<SelectListItem>? TaAoList { get; set; }
+        public List<SelectListItem>? ChatLieuList { get; set; }
+       
     }
 
 }

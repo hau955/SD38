@@ -26,14 +26,17 @@ namespace AppView.Areas.Admin.Repository
             content.Add(new StringContent(model.GioiTinh.ToString().ToLower()), "GioiTinh");
             content.Add(new StringContent(model.TrangThai.ToString().ToLower()), "TrangThai");
             content.Add(new StringContent(model.DanhMucID.ToString()), "DanhMucID");
-
-            if (model.ImageFile != null && model.ImageFile.Length > 0)
+            if (model.ImageFiles != null && model.ImageFiles.Any())
             {
-                var fileStream = model.ImageFile.OpenReadStream();
-                var fileContent = new StreamContent(fileStream);
-                fileContent.Headers.ContentType = new MediaTypeHeaderValue(model.ImageFile.ContentType);
-                content.Add(fileContent, "ImageFile", model.ImageFile.FileName);
+                foreach (var image in model.ImageFiles)
+                {
+                    var fileStream = image.OpenReadStream();
+                    var fileContent = new StreamContent(fileStream);
+                    fileContent.Headers.ContentType = new MediaTypeHeaderValue(image.ContentType);
+                    content.Add(fileContent, "ImageFiles", image.FileName); // phải khớp với key phía API
+                }
             }
+
 
             var response = await _httpClient.PostAsync("api/SanPham/create", content);
             if (!response.IsSuccessStatusCode)
@@ -68,7 +71,7 @@ namespace AppView.Areas.Admin.Repository
             }
 
             var content = await response.Content.ReadAsStringAsync();
-            var apiResult = JsonSerializer.Deserialize<ApiResult<SanPham>>(content, new JsonSerializerOptions
+            var apiResult = JsonSerializer.Deserialize<ApiResult<SanPhamView>>(content, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
@@ -82,10 +85,18 @@ namespace AppView.Areas.Admin.Repository
                 TenSanPham = sanPham.TenSanPham,
                 MoTa = sanPham.MoTa,
                 TrongLuong = sanPham.TrongLuong ?? 0,
-                GioiTinh = sanPham.GioiTinh ?? false,
+                GioiTinh = sanPham.GioiTinh ,
                 TrangThai = sanPham.TrangThai,
-                DanhMucID = sanPham.DanhMucId,
-                //HinhAnh = sanPham.HinhAnh // để hiển thị ảnh nếu cần
+                DanhMucID = sanPham.DanhMucID,
+                DanhSachAnh = sanPham.DanhSachAnh?.Select(a => new AnhSanPhamViewModel
+                {
+                    IdAnh = a.IdAnh,
+                    IDSanPham = a.IDSanPham,
+                    DuongDanAnh = a.DuongDanAnh,
+                    AnhChinh = a.AnhChinh
+                }).ToList()
+
+
             };
         }
 
@@ -100,13 +111,17 @@ namespace AppView.Areas.Admin.Repository
             content.Add(new StringContent(model.TrangThai.ToString().ToLower()), "TrangThai");
             content.Add(new StringContent(model.DanhMucID.ToString()), "DanhMucID");
 
-            if (model.ImageFile != null && model.ImageFile.Length > 0)
+            if (model.ImageFiles != null && model.ImageFiles.Any())
             {
-                var fileStream = model.ImageFile.OpenReadStream();
-                var fileContent = new StreamContent(fileStream);
-                fileContent.Headers.ContentType = new MediaTypeHeaderValue(model.ImageFile.ContentType);
-                content.Add(fileContent, "ImageFile", model.ImageFile.FileName);
+                foreach (var image in model.ImageFiles)
+                {
+                    var fileStream = image.OpenReadStream();
+                    var fileContent = new StreamContent(fileStream);
+                    fileContent.Headers.ContentType = new MediaTypeHeaderValue(image.ContentType);
+                    content.Add(fileContent, "ImageFiles", image.FileName); // phải khớp với key phía API
+                }
             }
+
 
             var response = await _httpClient.PutAsync("api/SanPham/update", content);
             if (!response.IsSuccessStatusCode)

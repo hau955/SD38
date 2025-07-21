@@ -1,7 +1,9 @@
 ﻿using AppApi.IService;
 using AppApi.ViewModels.BanHang;
+using AppData.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppApi.Controllers
 {
@@ -9,11 +11,14 @@ namespace AppApi.Controllers
     [ApiController]
     public class BanHangController : ControllerBase
     {
+        private readonly ApplicationDbContext _context;
+
         private readonly IBanHangService _banHangService;
 
-        public BanHangController(IBanHangService banHangService)
+        public BanHangController(IBanHangService banHangService,ApplicationDbContext dbContext)
         {
             _banHangService = banHangService;
+            _context = dbContext;
         }
 
         [HttpPost("ban-tai-quay")]
@@ -25,5 +30,51 @@ namespace AppApi.Controllers
 
             return Ok(new { message = result.Message, hoaDonId = result.HoaDonId });
         }
+        [HttpPost("thanh-toan-hoa-don-cho")]
+        public async Task<IActionResult> ThanhToanHoaDonCho([FromBody] ThanhToanHoaDonRequest request)
+        {
+            var result = await _banHangService.ThanhToanHoaDonChoAsync(request);
+            if (result.IsSuccess)
+                return Ok(new { message = result.Message });
+
+            return BadRequest(new { message = result.Message });
+        }
+        [HttpGet("hoa-don-cho")]
+        public async Task<IActionResult> GetHoaDonCho()
+        {
+            var hoaDons = await _context.HoaDons
+                .Where(h => h.TrangThaiDonHang == "Chờ thanh toán" && h.TrangThaiThanhToan == "Chưa thanh toán")
+                .OrderByDescending(h => h.NgayTao)
+                .Select(h => new
+                {
+                    h.IDHoaDon,
+                    h.NgayTao,
+                    h.TongTienTruocGiam,
+                    h.TongTienSauGiam,
+                    h.GhiChu
+                })
+                .ToListAsync();
+
+            return Ok(hoaDons);
+        }
+        [HttpPost("them-san-pham-vao-hoa-don-cho")]
+        public async Task<IActionResult> ThemSanPhamVaoHoaDonCho([FromBody] ThemSanPham request)
+        {
+            var result = await _banHangService.ThemSanPhamVaoHoaDonChoAsync(request);
+            if (result.IsSuccess)
+                return Ok(new { message = result.Message });
+
+            return BadRequest(new { message = result.Message });
+        }
+        [HttpPost("tru-san-pham-hoa-don-cho")]
+        public async Task<IActionResult> TruSanPhamHoaDonCho([FromBody] TruSanPham request)
+        {
+            var result = await _banHangService.TruSanPhamKhoiHoaDonChoAsync(request);
+            if (result.IsSuccess)
+                return Ok(new { message = result.Message });
+
+            return BadRequest(new { message = result.Message });
+        }
+
     }
 }

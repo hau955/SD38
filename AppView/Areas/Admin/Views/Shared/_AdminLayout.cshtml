@@ -388,8 +388,8 @@
                             <div data-i18n="ChatLieu">Chất Liệu</div>
                         </a>
                     </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "TaAo" ? "active" : "")">
-                        <a href="/Admin/TaAo/Index" class="menu-link">
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "DanhMuc" ? "active" : "")">
+                        <a href="/Admin/DanhMuc/Index" class="menu-link">
                             <i class="menu-icon fas fa-tags"></i>
                             <div data-i18n="DanhMuc">Danh Mục</div>
                         </a>
@@ -530,7 +530,7 @@
                                         <div class="dropdown-divider"></div>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="/Admin/Account/Profile">
+                                        <a class="dropdown-item" href="/Admin/Profile">
                                             <i class="fas fa-user me-2"></i>
                                             <span class="align-middle">Hồ Sơ Cá Nhân</span>
                                         </a>

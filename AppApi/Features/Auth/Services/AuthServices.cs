@@ -287,26 +287,112 @@ namespace AppApi.Features.Services
                 Roles = roles
             };
 
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
+            //var result = await _userManager.CreateAsync(user, model.Password);
+            //if (!result.Succeeded)
+            //{
+            //    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            //    return ApiResponse<object>.Fail($"Tạo tài khoản thất bại: {errors}", 500);
+            //}
+
+            //// Gán quyền Admin thay vì Customer
+            //await _userManager.AddToRoleAsync(user, "Employee");
+
+            //var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            //var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            //var confirmationLink = $"{_configuration["Frontend:EmailConfirmationUrl"]}?email={user.Email}&token={encodedToken}";
+
+            //var subject = "Xác thực tài khoản quản trị";
+            //var body = $"<p>Chào bạn,</p><p>Vui lòng xác thực tài khoản bằng cách <a href=\"{confirmationLink}\">bấm vào đây</a>.</p>";
+
+            //await _emailService.SendEmailAsync(user.Email, subject, body);
+
+            //return ApiResponse<object>.Success(null, "Đăng ký admin thành công. Vui lòng kiểm tra email để xác thực tài khoản.", 201);
+        }
+
+        public async Task<ApiResponse<object>> RegisterAdminAsync(RegisterDto model)
+        {
+            try
             {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                return ApiResponse<object>.Fail($"Tạo tài khoản thất bại: {errors}", 500);
+                var email = model.Email?.Trim().ToLower() ?? string.Empty;
+                var userByEmail = await _userManager.FindByEmailAsync(email);
+                var userByUserName = await _userManager.FindByNameAsync(email);
+
+                if (userByEmail != null || userByUserName != null)
+                {
+                    return ApiResponse<object>.Fail("Email đã được sử dụng. Vui lòng chọn email khác.", 400);
+                }
+
+                var user = new ApplicationUser
+                {
+                    Email = email,
+                    UserName = email,
+                    DiaChi = model.Address,
+                    HoTen = model.FullName,
+                    SoDienThoai = model.PhoneNumber,
+                    GioiTinh = model.Gender,
+                    NgaySinh = model.DateOfBirth,
+                    SecurityStamp = Guid.NewGuid().ToString()
+                };
+
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    return ApiResponse<object>.Fail($"Đăng ký thất bại: {errors}", 400);
+                }
+
+                await _userManager.AddToRoleAsync(user, "Admin");
+
+                await SendConfirmationEmailAsync(user);
+                return ApiResponse<object>.Success(new object(), "Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.", 201);
             }
+            catch (Exception ex)
+            {
+                return ApiResponse<object>.Fail($"Không thể gửi email xác nhận: {ex.Message}", 500);
+            }
+        }
 
-            // Gán quyền Admin thay vì Customer
-            await _userManager.AddToRoleAsync(user, "Employee");
+        public async Task<ApiResponse<object>> RegisterEmPloyee(RegisterDto model)
+        {
+            try
+            {
+                var email = model.Email?.Trim().ToLower() ?? string.Empty;
+                var userByEmail = await _userManager.FindByEmailAsync(email);
+                var userByUserName = await _userManager.FindByNameAsync(email);
 
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var confirmationLink = $"{_configuration["Frontend:EmailConfirmationUrl"]}?email={user.Email}&token={encodedToken}";
+                if (userByEmail != null || userByUserName != null)
+                {
+                    return ApiResponse<object>.Fail("Email đã được sử dụng. Vui lòng chọn email khác.", 400);
+                }
 
-            var subject = "Xác thực tài khoản quản trị";
-            var body = $"<p>Chào bạn,</p><p>Vui lòng xác thực tài khoản bằng cách <a href=\"{confirmationLink}\">bấm vào đây</a>.</p>";
+                var user = new ApplicationUser
+                {
+                    Email = email,
+                    UserName = email,
+                    DiaChi = model.Address,
+                    HoTen = model.FullName,
+                    SoDienThoai = model.PhoneNumber,
+                    GioiTinh = model.Gender,
+                    NgaySinh = model.DateOfBirth,
+                    SecurityStamp = Guid.NewGuid().ToString()
+                };
 
-            await _emailService.SendEmailAsync(user.Email, subject, body);
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    return ApiResponse<object>.Fail($"Đăng ký thất bại: {errors}", 400);
+                }
 
-            return ApiResponse<object>.Success(null, "Đăng ký admin thành công. Vui lòng kiểm tra email để xác thực tài khoản.", 201);
+                await _userManager.AddToRoleAsync(user, "Employee");
+
+                await SendConfirmationEmailAsync(user);
+                return ApiResponse<object>.Success(new object(), "Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.", 201);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<object>.Fail($"Không thể gửi email xác nhận: {ex.Message}", 500);
+            }
         }
     }
 }

@@ -5,6 +5,7 @@ namespace AppView.Areas.Auth.Repository
     public interface IAuthRepository
     {
         Task<ApiResponse<object>> RegisterAsync(RegisterViewModel model);
+     
         Task<ApiResponse<AuthResponseViewModel>> LoginAsync(LoginViewModel model);
         Task<ApiResponse<object>> ConfirmEmailAsync(string email, string token);
         Task<ApiResponse<object>> ForgotPasswordAsync(ForgotPasswordViewModel model);

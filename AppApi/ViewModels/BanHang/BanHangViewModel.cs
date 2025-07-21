@@ -8,7 +8,7 @@
         //public Guid IDDiaChiNhanHang { get; set; }          // Bắt buộc (tạm dùng default nếu chưa cần giao hàng)
        // public float? PhanTramGiamHoaDon { get; set; }      // Tùy chọn
         public string? GhiChu { get; set; }
-
+        public bool IsHoaDonCho { get; set; } = false;
         public List<SanPhamBanRequest> DanhSachSanPham { get; set; } = new();
     }
 

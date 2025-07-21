@@ -1,0 +1,46 @@
+﻿@model List<AppView.Areas.Admin.ViewModels.BanHangViewModels.HoaDonChoVM>
+
+@{
+    ViewData["Title"] = "Danh sách hóa đơn chờ";
+}
+@{
+    Layout = "/Areas/Admin/Views/Shared/_BanHangTaiQuayLayout.cshtml";
+}
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Mã hóa đơn</th>
+            <th>Ngày tạo</th>
+            <th>Tổng tiền trước giảm</th>
+            <th>Tổng tiền sau giảm</th>
+            <th>Ghi chú</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var hd in Model)
+        {
+            <tr>
+              <td>@hd.IDHoaDon</td>
+                <td>@hd.NgayTao</td>
+                <td>@String.Format("{0:N0}", hd.TongTienTruocGiam)</td>
+                <td>@String.Format("{0:N0}", hd.TongTienSauGiam)</td>
+                
+                <td>
+                    <a href="@Url.Action("HoaDonChiTiet", "BanHang", new { area = "Admin", id = hd.IDHoaDon })" class="btn btn-info btn-sm">Chi tiết</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

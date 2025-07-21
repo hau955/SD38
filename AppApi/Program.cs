@@ -124,6 +124,7 @@ builder.Services.AddScoped<IMauSacService, MauSacService>();
 builder.Services.AddScoped<ISizeService, SizeService>();
 builder.Services.AddScoped<IChatLieuService, ChatLieuService>();
 builder.Services.AddScoped<IBanHangService, BanHangService>();
+builder.Services.AddScoped<IDanhMucSPService, DanhMucSPService>();
 
 builder.Services.AddScoped<ISanPhamCTService, SanPhamCTService>();
 builder.Services.AddScoped<IProfileServive, ProfileService>();
@@ -164,7 +165,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "AppApi v1");
-        c.RoutePrefix = string.Empty;
+       // c.RoutePrefix = string.Empty;
     });
 }
 

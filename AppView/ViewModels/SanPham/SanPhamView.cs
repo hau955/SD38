@@ -1,4 +1,5 @@
 ﻿
+using AppApi.ViewModels.SanPham;
 using AppView.ViewModels;
 
 namespace AppView.ViewModels.SanPham
@@ -17,5 +18,6 @@ namespace AppView.ViewModels.SanPham
         public Guid DanhMucID { get; set; }
         public string? TenDanhMuc { get; set; }
         public List<SanPhamCTViewModel> ChiTiets { get; set; } = new();
+        public List<AnhSanPhamViewModel>? DanhSachAnh { get; set; }
     }
 }

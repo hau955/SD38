@@ -15,7 +15,7 @@ namespace AppData.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=LAPTOP-Q4DACOEF\\MSSQLSERVER02;Database=AoDaiModel1;Trusted_Connection=True;TrustServerCertificate=True"); //optionsBuilder.UseSqlServer( "Server=HAU-2005;Database=AoDaiModel;User Id=sa;Password=Hauhoang0905!;TrustServerCertificate=true;"); //"Server=DESKTOP-A99GQBL;Database=AoDaiModel;Trusted_Connection=True;TrustServerCertificate=True");
+            optionsBuilder.UseSqlServer("Server=HAU-2005;Database=AoDaiModel;User Id=sa;Password=Hauhoang0905!;TrustServerCertificate=true;");//"Server=LAPTOP-Q4DACOEF\\MSSQLSERVER02;Database=AoDaiModel1;Trusted_Connection=True;TrustServerCertificate=True");  //"Server=DESKTOP-A99GQBL;Database=AoDaiModel;Trusted_Connection=True;TrustServerCertificate=True");
         }
         public DbSet<GioHang> GioHangs { get; set; }
         public DbSet<GioHangCT> GioHangChiTiets { get; set; }
@@ -136,12 +136,7 @@ namespace AppData.Models
                 .HasForeignKey(spct => spct.IdChatLieu)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // 1-n: TaAo - SanPhamChiTiet
-            builder.Entity<SanPhamCT>()
-                .HasOne(spct => spct.TaAo)
-                .WithMany(ta => ta.SanPhamChiTiets)
-                .HasForeignKey(spct => spct.IDTaAo)
-                .OnDelete(DeleteBehavior.Restrict);
+          
 
             // Kiểu decimal mặc định là (18,2)
             foreach (var property in builder.Model.GetEntityTypes()

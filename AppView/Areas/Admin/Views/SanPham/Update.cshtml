@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Cập nhật sản phẩm";
+    var apiBaseUrl = "https://localhost:7221"; // hoặc đọc từ cấu hình
 }
 
 <style>
@@ -30,32 +31,14 @@
         border-color: #d4af37;
     }
 
-    .btn-success {
-        background-color: #d4af37;
-        border: none;
-        font-weight: 500;
-        color: white;
-    }
+   
+   
 
-        .btn-success:hover {
-            background-color: #b8941f;
-        }
 
-    .btn-secondary {
-        background-color: #8B0000;
-        border: none;
-        color: white;
-        font-weight: 500;
-    }
 
-        .btn-secondary:hover {
-            background-color: #a00000;
-        }
-
-    .text-danger {
-        font-size: 0.875rem;
-    }
 </style>
+
+
 
 <div class="container mt-4">
     <div class="form-wrapper">
@@ -103,12 +86,60 @@
                     <option value="">-- Chọn danh mục --</option>
                 </select>
             </div>
+            <div class="mb-3">
+                <label>Ảnh sản phẩm</label>
+                <input type="file" name="ImageFiles" multiple class="form-control" />
 
-            <div class="col-md-6">
-                <label class="form-label">Ảnh sản phẩm</label>
-                <input asp-for="ImageFile" type="file" class="form-control" />
-                <span asp-validation-for="ImageFile" class="text-danger"></span>
             </div>
+            <h6 class="mt-4">Ảnh hiện có:</h6>
+            <div class="row g-3">
+                @foreach (var anh in Model.DanhSachAnh)
+                {
+                    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                        <div class="position-relative d-flex flex-column justify-content-between h-100">
+                            <img src="@($"{apiBaseUrl}/{anh.DuongDanAnh}")" class="img-fluid rounded" />
+
+                            <!-- Nút xóa -->
+                            <div id="delete-form-@anh.IdAnh" action="@Url.Action("DeleteImage", "SanPham")" method="post"
+                                  class="position-absolute top-0 end-0 m-1" style="z-index: 10;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="idAnh" value="@anh.IdAnh" />
+                                <input type="hidden" name="idSanPham" value="@Model.IDSanPham" />
+                                <button type="button" class="btn btn-sm btn-danger p-1 btn-delete-image"
+                                        data-anh-id="@anh.IdAnh"
+                                        data-sanpham-id="@Model.IDSanPham">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+
+                            <!-- Nút ảnh chính -->
+                            <div class="position-absolute bottom-0 start-0 m-1">
+                                @if (anh.AnhChinh)
+                                {
+                                    <span class="badge bg-success">ẢNH CHÍNH</span>
+                                }
+                                else
+                                {
+                                    <div asp-action="SetAsMainImage" method="post">
+                                        <input type="hidden" name="idAnh" value="@anh.IdAnh" />
+                                        <input type="hidden" name="idSanPham" value="@Model.IDSanPham" />
+                                        <button type="button"
+                                                class="btn btn-sm btn-warning rounded-pill position-absolute bottom-0 start-0 m-1 shadow btn-set-main-image"
+                                                data-id-anh="@anh.IdAnh"
+                                                data-id-sanpham="@Model.IDSanPham">
+                                            Đặt làm ảnh chính
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    }
+            </div>
+
+
+
 
             <div class="col-12 mt-4 d-flex gap-2">
                 <button type="submit" class="btn btn-success">
@@ -124,4 +155,53 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelectorAll(".btn-delete-image").forEach(btn => {
+            btn.addEventListener("click", function () {
+                if (!confirm("Bạn có chắc muốn xóa ảnh này?")) return;
+
+                const idAnh = this.getAttribute("data-anh-id");
+                const idSanPham = this.getAttribute("data-sanpham-id");
+
+                fetch("/Admin/SanPham/DeleteImage", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: `idAnh=${idAnh}&idSanPham=${idSanPham}`
+                }).then(res => {
+                    if (res.ok) {
+                        location.reload(); // hoặc remove ảnh khỏi DOM nếu muốn mượt hơn
+                    } else {
+                        alert("Lỗi khi xóa ảnh.");
+                    }
+                });
+            });
+        });
+             document.querySelectorAll(".btn-set-main-image").forEach(btn => {
+            btn.addEventListener("click", function () {
+                if (!confirm("Bạn có chắc muốn đặt ảnh này làm ảnh chính?")) return;
+
+                const idAnh = this.getAttribute("data-id-anh");
+                const idSanPham = this.getAttribute("data-id-sanpham");
+
+                fetch("/Admin/SanPham/SetAsMainImage", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: `idAnh=${idAnh}&idSanPham=${idSanPham}`
+                }).then(res => {
+                    if (res.ok) {
+                        location.reload(); // reload để cập nhật ảnh chính mới
+                    } else {
+                        alert("Lỗi khi đặt ảnh chính.");
+                    }
+                });
+            });
+        });
+    </script>
 }
+

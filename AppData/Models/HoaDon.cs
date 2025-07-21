@@ -50,12 +50,14 @@ public class HoaDon
     public decimal? TienGiamHoaDon { get; set; }
 
     [Required]
-    public TrangThaiDonHang TrangThaiDonHang { get; set; }
+    [MaxLength(50)]
+    public string TrangThaiDonHang { get; set; }
 
     [Required]
-    public TrangThaiThanhToan TrangThaiThanhToan { get; set; }
+    [MaxLength(50)]
+    public string TrangThaiThanhToan { get; set; }
 
-        public DateTime? NgayTao { get; set; }
+    public DateTime? NgayTao { get; set; }
 
         public DateTime? NgaySua { get; set; } 
 
