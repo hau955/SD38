@@ -40,5 +40,10 @@ namespace AppData.Models
         [JsonIgnore]
         // 1 sản phẩm có thể có nhiều record giảm giá khác nhau (theo thời gian hoặc sự kiện)
         public virtual ICollection<SanPhamGG> SanPhamGiamGias { get; set; } = new List<SanPhamGG>();
+        [JsonIgnore]
+        // 1 sản phẩm có thể xuất hiện nhiều lần trong hóa đơn chi tiết
+        public virtual ICollection<HoaDonCT> HoaDonChiTiets { get; set; } = new List<HoaDonCT>();
+        [JsonIgnore]
+        public virtual ICollection<GioHangCT> GioHangChiTiets { get; set; } = new List<GioHangCT>();
     }
 }

@@ -41,11 +41,8 @@ namespace AppData.Models
         [JsonIgnore]
         public virtual ICollection<AnhSanPham> AnhSanPhams { get; set; } = new List<AnhSanPham>();
        
-        [JsonIgnore]
-        // 1 sản phẩm có thể xuất hiện nhiều lần trong hóa đơn chi tiết
-        public virtual ICollection<HoaDonCT> HoaDonChiTiets { get; set; } = new List<HoaDonCT>();
-        [JsonIgnore] 
-        public virtual ICollection<GioHangCT> GioHangChiTiets { get; set; } = new List<GioHangCT>();
+       
+        
         public Guid DanhMucId { get; set; }  // Khóa ngoại đến DanhMuc
 
         public DanhMuc DanhMuc { get; set; } = null!;
