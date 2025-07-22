@@ -86,8 +86,9 @@ namespace AppView.Areas.Auth.Controllers
             // Lưu session
             HttpContext.Session.SetString("Token", result.Data.Token ?? "");
             HttpContext.Session.SetString("Email", result.Data.Email ?? "");
-           // HttpContext.Session.SetString("HinhAnh", result.Data.HinhAnh ?? "/admin/assets/img/avatars/default.png");
-            //HttpContext.Session.SetString("HoTen", result.Data.HoTen ?? "");
+            HttpContext.Session.SetString("HinhAnh", result.Data.hinhanh ?? "/admin/assets/img/avatars/default.png");
+            HttpContext.Session.SetString("HoTen", result.Data.hoten ?? "");
+            HttpContext.Session.SetString("ID", result.Data.Id.ToString() ?? "");
             HttpContext.Session.SetString("Roles", result.Data.Roles != null ? string.Join(",", result.Data.Roles) : "");
 
             return RedirectToAction("Index", "SanPham", new { area = "Admin" });

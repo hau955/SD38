@@ -284,7 +284,10 @@ namespace AppApi.Features.Services
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 Expiration = token.ValidTo,
                 Email = user.Email ?? string.Empty,
-                Roles = roles
+                Roles = roles,
+                hoten=user.HoTen,
+                hinhanh = user.HinhAnh,
+                Id = user.Id
             };
 
             //var result = await _userManager.CreateAsync(user, model.Password);

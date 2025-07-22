@@ -8,7 +8,7 @@ namespace AppApi.IService
         Task<(bool IsSuccess, string Message)> ThanhToanHoaDonChoAsync(ThanhToanHoaDonRequest request);
         Task<(bool IsSuccess, string Message)> ThemSanPhamVaoHoaDonChoAsync(ThemSanPham request);
         Task<(bool IsSuccess, string Message)> TruSanPhamKhoiHoaDonChoAsync(TruSanPham request);
-
+        Task<(bool IsSuccess, string Message)> HuyHoaDonAsync(Guid idHoaDon);
     }
 }
 

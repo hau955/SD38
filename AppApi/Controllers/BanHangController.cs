@@ -75,6 +75,15 @@ namespace AppApi.Controllers
 
             return BadRequest(new { message = result.Message });
         }
+        [HttpPost("huy-hoa-don")]
+        public async Task<IActionResult> HuyHoaDon([FromBody] HuyHoaDon request)
+        {
+            var result = await _banHangService.HuyHoaDonAsync(request.IDHoaDon);
+            if (result.IsSuccess)
+                return Ok(new { message = result.Message });
+
+            return BadRequest(new { message = result.Message });
+        }
 
     }
 }
