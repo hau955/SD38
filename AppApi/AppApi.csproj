@@ -37,7 +37,7 @@
 			<StateWebAsset Remove="@(StateWebAsset)" />
 
 			<!-- Loại bỏ các item trùng lặp dựa trên Identity -->
-			<StateWebAsset Include="@(FilteredStateWebAsset->Distinct())" />
+			<StateWebAsset Include="@(FilteredStateWebAsset-&gt;Distinct())" />
 		</ItemGroup>
 	</Target>
 	<ItemGroup>

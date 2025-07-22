@@ -136,7 +136,27 @@ namespace AppData.Models
                 .HasForeignKey(spct => spct.IdChatLieu)
                 .OnDelete(DeleteBehavior.Restrict);
 
-          
+            // 1-n: TaAo - SanPhamChiTiet
+            builder.Entity<SanPhamCT>()
+                .HasOne(spct => spct.TaAo)
+                .WithMany(ta => ta.SanPhamChiTiets)
+                .HasForeignKey(spct => spct.IDTaAo)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                .HasOne(spct => spct.TaAo)
+                .WithMany(ta => ta.SanPhamChiTiets)
+                .HasForeignKey(spct => spct.IDTaAo)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                .HasOne(spct => spct.TaAo)
+                .WithMany(ta => ta.SanPhamChiTiets)
+                .HasForeignKey(spct => spct.IDTaAo)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                .HasOne(spct => spct.TaAo)
+                .WithMany(ta => ta.SanPhamChiTiets)
+                .HasForeignKey(spct => spct.IDTaAo)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Kiểu decimal mặc định là (18,2)
             foreach (var property in builder.Model.GetEntityTypes()

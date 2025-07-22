@@ -1,5 +1,20 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@{
+    var token = Context.Session.GetString("Token");
+    var email = Context.Session.GetString("Email") ?? "Khách";
+    var roles = Context.Session.GetString("Roles") ?? "";
+    var isAdmin = roles.Contains("Admin");
+    var isLoggedIn = !string.IsNullOrEmpty(token);
+}
+@* @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                alert('@TempData["SuccessMessage"]');
+            });
+        </script>
+    } *@
+<!doctype html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

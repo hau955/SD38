@@ -1,9 +1,9 @@
 ﻿<!DOCTYPE html>
 
-  @{
+@{
     var avatarPath = Context.Session.GetString("HinhAnh") ?? "/admin/assets/img/avatars/1.png";
 
-<img src="@avatarPath" alt="Avatar" class="w-px-40 h-auto rounded-circle" />
+    <img src="@avatarPath" alt="Avatar" class="w-px-40 h-auto rounded-circle" />
 
     var hoten = Context.Session.GetString("HoTen");
 }
@@ -445,7 +445,7 @@
                             <div data-i18n="Basic">Danh Mục</div>
                         </a>
                     </li>
-      
+
                 </ul>
             </aside>
             <!-- / Menu -->
@@ -520,7 +520,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                   
+
                                                     <small class="text-muted">@hoten</small>
                                                 </div>
                                             </div>
@@ -544,10 +544,15 @@
                                     <li>
                                         <div class="dropdown-divider"></div>
                                     </li>
-                                    <a class="dropdown-item" asp-area="Auth" asp-controller="Auth" asp-action="Logout">
-                                        <i class="fas fa-sign-out-alt me-2"></i>
-                                        <span class="align-middle">Đăng Xuất</span>
-                                    </a>
+                                    <li>
+                                        <form id="adminLogoutForm" asp-area="Auth" asp-controller="Auth" asp-action="Logout" method="post" class="d-inline" autocomplete="off">
+                                            @Html.AntiForgeryToken()
+                                            <a class="dropdown-item" href="javascript:void(0)" onclick="handleAdminLogout(event)">
+                                                <i class="fas fa-sign-out-alt me-2"></i>
+                                                <span class="align-middle">Đăng xuất</span>
+                                            </a>
+                                        </form>
+                                    </li>
                                 </ul>
                             </li>
                             <!--/ User -->
@@ -652,6 +657,61 @@
                 });
             });
         });
+
+              async function handleAdminLogout(event) {
+            event.preventDefault();
+            const result = await Swal.fire({
+                title: 'Bạn có chắc muốn đăng xuất?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Đăng xuất',
+                cancelButtonText: 'Hủy'
+            });
+
+            if (!result.isConfirmed) return;
+
+            try {
+                const form = document.getElementById('adminLogoutForm');
+                const formData = new FormData(form);
+
+                const response = await fetch('/Auth/Auth/Logout', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'RequestVerificationToken': getCsrfToken()
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Đăng xuất thành công',
+                        text: 'Bạn đã đăng xuất khỏi hệ thống',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    window.location.href = data.redirectUrl || '/';
+                } else {
+                    throw new Error(data.message || 'Đăng xuất thất bại');
+                }
+            } catch (error) {
+                console.error('Logout failed:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Đăng xuất thất bại',
+                    text: error.message || 'Có lỗi xảy ra khi đăng xuất'
+                });
+            }
+        }
+
+        // Thêm hàm getCsrfToken nếu chưa có
+        function getCsrfToken() {
+            const input = document.querySelector('input[name="__RequestVerificationToken"]');
+            return input ? input.value : '';
+        }
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

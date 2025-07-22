@@ -57,10 +57,6 @@ namespace AppView.Areas.Auth.Controllers
                 showLoginModal = result.IsSuccess
             });
         }
-
-        // ========== Login ==========
-        [HttpGet]
-        public IActionResult Login() => View();
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
@@ -82,19 +78,22 @@ namespace AppView.Areas.Auth.Controllers
                     email = model.Email
                 });
             }
+            HttpContext.Session.SetString("Token", result.Data.Token);
+            HttpContext.Session.SetString("UserId", result.Data.Id.ToString());
+            HttpContext.Session.SetString("Email", result.Data.Email);
+            HttpContext.Session.SetString("HinhAnh", result.Data.hinhanh ?? "/admin/assets/img/avatars/default.png");
+            HttpContext.Session.SetString("HoTen", result.Data.hoten ?? result.Data.Email);
+            HttpContext.Session.SetString("Roles", string.Join(",", result.Data.Roles));
 
-            // Lưu session
-            HttpContext.Session.SetString("Token", result.Data.Token ?? "");
-            HttpContext.Session.SetString("Email", result.Data.Email ?? "");
-           // HttpContext.Session.SetString("HinhAnh", result.Data.HinhAnh ?? "/admin/assets/img/avatars/default.png");
-            //HttpContext.Session.SetString("HoTen", result.Data.HoTen ?? "");
-            HttpContext.Session.SetString("Roles", result.Data.Roles != null ? string.Join(",", result.Data.Roles) : "");
-
-            return RedirectToAction("Index", "SanPham", new { area = "Admin" });
-            // hoặc
-            return RedirectToAction("Index", "Home");
-
+            return Json(new
+            {
+                success = true,
+                redirectUrl = result.Data.Roles.Contains("Admin") ? Url.Action("Index", "SanPham", new { area = "Admin" }) : Url.Action("Index", "Home", new { area = "" }),
+                email = result.Data.Email,
+                userName = result.Data.hoten
+            });
         }
+
         // ========== Forgot Password ==========
         [HttpGet]
         public IActionResult ForgotPassword() => View();
@@ -216,15 +215,30 @@ namespace AppView.Areas.Auth.Controllers
                 message = result.Message
             });
         }
-
-        // ========== Logout ==========
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
-            HttpContext.Session.Clear();
-            return RedirectToAction("Index", "Home", new { area = "" });
+            try
+            {
+                await _signInManager.SignOutAsync();
+                HttpContext.Session.Clear();
+
+                // Xóa cookie authentication
+                if (HttpContext.Request.Cookies[".AspNetCore.Identity.Application"] != null)
+                    HttpContext.Response.Cookies.Delete(".AspNetCore.Identity.Application");
+
+                // Xóa JWT token nếu có
+                if (HttpContext.Request.Cookies["Token"] != null)
+                    HttpContext.Response.Cookies.Delete("Token");
+
+                return Json(new { success = true, redirectUrl = Url.Action("Index", "Home", new { area = "" }) });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi logout");
+                return Json(new { success = false, message = "Đăng xuất thất bại" });
+            }
         }
     }
 }
