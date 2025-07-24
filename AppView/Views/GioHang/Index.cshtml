@@ -1,0 +1,111 @@
+﻿@model List<AppView.ViewModels.GioHang.GioHangView>
+
+<style>
+    .table {
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .btn-update {
+        margin-right: 5px;
+    }
+
+    .quantity-input {
+        width: 80px;
+    }
+</style>
+
+<section class="container mt-5">
+    <h2 class="text-center">Giỏ hàng</h2>
+    @if (Model == null || !Model.Any())
+    {
+        <p>Giỏ hàng trống.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>Số lượng</th>
+                    <th>Đơn giá</th>
+                    <th>Tổng</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.TenSanPham</td>
+                        <td>
+                            <input type="number" class="form-control quantity-input" value="@item.SoLuong" min="1" data-id="@item.IDGioHangChiTiet" />
+                        </td>
+                        <td>@item.DonGia.ToString("N0") VNĐ</td>
+                        <td>@(item.SoLuong * item.DonGia).ToString("N0") VNĐ</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm btn-update" data-id="@item.IDGioHangChiTiet">Cập nhật</button>
+                            <button class="btn btn-danger btn-sm btn-delete" data-id="@item.IDGioHangChiTiet">Xóa</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <a href="/Checkout" class="btn btn-primary">Thanh toán</a>
+    }
+</section>
+
+<script>
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('btn-update')) {
+            const id = e.target.dataset.id;
+            const quantity = parseInt(e.target.closest('tr').querySelector('.quantity-input').value) || 1;
+            updateCartItem(id, quantity);
+        } else if (e.target.classList.contains('btn-delete')) {
+            const id = e.target.dataset.id;
+            deleteCartItem(id);
+        }
+    });
+
+    async function updateCartItem(id, quantity) {
+        const token = '@ViewBag.Token' || '';
+        if (!token || quantity < 1) return alert('Vui lòng đăng nhập và nhập số lượng hợp lệ!');
+
+        try {
+            const response = await fetch('/api/GioHang/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ GioHangCTId: id, SoLuong: quantity })
+            });
+            if (response.ok) {
+                alert('Cập nhật thành công!');
+                location.reload();
+            } else {
+                alert('Cập nhật thất bại!');
+            }
+        } catch {
+            alert('Lỗi kết nối!');
+        }
+    }
+
+    async function deleteCartItem(id) {
+        const token = '@ViewBag.Token' || '';
+        if (!token) return alert('Vui lòng đăng nhập!');
+
+        try {
+            const response = await fetch('/api/GioHang/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ GioHangCTId: id })
+            });
+            if (response.ok) {
+                alert('Xóa thành công!');
+                location.reload();
+            } else {
+                alert('Xóa thất bại!');
+            }
+        } catch {
+            alert('Lỗi kết nối!');
+        }
+    }
+</script>

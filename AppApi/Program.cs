@@ -10,6 +10,8 @@ using AppData.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
+
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddAuthorization();
 builder.Services.AddSwaggerGen();
@@ -58,6 +60,7 @@ builder.Services.AddScoped<IMauSacService, MauSacService>();
 builder.Services.AddScoped<ISizeService, SizeService>();
 builder.Services.AddScoped<IChatLieuService, ChatLieuService>();
 builder.Services.AddScoped<IBanHangService, BanHangService>();
+builder.Services.AddScoped<GioHangService>();
 
 builder.Services.AddScoped<ISanPhamCTService, SanPhamCTService>();
 builder.Services.AddScoped<IProfileServive, ProfileService>();

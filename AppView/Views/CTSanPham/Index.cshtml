@@ -25,9 +25,9 @@
         color: white;
     }
 
-    .btn-success:hover {
-        background-color: #b8941f;
-    }
+        .btn-success:hover {
+            background-color: #b8941f;
+        }
 
     .btn-secondary {
         background-color: #8B0000;
@@ -36,9 +36,9 @@
         font-weight: 500;
     }
 
-    .btn-secondary:hover {
-        background-color: #a52a2a;
-    }
+        .btn-secondary:hover {
+            background-color: #a52a2a;
+        }
 
     .card-title {
         font-weight: 600;
@@ -64,168 +64,169 @@
         border-top-left-radius: 1rem;
         border-top-right-radius: 1rem;
     }
+
+    .product-box {
+        position: relative;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 0;
+    }
+
+        .product-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-box img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            object-position: top center;
+        }
+
+    .product-details {
+        padding: 16px 20px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .product-details h1 {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #4E4E4E;
+        }
+
+        .product-details p {
+            font-size: 0.9rem;
+            margin: 5px 0 10px;
+            color: #4E4E4E;
+        }
+
+    .btn-group {
+        margin-top: auto;
+        display: flex;
+        gap: 8px;
+    }
+
+        .btn-group .btn-detail {
+            background-color: #C3A1A0;
+            padding: 10px 16px;
+            flex-grow: 1;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+    #product-detail-modal {
+        display: none;
+        position: fixed;
+        top: 5%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 700px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        padding: 20px;
+        z-index: 1000;
+    }
+
+        #product-detail-modal .sizes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 40px);
+            grid-gap: 6px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+    .size {
+        padding: 8px;
+        border: 1px solid #E0C9CB;
+        font-size: 0.8rem;
+        text-align: center;
+        cursor: pointer;
+        color: #BA7E7E;
+        transition: all .3s ease-in-out;
+    }
+
+        .size:hover, .size.focus {
+            background-color: #BA7E7E;
+            color: #fff;
+        }
+
+    #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+        display: none;
+    }
+
+    .btn-detail,
+    .btn-add {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-detail {
+        background-color: #f1f1f1;
+        color: #333;
+    }
+
+        .btn-detail:hover {
+            background-color: #ddd;
+            color: #000;
+        }
+
+    .btn-add {
+        background-color: #C3A1A0;
+        color: #fff;
+    }
+
+        .btn-add:hover {
+            background-color: #a2807e;
+        }
+
+    #quantity {
+        width: 100px;
+        display: inline-block;
+        margin-left: 10px;
+    }
 </style>
 
 <section class="container mt-5 form-wrapper">
     <h2 class="text-center">Danh sách sản phẩm</h2>
-
-    <style>
-        .product-box {
-            position: relative;
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            padding: 0;
-        }
-
-            .product-box:hover {
-                transform: translateY(-5px);
-            }
-
-            .product-box img {
-                width: 100%;
-                height: 250px;
-                object-fit: cover;
-                object-position: top center;
-            }
-
-        .product-details {
-            padding: 16px 20px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-            .product-details h1 {
-                font-size: 1.3rem;
-                font-weight: bold;
-                color: #4E4E4E;
-            }
-
-            .product-details p {
-                font-size: 0.9rem;
-                margin: 5px 0 10px;
-                color: #4E4E4E;
-            }
-
-        .btn-group {
-            margin-top: auto;
-            display: flex;
-            gap: 8px;
-        }
-
-            .btn-group .btn-detail {
-                background-color: #C3A1A0;
-                padding: 10px 16px;
-                flex-grow: 1;
-                border-radius: 6px;
-                font-size: 0.9rem;
-                border: none;
-                color: white;
-                cursor: pointer;
-            }
-
-        #product-detail-modal {
-            display: none;
-            position: fixed;
-            top: 5%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 700px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
-            padding: 20px;
-            z-index: 1000;
-        }
-
-            #product-detail-modal .sizes {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, 40px);
-                grid-gap: 6px;
-                margin-bottom: 15px;
-                width: 100%;
-            }
-
-        .size {
-            padding: 8px;
-            border: 1px solid #E0C9CB;
-            font-size: 0.8rem;
-            text-align: center;
-            cursor: pointer;
-            color: #BA7E7E;
-            transition: all .3s ease-in-out;
-        }
-
-            .size:hover, .size.focus {
-                background-color: #BA7E7E;
-                color: #fff;
-            }
-
-        #overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-            display: none;
-        }.btn-detail,
-.btn-add {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-}
-
-.btn-detail {
-    background-color: #f1f1f1;
-    color: #333;
-}
-
-.btn-detail:hover {
-    background-color: #ddd;
-    color: #000;
-}
-
-.btn-add {
-    background-color: #C3A1A0;
-    color: #fff;
-}
-
-.btn-add:hover {
-    background-color: #a2807e;
-}
-
-
-    </style>
-
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         @foreach (var sp in Model)
         {
             <div class="col">
                 <div class="product-box">
-                    <img src="@sp.HinhAnh?.Split(';').FirstOrDefault()" alt="Ảnh sản phẩm" />
+                    <img src="@(sp.HinhAnh?.Split(';').FirstOrDefault() ?? "/images/default.jpg")" alt="Ảnh sản phẩm" />
                     <div class="product-details">
                         <h1>@sp.TenSanPham</h1>
-                        <p>@sp.MoTa</p>
-
-                        <button class="btn-detail"
-                                onclick='showDetail(@Html.Raw(JsonSerializer.Serialize(sp, new JsonSerializerOptions { PropertyNamingPolicy = null })))'>
+                        <p>@(sp.MoTa ?? "Không có mô tả")</p>
+                        <button class="btn-detail" onclick='showDetail(@Html.Raw(JsonSerializer.Serialize(sp, new JsonSerializerOptions { PropertyNamingPolicy = null })))'>
                             Xem chi tiết
                         </button>
                     </div>
@@ -237,45 +238,46 @@
 
 <!-- Overlay & Modal -->
 <div id="overlay"></div>
-
 <div id="product-detail-modal">
-    <button onclick="closeModal()" style="float:right;font-size:1.2rem;">✖</button>
+    <button onclick="closeModal()" style="float:right; font-size:1.2rem; border:none; background:none;">✖</button>
     <h3 id="detail-title"></h3>
     <img id="detail-img" src="" style="width: 100%; height: 250px; object-fit: contain;" />
-
     <p id="detail-description"></p>
-
     <div id="detail-sizes"></div>
     <div id="detail-mau"></div>
     <div id="detail-coao"></div>
     <div id="detail-taao"></div>
-
-    <button class="btn-add">Thêm vào giỏ hàng</button>
+    <div class="mt-3">
+        <label for="quantity">Số lượng:</label>
+        <input type="number" id="quantity" class="form-control" min="1" value="1" />
+    </div>
+    <button class="btn-add" onclick="addToCart()">Thêm vào giỏ hàng</button>
+    <p id="login-prompt" style="display:none; color:red;">Vui lòng <a href="/Auth/Auth/Login">đăng nhập</a> hoặc <a href="/Auth/Auth/Register">đăng ký</a>!</p>
 </div>
 
 <script>
+    let selectedProduct = null;
+
     function showDetail(sp) {
-        // Hiển thị modal
+        selectedProduct = sp;
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('product-detail-modal').style.display = 'block';
 
-        // Hiển thị dữ liệu
-        document.getElementById('detail-title').innerText = sp.TenSanPham;
-        document.getElementById('detail-img').src = (sp.HinhAnh || '').split(';')[0];
-        document.getElementById('detail-description').innerText = sp.MoTa || '';
+        document.getElementById('detail-title').innerText = sp.TenSanPham || 'Không có tiêu đề';
+        document.getElementById('detail-img').src = (sp.HinhAnh?.split(';')[0] || '/images/default.jpg');
+        document.getElementById('detail-description').innerText = sp.MoTa || 'Không có mô tả';
 
-        // Lọc sản phẩm còn hàng
-        const chiTiets = sp.ChiTiets.filter(c => c.TrangThai);
+        const chiTiets = sp.ChiTiets?.filter(c => c.TrangThai) || [];
 
         function renderOptions(label, list, key, containerId) {
             const unique = [...new Set(list.map(x => x[key]).filter(x => !!x))];
+            const container = document.getElementById(containerId);
             if (unique.length > 0) {
-                document.getElementById(containerId).innerHTML =
-                    `<p><strong>${label}</strong></p><div class="sizes">` +
-                    unique.map(val => `<div class="size">${val}</div>`).join('') +
+                container.innerHTML = `<p><strong>${label}</strong></p><div class="sizes">` +
+                    unique.map(val => `<div class="size" data-value="${val}">${val}</div>`).join('') +
                     `</div>`;
             } else {
-                document.getElementById(containerId).innerHTML = '';
+                container.innerHTML = '';
             }
         }
 
@@ -288,9 +290,9 @@
     function closeModal() {
         document.getElementById('overlay').style.display = 'none';
         document.getElementById('product-detail-modal').style.display = 'none';
+        selectedProduct = null;
     }
 
-    // Kích hoạt chọn size
     document.addEventListener('click', function (e) {
         if (e.target.classList.contains('size')) {
             const parent = e.target.closest('.sizes');
@@ -298,5 +300,61 @@
             e.target.classList.add('focus');
         }
     });
-</script>
 
+    async function addToCart() {
+        if (!selectedProduct) return;
+
+        const selectedSize = document.querySelector('#detail-sizes .focus')?.dataset.value;
+        const selectedMau = document.querySelector('#detail-mau .focus')?.dataset.value;
+        const selectedCoAo = document.querySelector('#detail-coao .focus')?.dataset.value;
+        const selectedTaAo = document.querySelector('#detail-taao .focus')?.dataset.value;
+        const quantity = parseInt(document.getElementById('quantity').value) || 1;
+
+        if (!selectedSize && !selectedMau && !selectedCoAo && !selectedTaAo) {
+            alert('Vui lòng chọn ít nhất một tùy chọn!');
+            return;
+        }
+
+        const chiTiets = selectedProduct.ChiTiets?.filter(c => c.TrangThai) || [];
+        const selectedChiTiet = chiTiets.find(c =>
+            (!selectedSize || c.Size === selectedSize) &&
+            (!selectedMau || c.MauSac === selectedMau) &&
+            (!selectedCoAo || c.CoAo === selectedCoAo) &&
+            (!selectedTaAo || c.TaAo === selectedTaAo)
+        );
+
+        if (!selectedChiTiet || quantity <= 0 || quantity > selectedChiTiet.SoLuongTonKho) {
+            alert('Sản phẩm không hợp lệ hoặc số lượng vượt quá tồn kho!');
+            return;
+        }
+
+        const token = '@ViewBag.Token' || '';
+        if (!token) {
+            document.getElementById('login-prompt').style.display = 'block';
+            return;
+        }
+
+        try {
+            const response = await fetch('https://localhost:7221/api/GioHang/add', { // Thay 7221 bằng port thực tế
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ SanPhamId: selectedProduct.IDSanPham, SoLuong: quantity })
+            });
+
+            const result = await response.json();
+            console.log('API Response:', result);
+            if (response.ok) {
+                // Chuyển hướng đến trang giỏ hàng
+                window.location.href = '/GioHang';
+            } else {
+                alert(`Thêm vào giỏ hàng thất bại: ${result.message || `Mã lỗi: ${response.status}`}`);
+            }
+        } catch (error) {
+            console.error('Lỗi API:', error);
+            alert('Lỗi kết nối. Vui lòng thử lại!');
+        }
+    }
+</script>
