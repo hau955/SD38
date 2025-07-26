@@ -1,0 +1,65 @@
+﻿@model List<AppView.Areas.Admin.ViewModels.BanHangViewModels.HoaDonResponseViewModel>
+@{
+    ViewData["Title"] = "Bán tại quầy";
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        ⚠️ @TempData["Error"]
+    </div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        ✅ @TempData["Success"]
+    </div>
+}
+
+
+
+
+<h2 class="text-xl font-bold mb-4">Danh sách hóa đơn chờ thanh toán</h2>
+
+<div class="mb-4">
+    <a asp-action="SanPham" class="btn btn-success">Tạo hóa đơn mới</a>
+</div>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Ngày tạo</th>
+            <th>Ghi chú</th>
+            <th>Tổng tiền trước giảm</th>
+            <th>Tổng tiền sau giảm</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var hoaDon in Model)
+        {
+            <tr>
+                <td>@hoaDon.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@hoaDon.GhiChu</td>
+                <td>@hoaDon.TongTienTruocGiam.ToString("N0") đ</td>
+                <td>@hoaDon.TongTienSauGiam.ToString("N0") đ</td>
+                <td>
+                    <form asp-area="Admin" asp-controller="BanHang" asp-action="ThanhToanHoaDonCho" method="post" class="d-inline">
+                        <input type="hidden" name="IDHoaDon" value="@hoaDon.IDHoaDon" />
+                        <button type="submit" class="btn btn-primary btn-sm">Thanh toán</button>
+                    </form>
+
+                    <form asp-area="Admin" asp-controller="BanHang" asp-action="ThemSanPhamVaoHoaDonCho" method="get" class="d-inline">
+                        <input type="hidden" name="IDHoaDon" value="@hoaDon.IDHoaDon" />
+                        <a asp-action="SanPham" asp-route-idHoaDon="@hoaDon.IDHoaDon" class="btn btn-info btn-sm">Xem / Thêm SP</a>
+
+                    </form>
+
+                    <form asp-area="Admin" asp-controller="BanHang" asp-action="HuyHoaDon" method="post" class="d-inline" onsubmit="return confirm('Xác nhận hủy hóa đơn?');">
+                        <input type="hidden" name="idHoaDon" value="@hoaDon.IDHoaDon" />
+                        <button type="submit" class="btn btn-danger btn-sm">Hủy</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

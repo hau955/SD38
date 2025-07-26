@@ -4,6 +4,7 @@
     ViewData["Title"] = "Cập nhật sản phẩm chi tiết";
     var mauSacs = ViewBag.MauSacs as List<AppData.Models.MauSac>;
     var sizes = ViewBag.Sizes as List<AppData.Models.Size>;
+    var chatlieus = ViewBag.ChatLieus as List<AppData.Models.ChatLieu>;
     //var coAos = ViewBag.CoAos as List<AppData.Models.CoAo>;
     //var taAos = ViewBag.TaAos as List<AppData.Models.TaAo>;
 }
@@ -85,31 +86,20 @@
             </select>
         </div>
 
-       @*  <div class="col-md-6">
+       <div class="col-md-6">
             <label class="form-label">Cổ áo</label>
-            <select asp-for="IDCoAo" class="form-select">
+            <select asp-for="IdChatLieu" class="form-select">
                 <option value="">-- Chọn cổ áo --</option>
-                @foreach (var item in coAos)
+                @foreach (var item in chatlieus)
                 {
-                    <option value="@item.IDCoAo" selected="@(Model.IDCoAo == item.IDCoAo)">
-                        @item.TenCoAo
+                    <option value="@item.IDChatLieu" selected="@(Model.IdChatLieu == item.IDChatLieu)">
+                        @item.TenChatLieu
                     </option>
                 }
             </select>
         </div>
 
-        <div class="col-md-6">
-            <label class="form-label">Tà áo</label>
-            <select asp-for="IDTaAo" class="form-select">
-                <option value="">-- Chọn tà áo --</option>
-                @foreach (var item in taAos)
-                {
-                    <option value="@item.IDTaAo" selected="@(Model.IDTaAo == item.IDTaAo)">
-                        @item.TenTaAo
-                    </option>
-                }
-            </select>
-        </div> *@
+     
 
         <div class="col-md-6">
             <label asp-for="SoLuongTonKho" class="form-label">Số lượng tồn kho</label>

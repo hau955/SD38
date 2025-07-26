@@ -1,12 +1,115 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
+﻿using AppView.Areas.Admin.IRepo;
+using Microsoft.AspNetCore.Mvc;
+using AppView.Areas.Admin.ViewModels.BanHangViewModels;
+using AppView.Areas.Admin.ViewModels.SanPhamViewModels;
 namespace AppView.Areas.Admin.Controllers
 {
+    [Area("Admin")]
     public class BanHangController : Controller
     {
-        public IActionResult Index()
+        private readonly IBanHangfRepo _banHangRepo;
+
+        public BanHangController(IBanHangfRepo banHangRepo)
         {
-            return View();
+            _banHangRepo = banHangRepo;
+        }
+        [HttpGet]
+        public async Task<IActionResult> SanPham(Guid? idHoaDon)
+        {
+            // 🔁 1. Gọi API local để lấy danh sách sản phẩm
+            using var client = new HttpClient();
+            var sanPhams = await client.GetFromJsonAsync<List<SanPhamView>>("https://localhost:7221/api/SanPham/with-chi-tiet");
+
+            // 🔁 2. Truyền ID hóa đơn xuống View
+            ViewBag.IDHoaDon = idHoaDon;
+
+            // 🔁 3. Gọi repo để lấy chi tiết hóa đơn nếu có
+            if (idHoaDon.HasValue)
+            {
+                var hoaDonResult = await _banHangRepo.XemChiTietHoaDonAsync(idHoaDon.Value);
+                if (hoaDonResult.IsSuccess)
+                {
+                    ViewBag.HoaDonChiTiet = hoaDonResult.Data;
+                }
+                else
+                {
+                    ViewBag.HoaDonChiTiet = null;
+                    ViewBag.HoaDonError = hoaDonResult.Message;
+                }
+            }
+
+            return View(sanPhams ?? new List<SanPhamView>());
+        }
+
+
+        public async Task<IActionResult> HoaDonCho()
+        {
+            
+            var hoaDons = await _banHangRepo.GetHoaDonChoAsync();
+            return View(hoaDons); // View hiển thị danh sách hóa đơn chờ
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> BanTaiQuay(BanHangViewModel model)
+        {
+            Guid idNguoiTao = model.IDNguoiTao ?? Guid.Empty;
+
+
+            var result = await _banHangRepo.BanTaiQuayAsync(model);
+            if (!result.IsSuccess)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction("HoaDonCho");
+            }
+
+            TempData["Success"] = "Tạo hóa đơn thành công";
+            return RedirectToAction("HoaDonCho");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ThanhToanHoaDonCho(ThanhToanHoaDonRequest model)
+        {
+            var result = await _banHangRepo.ThanhToanHoaDonChoAsync(model);
+            if (!result.IsSuccess)
+            {
+                TempData["Error"] = result.Message;
+                return RedirectToAction("HoaDonCho");
+            }
+
+            // ✅ Lấy chi tiết hóa đơn để in
+            var hoaDonResult = await _banHangRepo.XemChiTietHoaDonAsync(model.IDHoaDon);
+            if (!hoaDonResult.IsSuccess)
+            {
+                TempData["Error"] = "Thanh toán xong nhưng không thể load chi tiết hóa đơn để in.";
+                return RedirectToAction("HoaDonCho");
+            }
+
+            return View("InHoaDon", hoaDonResult.Data); // View sẽ có window.print()
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> ThemSanPhamVaoHoaDonCho(ThemSanPham model)
+        {
+            var result = await _banHangRepo.ThemSanPhamVaoHoaDonChoAsync(model);
+            TempData[result.IsSuccess ? "Success" : "Error"] = result.Message;
+            return RedirectToAction("HoaDonCho");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> TruSanPhamKhoiHoaDonCho(TruSanPham model)
+        {
+            var result = await _banHangRepo.TruSanPhamKhoiHoaDonChoAsync(model);
+            TempData[result.IsSuccess ? "Success" : "Error"] = result.Message;
+            return RedirectToAction("HoaDonCho");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> HuyHoaDon(Guid idHoaDon)
+        {
+            var result = await _banHangRepo.HuyHoaDonAsync(idHoaDon);
+            TempData[result.IsSuccess ? "Success" : "Error"] = result.Message;
+            return RedirectToAction("HoaDonCho");
         }
     }
 }

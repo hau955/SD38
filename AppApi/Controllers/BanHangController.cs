@@ -84,6 +84,16 @@ namespace AppApi.Controllers
 
             return BadRequest(new { message = result.Message });
         }
+        [HttpGet("xem-hoa-don/{idHoaDon}")]
+        public async Task<IActionResult> XemHoaDonChiTiet(Guid idHoaDon)
+        {
+            var result = await _banHangService.XemChiTietHoaDonAsync(idHoaDon);
+
+            if (!result.IsSuccess)
+                return NotFound(result.Message);
+
+            return Ok(result.Data);
+        }
 
     }
 }

@@ -35,6 +35,8 @@ namespace AppApi.Service
                 {
                     IDHoaDon = Guid.NewGuid(),
                     NgayTao = DateTime.Now,
+                    IDUser = new Guid("07E1FC26-D86A-44F6-AC5A-F28452D4E22B"),
+
                     IDNguoiTao = request.IDNguoiTao,
                     TrangThaiDonHang = request.IsHoaDonCho ? "Chờ thanh toán" : "Đã bán",
                     TrangThaiThanhToan = request.IsHoaDonCho ? "Chưa thanh toán" : "Đã thanh toán",
@@ -316,6 +318,63 @@ namespace AppApi.Service
         }
 
 
+        public async Task<(bool IsSuccess, string Message, HoaDonChiTietViewModel? Data)> XemChiTietHoaDonAsync(Guid idHoaDon)
+        {
+            var hoaDon = await _context.HoaDons
+     .Include(h => h.HoaDonChiTiets)
+         .ThenInclude(ct => ct.SanPhamCT)
+             .ThenInclude(spct => spct.SanPham)
+     .Include(h => h.HoaDonChiTiets)
+         .ThenInclude(ct => ct.SanPhamCT)
+             .ThenInclude(spct => spct.SizeAo)
+     .Include(h => h.HoaDonChiTiets)
+         .ThenInclude(ct => ct.SanPhamCT)
+             .ThenInclude(spct => spct.MauSac)
+             .Include(h => h.HoaDonChiTiets)
+         .ThenInclude(ct => ct.SanPhamCT)
+             .ThenInclude(spct => spct.ChatLieu)
+             .Include(h => h.User2).Include(h => h.User)
+     .FirstOrDefaultAsync(h => h.IDHoaDon == idHoaDon);
+                
+     
+
+
+            if (hoaDon == null)
+            {
+                return (false, "Không tìm thấy hóa đơn", null);
+            }
+
+            var result = new HoaDonChiTietViewModel
+            {
+                IDHoaDon = hoaDon.IDHoaDon,
+                NgayTao = hoaDon.NgayTao ?? DateTime.Now,
+                TenNguoiTao = hoaDon.User2?.HoTen ?? "Không rõ",
+                NguoiMuaHang=hoaDon.User?.HoTen?? "Không rõ",
+                TrangThaiDonHang = hoaDon.TrangThaiDonHang,
+                TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
+                TongTienTruocGiam = hoaDon.TongTienTruocGiam,
+                TienGiam = hoaDon.TienGiam,
+                TongTienSauGiam = hoaDon.TongTienSauGiam,
+                GhiChu = hoaDon.GhiChu,
+                DanhSachSanPham = hoaDon.HoaDonChiTiets
+    .GroupBy(ct => ct.IDSanPhamCT)
+    .Select(g =>
+    {
+        var first = g.First();
+        return new ChiTietSanPhamViewModel
+        {
+            IDSanPhamCT = g.Key,
+            TenSanPham = $"{first.SanPhamCT.SanPham.TenSanPham} - Chất liệu: {first.SanPhamCT.ChatLieu.TenChatLieu} - Màu: {first.SanPhamCT.MauSac.TenMau} - Size: {first.SanPhamCT.SizeAo.SoSize}  - {first.SanPhamCT.GiaBan:N0} đ",
+            SoLuong = g.Sum(x => x.SoLuongSanPham),
+            DonGia = first.GiaSanPham
+        };
+    })
+    .ToList()
+
+            };
+
+            return (true, "Lấy chi tiết hóa đơn thành công", result);
+        }
 
     }
 }
