@@ -76,15 +76,8 @@ namespace AppView.Areas.Admin.Controllers
                 return RedirectToAction("HoaDonCho");
             }
 
-            // ✅ Lấy chi tiết hóa đơn để in
-            var hoaDonResult = await _banHangRepo.XemChiTietHoaDonAsync(model.IDHoaDon);
-            if (!hoaDonResult.IsSuccess)
-            {
-                TempData["Error"] = "Thanh toán xong nhưng không thể load chi tiết hóa đơn để in.";
-                return RedirectToAction("HoaDonCho");
-            }
-
-            return View("InHoaDon", hoaDonResult.Data); // View sẽ có window.print()
+            // Thay vì return View(...) => redirect tới action GET
+            return RedirectToAction("InHoaDon", new { id = model.IDHoaDon });
         }
 
 
@@ -111,5 +104,18 @@ namespace AppView.Areas.Admin.Controllers
             TempData[result.IsSuccess ? "Success" : "Error"] = result.Message;
             return RedirectToAction("HoaDonCho");
         }
+        [HttpGet]
+        public async Task<IActionResult> InHoaDon(Guid id)
+        {
+            var hoaDonResult = await _banHangRepo.XemChiTietHoaDonAsync(id);
+            if (!hoaDonResult.IsSuccess)
+            {
+                TempData["Error"] = hoaDonResult.Message;
+                return RedirectToAction("HoaDonCho");
+            }
+
+            return View("InHoaDon", hoaDonResult.Data);
+        }
+
     }
 }

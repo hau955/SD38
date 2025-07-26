@@ -45,15 +45,17 @@ namespace AppApi.Controllers
             var hoaDons = await _context.HoaDons
                 .Where(h => h.TrangThaiDonHang == "Chờ thanh toán" && h.TrangThaiThanhToan == "Chưa thanh toán")
                 .OrderByDescending(h => h.NgayTao)
+                .Include(h => h.User2) // <<-- Nạp User2
                 .Select(h => new
                 {
                     h.IDHoaDon,
                     h.NgayTao,
                     h.TongTienTruocGiam,
                     h.TongTienSauGiam,
-                    h.GhiChu
+                    NguoiTao = h.User2 != null ? h.User2.HoTen : "Không rõ"
                 })
                 .ToListAsync();
+
 
             return Ok(hoaDons);
         }

@@ -111,10 +111,5 @@ namespace AppView.Areas.Auth.Repository
             var response = await _httpClient.PostAsJsonAsync("https://localhost:7221/api/auths/resend-confirmation", new { email });
             return await ParseApiResponse<object>(response);
         }
-
-        public Task<ApiResponse<object>> LogoutAsync(string userId)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

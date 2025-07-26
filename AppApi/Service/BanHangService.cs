@@ -118,7 +118,7 @@ namespace AppApi.Service
             hoaDon.TrangThaiThanhToan = "Đã thanh toán";
             hoaDon.NgayThanhToan = DateTime.Now;
             hoaDon.NgaySua = DateTime.Now;
-           // hoaDon.IDNguoiTao ??= request.IDNguoiTao;
+           
             hoaDon.GhiChu += " | " + request.GhiChuThanhToan;
 
             await _context.SaveChangesAsync();
@@ -348,6 +348,8 @@ namespace AppApi.Service
             {
                 IDHoaDon = hoaDon.IDHoaDon,
                 NgayTao = hoaDon.NgayTao ?? DateTime.Now,
+                NgayThanhToan = hoaDon.NgayThanhToan ?? DateTime.Now,
+
                 TenNguoiTao = hoaDon.User2?.HoTen ?? "Không rõ",
                 NguoiMuaHang=hoaDon.User?.HoTen?? "Không rõ",
                 TrangThaiDonHang = hoaDon.TrangThaiDonHang,

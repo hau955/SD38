@@ -1,0 +1,443 @@
+﻿@model AppView.Areas.Admin.ViewModels.EmployeeManagerment.UpdateEmployeeViewModel
+
+@{
+    ViewData["Title"] = "Chỉnh Sửa Nhân Viên";
+}
+<div class="alert alert-info">
+    <strong>Debug Info:</strong>
+    <div>Total Items: @ViewBag.Count</div>
+    <div>Current Page: @ViewBag.CurrentPage</div>
+    <div>Total Pages: @ViewBag.TotalPages</div>
+</div>
+<div class="page-header">
+    <h1 class="page-title">
+        <i class="fas fa-user-edit"></i>
+        Chỉnh Sửa Nhân Viên
+    </h1>
+    <div class="page-actions">
+        <a href="@Url.Action("Details", new { id = Model.Id })" class="btn btn-info me-2">
+            <i class="fas fa-eye"></i>
+            Xem Chi Tiết
+        </a>
+        <a href="@Url.Action("Index")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i>
+            Quay lại
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-lg border-0">
+    <div class="card-header bg-gradient text-white">
+        <h5 class="mb-0">
+            <i class="fas fa-user-edit me-2"></i>
+            Cập Nhật Thông Tin: @Model.FullName
+        </h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            <input asp-for="Id" type="hidden" />
+            <input asp-for="AvatarUrl" type="hidden" />
+
+            <div class="row">
+                <!-- Avatar Section -->
+                <div class="col-lg-3">
+                    <div class="avatar-section text-center">
+                        <div class="current-avatar mb-3">
+                            @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                            {
+                                <img src="@Model.AvatarUrl" alt="Avatar" class="employee-avatar" />
+                            }
+                            else
+                            {
+                                <div class="no-avatar">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Thay Đổi Ảnh</label>
+                            <input type="file" name="AvatarFile" class="form-control" accept="image/*" />
+                            <div class="form-text">JPG, PNG, GIF (Tối đa 2MB)</div>
+                        </div>
+
+                        <div class="user-info-card">
+                            <div class="info-item">
+                                <i class="fas fa-id-card text-primary"></i>
+                                <div>
+                                    <small class="text-muted">ID Nhân Viên</small>
+                                    <div class="fw-bold">@Model.Id</div>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-calendar-alt text-info"></i>
+                                <div>
+                                    <small class="text-muted">Cập nhật lần cuối</small>
+                                    <div class="fw-bold">Hôm nay</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Information -->
+                <div class="col-lg-9">
+                    <div class="row">
+                        <!-- Thông tin cá nhân -->
+                        <div class="col-lg-6">
+                            <div class="form-section">
+                                <h6 class="section-title">
+                                    <i class="fas fa-user text-primary"></i>
+                                    Thông Tin Cá Nhân
+                                </h6>
+
+                                <div class="mb-3">
+                                    <label asp-for="FullName" class="form-label required">Họ và Tên</label>
+                                    <input asp-for="FullName" class="form-control" required />
+                                    <span asp-validation-for="FullName" class="text-danger"></span>
+                                    <div class="invalid-feedback">
+                                        Vui lòng nhập họ và tên.
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="PhoneNumber" class="form-label">Số Điện Thoại</label>
+                                    <input asp-for="PhoneNumber" class="form-control" placeholder="0901234567" />
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Address" class="form-label">Địa Chỉ</label>
+                                    <textarea asp-for="Address" class="form-control" rows="3" placeholder="Nhập địa chỉ đầy đủ"></textarea>
+                                    <span asp-validation-for="Address" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin bổ sung -->
+                        <div class="col-lg-6">
+                            <div class="form-section">
+                                <h6 class="section-title">
+                                    <i class="fas fa-info-circle text-success"></i>
+                                    Thông Tin Bổ Sung
+                                </h6>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="DateOfBirth" class="form-label">Ngày Sinh</label>
+                                        <input asp-for="DateOfBirth" type="date" class="form-control" />
+                                        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Gender" class="form-label">Giới Tính</label>
+                                        <select asp-for="Gender" class="form-select">
+                                            <option value="">-- Chọn giới tính --</option>
+                                            <option value="true">Nam</option>
+                                            <option value="false">Nữ</option>
+                                        </select>
+                                        <span asp-validation-for="Gender" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="update-info-box">
+                                    <div class="info-header">
+                                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                                        <strong>Lưu Ý Khi Cập Nhật</strong>
+                                    </div>
+                                    <ul class="mb-0">
+                                        <li>Email không thể thay đổi từ form này</li>
+                                        <li>Để đổi mật khẩu, sử dụng chức năng "Reset Password"</li>
+                                        <li>Thay đổi sẽ có hiệu lực ngay lập tức</li>
+                                        <li>Nhân viên sẽ nhận thông báo qua email</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save me-2"></i>
+                    Cập Nhật Thông Tin
+                </button>
+                <a href="@Url.Action("ResetPassword", new { id = Model.Id })" class="btn btn-warning btn-lg">
+                    <i class="fas fa-key me-2"></i>
+                    Đổi Mật Khẩu
+                </a>
+                <a href="@Url.Action("Details", new { id = Model.Id })" class="btn btn-info btn-lg">
+                    <i class="fas fa-eye me-2"></i>
+                    Xem Chi Tiết
+                </a>
+                <a href="@Url.Action("Index")" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-times me-2"></i>
+                    Hủy Bỏ
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--ao-dai-gold);
+    }
+
+    .avatar-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+    }
+
+    .employee-avatar {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid var(--ao-dai-gold);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .no-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        color: #6c757d;
+        font-size: 3rem;
+        margin: 0 auto;
+    }
+
+    .user-info-card {
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-item i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+    .form-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border: 1px solid #e9ecef;
+        height: 100%;
+    }
+
+    .section-title {
+        color: var(--ao-dai-dark);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--ao-dai-gold);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .update-info-box {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .info-header {
+        margin-bottom: 0.5rem;
+        color: #856404;
+        font-size: 0.9rem;
+    }
+
+    .update-info-box ul {
+        font-size: 0.85rem;
+        color: #664d03;
+        margin-left: 1rem;
+    }
+
+    .update-info-box li {
+        margin-bottom: 0.25rem;
+    }
+
+    .form-label.required::after {
+        content: ' *';
+        color: var(--ao-dai-red);
+    }
+
+    .form-actions {
+        text-align: center;
+        padding-top: 2rem;
+        border-top: 2px solid #e9ecef;
+        margin-top: 2rem;
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--ao-dai-red) 0%, var(--ao-dai-gold) 100%);
+        border: none;
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+        border: none;
+        color: white;
+    }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+            color: white;
+        }
+
+    .card-header.bg-gradient {
+        background: linear-gradient(135deg, var(--ao-dai-red) 0%, var(--ao-dai-gold) 100%) !important;
+    }
+
+    .page-actions .btn {
+        margin-left: 0.5rem;
+    }
+
+    @@media (max-width: 768px) {
+        .form-actions
+
+    {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    }
+</style>
+
+<script>
+    // Form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        Swal.fire({
+            title: 'Xác nhận cập nhật',
+            text: 'Bạn chắc chắn muốn cập nhật thông tin nhân viên này?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Hủy bỏ'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.submit();
+            }
+        });
+    });
+
+    // Thêm xử lý response từ server
+    @if (TempData["SuccessMessage"] != null)
+    {
+            <text>
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công',
+                text: '@TempData["SuccessMessage"]',
+                confirmButtonColor: '#3085d6'
+            });
+            </text>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+            <text>
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: '@TempData["ErrorMessage"]',
+                confirmButtonColor: '#d33'
+            });
+            </text>
+    }
+    // Preview new avatar
+    document.querySelector('input[name="AvatarFile"]').addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const avatar = document.querySelector('.employee-avatar') || document.querySelector('.no-avatar');
+                if (avatar.tagName === 'IMG') {
+                    avatar.src = e.target.result;
+                } else {
+                    // Replace no-avatar div with img
+                    const newImg = document.createElement('img');
+                    newImg.src = e.target.result;
+                    newImg.className = 'employee-avatar';
+                    avatar.parentNode.replaceChild(newImg, avatar);
+                }
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    // Phone number formatting
+    document.querySelector('input[name="PhoneNumber"]').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 10) {
+            value = value.substring(0, 10);
+        }
+        e.target.value = value;
+    });
+</script>

@@ -5,7 +5,7 @@
         public Guid IDHoaDon { get; set; }
         public string? TenNguoiTao { get; set; }
         public string? NguoiMuaHang { get; set; }
-
+        public DateTime NgayThanhToan { get; set; }
         public DateTime NgayTao { get; set; }
         public string? TrangThaiDonHang { get; set; }
         public string? TrangThaiThanhToan { get; set; }

@@ -15,12 +15,11 @@ namespace AppData.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=HAU-2005;Database=AoDaiModel;User Id=sa;Password=Hauhoang0905!;TrustServerCertificate=true;");//"Server=LAPTOP-Q4DACOEF\\MSSQLSERVER02;Database=AoDaiModel1;Trusted_Connection=True;TrustServerCertificate=True");  //"Server=DESKTOP-A99GQBL;Database=AoDaiModel;Trusted_Connection=True;TrustServerCertificate=True");
+            optionsBuilder.UseSqlServer("Server=HAU-2005;Database=AoDaiModel;User Id=sa;Password=Hauhoang0905!;TrustServerCertificate=true;"); //optionsBuilder.UseSqlServer("Server=LAPTOP-Q4DACOEF\\MSSQLSERVER02;Database=AoDaiModel1;Trusted_Connection=True;TrustServerCertificate=True"); "Server=DESKTOP-A99GQBL;Database=AoDaiModel;Trusted_Connection=True;TrustServerCertificate=True");
         }
         public DbSet<GioHang> GioHangs { get; set; }
         public DbSet<GioHangCT> GioHangChiTiets { get; set; }
         public DbSet<DiaChiNhanHang> DiaChiNhanHangs { get; set; }
-
         public DbSet<HinhThucTT> HinhThucTTs { get; set; }
         public DbSet<HoaDon> HoaDons { get; set; }
         public DbSet<HoaDonCT> HoaDonChiTiets { get; set; }
@@ -135,8 +134,6 @@ namespace AppData.Models
                 .WithMany(ca => ca.SanPhamChiTiets)
                 .HasForeignKey(spct => spct.IdChatLieu)
                 .OnDelete(DeleteBehavior.Restrict);
-
-          
 
             // Kiểu decimal mặc định là (18,2)
             foreach (var property in builder.Model.GetEntityTypes()

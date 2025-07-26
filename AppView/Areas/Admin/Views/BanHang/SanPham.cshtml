@@ -21,7 +21,8 @@
 </style>
 
 <h2 class="text-xl font-bold mb-4">@((isThemVaoHoaDon ? "Thêm sản phẩm vào hóa đơn" : "Tạo hóa đơn mới"))</h2>
-<form asp-area="Admin" asp-controller="BanHang" asp-action="@(isThemVaoHoaDon ? "ThemSanPhamVaoHoaDonCho" : "BanTaiQuay")" method="post">
+<form id="mainForm" asp-area="Admin" asp-controller="BanHang" asp-action="@(isThemVaoHoaDon ? "ThemSanPhamVaoHoaDonCho" : "BanTaiQuay")" method="post">
+
     @if (isThemVaoHoaDon)
     {
         <input type="hidden" name="IDHoaDon" value="@idHoaDon" />
@@ -105,8 +106,8 @@
                         <!-- Số lượng -->
                         <div class="mt-3 hidden-select" data-product="@sp.IDSanPham" data-index="@i" style="display:none;">
                             <label>Số lượng:</label>
-                            <input type="number" name="DanhSachSanPham[@i].SoLuong" class="form-control form-control-sm qty-input" value="1" min="1" />
-                            <input type="hidden" name="DanhSachSanPham[@i].IDSanPhamCT" class="product-detail-id" />
+                            <input type="number" class="form-control form-control-sm qty-input" value="1" min="1" />
+                            <input type="hidden" class="product-detail-id" />
                         </div>
                     </div>
 
@@ -136,10 +137,13 @@
     <div class="card mt-4 shadow-sm">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h4 class="mb-0">🧾 Chi tiết hóa đơn</h4>
-            <form asp-area="Admin" asp-controller="BanHang" asp-action="ThanhToanHoaDonCho" method="post" class="mb-0">
+            <form asp-area="Admin" asp-controller="BanHang" asp-action="ThanhToanHoaDonCho" method="post" id="printForm">
                 <input type="hidden" name="IDHoaDon" value="@idHoaDon" />
-                <button type="submit" class="btn btn-success btn-sm">💵 Thanh toán</button>
+                <input type="hidden" name="GhiChuThanhToan" value="" />
+                <button type="button" class="btn btn-success btn-sm" onclick="submitAndPrint()">💵 Thanh toán</button>
             </form>
+
+
 
         </div>
 
@@ -176,7 +180,7 @@
                                 <td class="text-end">@sp.DonGia.ToString("N0") đ</td>
                                 <td class="text-end">@sp.ThanhTien.ToString("N0") đ</td>
                                 <td>
-                                    <form asp-area="Admin" asp-controller="BanHang" asp-action="ThanhToanHoaDonCho" method="post" class="mb-0" target="_blank">
+                                    <form asp-area="Admin" asp-controller="BanHang" asp-action="TruSanPhamKhoiHoaDonCho" method="post" class="mb-0">
 
                                         <input type="hidden" name="IDHoaDon" value="@idHoaDon" />
                                         <input type="hidden" name="IDSanPhamCT" value="@sp.IDSanPhamCT" />
@@ -297,23 +301,37 @@
                 hiddenInput.value = "";
             }
         }
-
-        // ✅ Cập nhật lại tên input trước khi submit
-        document.querySelector('form').addEventListener('submit', function () {
+                document.getElementById('mainForm').addEventListener('submit', function () {
             const allSections = document.querySelectorAll('.hidden-select');
+            let currentIndex = 0;
+
             allSections.forEach(section => {
                 const idInput = section.querySelector('.product-detail-id');
                 const qtyInput = section.querySelector('.qty-input');
-                const index = section.getAttribute('data-index');
 
                 if (idInput && idInput.value) {
-                    idInput.name = `DanhSachSanPham[${index}].IDSanPhamCT`;
-                    qtyInput.name = `DanhSachSanPham[${index}].SoLuong`;
+                    idInput.setAttribute('name', `DanhSachSanPham[${currentIndex}].IDSanPhamCT`);
+                    qtyInput.setAttribute('name', `DanhSachSanPham[${currentIndex}].SoLuong`);
+                    currentIndex++;
                 } else {
-                    idInput?.removeAttribute("name");
-                    qtyInput?.removeAttribute("name");
+                    idInput?.removeAttribute('name');
+                    qtyInput?.removeAttribute('name');
                 }
             });
         });
+
+                     function submitAndPrint() {
+            const hoaDonId = '@idHoaDon'; // Lấy ID hóa đơn ra từ Razor
+            if (hoaDonId) {
+                // 👉 In hóa đơn ở tab mới
+                window.open('/Admin/BanHang/InHoaDon?id=' + hoaDonId, '_blank');
+
+                // 👉 Gửi form thanh toán (POST) ở tab hiện tại
+                document.getElementById("printForm").submit();
+            } else {
+                alert("Không tìm thấy ID hóa đơn để in.");
+            }
+        }
+
     </script>
 }

@@ -111,13 +111,5 @@ namespace AppApi.Features.Controllers
 
             return BadRequest(new { success = false, message = result.Message });
         }
-
-        [Authorize]
-        [HttpPost("logout")]
-        public IActionResult Logout()
-        {
-            // Tuỳ vào cách bạn triển khai token, có thể xoá token client-side hoặc thêm logic blacklist token server-side.
-            return Ok(new { Message = "Đăng xuất thành công" });
-        }
     }
 }

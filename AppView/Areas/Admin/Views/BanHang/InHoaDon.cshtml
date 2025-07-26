@@ -82,7 +82,7 @@
 
     <!-- ✅ Header -->
     <div class="header">
-        <img src="~/images/image.png" alt="Logo" /> <!-- logo của shop -->
+        <img src="@Url.Content("~/images/image.png")" alt="Logo" /> <!-- logo của shop -->
         <h2>HÓA ĐƠN BÁN HÀNG</h2>
         <div class="info">
             CỬA HÀNG ÁO DÀI VIỆT NAM<br />
@@ -94,7 +94,8 @@
     <!-- ✅ Thông tin hóa đơn -->
     <div class="info">
       @*  Mã hóa đơn: <strong>@Model.IDHoaDon</strong><br /> *@
-        Ngày lập: @Model.NgayTao.ToString("dd/MM/yyyy HH:mm")<br />
+        Ngày tạo hóa đơn: @Model.NgayTao.ToString("dd/MM/yyyy HH:mm")<br />
+       @*  Ngày ngày thanh toán: @Model.NgayThanhToan.ToString("dd/MM/yyyy HH:mm")<br /> *@
         Nhân viên: @Model.TenNguoiTao<br />
         Người Mua: @Model.NguoiMuaHang<br />
         Ghi chú: @(string.IsNullOrEmpty(Model.GhiChu) ? "Không có" : Model.GhiChu)
@@ -137,7 +138,8 @@
 
     <!-- ✅ Ký tên -->
     <div class="signature">
-        Hà Nội, ngày @DateTime.Now.ToString("dd") tháng @DateTime.Now.ToString("MM") năm @DateTime.Now.ToString("yyyy")<br />
+        Hà Nội, ngày @DateTime.Now.ToString("dd/MM/yyyy HH:mm")<br />
+
         <strong>Người lập hóa đơn</strong><br />
         @Model.TenNguoiTao
     </div>

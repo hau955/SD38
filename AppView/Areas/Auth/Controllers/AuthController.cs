@@ -57,10 +57,11 @@ namespace AppView.Areas.Auth.Controllers
                 showLoginModal = result.IsSuccess
             });
         }
-
-        // ========== Login ==========
         [HttpGet]
-        public IActionResult Login() => View();
+        public IActionResult Login()
+        {
+            return View();
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
@@ -94,7 +95,6 @@ namespace AppView.Areas.Auth.Controllers
             return RedirectToAction("Index", "SanPham", new { area = "Admin" });
             // hoặc
             return RedirectToAction("Index", "Home");
-
         }
         // ========== Forgot Password ==========
         [HttpGet]
@@ -217,15 +217,30 @@ namespace AppView.Areas.Auth.Controllers
                 message = result.Message
             });
         }
-
-        // ========== Logout ==========
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
-            HttpContext.Session.Clear();
-            return RedirectToAction("Index", "Home", new { area = "" });
+            try
+            {
+                await _signInManager.SignOutAsync();
+                HttpContext.Session.Clear();
+
+                // Xóa cookie authentication
+                if (HttpContext.Request.Cookies[".AspNetCore.Identity.Application"] != null)
+                    HttpContext.Response.Cookies.Delete(".AspNetCore.Identity.Application");
+
+                // Xóa JWT token nếu có
+                if (HttpContext.Request.Cookies["Token"] != null)
+                    HttpContext.Response.Cookies.Delete("Token");
+
+                return Json(new { success = true, redirectUrl = Url.Action("Index", "Home", new { area = "" }) });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi logout");
+                return Json(new { success = false, message = "Đăng xuất thất bại" });
+            }
         }
     }
 }
