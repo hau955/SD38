@@ -16,5 +16,6 @@
     {
         public Guid IDSanPhamCT { get; set; }
         public int SoLuong { get; set; }
+      
     }
 }

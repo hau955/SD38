@@ -57,6 +57,11 @@ namespace AppView.Areas.Auth.Controllers
                 showLoginModal = result.IsSuccess
             });
         }
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
@@ -90,7 +95,7 @@ namespace AppView.Areas.Auth.Controllers
             return RedirectToAction("Index", "SanPham", new { area = "Admin" });
             // hoặc
             return RedirectToAction("Index", "Home");
-
+        }
         // ========== Forgot Password ==========
         [HttpGet]
         public IActionResult ForgotPassword() => View();

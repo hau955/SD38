@@ -287,7 +287,7 @@ namespace AppApi.Features.Services
                 Roles = roles,
                 hoten=user.HoTen,
                 hinhanh = user.HinhAnh,
-                Id = user.Id
+               
             };
 
             //var result = await _userManager.CreateAsync(user, model.Password);

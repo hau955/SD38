@@ -9,15 +9,8 @@ namespace AppView.Areas.Auth.ViewModel
         public DateTime Expiration { get; set; }
         public string Email { get; set; }
         public string hoten { get; set; }
-        public string hinhanh { get; set; }
+        public string? hinhanh { get; set; }
         public IList<string> Roles { get; set; }
-        public string hoten { get; set; } 
-        public Guid Id { get; set; } 
-
-        
-
-       
-        public string? hinhanh { get; set; } // Không bắt buộc
        
       
     }
