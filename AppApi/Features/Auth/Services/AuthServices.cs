@@ -285,8 +285,9 @@ namespace AppApi.Features.Services
                 Expiration = token.ValidTo,
                 Email = user.Email ?? string.Empty,
                 Roles = roles,
-                hoten = user.HoTen ?? string.Empty,
-                hinhanh = user.HinhAnh ?? string.Empty
+                hoten=user.HoTen,
+                hinhanh = user.HinhAnh,
+                Id = user.Id
             };
 
             //var result = await _userManager.CreateAsync(user, model.Password);

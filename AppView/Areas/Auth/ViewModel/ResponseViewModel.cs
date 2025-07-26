@@ -11,12 +11,13 @@ namespace AppView.Areas.Auth.ViewModel
         public string hoten { get; set; }
         public string hinhanh { get; set; }
         public IList<string> Roles { get; set; }
-        public string HoTen { get; set; } = string.Empty;
+        public string hoten { get; set; } 
+        public Guid Id { get; set; } 
 
         
 
        
-        public string? HinhAnh { get; set; } // Không bắt buộc
+        public string? hinhanh { get; set; } // Không bắt buộc
        
       
     }

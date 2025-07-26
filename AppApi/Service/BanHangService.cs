@@ -35,7 +35,7 @@ namespace AppApi.Service
                 {
                     IDHoaDon = Guid.NewGuid(),
                     NgayTao = DateTime.Now,
-                    
+                    IDNguoiTao = request.IDNguoiTao,
                     TrangThaiDonHang = request.IsHoaDonCho ? "Chờ thanh toán" : "Đã bán",
                     TrangThaiThanhToan = request.IsHoaDonCho ? "Chưa thanh toán" : "Đã thanh toán",
                     GhiChu = request.GhiChu
@@ -46,8 +46,8 @@ namespace AppApi.Service
                 foreach (var sp in request.DanhSachSanPham)
                 {
                     var sanPhamCT = await _context.SanPhamChiTiets
-                        .Include(x => x.SanPham)
-                        .FirstOrDefaultAsync(x => x.IDSanPhamCT == sp.IDSanPhamCT);
+                       .Include(x => x.SanPham)
+                       .FirstOrDefaultAsync(x => x.IDSanPhamCT == sp.IDSanPhamCT);
 
                     if (sanPhamCT == null)
                         return (false, $"Không tìm thấy sản phẩm chi tiết {sp.IDSanPhamCT}", null);
@@ -65,8 +65,8 @@ namespace AppApi.Service
                     {
                         IDHoaDonChiTiet = Guid.NewGuid(),
                         IDHoaDon = hoaDon.IDHoaDon,
-                        IDSanPham = sanPhamCT.IDSanPham,
-                        TenSanPham = sanPhamCT.SanPham?.TenSanPham ,
+                        IDSanPhamCT = sanPhamCT.IDSanPhamCT,
+                        TenSanPham = sanPhamCT.SanPham!.TenSanPham ,
                         SoLuongSanPham = sp.SoLuong,
                         GiaSanPham = sanPhamCT.GiaBan,
                         GiaSauGiamGia = sanPhamCT.GiaBan,
@@ -138,7 +138,9 @@ namespace AppApi.Service
                 foreach (var sp in request.DanhSachSanPham)
                 {
                     var sanPhamCT = await _context.SanPhamChiTiets
+                        .Include(x => x.SanPham)
                         .FirstOrDefaultAsync(x => x.IDSanPhamCT == sp.IDSanPhamCT);
+
 
                     if (sanPhamCT == null)
                         return (false, $"Không tìm thấy sản phẩm chi tiết {sp.IDSanPhamCT}");
@@ -160,14 +162,15 @@ namespace AppApi.Service
                     {
                         IDHoaDonChiTiet = Guid.NewGuid(),
                         IDHoaDon = hoaDon.IDHoaDon,
-                        IDSanPham = sanPhamCT.IDSanPham,
-                        TenSanPham = sanPhamCT.SanPham?.TenSanPham ,
+                        IDSanPhamCT = sanPhamCT.IDSanPhamCT,
+                        TenSanPham = sanPhamCT.SanPham!.TenSanPham ,
                         SoLuongSanPham = sp.SoLuong,
                         GiaSanPham = sanPhamCT.GiaBan,
                         GiaSauGiamGia = sanPhamCT.GiaBan,
                         NgayTao = DateTime.Now,
                         TrangThai = true
                     });
+
                 }
 
                 hoaDon.TongTienTruocGiam += tongTienThem;
@@ -186,8 +189,10 @@ namespace AppApi.Service
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                return (false, $"Lỗi hệ thống: {ex.Message}");
+                var inner = ex.InnerException?.Message ?? ex.Message;
+                return (false, $"Lỗi hệ thống chi tiết: {inner}");
             }
+
         }
 
         public async Task<(bool IsSuccess, string Message)> TruSanPhamKhoiHoaDonChoAsync(TruSanPham request)
@@ -202,20 +207,17 @@ namespace AppApi.Service
                 if (hoaDon == null || hoaDon.TrangThaiThanhToan == "Đã thanh toán")
                     return (false, "Hóa đơn không tồn tại hoặc đã thanh toán");
 
+                // ✅ Tìm chi tiết hóa đơn theo ID sản phẩm chi tiết
                 var chiTiet = hoaDon.HoaDonChiTiets
-                    .FirstOrDefault(ct => ct.IDSanPham == _context.SanPhamChiTiets
-                                                            .Where(spct => spct.IDSanPhamCT == request.IDSanPhamCT)
-                                                            .Select(spct => spct.IDSanPham)
-                                                            .FirstOrDefault()
-                                  && ct.TrangThai);
+                    .FirstOrDefault(x => x.IDSanPhamCT == request.IDSanPhamCT && x.TrangThai);
 
                 if (chiTiet == null)
-                    return (false, "Không tìm thấy sản phẩm trong hóa đơn");
+                    return (false, "Không tìm thấy sản phẩm chi tiết trong hóa đơn");
 
                 if (request.SoLuong > chiTiet.SoLuongSanPham)
-                    return (false, "Số lượng cần trừ lớn hơn số lượng có trong hóa đơn");
+                    return (false, "Số lượng cần trừ lớn hơn số lượng trong hóa đơn");
 
-                // ✅ Cộng lại vào kho
+                // ✅ Cộng lại tồn kho
                 var sanPhamCT = await _context.SanPhamChiTiets
                     .FirstOrDefaultAsync(sp => sp.IDSanPhamCT == request.IDSanPhamCT);
 
@@ -224,20 +226,27 @@ namespace AppApi.Service
 
                 sanPhamCT.SoLuongTonKho += request.SoLuong;
 
-                // ✅ Cập nhật hóa đơn chi tiết hoặc xóa nếu hết số lượng
-                if (request.SoLuong == chiTiet.SoLuongSanPham)
+                // ✅ Trừ số lượng, hoặc xóa nếu hết
+                var tienTru = request.SoLuong * chiTiet.GiaSauGiamGia;
+
+                chiTiet.SoLuongSanPham -= request.SoLuong;
+
+                if (chiTiet.SoLuongSanPham <= 0)
                 {
                     _context.HoaDonChiTiets.Remove(chiTiet);
                 }
                 else
                 {
-                    chiTiet.SoLuongSanPham -= request.SoLuong;
                     chiTiet.NgayTao = DateTime.Now;
+                    _context.HoaDonChiTiets.Update(chiTiet);
                 }
 
-                var tienTru = request.SoLuong * chiTiet.GiaSauGiamGia;
+                // ✅ Cập nhật tổng tiền
                 hoaDon.TongTienTruocGiam -= tienTru;
                 hoaDon.TongTienSauGiam -= tienTru;
+
+                _context.HoaDons.Update(hoaDon);
+                _context.SanPhamChiTiets.Update(sanPhamCT);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -250,6 +259,62 @@ namespace AppApi.Service
                 return (false, $"Lỗi: {ex.Message}");
             }
         }
+
+        public async Task<(bool IsSuccess, string Message)> HuyHoaDonAsync(Guid idHoaDon)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var hoaDon = await _context.HoaDons
+                    .Include(h => h.HoaDonChiTiets)
+                    .FirstOrDefaultAsync(h => h.IDHoaDon == idHoaDon);
+
+                if (hoaDon == null)
+                    return (false, "Không tìm thấy hóa đơn");
+
+                if (hoaDon.TrangThaiThanhToan == "Đã thanh toán")
+                    return (false, "Hóa đơn đã thanh toán, không thể hủy");
+
+                if (hoaDon.TrangThaiThanhToan == "Đã hủy")
+                    return (false, "Hóa đơn đã bị hủy trước đó");
+                if (hoaDon.TrangThaiDonHang == "Đã hủy")
+                    return (false, "Hóa đơn đã bị hủy trước đó");
+
+                // ✅ Trả lại tồn kho & xóa chi tiết hóa đơn
+                foreach (var ct in hoaDon.HoaDonChiTiets.ToList())
+                {
+                    var spCT = await _context.SanPhamChiTiets
+                        .FirstOrDefaultAsync(x => x.IDSanPham == ct.IDSanPhamCT);
+
+                    if (spCT != null)
+                    {
+                        spCT.SoLuongTonKho += ct.SoLuongSanPham;
+                        _context.SanPhamChiTiets.Update(spCT);
+                    }
+
+                    _context.HoaDonChiTiets.Remove(ct); // 👉 XÓA
+                }
+
+                // ✅ Cập nhật hóa đơn
+                hoaDon.TongTienTruocGiam = 0;
+                hoaDon.TongTienSauGiam = 0;
+                hoaDon.TrangThaiThanhToan = "Đã hủy";
+                hoaDon.NgayTao = DateTime.Now;
+
+                _context.HoaDons.Update(hoaDon);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return (true, "Hủy hóa đơn thành công");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return (false, $"Lỗi hệ thống: {ex.InnerException?.Message ?? ex.Message}");
+            }
+        }
+
 
 
     }

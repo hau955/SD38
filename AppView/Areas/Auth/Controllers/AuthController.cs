@@ -78,21 +78,18 @@ namespace AppView.Areas.Auth.Controllers
                     email = model.Email
                 });
             }
-            HttpContext.Session.SetString("Token", result.Data.Token);
-            HttpContext.Session.SetString("UserId", result.Data.Id.ToString());
-            HttpContext.Session.SetString("Email", result.Data.Email);
-            HttpContext.Session.SetString("HinhAnh", result.Data.hinhanh ?? "/admin/assets/img/avatars/default.png");
-            HttpContext.Session.SetString("HoTen", result.Data.hoten ?? result.Data.Email);
-            HttpContext.Session.SetString("Roles", string.Join(",", result.Data.Roles));
 
-            return Json(new
-            {
-                success = true,
-                redirectUrl = result.Data.Roles.Contains("Admin") ? Url.Action("Index", "SanPham", new { area = "Admin" }) : Url.Action("Index", "Home", new { area = "" }),
-                email = result.Data.Email,
-                userName = result.Data.hoten
-            });
-        }
+            // Lưu session
+            HttpContext.Session.SetString("Token", result.Data.Token ?? "");
+            HttpContext.Session.SetString("Email", result.Data.Email ?? "");
+            HttpContext.Session.SetString("HinhAnh", result.Data.hinhanh ?? "/admin/assets/img/avatars/default.png");
+            HttpContext.Session.SetString("HoTen", result.Data.hoten ?? "");
+            HttpContext.Session.SetString("ID", result.Data.Id.ToString() ?? "");
+            HttpContext.Session.SetString("Roles", result.Data.Roles != null ? string.Join(",", result.Data.Roles) : "");
+
+            return RedirectToAction("Index", "SanPham", new { area = "Admin" });
+            // hoặc
+            return RedirectToAction("Index", "Home");
 
         // ========== Forgot Password ==========
         [HttpGet]
