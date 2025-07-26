@@ -285,8 +285,8 @@ namespace AppApi.Features.Services
                 Expiration = token.ValidTo,
                 Email = user.Email ?? string.Empty,
                 Roles = roles,
-                hoten = user.HoTen ?? string.Empty, 
-                hinhanh = user.HinhAnh ?? string.Empty  
+                hoten = user.HoTen ?? string.Empty,
+                hinhanh = user.HinhAnh ?? string.Empty
             };
 
             //var result = await _userManager.CreateAsync(user, model.Password);
@@ -386,9 +386,14 @@ namespace AppApi.Features.Services
                     return ApiResponse<object>.Fail($"Đăng ký thất bại: {errors}", 400);
                 }
 
-            await _emailService.SendEmailAsync(user.Email, subject, body);
+                //await _emailService.SendEmailAsync(user.Email, subject, body);
 
-            return ApiResponse<object>.Success(null, "Đăng ký admin thành công. Vui lòng kiểm tra email để xác thực tài khoản.", 201);
+                return ApiResponse<object>.Success(null, "Đăng ký admin thành công. Vui lòng kiểm tra email để xác thực tài khoản.", 201);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<object>.Fail($"Không thể gửi email xác nhận: {ex.Message}", 500);
+            }
         }
     }
 }

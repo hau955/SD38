@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250717160749_Init")]
+    [Migration("20250722072452_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -544,7 +544,7 @@ namespace AppData.Migrations
                     b.Property<Guid>("IDGiamGia")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IDSanPham")
+                    b.Property<Guid>("IDSanPhamCT")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("NgaySua")
@@ -563,7 +563,7 @@ namespace AppData.Migrations
 
                     b.HasIndex("IDGiamGia");
 
-                    b.HasIndex("IDSanPham");
+                    b.HasIndex("IDSanPhamCT");
 
                     b.ToTable("SanPhamGiamGias");
                 });
@@ -639,11 +639,15 @@ namespace AppData.Migrations
                     b.Property<decimal>("TongTienTruocGiam")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<int>("TrangThaiDonHang")
-                        .HasColumnType("int");
+                    b.Property<string>("TrangThaiDonHang")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("TrangThaiThanhToan")
-                        .HasColumnType("int");
+                    b.Property<string>("TrangThaiThanhToan")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("IDHoaDon");
 
@@ -886,15 +890,15 @@ namespace AppData.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AppData.Models.SanPham", "SanPham")
+                    b.HasOne("AppData.Models.SanPhamCT", "SanPhamCT")
                         .WithMany("SanPhamGiamGias")
-                        .HasForeignKey("IDSanPham")
+                        .HasForeignKey("IDSanPhamCT")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("GiamGia");
 
-                    b.Navigation("SanPham");
+                    b.Navigation("SanPhamCT");
                 });
 
             modelBuilder.Entity("HoaDon", b =>
@@ -1034,7 +1038,10 @@ namespace AppData.Migrations
                     b.Navigation("HoaDonChiTiets");
 
                     b.Navigation("SanPhamChiTiets");
+                });
 
+            modelBuilder.Entity("AppData.Models.SanPhamCT", b =>
+                {
                     b.Navigation("SanPhamGiamGias");
                 });
 

@@ -1,26 +1,19 @@
 ﻿<!DOCTYPE html>
-
 @{
     var avatarPath = Context.Session.GetString("HinhAnh") ?? "/admin/assets/img/avatars/1.png";
-
-    <img src="@avatarPath" alt="Avatar" class="w-px-40 h-auto rounded-circle" />
-
     var hoten = Context.Session.GetString("HoTen");
 }
 
 <!-- =========================================================
 * Sneat - Bootstrap 5 HTML Admin Template - Pro | v1.0.0
 ==============================================================
-
 * Product Page: https://themeselection.com/products/sneat-bootstrap-html-admin-template/
 * Created by: ThemeSelection
 * License: You must have a valid license purchased in order to legally use the theme for your project.
 * Copyright ThemeSelection (https://themeselection.com)
-
 =========================================================
  -->
-<!-- beautify ignore:start -->
-<html lang="en"
+<html lang="vi"
       class="light-style layout-menu-fixed"
       dir="ltr"
       data-theme="theme-default"
@@ -53,7 +46,16 @@
     <link rel="stylesheet" href="/admin/assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
     <link rel="stylesheet" href="/admin/assets/css/demo.css" />
 
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="/admin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="/admin/assets/vendor/libs/apex-charts/apex-charts.css" />
+
+    <!-- Helpers -->
+    <script src="/admin/assets/vendor/js/helpers.js"></script>
+    <script src="/admin/assets/js/config.js"></script>
+
     <style>
+        /* ===== FORM STYLING ===== */
         .form-wrapper {
             background-color: #ffffff;
             border-radius: 0.75rem;
@@ -119,20 +121,8 @@
                 border-color: #696cff;
                 box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.25) !important;
             }
-    </style>
 
-
-    <!-- Vendors CSS -->
-    <link rel="stylesheet" href="/admin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-    <link rel="stylesheet" href="/admin/assets/vendor/libs/apex-charts/apex-charts.css" />
-
-    <!-- Helpers -->
-    <script src="/admin/assets/vendor/js/helpers.js"></script>
-    <script src="/admin/assets/js/config.js"></script>
-
-    <!-- Custom Vietnamese Style -->
-    <style type="text/css">
-        /* Vietnamese Ao Dai Theme Variables */
+        /* ===== VIETNAMESE AO DAI THEME ===== */
         .ao-dai-theme {
             --ao-dai-red: #dc2626;
             --ao-dai-gold: #f59e0b;
@@ -141,14 +131,14 @@
             --ao-dai-dark: #1f2937;
         }
 
-        /* Base Styling */
+        /* ===== BASE STYLING ===== */
         body {
             font-family: 'Inter', sans-serif !important;
             background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
             min-height: 100vh;
         }
 
-        /* Brand Styling */
+        /* ===== BRAND STYLING ===== */
         .app-brand-text {
             font-family: 'Playfair Display', serif !important;
             font-weight: 700 !important;
@@ -158,7 +148,7 @@
             background-clip: text !important;
         }
 
-        /* Menu Styling */
+        /* ===== MENU STYLING ===== */
         .layout-menu {
             background: linear-gradient(180deg, #fff 0%, #fef3c7 100%) !important;
             border-right: 3px solid #f59e0b !important;
@@ -194,7 +184,7 @@
             letter-spacing: 1px !important;
         }
 
-        /* Navbar Styling */
+        /* ===== NAVBAR STYLING ===== */
         .layout-navbar {
             background: white !important;
             border-bottom: 3px solid #f59e0b !important;
@@ -213,7 +203,7 @@
             font-size: 1.2rem !important;
         }
 
-        /* Content Styling */
+        /* ===== CONTENT STYLING ===== */
         .content-wrapper {
             background: rgba(255, 255, 255, 0.9) !important;
             backdrop-filter: blur(10px) !important;
@@ -222,7 +212,7 @@
             box-shadow: 0 8px 32px rgba(220, 38, 38, 0.1) !important;
         }
 
-        /* Dropdown Styling */
+        /* ===== DROPDOWN STYLING ===== */
         .dropdown-menu {
             border: none !important;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
@@ -234,7 +224,7 @@
             color: #1f2937 !important;
         }
 
-        /* Footer Styling */
+        /* ===== FOOTER STYLING ===== */
         .footer {
             background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%) !important;
             color: white !important;
@@ -245,7 +235,7 @@
                 color: #fef3c7 !important;
             }
 
-        /* Search Box Styling */
+        /* ===== SEARCH BOX STYLING ===== */
         .search-box {
             background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
             border: 2px solid #f59e0b !important;
@@ -264,13 +254,13 @@
                     color: #92400e !important;
                 }
 
-        /* Avatar Styling */
+        /* ===== AVATAR STYLING ===== */
         .avatar {
             border: 3px solid #f59e0b !important;
             box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2) !important;
         }
 
-        /* Background Pattern */
+        /* ===== BACKGROUND PATTERN ===== */
         .lotus-pattern {
             position: fixed;
             top: 0;
@@ -282,27 +272,29 @@
             z-index: -1;
         }
 
-        /* Animation */
+        /* ===== ANIMATIONS ===== */
         .fade-in-up {
             opacity: 0;
             transform: translateY(20px);
             animation: fadeInUpAnimation 0.6s ease-out forwards;
         }
 
-        /* Keyframes at the end to avoid parsing issues */
         @@keyframes fadeInUpAnimation {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
+            from
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        {
+            opacity: 0;
+            transform: translateY(20px);
         }
 
-        /* Custom Card Styling */
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        /* ===== CUSTOM CARD STYLING ===== */
         .vietnamese-card {
             border: none !important;
             border-radius: 15px !important;
@@ -317,13 +309,13 @@
             background-clip: text !important;
         }
 
-        /* Notification Badge */
+        /* ===== NOTIFICATION BADGE ===== */
         .notification-badge {
             background: #dc2626 !important;
             font-size: 0.6rem !important;
         }
 
-        /* Hover Effects */
+        /* ===== HOVER EFFECTS ===== */
         .hover-lift {
             transition: transform 0.3s ease, box-shadow 0.3s ease !important;
         }
@@ -339,6 +331,7 @@
     <div class="lotus-pattern"></div>
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
+            <!-- ===== SIDEBAR MENU ===== -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
                 <div class="app-brand demo text-center p-3">
                     <a href="/Admin/Home/Index" class="app-brand-link d-flex align-items-center">
@@ -439,21 +432,19 @@
                             <div data-i18n="CaiDat">Cài Đặt</div>
                         </a>
                     </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "DanhMuc" ? "active" : "")">
-                        <a href="/Admin/DanhMuc/Index" class="menu-link">
-                            <i class="menu-icon tf-icons bx bxs-user-account"></i>
-                            <div data-i18n="Basic">Danh Mục</div>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "EmployeeManagement" ? "active" : "")">
+                        <a href="/Admin/EmployeeManagement" class="menu-link">
+                            <i class="menu-icon fas fa-user-tie"></i>
+                            <div data-i18n="EmployeeManagement">Quản Lý Nhân Viên</div>
                         </a>
                     </li>
-
                 </ul>
             </aside>
             <!-- / Menu -->
             <!-- Layout container -->
             <div class="layout-page">
-                <!-- Navbar -->
-                <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
-                     id="layout-navbar">
+                <!-- ===== NAVBAR ===== -->
+                <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
                     <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
                         <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
                             <i class="bx bx-menu bx-sm"></i>
@@ -520,7 +511,6 @@
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-
                                                     <small class="text-muted">@hoten</small>
                                                 </div>
                                             </div>
@@ -559,9 +549,8 @@
                         </ul>
                     </div>
                 </nav>
-
                 <!-- / Navbar -->
-                <!-- Content wrapper -->
+                <!-- ===== CONTENT WRAPPER ===== -->
                 <div class="content-wrapper fade-in-up">
                     <!-- Content -->
                     <div class="container-xxl">
@@ -570,7 +559,7 @@
                         </main>
                     </div>
                     <!-- / Content -->
-                    <!-- Footer -->
+                    <!-- ===== FOOTER ===== -->
                     <footer class="content-footer footer bg-footer-theme">
                         <div class="container-xxl d-flex flex-wrap justify-content-between py-3 flex-md-row flex-column">
                             <div class="mb-2 mb-md-0">
@@ -600,7 +589,7 @@
         <div class="layout-overlay layout-menu-toggle"></div>
     </div>
     <!-- / Layout wrapper -->
-    <!-- Core JS -->
+    <!-- ===== CORE JS ===== -->
     <script src="/admin/assets/vendor/libs/jquery/jquery.js"></script>
     <script src="/admin/assets/vendor/libs/popper/popper.js"></script>
     <script src="/admin/assets/vendor/js/bootstrap.js"></script>
@@ -620,9 +609,10 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Custom Confirmation Script -->
+    <!-- ===== CUSTOM SCRIPTS ===== -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // Form confirmation handler
             const forms = document.querySelectorAll("form[data-confirm]");
 
             forms.forEach(function(form) {
@@ -647,7 +637,7 @@
                 });
             });
 
-            // Add smooth menu interactions
+            // Smooth menu interactions
             document.querySelectorAll('.menu-link').forEach(function(link) {
                 link.addEventListener('click', function(e) {
                     document.querySelectorAll('.menu-item').forEach(function(item) {
@@ -656,16 +646,29 @@
                     e.target.closest('.menu-item').classList.add('active');
                 });
             });
+
+            // Search functionality
+            const searchInput = document.querySelector('.search-box input');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        performSearch(this.value);
+                    }
+                });
+            }
         });
 
-              async function handleAdminLogout(event) {
+        // Admin logout handler
+        async function handleAdminLogout(event) {
             event.preventDefault();
             const result = await Swal.fire({
                 title: 'Bạn có chắc muốn đăng xuất?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Đăng xuất',
-                cancelButtonText: 'Hủy'
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280'
             });
 
             if (!result.isConfirmed) return;
@@ -707,11 +710,124 @@
             }
         }
 
-        // Thêm hàm getCsrfToken nếu chưa có
+        // Get CSRF token helper
         function getCsrfToken() {
             const input = document.querySelector('input[name="__RequestVerificationToken"]');
             return input ? input.value : '';
         }
+
+        // Search functionality
+        function performSearch(query) {
+            if (query.trim() === '') return;
+
+            // Show loading
+            Swal.fire({
+                title: 'Đang tìm kiếm...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Simulate search - replace with actual search logic
+            setTimeout(() => {
+                Swal.close();
+                // Redirect to search results or update current page
+                console.log('Searching for:', query);
+            }, 1000);
+        }
+
+        // Toast notification helper
+        function showToast(type, message) {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                    toast.addEventListener('mouseleave', Swal.resumeTimer);
+                }
+            });
+
+            Toast.fire({
+                icon: type,
+                title: message
+            });
+        }
+
+        // Form validation enhancement
+        function enhanceFormValidation() {
+            // Custom validation messages in Vietnamese
+            if (typeof jQuery !== 'undefined' && jQuery.validator) {
+                jQuery.extend(jQuery.validator.messages, {
+                    required: "Trường này là bắt buộc.",
+                    remote: "Vui lòng sửa trường này.",
+                    email: "Vui lòng nhập email hợp lệ.",
+                    url: "Vui lòng nhập URL hợp lệ.",
+                    date: "Vui lòng nhập ngày hợp lệ.",
+                    dateISO: "Vui lòng nhập ngày hợp lệ (ISO).",
+                    number: "Vui lòng nhập số hợp lệ.",
+                    digits: "Vui lòng chỉ nhập số.",
+                    creditcard: "Vui lòng nhập số thẻ tín dụng hợp lệ.",
+                    equalTo: "Vui lòng nhập cùng giá trị.",
+                    extension: "Vui lòng nhập tệp với phần mở rộng hợp lệ.",
+                    maxlength: jQuery.validator.format("Vui lòng nhập không quá {0} ký tự."),
+                    minlength: jQuery.validator.format("Vui lòng nhập ít nhất {0} ký tự."),
+                    rangelength: jQuery.validator.format("Vui lòng nhập từ {0} đến {1} ký tự."),
+                    range: jQuery.validator.format("Vui lòng nhập từ {0} đến {1}."),
+                    max: jQuery.validator.format("Vui lòng nhập nhỏ hơn hoặc bằng {0}."),
+                    min: jQuery.validator.format("Vui lòng nhập lớn hơn hoặc bằng {0}.")
+                });
+            }
+        }
+
+        // Initialize enhancements when document is ready
+        document.addEventListener("DOMContentLoaded", function() {
+            enhanceFormValidation();
+        });
+
+        // Utility functions for common operations
+        window.AoDaiAdmin = {
+            // Show success message
+            showSuccess: function(message) {
+                showToast('success', message);
+            },
+
+            // Show error message
+            showError: function(message) {
+                showToast('error', message);
+            },
+
+            // Show warning message
+            showWarning: function(message) {
+                showToast('warning', message);
+            },
+
+            // Show info message
+            showInfo: function(message) {
+                showToast('info', message);
+            },
+
+            // Confirm action
+            confirm: function(title, text, callback) {
+                Swal.fire({
+                    title: title,
+                    text: text,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Đồng ý',
+                    cancelButtonText: 'Hủy bỏ'
+                }).then(function(result) {
+                    if (result.isConfirmed && callback) {
+                        callback();
+                    }
+                });
+            }
+        };
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

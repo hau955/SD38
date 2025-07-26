@@ -1,0 +1,538 @@
+﻿@model AppView.Areas.Admin.ViewModels.EmployeeManagerment.EmployeeDetailViewModel
+
+@{
+    ViewData["Title"] = "Chi Tiết Nhân Viên";
+}
+
+<div class="page-header">
+    <h1 class="page-title">
+        <i class="fas fa-user-circle"></i>
+        Chi Tiết Nhân Viên
+    </h1>
+    <div class="page-actions">
+        <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-warning me-2">
+            <i class="fas fa-edit"></i>
+            Chỉnh Sửa
+        </a>
+        <a href="@Url.Action("ResetPassword", new { id = Model.Id })" class="btn btn-info me-2">
+            <i class="fas fa-key"></i>
+            Đổi Mật Khẩu
+        </a>
+        <a href="@Url.Action("AssignRole", new { id = Model.Id })" class="btn btn-success me-2">
+            <i class="fas fa-user-tag"></i>
+            Phân Quyền
+        </a>
+        <a href="@Url.Action("Index")" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i>
+            Quay lại
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Profile Card -->
+    <div class="col-lg-4">
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="avatar-container">
+                    @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                    {
+                        <img src="@Model.AvatarUrl" alt="@Model.FullName" class="profile-avatar" />
+                    }
+                    else
+                    {
+                        <div class="no-avatar-large">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                    }
+                </div>
+                <div class="profile-info">
+                    <h3 class="profile-name">@Model.FullName</h3>
+                    <p class="profile-role">@Model.Role</p>
+                    <div class="profile-id">ID: @Model.Id</div>
+                </div>
+            </div>
+
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <i class="fas fa-envelope text-primary"></i>
+                    <div>
+                        <small class="text-muted">Email</small>
+                        <div class="fw-bold">@(Model.Email ?? "Chưa cập nhật")</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-phone text-success"></i>
+                    <div>
+                        <small class="text-muted">Điện thoại</small>
+                        <div class="fw-bold">@(Model.PhoneNumber ?? "Chưa cập nhật")</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-birthday-cake text-warning"></i>
+                    <div>
+                        <small class="text-muted">Ngày sinh</small>
+                        <div class="fw-bold">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-venus-mars text-info"></i>
+                    <div>
+                        <small class="text-muted">Giới tính</small>
+                        <div class="fw-bold">
+                            @if (Model.Gender.HasValue)
+                            {
+                                @(Model.Gender.Value ? "Nam" : "Nữ")
+                            }
+                            else
+                            {
+                                <span>Chưa cập nhật</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <a href="mailto:@Model.Email" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-envelope me-1"></i>
+                    Gửi Email
+                </a>
+                <a href="tel:@Model.PhoneNumber" class="btn btn-outline-success btn-sm">
+                    <i class="fas fa-phone me-1"></i>
+                    Gọi Điện
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Info -->
+    <div class="col-lg-8">
+        <div class="details-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Thông Tin Chi Tiết
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-section">
+                            <h6 class="section-title">
+                                <i class="fas fa-user text-primary"></i>
+                                Thông Tin Cá Nhân
+                            </h6>
+
+                            <div class="info-item">
+                                <label>Họ và Tên:</label>
+                                <div class="info-value">@Model.FullName</div>
+                            </div>
+
+                            <div class="info-item">
+                                <label>Email:</label>
+                                <div class="info-value">
+                                    @if (!string.IsNullOrEmpty(Model.Email))
+                                    {
+                                        <a href="mailto:@Model.Email" class="text-decoration-none">@Model.Email</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa cập nhật</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <label>Số Điện Thoại:</label>
+                                <div class="info-value">
+                                    @if (!string.IsNullOrEmpty(Model.PhoneNumber))
+                                    {
+                                        <a href="tel:@Model.PhoneNumber" class="text-decoration-none">@Model.PhoneNumber</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa cập nhật</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <label>Địa Chỉ:</label>
+                                <div class="info-value">
+                                    @if (!string.IsNullOrEmpty(Model.Address))
+                                    {
+                                        @Model.Address
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa cập nhật</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-section">
+                            <h6 class="section-title">
+                                <i class="fas fa-briefcase text-success"></i>
+                                Thông Tin Công Việc
+                            </h6>
+
+                            <div class="info-item">
+                                <label>Vai Trò:</label>
+                                <div class="info-value">
+                                    <span class="badge bg-primary">@Model.Role</span>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <label>ID Nhân Viên:</label>
+                                <div class="info-value">
+                                    <code>@Model.Id</code>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <label>Ngày Sinh:</label>
+                                <div class="info-value">
+                                    @if (Model.DateOfBirth.HasValue)
+                                    {
+                                        @Model.DateOfBirth.Value.ToString("dd/MM/yyyy")
+                                        <small class="text-muted">
+                                            (@((DateTime.Now.Year - Model.DateOfBirth.Value.Year)) tuổi)
+                                        </small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa cập nhật</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <label>Giới Tính:</label>
+                                <div class="info-value">
+                                    @if (Model.Gender.HasValue)
+                                    {
+                                        if (Model.Gender.Value)
+                                        {
+                                            <span class="badge bg-info"><i class="fas fa-mars me-1"></i>Nam</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-pink"><i class="fas fa-venus me-1"></i>Nữ</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa cập nhật</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-cards mt-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="action-card text-center">
+                        <i class="fas fa-edit text-warning"></i>
+                        <h6>Chỉnh Sửa</h6>
+                        <p class="text-muted">Cập nhật thông tin cá nhân</p>
+                        <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-warning me-2">
+                            Chỉnh Sửa
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="action-card text-center">
+                        <i class="fas fa-key text-info"></i>
+                        <h6>Đổi Mật Khẩu</h6>
+                        <p class="text-muted">Reset mật khẩu đăng nhập</p>
+                        <a href="@Url.Action("ResetPassword", new { id = Model.Id })" class="btn btn-info me-2">
+                            Đổi Mật Khẩu
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="action-card text-center">
+                        <i class="fas fa-user-tag text-success"></i>
+                        <h6>Phân Quyền</h6>
+                        <p class="text-muted">Gán vai trở và quyền hạn</p>
+                        <a href="@Url.Action("AssignRole", new { id = Model.Id })" class="btn btn-success btn-sm">
+                            Phân Quyền
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--ao-dai-gold);
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        border: 1px solid #e9ecef;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, var(--ao-dai-red) 0%, var(--ao-dai-gold) 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        margin-bottom: 1rem;
+    }
+
+    .no-avatar-large {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        font-size: 4rem;
+        margin: 0 auto 1rem;
+    }
+
+    .profile-name {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-role {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-id {
+        font-size: 0.85rem;
+        opacity: 0.8;
+        font-family: monospace;
+    }
+
+    .profile-stats {
+        padding: 1.5rem;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-item i {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+    .profile-actions {
+        padding: 1.5rem;
+        border-top: 1px solid #f8f9fa;
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .details-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e9ecef;
+    }
+
+        .details-card .card-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 2px solid var(--ao-dai-gold);
+            padding: 1.5rem;
+            border-radius: 15px 15px 0 0;
+        }
+
+    .info-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        color: var(--ao-dai-dark);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--ao-dai-gold);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-item {
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+        .info-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .info-item label {
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+
+    .info-value {
+        font-size: 1rem;
+        color: var(--ao-dai-dark);
+        word-break: break-word;
+    }
+
+    .action-cards {
+        margin-top: 2rem;
+    }
+
+    .action-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e9ecef;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+    }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-card i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .action-card h6 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--ao-dai-dark);
+        }
+
+        .action-card p {
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+    .page-actions .btn {
+        margin-left: 0.5rem;
+    }
+
+    .bg-pink {
+        background-color: #e91e63 !important;
+    }
+
+    code {
+        background: #f8f9fa;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+
+    @@media (max-width: 768px) {
+        .page-header
+
+    {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .page-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+        .page-actions .btn {
+            margin: 0;
+        }
+
+    }
+</style>
+
+<script>
+    // Add some interactive effects
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add click to copy for ID
+        const idElement = document.querySelector('code');
+        if (idElement) {
+            idElement.style.cursor = 'pointer';
+            idElement.title = 'Click để sao chép ID';
+
+            idElement.addEventListener('click', function() {
+                navigator.clipboard.writeText(this.textContent).then(function() {
+                    // Show toast or alert
+                    const originalText = idElement.textContent;
+                    idElement.textContent = 'Đã sao chép!';
+                    idElement.style.color = 'green';
+
+                    setTimeout(function() {
+                        idElement.textContent = originalText;
+                        idElement.style.color = '';
+                    }, 2000);
+                });
+            });
+        }
+
+        // Add animation to action cards
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeInUp 0.6s ease-out forwards';
+                }
+            });
+        });
+
+        document.querySelectorAll('.action-card').forEach(card => {
+            observer.observe(card);
+        });
+    });
+</script>
