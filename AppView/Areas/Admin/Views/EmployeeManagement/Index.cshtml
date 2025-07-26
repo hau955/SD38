@@ -1,0 +1,383 @@
+﻿@model List<AppView.Areas.Admin.ViewModels.EmployeeManagerment.EmployeeListViewModel>
+
+@{
+    ViewData["Title"] = "Quản lý nhân viên";
+}
+
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="mb-0">
+                <i class="fas fa-users me-2 text-primary"></i>
+                @ViewData["Title"]
+            </h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Nhân viên</li>
+                </ol>
+            </nav>
+        </div>
+        <a href="@Url.Action("Create")" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>
+            Thêm nhân viên
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom">
+        <h5 class="mb-0">
+            <i class="fas fa-filter me-2 text-muted"></i>
+            Bộ lọc tìm kiếm
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small text-muted">Họ tên</label>
+                <input name="fullName" class="form-control form-control-sm" placeholder="Nhập họ tên" value="@ViewBag.FullName" />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small text-muted">Email</label>
+                <input name="email" class="form-control form-control-sm" placeholder="Nhập email" value="@ViewBag.Email" />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small text-muted">Trạng thái</label>
+                <select name="isActive" class="form-select form-select-sm">
+                    <option value="">Tất cả</option>
+                    <option value="true" selected="@(ViewBag.IsActive?.ToString() == "True" ? "selected" : null)">Hoạt động</option>
+                    <option value="false" selected="@(ViewBag.IsActive?.ToString() == "False" ? "selected" : null)">Tạm khóa</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small text-muted">Số lượng hiển thị</label>
+                <select name="pageSize" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="10" selected="@(ViewBag.PageSize == 10 ? "selected" : null)">10 bản ghi</option>
+                    <option value="25" selected="@(ViewBag.PageSize == 25 ? "selected" : null)">25 bản ghi</option>
+                    <option value="50" selected="@(ViewBag.PageSize == 50 ? "selected" : null)">50 bản ghi</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 d-flex">
+                <button type="submit" class="btn btn-sm btn-primary me-2">
+                    <i class="fas fa-search me-1"></i>
+                    Tìm kiếm
+                </button>
+                <a href="@Url.Action("Index")" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-undo"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 50px" class="text-center">#</th>
+                        <th style="width: 60px">Ảnh</th>
+                        <th>Nhân viên</th>
+                        <th>Thông tin liên hệ</th>
+                        <th style="width: 120px">Vai trò</th>
+                        <th style="width: 120px">Trạng thái</th>
+                        <th style="width: 160px" class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var (emp, index) in Model.Select((emp, index) => (emp, index + 1 + ((ViewBag.CurrentPage - 1) * ViewBag.PageSize))))
+                        {
+                            <tr>
+                                <td class="text-center text-muted small">@index</td>
+                                <td>
+                                    <div class="avatar avatar-sm">
+                                        <img src="@(string.IsNullOrEmpty(emp.AvatarUrl) ? "/img/default-avatar.jpg" : emp.AvatarUrl)"
+                                             class="rounded-circle border"
+                                             style="width: 36px; height: 36px; object-fit: cover"
+                                             alt="Ảnh đại diện" />
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@emp.FullName</div>
+                                    <small class="text-muted">ID: @emp.Id</small>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas fa-envelope me-2 text-muted" style="width: 16px"></i>
+                                        <span class="text-truncate" style="max-width: 200px" title="@emp.Email">@emp.Email</span>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(emp.PhoneNumber))
+                                    {
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-phone me-2 text-muted" style="width: 16px"></i>
+                                            <span>@emp.PhoneNumber</span>
+                                        </div>
+                                    }
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill
+                                              @(emp.Role == "Admin" ? "bg-danger" :
+                                                                                  emp.Role == "Manager" ? "bg-primary" :
+                                                                                  emp.Role == "Employee" ? "bg-success" :
+                                                                                  emp.Role == "Sales" ? "bg-info" : "bg-secondary")">
+                                @emp.Role
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge rounded-pill bg-@(emp.IsActive ? "success" : "secondary")">
+                                <i class="fas fa-circle me-1" style="font-size: 8px"></i>
+                                @(emp.IsActive ? "Hoạt động" : "Tạm khóa")
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-1">
+                                <a href="@Url.Action("Details", new { id = emp.Id })"
+                                   class="btn btn-sm btn-outline-primary rounded-circle"
+                                   title="Chi tiết"
+                                   style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center">
+                                    <i class="fas fa-eye" style="font-size: 12px"></i>
+                                </a>
+                                <a href="@Url.Action("Edit", new { id = emp.Id })"
+                                   class="btn btn-sm btn-outline-warning rounded-circle"
+                                   title="Chỉnh sửa"
+                                   style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center">
+                                    <i class="fas fa-edit" style="font-size: 12px"></i>
+                                </a>
+                                <button type="button"
+                                        class="btn btn-sm @(emp.IsActive ? "btn-outline-danger" : "btn-outline-success") rounded-circle toggle-status"
+                                        title="@(emp.IsActive ? "Khóa tài khoản" : "Kích hoạt tài khoản")"
+                                        data-id="@emp.Id"
+                                        style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center">
+                                    <i class="fas @(emp.IsActive ? "fa-lock" : "fa-unlock")" style="font-size: 12px"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                <i class="fas fa-user-slash fa-2x mb-3"></i>
+                                <h5>Không tìm thấy nhân viên nào</h5>
+                                <p class="mb-0">Thử thay đổi điều kiện tìm kiếm hoặc <a href="@Url.Action("Create")">thêm nhân viên mới</a></p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.Any())
+        {
+            <div class="d-flex justify-content-between align-items-center px-4 py-3 border-top">
+                <div class="text-muted small">
+                    Hiển thị <span class="fw-semibold">@Model.Count</span> trên tổng số <span class="fw-semibold">@ViewBag.TotalCount</span> nhân viên
+                </div>
+
+                @if ((int)ViewBag.TotalPages > 1)
+                {
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = 1, pageSize = ViewBag.PageSize, fullName = ViewBag.FullName, email = ViewBag.Email, isActive = ViewBag.IsActive })" aria-label="First">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1, pageSize = ViewBag.PageSize, fullName = ViewBag.FullName, email = ViewBag.Email, isActive = ViewBag.IsActive })" aria-label="Previous">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+
+                            @{
+                                int startPage = Math.Max(1, ViewBag.CurrentPage - 2);
+                                int endPage = Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2);
+
+                                if (startPage > 1)
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                }
+
+                                for (int i = startPage; i <= endPage; i++)
+                                {
+                                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("Index", new { page = i, pageSize = ViewBag.PageSize, fullName = ViewBag.FullName, email = ViewBag.Email, isActive = ViewBag.IsActive })">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+
+                                if (endPage < ViewBag.TotalPages)
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                }
+                            }
+
+                            <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1, pageSize = ViewBag.PageSize, fullName = ViewBag.FullName, email = ViewBag.Email, isActive = ViewBag.IsActive })" aria-label="Next">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.TotalPages, pageSize = ViewBag.PageSize, fullName = ViewBag.FullName, email = ViewBag.Email, isActive = ViewBag.IsActive })" aria-label="Last">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .page-header {
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .card {
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 1rem 1.25rem;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+        .table th {
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.75rem 1rem;
+            background-color: #f8f9fa;
+        }
+
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+    .pagination .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .text-truncate {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+        max-width: 100%;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Xử lý toggle status bằng AJAX
+            $('.toggle-status').click(function() {
+                const id = $(this).data('id');
+                const isActive = $(this).hasClass('btn-outline-danger');
+                const actionText = isActive ? 'khóa' : 'kích hoạt';
+
+                Swal.fire({
+                    title: `Xác nhận ${actionText} tài khoản`,
+                    text: `Bạn chắc chắn muốn ${actionText} tài khoản nhân viên này?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: isActive ? '#dc3545' : '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: `Đồng ý ${actionText}`,
+                    cancelButtonText: 'Hủy bỏ'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("ToggleStatus")',
+                            type: 'POST',
+                            data: { id: id },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Thành công',
+                                        text: response.message,
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Lỗi',
+                                        text: response.message
+                                    });
+                                }
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Lỗi',
+                                    text: 'Đã xảy ra lỗi khi thực hiện thao tác'
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Hiển thị thông báo từ TempData
+            @if (TempData["SuccessMessage"] != null)
+            {
+                    <text>
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công',
+                        text: '@Html.Raw(TempData["SuccessMessage"])',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    </text>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                    <text>
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: '@Html.Raw(TempData["ErrorMessage"])'
+                    });
+                    </text>
+            }
+        });
+    </script>
+}

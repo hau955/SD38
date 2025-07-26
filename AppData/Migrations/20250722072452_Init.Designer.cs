@@ -4,6 +4,7 @@ using AppData.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250722072452_Init")]
+    partial class Init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -327,7 +330,7 @@ namespace AppData.Migrations
                     b.Property<Guid>("IDGioHang")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("IDSanPhamCT")
+                    b.Property<Guid>("IDSanPham")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("SoLuong")
@@ -340,6 +343,7 @@ namespace AppData.Migrations
 
                     b.HasIndex("IDGioHang");
 
+                    b.HasIndex("IDSanPham");
 
                     b.ToTable("GioHangChiTiets");
                 });
@@ -388,6 +392,7 @@ namespace AppData.Migrations
                     b.Property<Guid>("IDHoaDon")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("IDSanPham")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("NgaySua")
@@ -411,6 +416,7 @@ namespace AppData.Migrations
 
                     b.HasIndex("IDHoaDon");
 
+                    b.HasIndex("IDSanPham");
 
                     b.ToTable("HoaDonChiTiets");
                 });
@@ -538,6 +544,7 @@ namespace AppData.Migrations
                     b.Property<Guid>("IDGiamGia")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("IDSanPhamCT")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("NgaySua")
@@ -799,10 +806,15 @@ namespace AppData.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("AppData.Models.SanPham", "SanPham")
                         .WithMany("GioHangChiTiets")
+                        .HasForeignKey("IDSanPham")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("GioHang");
 
+                    b.Navigation("SanPham");
                 });
 
             modelBuilder.Entity("AppData.Models.HoaDonCT", b =>
@@ -813,12 +825,15 @@ namespace AppData.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("AppData.Models.SanPham", "SanPham")
                         .WithMany("HoaDonChiTiets")
+                        .HasForeignKey("IDSanPham")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("HoaDon");
 
+                    b.Navigation("SanPham");
                 });
 
             modelBuilder.Entity("AppData.Models.SanPham", b =>
@@ -877,6 +892,9 @@ namespace AppData.Migrations
 
                     b.HasOne("AppData.Models.SanPhamCT", "SanPhamCT")
                         .WithMany("SanPhamGiamGias")
+                        .HasForeignKey("IDSanPhamCT")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("GiamGia");
 
@@ -1024,10 +1042,6 @@ namespace AppData.Migrations
 
             modelBuilder.Entity("AppData.Models.SanPhamCT", b =>
                 {
-                    b.Navigation("GioHangChiTiets");
-
-                    b.Navigation("HoaDonChiTiets");
-
                     b.Navigation("SanPhamGiamGias");
                 });
 
