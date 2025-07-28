@@ -2,6 +2,8 @@
 using AppView.Areas.Admin.IRepo;
 using AppView.Areas.Admin.Repository;
 using AppView.Areas.Auth.Repository;
+using AppView.Areas.BanHangTaiQuay.IRepo;
+using AppView.Areas.BanHangTaiQuay.Repository;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

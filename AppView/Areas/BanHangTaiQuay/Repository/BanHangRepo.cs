@@ -1,11 +1,9 @@
-﻿
-using AppView.Areas.Admin.IRepo;
-using AppView.Areas.Admin.Common;
-
-using AppView.Areas.Admin.ViewModels.BanHangViewModels;
+﻿using AppView.Areas.Admin.Common;
+using AppView.Areas.BanHangTaiQuay.ViewModels.BanHangViewModels;
+using AppView.Areas.BanHangTaiQuay.IRepo;
 
 
-namespace AppView.Areas.Admin.Repository
+namespace AppView.Areas.BanHangTaiQuay.Repository
 {
     public class BanHangRepo : IBanHangfRepo
     {
@@ -52,10 +50,10 @@ namespace AppView.Areas.Admin.Repository
                    ?? new ApiResult<bool> { IsSuccess = false, Message = "Lỗi không xác định", Data = false };
         }
 
-        public async Task<List<HoaDonResponseViewModel>> GetHoaDonChoAsync()
+        public async Task<List<HoaDonResponseViewModel>> GetHoaDonChoAsync( Guid idNguoiTao)
         {
             return await _httpClient.GetFromJsonAsync<List<HoaDonResponseViewModel>>(
-                $"{BASE_URL}/hoa-don-cho") ?? new List<HoaDonResponseViewModel>();
+                $"{BASE_URL}/hoa-don-cho?idNguoiTao={idNguoiTao}") ?? new List<HoaDonResponseViewModel>();
         }
 
         public async Task<(bool IsSuccess, string Message, HoaDonChiTietViewModel? Data)> XemChiTietHoaDonAsync(Guid idHoaDon)

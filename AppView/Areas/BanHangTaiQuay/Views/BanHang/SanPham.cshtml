@@ -1,4 +1,8 @@
-﻿@model List<AppView.Areas.Admin.ViewModels.SanPhamViewModels.SanPhamView>
+﻿@using AppView.Areas.BanHangTaiQuay.ViewModels.BanHangViewModels
+@model List<AppView.Areas.Admin.ViewModels.SanPhamViewModels.SanPhamView>
+@{
+    Layout = "~/Areas/BanHangTaiQuay/Views/Shared/_BanHangTaiQuayLayout.cshtml";
+}
 @if (TempData["Error"] != null)
 {
     <div class="alert alert-danger">
@@ -132,7 +136,7 @@
 
 @if (isThemVaoHoaDon && ViewBag.HoaDonChiTiet != null)
 {
-    var hd = ViewBag.HoaDonChiTiet as AppView.Areas.Admin.ViewModels.BanHangViewModels.HoaDonChiTietViewModel;
+    var hd = ViewBag.HoaDonChiTiet as HoaDonChiTietViewModel;
 
     <div class="card mt-4 shadow-sm">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -328,6 +332,21 @@
 
                 // 👉 Gửi form thanh toán (POST) ở tab hiện tại
                 document.getElementById("printForm").submit();
+            } else {
+                alert("Không tìm thấy ID hóa đơn để in.");
+            }
+        }
+                function submitAndPrint() {
+            const hoaDonId = '@idHoaDon';
+            if (hoaDonId) {
+                // ❓ Hiển thị hộp thoại xác nhận trước khi tiếp tục
+                if (confirm("Bạn có chắc chắn muốn thanh toán hóa đơn này không?")) {
+                    // 👉 In hóa đơn ở tab mới
+                    window.open('/Admin/BanHang/InHoaDon?id=' + hoaDonId, '_blank');
+
+                    // 👉 Gửi form thanh toán (POST) ở tab hiện tại
+                    document.getElementById("printForm").submit();
+                }
             } else {
                 alert("Không tìm thấy ID hóa đơn để in.");
             }

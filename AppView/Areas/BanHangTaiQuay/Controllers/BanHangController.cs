@@ -1,10 +1,10 @@
-﻿using AppView.Areas.Admin.IRepo;
-using Microsoft.AspNetCore.Mvc;
-using AppView.Areas.Admin.ViewModels.BanHangViewModels;
+﻿using Microsoft.AspNetCore.Mvc;
 using AppView.Areas.Admin.ViewModels.SanPhamViewModels;
-namespace AppView.Areas.Admin.Controllers
+using AppView.Areas.BanHangTaiQuay.ViewModels.BanHangViewModels;
+using AppView.Areas.BanHangTaiQuay.IRepo;
+namespace AppView.Areas.BanHangTaiQuay.Controllers
 {
-    [Area("Admin")]
+    [Area("BanHangTaiQuay")]
     public class BanHangController : Controller
     {
         private readonly IBanHangfRepo _banHangRepo;
@@ -44,9 +44,16 @@ namespace AppView.Areas.Admin.Controllers
 
         public async Task<IActionResult> HoaDonCho()
         {
-            
-            var hoaDons = await _banHangRepo.GetHoaDonChoAsync();
-            return View(hoaDons); // View hiển thị danh sách hóa đơn chờ
+
+            var idnguoitao = HttpContext.Session.GetString("ID");
+
+            if (string.IsNullOrEmpty(idnguoitao) || !Guid.TryParse(idnguoitao, out var idNguoiTao))
+            {
+                return Unauthorized(); // hoặc RedirectToAction("Login");
+            }
+
+            var hoaDons = await _banHangRepo.GetHoaDonChoAsync(idNguoiTao);
+            return View(hoaDons);
         }
 
         [HttpPost]
@@ -86,7 +93,7 @@ namespace AppView.Areas.Admin.Controllers
         {
             var result = await _banHangRepo.ThemSanPhamVaoHoaDonChoAsync(model);
             TempData[result.IsSuccess ? "Success" : "Error"] = result.Message;
-            return RedirectToAction("HoaDonCho");
+            return RedirectToAction("SanPham", new { idHoaDon = model.IDHoaDon });
         }
 
         [HttpPost]
@@ -94,7 +101,7 @@ namespace AppView.Areas.Admin.Controllers
         {
             var result = await _banHangRepo.TruSanPhamKhoiHoaDonChoAsync(model);
             TempData[result.IsSuccess ? "Success" : "Error"] = result.Message;
-            return RedirectToAction("HoaDonCho");
+            return RedirectToAction("SanPham", new { idHoaDon = model.IDHoaDon });
         }
 
         [HttpPost]

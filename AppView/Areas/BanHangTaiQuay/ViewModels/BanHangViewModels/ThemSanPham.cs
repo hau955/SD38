@@ -1,6 +1,6 @@
 ﻿using AppApi.ViewModels.BanHang;
 
-namespace AppView.Areas.Admin.ViewModels.BanHangViewModels
+namespace AppView.Areas.BanHangTaiQuay.ViewModels.BanHangViewModels
 {
     public class ThemSanPham
     {

@@ -1,7 +1,7 @@
 ﻿
-using AppView.Areas.Admin.ViewModels.BanHangViewModels;
-using AppView.Areas.Admin.IRepo;
+
 using Microsoft.AspNetCore.Mvc;
+using AppView.Areas.BanHangTaiQuay.IRepo;
 
 namespace AppView.Areas.Admin.Controllers
 {

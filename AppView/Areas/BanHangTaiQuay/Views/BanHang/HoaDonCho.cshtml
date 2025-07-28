@@ -1,6 +1,9 @@
-﻿@model List<AppView.Areas.Admin.ViewModels.BanHangViewModels.HoaDonResponseViewModel>
+﻿@using AppView.Areas.BanHangTaiQuay.ViewModels.BanHangViewModels
+@model List<HoaDonResponseViewModel>
 @{
     ViewData["Title"] = "Bán tại quầy";
+    Layout = "~/Areas/BanHangTaiQuay/Views/Shared/_BanHangTaiQuayLayout.cshtml";
+    ViewBag.HideHoaDonCho = true;
 }
 
 <!-- THÔNG BÁO -->
@@ -19,9 +22,12 @@
     </div>
 }
 
-<div class="container mt-5">
+<!-- ✅ Đã chuyển sang container-fluid và thêm max-width -->
+<div class="container-fluid px-5 mt-5" style="max-width: 1400px; margin: auto;">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-gradient"><i class="bi bi-receipt-cutoff me-2"></i>Hóa đơn chờ thanh toán</h2>
+        <h2 class="fw-bold text-gradient">
+            <i class="bi bi-receipt-cutoff me-2"></i>Hóa đơn chờ thanh toán
+        </h2>
         <a asp-action="SanPham" class="btn btn-warning shadow-sm fw-semibold rounded-pill px-4 py-2">
             <i class="bi bi-plus-circle me-1"></i> Tạo hóa đơn mới
         </a>
@@ -33,6 +39,7 @@
                 <table class="table table-hover align-middle text-center">
                     <thead class="table-dark rounded-top">
                         <tr>
+                            <th scope="col">#</th>
                             <th scope="col"><i class="bi bi-calendar-week"></i> Ngày tạo</th>
                             <th scope="col"><i class="bi bi-person-circle"></i> Người tạo</th>
                             <th scope="col"><i class="bi bi-cash-coin"></i> Trước giảm</th>
@@ -41,10 +48,13 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @{
+                            var stt = 1;
+                        }
                         @if (!Model.Any())
                         {
                             <tr>
-                                <td colspan="5" class="text-muted py-4 fst-italic">Không có hóa đơn nào.</td>
+                                <td colspan="6" class="text-muted py-4 fst-italic">Không có hóa đơn nào.</td>
                             </tr>
                         }
                         else
@@ -52,6 +62,7 @@
                             foreach (var hoaDon in Model)
                             {
                                 <tr>
+                                    <td>@stt</td>
                                     <td>@hoaDon.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
                                     <td>@hoaDon.NguoiTao</td>
                                     <td>@hoaDon.TongTienTruocGiam.ToString("N0") đ</td>
@@ -70,6 +81,7 @@
                                         </div>
                                     </td>
                                 </tr>
+                                stt++;
                             }
                         }
                     </tbody>
