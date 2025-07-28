@@ -51,6 +51,7 @@ builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
 
 builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
 builder.Services.AddScoped<IBanHangfRepo, BanHangRepo>();
+builder.Services.AddScoped<IThongKeRepo, ThongKeRepo>();
 builder.Services.AddScoped<IChatLieuRepo, ChatLieuRepo>();
 builder.Services.AddHttpClient<IDanhMucRePo, DanhMucRepo>();
 builder.Services.AddScoped<IProfileRepo, ProfileRepo>();

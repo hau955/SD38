@@ -68,7 +68,13 @@ namespace AppView.Areas.Auth.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return Json(new { success = false, message = "Thông tin không hợp lệ." });
+                return Json(new
+                {
+                    IsSuccess = false,
+                    Message = "Thông tin không hợp lệ.",
+                    Errors = ModelState.Values.SelectMany(v => v.Errors)
+                                .Select(e => e.ErrorMessage)
+                });
             }
 
             var result = await _authRepository.LoginAsync(model);
@@ -77,10 +83,10 @@ namespace AppView.Areas.Auth.Controllers
             {
                 return Json(new
                 {
-                    success = false,
-                    message = result.Message ?? "Đăng nhập thất bại.",
-                    requiresConfirmation = result.Message?.Contains("xác nhận email") ?? false,
-                    email = model.Email
+                    IsSuccess = false,
+                    Message = result.Message ?? "Đăng nhập thất bại.",
+                    RequiresConfirmation = result.Message?.Contains("xác nhận email") ?? false,
+                    Email = model.Email
                 });
             }
 
@@ -92,9 +98,17 @@ namespace AppView.Areas.Auth.Controllers
             HttpContext.Session.SetString("ID", result.Data.Id.ToString() ?? "");
             HttpContext.Session.SetString("Roles", result.Data.Roles != null ? string.Join(",", result.Data.Roles) : "");
 
-            return RedirectToAction("Index", "SanPham", new { area = "Admin" });
-            // hoặc
-            return RedirectToAction("Index", "Home");
+            return Json(new
+            {
+                IsSuccess = true,
+                Email = result.Data.Email,
+                IsAdmin = result.Data.Roles.Contains("Admin"),
+                RedirectUrl = result.Data.Roles.Contains("Admin")
+                    ? Url.Action("Index", "SanPham", new { area = "Admin" })
+                    : result.Data.Roles.Contains("Employee")
+                        ? Url.Action("Index", "Home", new { area = "Employee" })
+                        : Url.Action("Index", "Home", new { area = "" })
+            });
         }
         // ========== Forgot Password ==========
         [HttpGet]
