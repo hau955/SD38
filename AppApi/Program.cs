@@ -1,4 +1,5 @@
 ﻿using AppApi.Features.Services;
+using AppApi.Features.ThongKe.Services;
 using AppApi.IService;
 using AppApi.Service;
 using AppData.Models;
@@ -127,6 +128,7 @@ builder.Services.AddScoped<IBanHangService, BanHangService>();
 builder.Services.AddScoped<IDanhMucSPService, DanhMucSPService>();
 builder.Services.AddScoped<ISanPhamCTService, SanPhamCTService>();
 builder.Services.AddScoped<IProfileServive, ProfileService>();
+builder.Services.AddScoped<IThongKeService, ThongKeService>();
 builder.Services.AddScoped<IEmployeeManagementService, EmployeeManagementService>();
 
 // Configure CORS

@@ -1,0 +1,173 @@
+﻿@using AppView.Areas.Admin.ViewModels.ThongKeViewModel
+@model DashboardOverviewViewModel
+@{
+    ViewData["Title"] = ViewBag.Title;
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <h4 class="mb-sm-0">@ViewData["Title"]</h4>
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="/Admin">Trang chủ</a></li>
+                        <li class="breadcrumb-item active">Thống kê</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Tổng doanh thu</span>
+                            <h4 class="mb-3">
+                                @Model.Revenue.TotalRevenue.ToString("N0") VNĐ
+                            </h4>
+                            <div class="text-nowrap">
+                                <span class="badge badge-soft-@(Model.Revenue.RevenueChangePercentage >= 0 ? "success" : "danger") text-@(Model.Revenue.RevenueChangePercentage >= 0 ? "success" : "danger")">
+                                    @Model.Revenue.RevenueChangePercentage.ToString("F1")%
+                                </span>
+                                <span class="ms-1 text-muted font-size-13">so với tháng trước</span>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0 text-end dash-widget">
+                            <div id="mini-chart1" data-colors='["#1f58c7"]' class="apex-charts"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Tổng đơn hàng</span>
+                            <h4 class="mb-3">@Model.Orders.TotalOrders.ToString("N0")</h4>
+                            <div class="text-nowrap">
+                                <span class="text-success">@Model.Orders.CompletedOrders</span> hoàn thành,
+                                <span class="text-warning">@Model.Orders.PendingOrders</span> đang xử lý
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0 text-end dash-widget">
+                            <div id="mini-chart2" data-colors='["#f56e6e"]' class="apex-charts"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Khách hàng mới</span>
+                            <h4 class="mb-3">@Model.Customers.NewCustomers.ToString("N0")</h4>
+                            <div class="text-nowrap">
+                                <span class="text-success">@Model.Customers.RetentionRate.ToString("F1")%</span>
+                                <span class="ms-1 text-muted font-size-13">tỷ lệ giữ chân</span>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0 text-end dash-widget">
+                            <div id="mini-chart3" data-colors='["#f1c40f"]' class="apex-charts"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Tồn kho</span>
+                            <h4 class="mb-3">@Model.Inventory.ActiveProducts.ToString("N0")</h4>
+                            <div class="text-nowrap">
+                                <span class="text-danger">@Model.Inventory.OutOfStockItems</span> hết hàng,
+                                <span class="text-warning">@Model.Inventory.LowStockItems</span> sắp hết
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0 text-end dash-widget">
+                            <div id="mini-chart4" data-colors='["#2eb85c"]' class="apex-charts"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Trend Chart -->
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card">
+                <div class="card-header align-items-center d-flex">
+                    <h4 class="card-title mb-0 flex-grow-1">Xu hướng doanh thu (7 ngày qua)</h4>
+                </div>
+                <div class="card-body">
+                    <div id="revenue-chart" class="apex-charts" dir="ltr"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">Trạng thái đơn hàng</h4>
+                </div>
+                <div class="card-body">
+                    <div id="order-status-chart" class="apex-charts" dir="ltr"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+        // Revenue trend chart
+        var revenueOptions = {
+            chart: {
+                type: 'line',
+                height: 350
+            },
+            series: [{
+                name: 'Doanh thu',
+                data: [@string.Join(",", Model.Revenue.Trends.Select(t => t.Revenue))]
+            }],
+            xaxis: {
+                categories: [@string.Join(",", Model.Revenue.Trends.Select(t => $"'{t.Label}'"))]
+            },
+            stroke: {
+                curve: 'smooth'
+            },
+            colors: ['#1f58c7']
+        };
+        var revenueChart = new ApexCharts(document.querySelector("#revenue-chart"), revenueOptions);
+        revenueChart.render();
+
+        // Order status chart
+        var orderOptions = {
+            chart: {
+                type: 'donut',
+                height: 300
+            },
+            series: [@Model.Orders.CompletedOrders, @Model.Orders.PendingOrders, @Model.Orders.CancelledOrders],
+            labels: ['Hoàn thành', 'Đang xử lý', 'Đã hủy'],
+            colors: ['#2eb85c', '#f1c40f', '#f56e6e']
+        };
+        var orderChart = new ApexCharts(document.querySelector("#order-status-chart"), orderOptions);
+        orderChart.render();
+    </script>
+}

@@ -28,8 +28,6 @@ function showRegisterModal() {
         document.querySelector('#registerForm input[name="FullName"]')?.focus();
     }, 500);
 }
-
-// === Form handlers ===
 async function submitLogin(event) {
     event.preventDefault();
     const form = event.target;
@@ -45,51 +43,68 @@ async function submitLogin(event) {
             method: 'POST',
             body: formData,
             headers: {
-                'RequestVerificationToken': getCsrfToken()
+                'RequestVerificationToken': getCsrfToken(),
+                'Accept': 'application/json' // Yêu cầu server trả về JSON
             }
         });
 
+        // Kiểm tra status code trước khi parse JSON
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Đăng nhập thất bại');
+        }
+
         const result = await response.json();
 
-        if (result.success) {
+        // Kiểm tra cả 2 trường hợp (hoa/thường) cho chắc chắn
+        const isSuccess = result.isSuccess || result.IsSuccess;
+
+        if (isSuccess) {
             await Swal.fire({
                 icon: 'success',
                 title: 'Đăng nhập thành công!',
                 text: 'Chào mừng bạn trở lại!',
-                showConfirmButton: true,
-                confirmButtonText: 'Tiếp tục'
+                timer: 1500,
+                showConfirmButton: false
             });
+
+            // Cập nhật header nếu có email
             if (result.email) {
-                updateUserHeader(result.email, result.isAdmin);
+                updateUserHeader(result.email, result.isAdmin || result.IsAdmin);
             }
 
+            // Đóng modal đăng nhập
             const modal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
             if (modal) modal.hide();
-            window.location.href = result.redirectUrl || "/";
+
+            // Redirect sau 1.5 giây
+            setTimeout(() => {
+                window.location.href = result.redirectUrl ||
+                    (result.isAdmin ? "/Admin/SanPham" :
+                        result.IsAdmin ? "/Admin/SanPham" : "/");
+            }, 1500);
         } else {
+            // Xử lý trường hợp cần xác nhận email
             if (result.requiresConfirmation) {
                 showEmailConfirmationAlert(result.email);
             }
 
-            Swal.fire({
-                icon: 'error',
-                title: 'Đăng nhập thất bại',
-                text: result.message || 'Có lỗi xảy ra'
-            });
+            // Hiển thị thông báo lỗi
+            throw new Error(result.message || 'Email hoặc mật khẩu không đúng');
         }
     } catch (error) {
         console.error('Login error:', error);
         Swal.fire({
             icon: 'error',
-            title: 'Lỗi hệ thống',
-            text: 'Không thể kết nối đến server.'
+            title: 'Đăng nhập thất bại',
+            text: error.message || 'Có lỗi xảy ra khi đăng nhập',
+            confirmButtonText: 'Thử lại'
         });
     } finally {
         loginBtn.disabled = false;
         loginBtn.innerHTML = originalBtnContent;
     }
 }
-
 let isRegistering = false;
 
 async function submitRegistration(event) {
