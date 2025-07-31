@@ -96,6 +96,19 @@ namespace AppApi.Controllers
 
             return Ok(result.Data);
         }
+        [HttpGet("tao-link")]
+        public async Task<IActionResult> TaoLinkThanhToan([FromQuery] Guid hoaDonId)
+        {
+            var url = await _banHangService.TaoUrlThanhToanAsync(hoaDonId);
+            return Ok(new { Url = url });
+        }
+
+        [HttpGet("vnpay-return")]
+        public async Task<IActionResult> VnPayCallback()
+        {
+            var result = await _banHangService.XuLyKetQuaThanhToanAsync(Request.Query);
+            return Ok(result);
+        }
 
     }
 }

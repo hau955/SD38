@@ -350,7 +350,7 @@
                         <span class="menu-header-text">Quản Lý Bán Hàng</span>
                     </li>
                     <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
-                        <a href="/BanHangTaiQuay/BanHang/HoaDonCho" class="menu-link">
+                        <a href="/Admin/ThongKe/Dashboard" class="menu-link">
                             <i class="menu-icon fas fa-chart-line"></i>
                             <div data-i18n="Analytics">Bán Hàng Tại Quầy</div>
                         </a>
@@ -412,20 +412,32 @@
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Báo Cáo & Thống Kê</span>
                     </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "BaoCao" && ViewContext.RouteData.Values["action"]?.ToString() == "DoanhThu" ? "active" : "")">
-                        <a href="/Admin/BaoCao/DoanhThu" class="menu-link">
-                            <i class="menu-icon fas fa-chart-bar"></i>
-                            <div data-i18n="DoanhThu">Doanh Thu</div>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ThongKe" && ViewContext.RouteData.Values["action"]?.ToString() == "Customers" ? "active" : "")">
+                        <a href="/Admin/ThongKe/Customers" class="menu-link">
+                            <i class="menu-icon fas fa-users"></i>
+                            <div data-i18n="Customers">Khách hàng</div>
                         </a>
                     </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "BaoCao" && ViewContext.RouteData.Values["action"]?.ToString() == "TonKho" ? "active" : "")">
-                        <a href="/Admin/BaoCao/TonKho" class="menu-link">
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ThongKe" && ViewContext.RouteData.Values["action"]?.ToString() == "Revenue" ? "active" : "")">
+                        <a href="/Admin/ThongKe/Revenue" class="menu-link">
+                            <i class="menu-icon fas fa-coins"></i>
+                            <div data-i18n="Revenue">Doanh Thu</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ThongKe" && ViewContext.RouteData.Values["action"]?.ToString() == "Products" ? "active" : "")">
+                        <a href="/Admin/ThongKe/Products" class="menu-link">
                             <i class="menu-icon fas fa-warehouse"></i>
-                            <div data-i18n="TonKho">Tồn Kho</div>
+                            <div data-i18n="Products">Tồn Kho</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ThongKe" && ViewContext.RouteData.Values["action"]?.ToString() == "Promotions" ? "active" : "")">
+                        <a href="/Admin/ThongKe/Promotions" class="menu-link">
+                            <i class="menu-icon fas fa-tags"></i>
+                            <div data-i18n="Promotions">Giảm giá</div>
                         </a>
                     </li>
 
-                    <!-- Cài đặt -->
+                    <!-- Cài đ                    <!-- Cài đặt -->
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Hệ Thống</span>
                     </li>

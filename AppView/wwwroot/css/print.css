@@ -1,0 +1,78 @@
+﻿@page {
+    size: 58mm auto;
+    margin: 0;
+}
+
+body {
+    width: 58mm;
+    font-family: 'Times New Roman', serif;
+    font-size: 10.5px;
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+.container {
+    padding: 5px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+    .header img {
+        width: 40px;
+        height: auto;
+        margin-bottom: 3px;
+    }
+
+.info,
+.footer,
+.signature {
+    text-align: center;
+    font-size: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 5px;
+}
+
+th,
+td {
+    padding: 2px 2px;
+    border-bottom: 1px dashed #000;
+    text-align: left;
+}
+
+.total-row {
+    font-weight: bold;
+}
+
+.qr-watermark {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    opacity: 0.08;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+}
+
+    .qr-watermark img {
+        width: 100px;
+        height: 100px;
+    }
+
+.signature {
+    margin-top: 10px;
+    text-align: right;
+    padding-right: 10px;
+}
+
+hr {
+    border: none;
+    border-top: 1px dashed #000;
+    margin: 5px 0;
+}

@@ -8,10 +8,11 @@ namespace AppApi.Service
     public class BanHangService : IBanHangService
     {
         private readonly ApplicationDbContext _context;
-
-        public BanHangService(ApplicationDbContext context)
+        private readonly IConfiguration _config;
+        public BanHangService(ApplicationDbContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
         }
         public async Task<(bool IsSuccess, string Message, Guid? HoaDonId)> BanTaiQuayAsync(BanHangViewModel request)
         {
@@ -378,5 +379,61 @@ namespace AppApi.Service
             return (true, "Lấy chi tiết hóa đơn thành công", result);
         }
 
+        public async Task<string> TaoUrlThanhToanAsync(Guid hoaDonId)
+        {
+            var hoaDon = await _context.HoaDons.FindAsync(hoaDonId);
+            if (hoaDon == null || hoaDon.TrangThaiThanhToan == "Đã thanh toán")
+                throw new Exception("Hóa đơn không tồn tại hoặc đã thanh toán");
+
+            var vnp_TmnCode = _config["VnPay:TmnCode"];
+            var vnp_HashSecret = _config["VnPay:HashSecret"];
+            var vnp_Url = _config["VnPay:Url"];
+            var vnp_Returnurl = _config["VnPay:ReturnUrl"];
+
+            var price = (int)hoaDon.TongTienSauGiam * 100;
+
+            var vnPay = new VnPayLibrary();
+            vnPay.AddRequestData("vnp_Version", "2.1.0");
+            vnPay.AddRequestData("vnp_Command", "pay");
+            vnPay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
+            vnPay.AddRequestData("vnp_Amount", price.ToString());
+            vnPay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
+            vnPay.AddRequestData("vnp_CurrCode", "VND");
+            vnPay.AddRequestData("vnp_IpAddr", "127.0.0.1"); // dùng IP client nếu có
+            vnPay.AddRequestData("vnp_Locale", "vn");
+            vnPay.AddRequestData("vnp_OrderInfo", "Thanh toan hoa don #" + hoaDonId);
+            vnPay.AddRequestData("vnp_OrderType", "other");
+            vnPay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
+            vnPay.AddRequestData("vnp_TxnRef", hoaDonId.ToString());
+            vnPay.AddRequestData("vnp_SecureHashType", "HMACSHA512");
+
+
+
+            var paymentUrl = vnPay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
+            return paymentUrl;
+        }
+
+        public async Task<(bool IsSuccess, string Message)> XuLyKetQuaThanhToanAsync(IQueryCollection query)
+        {
+            var vnpay = new VnPayLibrary();
+            var response = vnpay.GetFullResponseData(query);
+
+            var isSuccess = vnpay.ValidateSignature(query, _config["VnPay:HashSecret"]);
+
+            if (!isSuccess)
+                return (false, "Chữ ký không hợp lệ");
+
+            var hoaDonId = Guid.Parse(response["vnp_TxnRef"]);
+            var hoaDon = await _context.HoaDons.FindAsync(hoaDonId);
+
+            if (hoaDon == null)
+                return (false, "Không tìm thấy hóa đơn");
+
+            hoaDon.TrangThaiThanhToan = "Đã thanh toán";
+            hoaDon.NgayThanhToan = DateTime.Now;
+            await _context.SaveChangesAsync();
+
+            return (true, "Thanh toán thành công");
+        }
     }
 }

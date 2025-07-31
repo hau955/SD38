@@ -10,6 +10,8 @@ namespace AppApi.IService
         Task<(bool IsSuccess, string Message)> TruSanPhamKhoiHoaDonChoAsync(TruSanPham request);
         Task<(bool IsSuccess, string Message)> HuyHoaDonAsync(Guid idHoaDon);
         Task<(bool IsSuccess, string Message, HoaDonChiTietViewModel? Data)> XemChiTietHoaDonAsync(Guid idHoaDon);
+        Task<string> TaoUrlThanhToanAsync(Guid hoaDonId); // trả về link redirect
+        Task<(bool IsSuccess, string Message)> XuLyKetQuaThanhToanAsync(IQueryCollection query);
     }
 }
 

@@ -2,19 +2,16 @@
 @model List<AppView.Areas.Admin.ViewModels.SanPhamViewModels.SanPhamView>
 @{
     Layout = "~/Areas/BanHangTaiQuay/Views/Shared/_BanHangTaiQuayLayout.cshtml";
+    var idHoaDon = Context.Request.Query["IDHoaDon"].ToString();
+    bool isThemVaoHoaDon = !string.IsNullOrEmpty(idHoaDon);
+    var idnguoitao = Context.Session.GetString("ID");
+    var apiBaseUrl = "https://localhost:7221";
 }
 @if (TempData["Error"] != null)
 {
     <div class="alert alert-danger">
         ⚠️ @TempData["Error"]
     </div>
-}
-
-@{
-    var idHoaDon = Context.Request.Query["idHoaDon"].ToString();
-    bool isThemVaoHoaDon = !string.IsNullOrEmpty(idHoaDon);
-    var idnguoitao = Context.Session.GetString("ID");
-    var apiBaseUrl = "https://localhost:7221";
 }
 <style>
     .sp-option.active {
@@ -25,8 +22,8 @@
 </style>
 
 <h2 class="text-xl font-bold mb-4">@((isThemVaoHoaDon ? "Thêm sản phẩm vào hóa đơn" : "Tạo hóa đơn mới"))</h2>
-<form id="mainForm" asp-area="Admin" asp-controller="BanHang" asp-action="@(isThemVaoHoaDon ? "ThemSanPhamVaoHoaDonCho" : "BanTaiQuay")" method="post">
 
+<form id="mainForm" asp-area="BanHangTaiQuay" asp-controller="BanHang" asp-action="@(isThemVaoHoaDon ? "ThemSanPhamVaoHoaDonCho" : "BanTaiQuay")" method="post">
     @if (isThemVaoHoaDon)
     {
         <input type="hidden" name="IDHoaDon" value="@idHoaDon" />
@@ -43,7 +40,6 @@
         {
             var sp = Model[i];
             var hetHangToanBo = sp.ChiTiets.All(x => x.SoLuongTonKho == 0);
-
             <div class="col-md-4 mb-4">
                 <div class="card shadow-sm border border-light h-100 @(hetHangToanBo ? "opacity-50 position-relative" : "")">
                     @if (hetHangToanBo)
@@ -52,8 +48,6 @@
                             Hết hàng
                         </div>
                     }
-                    <!-- ... Phần trên giữ nguyên như của bạn ... -->
-                    <!-- ✅ Vị trí trong vòng for mỗi sản phẩm -->
                     <div class="card-body text-center">
                         <h5 class="fw-bold">@sp.TenSanPham</h5>
                         <img src="@($"{apiBaseUrl}/{sp.DanhSachAnh?.FirstOrDefault(a => a.AnhChinh == true)?.DuongDanAnh}")"
@@ -104,23 +98,18 @@
                             </div>
                         </div>
 
-                        <!-- ✅ Nút chọn lại -->
                         <button type="button" class="btn btn-sm btn-warning mt-2" onclick="resetSelection('@sp.IDSanPham', @i)">🔄 Chọn lại</button>
 
-                        <!-- Số lượng -->
                         <div class="mt-3 hidden-select" data-product="@sp.IDSanPham" data-index="@i" style="display:none;">
                             <label>Số lượng:</label>
                             <input type="number" class="form-control form-control-sm qty-input" value="1" min="1" />
                             <input type="hidden" class="product-detail-id" />
                         </div>
                     </div>
-
                 </div>
             </div>
         }
-
     </div>
-
 
     @if (!isThemVaoHoaDon)
     {
@@ -133,7 +122,6 @@
     </button>
 </form>
 
-
 @if (isThemVaoHoaDon && ViewBag.HoaDonChiTiet != null)
 {
     var hd = ViewBag.HoaDonChiTiet as HoaDonChiTietViewModel;
@@ -141,7 +129,7 @@
     <div class="card mt-4 shadow-sm">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h4 class="mb-0">🧾 Chi tiết hóa đơn</h4>
-            <form asp-area="Admin" asp-controller="BanHang" asp-action="ThanhToanHoaDonCho" method="post" id="printForm">
+            <form asp-area="BanHangTaiQuay" asp-controller="BanHang" asp-action="ThanhToanHoaDonCho" method="post" id="printForm">
                 <input type="hidden" name="IDHoaDon" value="@idHoaDon" />
                 <input type="hidden" name="GhiChuThanhToan" value="" />
                 <button type="button" class="btn btn-success btn-sm" onclick="submitAndPrint()">💵 Thanh toán</button>
@@ -184,7 +172,7 @@
                                 <td class="text-end">@sp.DonGia.ToString("N0") đ</td>
                                 <td class="text-end">@sp.ThanhTien.ToString("N0") đ</td>
                                 <td>
-                                    <form asp-area="Admin" asp-controller="BanHang" asp-action="TruSanPhamKhoiHoaDonCho" method="post" class="mb-0">
+                                    <form asp-area="BanHangTaiQuay" asp-controller="BanHang" asp-action="TruSanPhamKhoiHoaDonCho" method="post" class="mb-0">
 
                                         <input type="hidden" name="IDHoaDon" value="@idHoaDon" />
                                         <input type="hidden" name="IDSanPhamCT" value="@sp.IDSanPhamCT" />
@@ -241,7 +229,6 @@
                              : 'ChatLieu';
 
                 const key = `${productId}-${index}`;
-
                 group.querySelectorAll('button').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
 
@@ -264,9 +251,7 @@
                         if (found.SoLuongTonKho > 0) {
                             section.style.display = 'block';
                             hiddenInput.value = found.IDSanPhamCT;
-                            console.log('✅ Gán IDSanPhamCT:', found.IDSanPhamCT);
 
-                            // 🔒 Khóa các nút khác
                             document.querySelectorAll(`.btn-group[data-product='${productId}'][data-index='${index}'] button`).forEach(b => {
                                 if (!b.classList.contains('active')) {
                                     b.disabled = true;
@@ -288,7 +273,6 @@
             });
         });
 
-        // ✅ Hàm chọn lại sản phẩm
         function resetSelection(productId, index) {
             const key = `${productId}-${index}`;
             delete selections[key];
@@ -305,9 +289,13 @@
                 hiddenInput.value = "";
             }
         }
-                document.getElementById('mainForm').addEventListener('submit', function () {
+
+        document.getElementById('mainForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
             const allSections = document.querySelectorAll('.hidden-select');
             let currentIndex = 0;
+            let isValid = false;
 
             allSections.forEach(section => {
                 const idInput = section.querySelector('.product-detail-id');
@@ -317,40 +305,33 @@
                     idInput.setAttribute('name', `DanhSachSanPham[${currentIndex}].IDSanPhamCT`);
                     qtyInput.setAttribute('name', `DanhSachSanPham[${currentIndex}].SoLuong`);
                     currentIndex++;
+                    isValid = true;
                 } else {
                     idInput?.removeAttribute('name');
                     qtyInput?.removeAttribute('name');
                 }
             });
+
+            const isThem = '@(isThemVaoHoaDon.ToString().ToLower())' === 'true';
+
+            if (!isValid && isThem) {
+                alert("❌ Bạn phải chọn ít nhất 1 sản phẩm!");
+                return;
+            }
+
+            this.submit();
         });
 
-                     function submitAndPrint() {
-            const hoaDonId = '@idHoaDon'; // Lấy ID hóa đơn ra từ Razor
-            if (hoaDonId) {
-                // 👉 In hóa đơn ở tab mới
-                window.open('/Admin/BanHang/InHoaDon?id=' + hoaDonId, '_blank');
-
-                // 👉 Gửi form thanh toán (POST) ở tab hiện tại
-                document.getElementById("printForm").submit();
-            } else {
-                alert("Không tìm thấy ID hóa đơn để in.");
-            }
-        }
-                function submitAndPrint() {
+        function submitAndPrint() {
             const hoaDonId = '@idHoaDon';
             if (hoaDonId) {
-                // ❓ Hiển thị hộp thoại xác nhận trước khi tiếp tục
                 if (confirm("Bạn có chắc chắn muốn thanh toán hóa đơn này không?")) {
-                    // 👉 In hóa đơn ở tab mới
-                    window.open('/Admin/BanHang/InHoaDon?id=' + hoaDonId, '_blank');
-
-                    // 👉 Gửi form thanh toán (POST) ở tab hiện tại
+                    window.open('/BanHangTaiQuay/BanHang/InHoaDon?id=' + hoaDonId, '_blank');
                     document.getElementById("printForm").submit();
                 }
             } else {
                 alert("Không tìm thấy ID hóa đơn để in.");
             }
         }
-
     </script>
 }
