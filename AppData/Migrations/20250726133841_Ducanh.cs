@@ -6,11 +6,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AppData.Migrations
 {
     /// <inheritdoc />
-<<<<<<<< HEAD:AppData/Migrations/20250724043012_annnnn.cs
-    public partial class annnnn : Migration
-========
+
+
+
     public partial class Ducanh : Migration
->>>>>>>> 1938af7227c8907b03e2c0cee6d5c0b3c5ba9c3d:AppData/Migrations/20250726133841_Ducanh.cs
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
