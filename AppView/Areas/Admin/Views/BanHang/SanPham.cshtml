@@ -1,0 +1,337 @@
+﻿@model List<AppView.Areas.Admin.ViewModels.SanPhamViewModels.SanPhamView>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        ⚠️ @TempData["Error"]
+    </div>
+}
+
+@{
+    var idHoaDon = Context.Request.Query["idHoaDon"].ToString();
+    bool isThemVaoHoaDon = !string.IsNullOrEmpty(idHoaDon);
+    var idnguoitao = Context.Session.GetString("ID");
+    var apiBaseUrl = "https://localhost:7221";
+}
+<style>
+    .sp-option.active {
+        background-color: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+    }
+</style>
+
+<h2 class="text-xl font-bold mb-4">@((isThemVaoHoaDon ? "Thêm sản phẩm vào hóa đơn" : "Tạo hóa đơn mới"))</h2>
+<form id="mainForm" asp-area="Admin" asp-controller="BanHang" asp-action="@(isThemVaoHoaDon ? "ThemSanPhamVaoHoaDonCho" : "BanTaiQuay")" method="post">
+
+    @if (isThemVaoHoaDon)
+    {
+        <input type="hidden" name="IDHoaDon" value="@idHoaDon" />
+    }
+    else
+    {
+        <input type="hidden" name="IsHoaDonCho" value="true" />
+    }
+
+    <input type="hidden" name="IDNguoiTao" value="@idnguoitao" />
+
+    <div class="row">
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            var sp = Model[i];
+            var hetHangToanBo = sp.ChiTiets.All(x => x.SoLuongTonKho == 0);
+
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm border border-light h-100 @(hetHangToanBo ? "opacity-50 position-relative" : "")">
+                    @if (hetHangToanBo)
+                    {
+                        <div class="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-75 text-white px-3 py-1 rounded">
+                            Hết hàng
+                        </div>
+                    }
+                    <!-- ... Phần trên giữ nguyên như của bạn ... -->
+                    <!-- ✅ Vị trí trong vòng for mỗi sản phẩm -->
+                    <div class="card-body text-center">
+                        <h5 class="fw-bold">@sp.TenSanPham</h5>
+                        <img src="@($"{apiBaseUrl}/{sp.DanhSachAnh?.FirstOrDefault(a => a.AnhChinh == true)?.DuongDanAnh}")"
+                             class="img-fluid rounded mb-2" style="max-height: 150px;" />
+
+                        <!-- Màu -->
+                        <div class="mb-2">
+                            <label>🎨 Màu:</label><br />
+                            <div class="btn-group color-group" data-product="@sp.IDSanPham" data-index="@i">
+                                @foreach (var mau in sp.ChiTiets.Select(x => x.MauSac).Distinct())
+                                {
+                                    var het = sp.ChiTiets.Where(c => c.MauSac == mau).All(c => c.SoLuongTonKho == 0);
+                                    <button type="button" class="btn btn-outline-secondary btn-sm color-btn @(het ? "disabled opacity-50" : "")"
+                                            data-value="@mau" @(het ? "disabled" : "")>
+                                        @mau
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Size -->
+                        <div class="mb-2">
+                            <label>📏 Size:</label><br />
+                            <div class="btn-group size-group" data-product="@sp.IDSanPham" data-index="@i">
+                                @foreach (var size in sp.ChiTiets.Select(x => x.Size).Distinct())
+                                {
+                                    var het = sp.ChiTiets.Where(c => c.Size == size).All(c => c.SoLuongTonKho == 0);
+                                    <button type="button" class="btn btn-outline-secondary btn-sm size-btn @(het ? "disabled opacity-50" : "")"
+                                            data-value="@size" @(het ? "disabled" : "")>
+                                        @size
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Chất liệu -->
+                        <div class="mb-2">
+                            <label>🧵 Chất liệu:</label><br />
+                            <div class="btn-group chatlieu-group" data-product="@sp.IDSanPham" data-index="@i">
+                                @foreach (var cl in sp.ChiTiets.Select(x => x.ChatLieu).Distinct())
+                                {
+                                    var het = sp.ChiTiets.Where(c => c.ChatLieu == cl).All(c => c.SoLuongTonKho == 0);
+                                    <button type="button" class="btn btn-outline-secondary btn-sm chatlieu-btn @(het ? "disabled opacity-50" : "")"
+                                            data-value="@cl" @(het ? "disabled" : "")>
+                                        @cl
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- ✅ Nút chọn lại -->
+                        <button type="button" class="btn btn-sm btn-warning mt-2" onclick="resetSelection('@sp.IDSanPham', @i)">🔄 Chọn lại</button>
+
+                        <!-- Số lượng -->
+                        <div class="mt-3 hidden-select" data-product="@sp.IDSanPham" data-index="@i" style="display:none;">
+                            <label>Số lượng:</label>
+                            <input type="number" class="form-control form-control-sm qty-input" value="1" min="1" />
+                            <input type="hidden" class="product-detail-id" />
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        }
+
+    </div>
+
+
+    @if (!isThemVaoHoaDon)
+    {
+        <label>Ghi chú:</label>
+        <textarea name="GhiChu" class="form-control mb-3"></textarea>
+    }
+
+    <button type="submit" class="btn btn-primary">
+        @(isThemVaoHoaDon ? "Thêm vào hóa đơn" : "Tạo hóa đơn")
+    </button>
+</form>
+
+
+@if (isThemVaoHoaDon && ViewBag.HoaDonChiTiet != null)
+{
+    var hd = ViewBag.HoaDonChiTiet as AppView.Areas.Admin.ViewModels.BanHangViewModels.HoaDonChiTietViewModel;
+
+    <div class="card mt-4 shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">🧾 Chi tiết hóa đơn</h4>
+            <form asp-area="Admin" asp-controller="BanHang" asp-action="ThanhToanHoaDonCho" method="post" id="printForm">
+                <input type="hidden" name="IDHoaDon" value="@idHoaDon" />
+                <input type="hidden" name="GhiChuThanhToan" value="" />
+                <button type="button" class="btn btn-success btn-sm" onclick="submitAndPrint()">💵 Thanh toán</button>
+            </form>
+
+
+
+        </div>
+
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>🕒 Ngày tạo:</strong> @hd.NgayTao.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p><strong>📝 Ghi chú:</strong> @(string.IsNullOrEmpty(hd.GhiChu) ? "<i>Không có</i>" : hd.GhiChu)</p>
+                    <p><strong>📝 Người Tạo:</strong> @(string.IsNullOrEmpty(hd.TenNguoiTao) ? "<i>Không có</i>" : hd.TenNguoiTao)</p>
+                    <p><strong>📝 Người Mua:</strong> @(string.IsNullOrEmpty(hd.NguoiMuaHang) ? "<i>Không có</i>" : hd.NguoiMuaHang)</p>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Số lượng</th>
+                            <th>Đơn giá</th>
+                            <th>Thành tiền</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < hd.DanhSachSanPham.Count; i++)
+                        {
+                            var sp = hd.DanhSachSanPham[i];
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td class="text-start">@sp.TenSanPham</td>
+                                <td>@sp.SoLuong</td>
+                                <td class="text-end">@sp.DonGia.ToString("N0") đ</td>
+                                <td class="text-end">@sp.ThanhTien.ToString("N0") đ</td>
+                                <td>
+                                    <form asp-area="Admin" asp-controller="BanHang" asp-action="TruSanPhamKhoiHoaDonCho" method="post" class="mb-0">
+
+                                        <input type="hidden" name="IDHoaDon" value="@idHoaDon" />
+                                        <input type="hidden" name="IDSanPhamCT" value="@sp.IDSanPhamCT" />
+                                        <input type="hidden" name="SoLuong" value="1" />
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">– Trừ 1</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+
+                        <!-- ✅ Tổng tiền hiển thị cuối bảng -->
+                        <tr class="fw-bold">
+                            <td colspan="4" class="text-end">Tổng tiền trước giảm:</td>
+                            <td class="text-end">@hd.TongTienTruocGiam.ToString("N0") đ</td>
+                            <td></td>
+                        </tr>
+                        <tr class="fw-bold text-success">
+                            <td colspan="4" class="text-end">Tổng tiền sau giảm:</td>
+                            <td class="text-end">@hd.TongTienSauGiam.ToString("N0") đ</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        const chiTietMap = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
+        Model.SelectMany(sp => sp.ChiTiets.Select(ct => new
+        {
+            ct.IDSanPhamCT,
+            ct.MauSac,
+            ct.Size,
+            ct.ChatLieu,
+            ct.SoLuongTonKho,
+            spID = sp.IDSanPham
+        }))
+    ));
+
+        const selections = {};
+
+        document.querySelectorAll('.btn-group button').forEach(btn => {
+            btn.addEventListener('click', function () {
+                if (btn.disabled) return;
+
+                const group = this.closest('.btn-group');
+                const productId = group.getAttribute('data-product');
+                const index = group.getAttribute('data-index');
+                const type = this.classList.contains('color-btn') ? 'MauSac'
+                             : this.classList.contains('size-btn') ? 'Size'
+                             : 'ChatLieu';
+
+                const key = `${productId}-${index}`;
+
+                group.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                if (!selections[key]) selections[key] = {};
+                selections[key][type] = this.dataset.value;
+
+                const selected = selections[key];
+                const section = document.querySelector(`.hidden-select[data-product='${productId}'][data-index='${index}']`);
+                const hiddenInput = section?.querySelector('.product-detail-id');
+
+                if (selected.MauSac && selected.Size && selected.ChatLieu) {
+                    const found = chiTietMap.find(ct =>
+                        ct.spID == productId &&
+                        ct.MauSac === selected.MauSac &&
+                        ct.Size === selected.Size &&
+                        ct.ChatLieu === selected.ChatLieu
+                    );
+
+                    if (found && section && hiddenInput) {
+                        if (found.SoLuongTonKho > 0) {
+                            section.style.display = 'block';
+                            hiddenInput.value = found.IDSanPhamCT;
+                            console.log('✅ Gán IDSanPhamCT:', found.IDSanPhamCT);
+
+                            // 🔒 Khóa các nút khác
+                            document.querySelectorAll(`.btn-group[data-product='${productId}'][data-index='${index}'] button`).forEach(b => {
+                                if (!b.classList.contains('active')) {
+                                    b.disabled = true;
+                                    b.classList.add('opacity-50');
+                                }
+                            });
+                        } else {
+                            section.style.display = 'none';
+                            hiddenInput.value = "";
+                            alert("❌ Sản phẩm đã hết hàng!");
+                        }
+                    }
+                } else {
+                    if (section && hiddenInput) {
+                        section.style.display = 'none';
+                        hiddenInput.value = "";
+                    }
+                }
+            });
+        });
+
+        // ✅ Hàm chọn lại sản phẩm
+        function resetSelection(productId, index) {
+            const key = `${productId}-${index}`;
+            delete selections[key];
+
+            document.querySelectorAll(`.btn-group[data-product='${productId}'][data-index='${index}'] button`).forEach(b => {
+                b.classList.remove('active', 'opacity-50');
+                b.disabled = false;
+            });
+
+            const section = document.querySelector(`.hidden-select[data-product='${productId}'][data-index='${index}']`);
+            const hiddenInput = section?.querySelector('.product-detail-id');
+            if (section && hiddenInput) {
+                section.style.display = 'none';
+                hiddenInput.value = "";
+            }
+        }
+                document.getElementById('mainForm').addEventListener('submit', function () {
+            const allSections = document.querySelectorAll('.hidden-select');
+            let currentIndex = 0;
+
+            allSections.forEach(section => {
+                const idInput = section.querySelector('.product-detail-id');
+                const qtyInput = section.querySelector('.qty-input');
+
+                if (idInput && idInput.value) {
+                    idInput.setAttribute('name', `DanhSachSanPham[${currentIndex}].IDSanPhamCT`);
+                    qtyInput.setAttribute('name', `DanhSachSanPham[${currentIndex}].SoLuong`);
+                    currentIndex++;
+                } else {
+                    idInput?.removeAttribute('name');
+                    qtyInput?.removeAttribute('name');
+                }
+            });
+        });
+
+                     function submitAndPrint() {
+            const hoaDonId = '@idHoaDon'; // Lấy ID hóa đơn ra từ Razor
+            if (hoaDonId) {
+                // 👉 In hóa đơn ở tab mới
+                window.open('/Admin/BanHang/InHoaDon?id=' + hoaDonId, '_blank');
+
+                // 👉 Gửi form thanh toán (POST) ở tab hiện tại
+                document.getElementById("printForm").submit();
+            } else {
+                alert("Không tìm thấy ID hóa đơn để in.");
+            }
+        }
+
+    </script>
+}

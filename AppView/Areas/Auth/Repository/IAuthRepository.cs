@@ -11,6 +11,5 @@ namespace AppView.Areas.Auth.Repository
         Task<ApiResponse<object>> ForgotPasswordAsync(ForgotPasswordViewModel model);
         Task<ApiResponse<object>> ResetPasswordAsync(ResetPasswordViewModel model);
         Task<ApiResponse<object>> ResendConfirmationEmailAsync(string email);
-        Task<ApiResponse<object>> LogoutAsync(string userId);
     }
 }

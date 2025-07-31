@@ -45,15 +45,17 @@ namespace AppApi.Controllers
             var hoaDons = await _context.HoaDons
                 .Where(h => h.TrangThaiDonHang == "Chờ thanh toán" && h.TrangThaiThanhToan == "Chưa thanh toán")
                 .OrderByDescending(h => h.NgayTao)
+                .Include(h => h.User2) // <<-- Nạp User2
                 .Select(h => new
                 {
                     h.IDHoaDon,
                     h.NgayTao,
                     h.TongTienTruocGiam,
                     h.TongTienSauGiam,
-                    h.GhiChu
+                    NguoiTao = h.User2 != null ? h.User2.HoTen : "Không rõ"
                 })
                 .ToListAsync();
+
 
             return Ok(hoaDons);
         }
@@ -83,6 +85,16 @@ namespace AppApi.Controllers
                 return Ok(new { message = result.Message });
 
             return BadRequest(new { message = result.Message });
+        }
+        [HttpGet("xem-hoa-don/{idHoaDon}")]
+        public async Task<IActionResult> XemHoaDonChiTiet(Guid idHoaDon)
+        {
+            var result = await _banHangService.XemChiTietHoaDonAsync(idHoaDon);
+
+            if (!result.IsSuccess)
+                return NotFound(result.Message);
+
+            return Ok(result.Data);
         }
 
     }

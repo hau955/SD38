@@ -21,7 +21,6 @@ namespace AppData.Models
         public DbSet<GioHang> GioHangs { get; set; }
         public DbSet<GioHangCT> GioHangChiTiets { get; set; }
         public DbSet<DiaChiNhanHang> DiaChiNhanHangs { get; set; }
-
         public DbSet<HinhThucTT> HinhThucTTs { get; set; }
         public DbSet<HoaDon> HoaDons { get; set; }
         public DbSet<HoaDonCT> HoaDonChiTiets { get; set; }
@@ -136,8 +135,6 @@ namespace AppData.Models
                 .WithMany(ca => ca.SanPhamChiTiets)
                 .HasForeignKey(spct => spct.IdChatLieu)
                 .OnDelete(DeleteBehavior.Restrict);
-
-          
 
             // Kiểu decimal mặc định là (18,2)
             foreach (var property in builder.Model.GetEntityTypes()

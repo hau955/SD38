@@ -36,5 +36,8 @@
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</Content>
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="wwwroot\uploads\" />
+	</ItemGroup>
 
 </Project>

@@ -1,11 +1,11 @@
-﻿using AppApi.IService;
-using AppApi.Service;
-using AppData.Models;
+﻿using AppData.Models;
 using AppView.Areas.Admin.IRepo;
 using AppView.Areas.Admin.Repository;
 using AppView.Areas.Auth.Repository;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -37,7 +37,7 @@ builder.Services.AddHttpClient<IAuthRepository, AuthRepository>(client =>
 {
     ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
 });
-builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
+
 builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
 {
     opt.TokenLifespan = TimeSpan.FromDays(2); // 24 giờ
@@ -51,12 +51,25 @@ builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
 
 builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
 builder.Services.AddScoped<IBanHangfRepo, BanHangRepo>();
+builder.Services.AddScoped<IThongKeRepo, ThongKeRepo>();
 builder.Services.AddScoped<IChatLieuRepo, ChatLieuRepo>();
 builder.Services.AddHttpClient<IDanhMucRePo, DanhMucRepo>();
 builder.Services.AddScoped<IProfileRepo, ProfileRepo>();
-
+builder.Services.AddHttpClient<IEmployeeManagementRepo, EmployeeManagementRepo>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+    client.DefaultRequestHeaders.Accept.Add(
+        new MediaTypeWithQualityHeaderValue("application/json"));
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+});
 builder.Services.AddDistributedMemoryCache();
-
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 2097152;
+});
 builder.Services.AddSession(options =>
 {
     // Cấu hình các tùy chọn cho session

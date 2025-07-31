@@ -27,7 +27,8 @@
                         </div>
 
                         <div class="login-form">
-                            <form asp-area="Auth" asp-controller="Auth" asp-action="Login" method="post" onsubmit="submitLogin(event) id="loginForm">
+                            <form asp-area="Auth" asp-controller="Auth" asp-action="Login" method="post" id="loginForm" onsubmit="submitLogin(event)" novalidate>
+
                                 <div asp-validation-summary="All" class="validation-summary text-danger"></div>
 
                                 <div class="form-floating">
