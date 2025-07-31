@@ -13,8 +13,9 @@ namespace AppData.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
 
-    [Migration("20250726133841_Ducanh")]
-    partial class Ducanh
+    [Migration("20250724043012_annnnn")]
+    partial class annnnn
+
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
