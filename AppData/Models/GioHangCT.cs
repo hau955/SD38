@@ -13,10 +13,9 @@ namespace AppData.Models
         [ForeignKey(nameof(IDGioHang))]
         public virtual GioHang GioHang { get; set; }
 
-        [Required]
-        public Guid IDSanPham { get; set; }
-        [ForeignKey(nameof(IDSanPham))]
-        public virtual SanPham SanPham { get; set; }
+        public Guid? IDSanPhamCT { get; set; }
+        [ForeignKey(nameof(IDSanPhamCT))]
+        public virtual SanPhamCT? SanPhamCT { get; set; }
 
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn 0")]

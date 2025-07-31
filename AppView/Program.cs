@@ -1,23 +1,46 @@
 ﻿using AppApi.IService;
 using AppApi.Service;
+using AppData.Models;
 using AppView.Areas.Admin.IRepo;
 using AppView.Areas.Admin.Repository;
 using AppView.Areas.Auth.Repository;
-
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
+);
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
-// Add services to the container.
+// Cho phép sử dụng các Razor Pages của Identity (nếu bạn dùng Identity UI)
+builder.Services.AddRazorPages();
+var isDev = builder.Environment.IsDevelopment();
+var apiBaseUrl = isDev
+    ? "https://localhost:7221/"
+    : "https://your-production-api.com/";
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
-var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
-builder.Services.AddHttpClient<ISanPhamRepo, SanPhamRepo>(client =>
-{
-    client.BaseAddress = new Uri("https://localhost:7221/");
-});
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole(); // 👈 Ghi log ra terminal/console
+builder.Logging.SetMinimumLevel(LogLevel.Information);
 builder.Services.AddHttpClient<IAuthRepository, AuthRepository>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7221/");
+    client.BaseAddress = new Uri(apiBaseUrl);
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+});
+builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
+builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
+{
+    opt.TokenLifespan = TimeSpan.FromDays(2); // 24 giờ
 });
 
 // Cấu hình HttpClient cho từng repo gọi API
@@ -27,11 +50,11 @@ builder.Services.AddScoped<ISizeRepo, SizeRepo>();
 builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
 
 builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
+builder.Services.AddScoped<IBanHangfRepo, BanHangRepo>();
 builder.Services.AddScoped<IChatLieuRepo, ChatLieuRepo>();
 builder.Services.AddHttpClient<IDanhMucRePo, DanhMucRepo>();
 builder.Services.AddScoped<IProfileRepo, ProfileRepo>();
 
-// Thêm dịch vụ cần thiết cho session
 builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddSession(options =>
@@ -41,7 +64,6 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true; // Đảm bảo cookie chỉ được truy cập bởi máy chủ
     options.Cookie.IsEssential = true; // Đánh dấu cookie là cần thiết cho ứng dụng
 });
-// (Không cần dòng AddScoped nữa!)
 
 // CORS (nếu có gọi từ web domain khác)
 builder.Services.AddCors(options =>
@@ -75,7 +97,7 @@ app.UseSession();
 
 app.UseRouting();
 app.UseCors("AllowAll");
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 // Routing mặc định

@@ -1,6 +1,7 @@
 ﻿using AppApi.IService;
 using AppApi.ViewModels.SanPham;
-using AppView.Areas.Admin.ViewModels;
+using ViewModels;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using AppData.Models;
@@ -23,132 +24,128 @@ namespace AppApi.Service
 
         public async Task<SanPham> Create(SanPhamCreateRequest model)
         {
-            string? imagePath = null;
+            if (model == null) throw new ArgumentNullException(nameof(model));
 
-            if (model.ImageFile != null && model.ImageFile.Length > 0)
-            {
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                var extension = Path.GetExtension(model.ImageFile.FileName).ToLower();
-                if (!allowedExtensions.Contains(extension))
-                    throw new InvalidOperationException("Định dạng ảnh không hợp lệ.");
-
-                // Kiểm tra kích thước ảnh (ví dụ: tối đa 5MB)
-                const long maxFileSize = 5 * 1024 * 1024; // 5MB
-                if (model.ImageFile.Length > maxFileSize)
-                    throw new InvalidOperationException("Ảnh quá lớn, vui lòng chọn ảnh có kích thước dưới 5MB.");
-
-                var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff");
-                var fileName = $"{timestamp}_{Guid.NewGuid()}{extension}";
-                var filePath = Path.Combine(_env.WebRootPath, "images", fileName);
-
-                // Đảm bảo thư mục tồn tại
-                var directoryPath = Path.GetDirectoryName(filePath);
-                if (!Directory.Exists(directoryPath))
-                {
-                    Directory.CreateDirectory(directoryPath);
-                }
-
-                try
-                {
-                    using var stream = new FileStream(filePath, FileMode.Create);
-                    await model.ImageFile.CopyToAsync(stream);
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException("Không thể lưu ảnh: " + ex.Message);
-                }
-
-                imagePath = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/images/{fileName}";
-            }
-           
             var sanPham = new SanPham
             {
-                DanhMucId = model.DanhMucID, // Khóa ngoại đến DanhMuc
                 IDSanPham = Guid.NewGuid(),
                 TenSanPham = model.TenSanPham,
                 MoTa = model.MoTa,
                 TrongLuong = model.TrongLuong,
-               GioiTinh = model.GioiTinh,
-               // HinhAnh = imagePath,
+                GioiTinh = model.GioiTinh,
                 TrangThai = model.TrangThai,
-                NgayTao =  DateTime.Now,
-                NgaySua =    DateTime.Now
-
+                DanhMucId = model.DanhMucID,
+                NgayTao = DateTime.Now,
+                NgaySua = DateTime.Now
             };
 
-            try
+            _context.SanPhams.Add(sanPham);
+            await _context.SaveChangesAsync();
+
+            // Lưu nhiều ảnh
+            if (model.ImageFiles != null && model.ImageFiles.Any())
             {
-                _context.SanPhams.Add(sanPham);
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                var folderPath = Path.Combine(_env.WebRootPath, "images");
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+
+                foreach (var file in model.ImageFiles)
+                {
+                    if (file.Length == 0) continue;
+
+                    var ext = Path.GetExtension(file.FileName).ToLower();
+                    if (!allowedExtensions.Contains(ext)) continue;
+
+                    if (file.Length > 5 * 1024 * 1024) continue; // Skip ảnh > 5MB
+
+                    var fileName = $"{DateTime.UtcNow:yyyyMMddHHmmssfff}_{Guid.NewGuid()}{ext}";
+                    var filePath = Path.Combine(folderPath, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    // Thêm vào bảng ảnh
+                    var anh = new AnhSanPham
+                    {
+                        IdAnh = Guid.NewGuid(),
+                        IDSanPham = sanPham.IDSanPham,
+                        DuongDanAnh = $"images/{fileName}",
+                        AnhChinh = false // tất cả mặc định là ảnh phụ
+                    };
+                    _context.AnhSanPham.Add(anh);
+                }
+
                 await _context.SaveChangesAsync();
             }
-           
-               catch (Exception ex)
-            {
-                var innerMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
-                var innerStack = ex.InnerException?.StackTrace ?? ex.StackTrace;
-                throw new InvalidOperationException($"Lỗi khi lưu sản phẩm: {innerMessage}\nChi tiết: {innerStack}");
-            }
-
-        
 
             return sanPham;
         }
 
 
-       
-       
-        public async Task<SanPham?> GetByID(Guid id)
+
+
+
+        public async Task<SanPhamView?> GetByID(Guid id)
         {
             return await _context.SanPhams
-                .Include(s => s.SanPhamGiamGias)
+                // .Include(s => s.SanPhamGiamGias)
                 .Include(s => s.SanPhamChiTiets)
-                .FirstOrDefaultAsync(sp => sp.IDSanPham == id);
+                .ThenInclude(ct => ct.MauSac)
+                .Include(s => s.SanPhamChiTiets)
+                .ThenInclude(ct => ct.SizeAo)
+                .Include(s => s.SanPhamChiTiets)
+                .ThenInclude(ct => ct.ChatLieu)
+                .Include(s => s.AnhSanPhams)
+                .Where(sp => sp.IDSanPham == id)
+                .Select(sp=> new SanPhamView
+                {
+                    IDSanPham = sp.IDSanPham,
+                    TenSanPham = sp.TenSanPham,
+                    MoTa = sp.MoTa,
+                    TrongLuong = sp.TrongLuong ?? 0,
+                    GioiTinh = sp.GioiTinh ?? false,
+                    TrangThai = sp.TrangThai,
+                    DanhMucID = sp.DanhMucId,
+                    TenDanhMuc = sp.DanhMuc!.TenDanhMuc,
+                    DanhSachAnh = sp.AnhSanPhams.Select(a => new AnhSanPhamViewModel
+                    {
+                        IdAnh = a.IdAnh,
+                        IDSanPham = a.IDSanPham,
+                        DuongDanAnh = a.DuongDanAnh,
+                        AnhChinh = a.AnhChinh
+                    }).ToList(),
+                    ChiTiets = sp.SanPhamChiTiets.Select(ct => new SanPhamCTViewModel
+                    {
+                        IDSanPhamCT = ct.IDSanPhamCT,
+                        IDSanPham = ct.IDSanPham, // Đảm bảo không bị null
+                        TenSanPham = sp.TenSanPham,
+                        MoTa = sp.MoTa,
+                        TrongLuong = sp.TrongLuong,
+                        GioiTinh = sp.GioiTinh,
+                        TrangThai = ct.TrangThai,
+                        GiaBan = ct.GiaBan,
+                        SoLuongTonKho = ct.SoLuongTonKho,
+                        IdMauSac = ct.IDMauSac,
+                        MauSac = ct.MauSac != null ? ct.MauSac.TenMau : null,
+                        IdSize = ct.IDSize,
+                        Size = ct.SizeAo != null ? ct.SizeAo.SoSize : null,
+                        IDChatLieu = ct.IdChatLieu,
+                        ChatLieu = ct.ChatLieu != null ? ct.ChatLieu.TenChatLieu : null
+                    }).ToList()
+                }).FirstOrDefaultAsync();
         }
         public async Task<SanPham> Update(SanPhamCreateRequest model)
         {
             var sanPham = await _context.SanPhams.FindAsync(model.IDSanPham);
             if (sanPham == null)
-            {
                 throw new KeyNotFoundException("Không tìm thấy sản phẩm.");
-            }
 
-            // Xử lý cập nhật ảnh nếu có file mới
-            if (model.ImageFile != null && model.ImageFile.Length > 0)
-            {
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                var extension = Path.GetExtension(model.ImageFile.FileName).ToLower();
-                if (!allowedExtensions.Contains(extension))
-                    throw new InvalidOperationException("Định dạng ảnh không hợp lệ.");
-
-                const long maxFileSize = 5 * 1024 * 1024; // 5MB
-                if (model.ImageFile.Length > maxFileSize)
-                    throw new InvalidOperationException("Ảnh quá lớn, vui lòng chọn ảnh nhỏ hơn 5MB.");
-
-                var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff");
-                var fileName = $"{timestamp}_{Guid.NewGuid()}{extension}";
-                var filePath = Path.Combine(_env.WebRootPath, "images", fileName);
-
-                var directoryPath = Path.GetDirectoryName(filePath);
-                if (!Directory.Exists(directoryPath))
-                {
-                    Directory.CreateDirectory(directoryPath);
-                }
-
-                try
-                {
-                    using var stream = new FileStream(filePath, FileMode.Create);
-                    await model.ImageFile.CopyToAsync(stream);
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException("Không thể lưu ảnh: " + ex.Message);
-                }
-
-                // Gán đường dẫn ảnh mới
-               // sanPham.HinhAnh = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/images/{fileName}";
-            }
-
-            // Cập nhật các thông tin khác
+            // Cập nhật thông tin cơ bản
             sanPham.TenSanPham = model.TenSanPham;
             sanPham.MoTa = model.MoTa;
             sanPham.TrongLuong = model.TrongLuong;
@@ -157,6 +154,45 @@ namespace AppApi.Service
             sanPham.DanhMucId = model.DanhMucID;
             sanPham.NgaySua = DateTime.Now;
 
+            // Nếu có ảnh mới
+            if (model.ImageFiles != null && model.ImageFiles.Any())
+            {
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                var folderPath = Path.Combine(_env.WebRootPath, "images");
+
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+
+                foreach (var file in model.ImageFiles)
+                {
+                    if (file.Length == 0) continue;
+
+                    var ext = Path.GetExtension(file.FileName).ToLower();
+                    if (!allowedExtensions.Contains(ext)) continue;
+                    if (file.Length > 5 * 1024 * 1024) continue;
+
+                    var fileName = $"{DateTime.UtcNow:yyyyMMddHHmmssfff}_{Guid.NewGuid()}{ext}";
+                    var filePath = Path.Combine(folderPath, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    var anh = new AnhSanPham
+                    {
+                        IdAnh = Guid.NewGuid(),
+                        IDSanPham = sanPham.IDSanPham,
+                        DuongDanAnh = $"images/{fileName}",
+                        AnhChinh = false // Mặc định là ảnh phụ
+                    };
+
+                    _context.AnhSanPham.Add(anh);
+                }
+            }
+
             try
             {
                 _context.SanPhams.Update(sanPham);
@@ -164,12 +200,13 @@ namespace AppApi.Service
             }
             catch (Exception ex)
             {
-                var innerMessage = ex.InnerException?.Message ?? ex.Message;
-                throw new InvalidOperationException("Lỗi khi cập nhật sản phẩm: " + innerMessage);
+                var msg = ex.InnerException?.Message ?? ex.Message;
+                throw new InvalidOperationException("Lỗi khi cập nhật sản phẩm: " + msg);
             }
 
             return sanPham;
         }
+
         public async  Task<List<SanPhamView>> GetAll()
         {
             return await _context.SanPhams
@@ -179,11 +216,10 @@ namespace AppApi.Service
             IDSanPham = sp.IDSanPham,
             TenSanPham = sp.TenSanPham,
             MoTa = sp.MoTa,
-            TrongLuong = sp.TrongLuong.Value,
-            GioiTinh = sp.GioiTinh.Value,
+            TrongLuong = sp.TrongLuong ?? 0,
+            GioiTinh = sp.GioiTinh ?? false,
             TrangThai = sp.TrangThai,
-            NgayTao = sp.NgayTao.Value,
-            NgaySua = sp.NgaySua.Value,
+           
           
             DanhMucID = sp.DanhMucId,
             TenDanhMuc = sp.DanhMuc!.TenDanhMuc
@@ -193,42 +229,61 @@ namespace AppApi.Service
         public async Task<List<SanPhamView>> GetAllSanPhamsAsync()
         {
             var result = await _context.SanPhams
-                  .Include(sp => sp.SanPhamChiTiets)
-                      .ThenInclude(ct => ct.MauSac)
-                  .Include(sp => sp.SanPhamChiTiets)
-                      .ThenInclude(ct => ct.SizeAo)
-                  .Include(sp => sp.SanPhamChiTiets)
-                      .ThenInclude(ct => ct.ChatLieu)
-                  
-                  .Include(sp => sp.DanhMuc)
-                  .Select(sp => new SanPhamView
-                  {
-                      IDSanPham = sp.IDSanPham,
-                      TenSanPham = sp.TenSanPham,
-                      MoTa = sp.MoTa,
-                     // HinhAnh = sp.HinhAnh,
-                      TenDanhMuc = sp.DanhMuc.TenDanhMuc,
-                      TrangThai=sp.TrangThai,
-                      ChiTiets = sp.SanPhamChiTiets.Select(ct => new SanPhamCTViewModel
-                      {
-                          IDSanPhamCT = ct.IDSanPhamCT,
-                          IdMauSac = ct.IDMauSac,
-                          MauSac = ct.MauSac != null ? ct.MauSac.TenMau : null,
+                .Include(sp => sp.SanPhamChiTiets)
+                    .ThenInclude(ct => ct.MauSac)
+                .Include(sp => sp.SanPhamChiTiets)
+                    .ThenInclude(ct => ct.SizeAo)
+                .Include(sp => sp.SanPhamChiTiets)
+                    .ThenInclude(ct => ct.ChatLieu)
+                .Include(sp => sp.AnhSanPhams)
+                
+                .Include(sp => sp.DanhMuc)
+                .Select(sp => new SanPhamView
+                {
+                    IDSanPham = sp.IDSanPham,
+                    TenSanPham = sp.TenSanPham,
+                    MoTa = sp.MoTa,
+                    TrongLuong = sp.TrongLuong ?? 0,
+                    GioiTinh = sp.GioiTinh ?? false,
+                    TrangThai = sp.TrangThai,
+                    DanhMucID = sp.DanhMucId,
+                    TenDanhMuc = sp.DanhMuc.TenDanhMuc,
+                    DanhSachAnh = sp.AnhSanPhams.Select(a => new AnhSanPhamViewModel
+                    {
+                        IdAnh = a.IdAnh,
+                        IDSanPham = a.IDSanPham,
+                        DuongDanAnh = a.DuongDanAnh,
+                        AnhChinh = a.AnhChinh
+                    }).ToList(),
+                    ChiTiets = sp.SanPhamChiTiets.Select(ct => new SanPhamCTViewModel
+                    {
+                        IDSanPhamCT = ct.IDSanPhamCT,
+                        IDSanPham = ct.IDSanPham, // Đảm bảo không bị null
 
-                          IdSize = ct.IDSize,
-                          Size = ct.SizeAo != null ? ct.SizeAo.SoSize : null,
+                        TenSanPham = sp.TenSanPham,
+                        MoTa = sp.MoTa,
+                        TrongLuong = sp.TrongLuong,
+                        GioiTinh = sp.GioiTinh,
+                        TrangThai = ct.TrangThai,
 
-                         
-                         
-                          GiaBan = ct.GiaBan,
-                          SoLuongTonKho = ct.SoLuongTonKho,
-                          TrangThai=ct.TrangThai
-                      }).ToList()
-                  })
-                  .ToListAsync();
+                        GiaBan = ct.GiaBan,
+                        SoLuongTonKho = ct.SoLuongTonKho,
+
+                        IdMauSac = ct.IDMauSac,
+                        MauSac = ct.MauSac != null ? ct.MauSac.TenMau : null,
+
+                        IdSize = ct.IDSize,
+                        Size = ct.SizeAo != null ? ct.SizeAo.SoSize : null,
+
+                        IDChatLieu = ct.IdChatLieu,
+                        ChatLieu = ct.ChatLieu != null ? ct.ChatLieu.TenChatLieu : null
+                    }).ToList(),
+                    
+                }).ToListAsync();
 
             return result;
-        
-    }
+        }
+
+       
     }
 }

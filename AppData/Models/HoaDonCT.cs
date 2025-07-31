@@ -16,9 +16,9 @@ namespace AppData.Models
 
         // FK đến Sản phẩm (1 sản phẩm có thể xuất hiện ở nhiều chi tiết)
         [Required]
-        [ForeignKey("SanPham")]
-        public Guid IDSanPham { get; set; }
-        public virtual SanPham SanPham { get; set; }
+        [ForeignKey("SanPhamCT")]
+        public Guid IDSanPhamCT { get; set; }
+        public virtual SanPhamCT SanPhamCT { get; set; }
 
         [Required]
         public int SoLuongSanPham { get; set; }

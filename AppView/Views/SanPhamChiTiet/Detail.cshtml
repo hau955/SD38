@@ -1,0 +1,338 @@
+﻿@model AppView.ViewModels.SanPham.SanPhamView
+
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+}
+
+<style>
+    .detail-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+
+    .detail-image {
+        width: 100%;
+        height: 300px;
+        object-fit: contain;
+    }
+
+    .option-group {
+        margin: 10px 0;
+    }
+
+        .option-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+    .material-option {
+        padding: 5px 10px;
+        margin-right: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        cursor: pointer;
+        display: inline-block;
+        user-select: none;
+    }
+
+        .material-option.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+    .btn-add-cart {
+        background-color: #2196F3;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+        .btn-add-cart:hover {
+            background-color: #1976D2;
+        }
+
+    #quantity-error {
+        color: red;
+        display: none;
+        margin-left: 10px;
+    }
+
+    .alert-warning {
+        color: #856404;
+        background-color: #fff3cd;
+        border-color: #ffeeba;
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="detail-container">
+    <h2 class="mb-4">Chi tiết sản phẩm</h2>
+    @if (!string.IsNullOrEmpty(ViewBag.Error))
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+    else if (Model != null && Model.IDSanPham != Guid.Empty)
+    {
+        <div class="row">
+            <div class="col-md-6">
+                <img src="@(Model.DanhSachAnh?.FirstOrDefault(a => a.AnhChinh)?.DuongDanAnh ?? "/images/anh1.jpg")" alt="Product Image" class="detail-image" />
+            </div>
+            <div class="col-md-6">
+                <h4>@Model.TenSanPham</h4>
+                <p>Giá: @(Model.ChiTiets?.FirstOrDefault()?.GiaBan?.ToString("N0") ?? "0") VNĐ</p>
+                <p>@Model.MoTa</p>
+                <div class="option-group">
+                    <label>Chất liệu:</label>
+                    @if (Model.ChiTiets != null && Model.ChiTiets.Any())
+                    {
+                        var hasValidMaterials = false;
+                        @foreach (var material in Model.ChiTiets.Select(ct => ct.ChatLieu).Distinct())
+                        {
+                            var ct = Model.ChiTiets.FirstOrDefault(ct => ct.ChatLieu == material);
+                            if (ct != null && ct.IDChatLieu != null)
+                            {
+                                hasValidMaterials = true;
+                                <span class="material-option" data-id="@ct.IDChatLieu" data-value="@material">@material</span>
+                            }
+                        }
+                        if (!hasValidMaterials)
+                        {
+                            <span class="alert alert-warning">Không tìm thấy chất liệu hợp lệ trong dữ liệu. Vui lòng kiểm tra backend hoặc API.</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="alert alert-warning">Không có thông tin chi tiết sản phẩm.</span>
+                    }
+                </div>
+                <div class="option-group">
+                    <label>Size:</label>
+                    <select id="size-select"></select>
+                </div>
+                <div class="option-group">
+                    <label>Màu sắc:</label>
+                    <select id="color-select"></select>
+                </div>
+                <div class="option-group">
+                    <label>Số lượng:</label>
+                    <input type="number" id="quantity" min="1" value="1" style="width: 80px;" />
+                    <span id="quantity-error"></span>
+                </div>
+                <button class="btn-add-cart" onclick="addToCart('@Model.IDSanPham')">Thêm vào giỏ hàng</button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">Không có thông tin sản phẩm để hiển thị.</div>
+    }
+</div>
+
+<script>
+    let selectedProductId = '';
+    let chiTiets = @Html.Raw(Json.Serialize(Model.ChiTiets));
+
+    // Log dữ liệu chiTiets để kiểm tra chi tiết
+    console.log('Initial ChiTiets:', chiTiets);
+    chiTiets.forEach((ct, index) => {
+        console.log(`ChiTiet ${index}:`, ct);
+    });
+
+    // Hàm cập nhật Size và Màu sắc dựa trên Chất liệu
+    function updateOptions(materialId) {
+        console.log('Material ID:', materialId); // Debug materialId
+        const sizeSelect = document.getElementById('size-select');
+        const colorSelect = document.getElementById('color-select');
+
+        // Xóa các option cũ
+        sizeSelect.innerHTML = '<option value="">Chọn Size</option>';
+        colorSelect.innerHTML = '<option value="">Chọn Màu sắc</option>';
+
+        // Lọc ChiTiets theo materialId, kiểm tra undefined và so sánh chính xác
+        const filteredChiTiets = chiTiets.filter(ct => ct && ct.IDChatLieu && ct.IDChatLieu.toString().toLowerCase() === materialId.toLowerCase());
+        console.log('Filtered ChiTiets:', filteredChiTiets); // Debug dữ liệu lọc
+
+        // Thêm Size duy nhất
+        if (filteredChiTiets.length > 0) {
+            const uniqueSizes = [...new Set(filteredChiTiets.map(ct => ct.Size))].filter(size => size && size.trim() !== '');
+            if (uniqueSizes.length > 0) {
+                uniqueSizes.forEach(size => {
+                    const ct = filteredChiTiets.find(ct => ct.Size && ct.Size.trim() === size.trim());
+                    if (ct && ct.IdSize) {
+                        const option = document.createElement('option');
+                        option.value = ct.IdSize;
+                        option.textContent = size;
+                        sizeSelect.appendChild(option);
+                    }
+                });
+            } else {
+                console.log('No valid Sizes found in filteredChiTiets');
+            }
+
+            // Thêm Màu sắc duy nhất
+            const uniqueColors = [...new Set(filteredChiTiets.map(ct => ct.MauSac))].filter(color => color && color.trim() !== '');
+            if (uniqueColors.length > 0) {
+                uniqueColors.forEach(color => {
+                    const ct = filteredChiTiets.find(ct => ct.MauSac && ct.MauSac.trim() === color.trim());
+                    if (ct && ct.IdMauSac) {
+                        const option = document.createElement('option');
+                        option.value = ct.IdMauSac;
+                        option.textContent = color;
+                        colorSelect.appendChild(option);
+                    }
+                });
+            } else {
+                console.log('No valid Colors found in filteredChiTiets');
+            }
+        } else {
+            console.log('No matching ChiTiets found for materialId:', materialId);
+        }
+    }
+
+    // Lắng nghe sự kiện chọn Chất liệu
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.material-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                document.querySelectorAll('.material-option').forEach(el => el.classList.remove('selected'));
+                e.target.classList.add('selected');
+                const materialId = e.target.dataset.id;
+                console.log('Clicked material ID:', materialId); // Debug khi click
+                updateOptions(materialId);
+            });
+        });
+    });
+
+    function addToCart(productId) {
+        selectedProductId = productId;
+        const selectedMaterialId = document.querySelector('.material-option.selected')?.dataset.id;
+        const selectedSizeId = document.getElementById('size-select').value;
+        const selectedColorId = document.getElementById('color-select').value;
+        const quantityInput = document.getElementById('quantity');
+        const quantity = parseInt(quantityInput.value) || 1;
+        const quantityError = document.getElementById('quantity-error');
+
+        console.log('Selected IDs:', { selectedMaterialId, selectedSizeId, selectedColorId, quantity });
+
+        if (!selectedMaterialId || !selectedSizeId || !selectedColorId) {
+            alert('Vui lòng chọn chất liệu, size và màu sắc!');
+            return;
+        }
+
+        // Validation số lượng
+        if (quantity < 1) {
+            quantityError.textContent = 'Số lượng phải lớn hơn 0!';
+            quantityError.style.display = 'inline';
+            return;
+        }
+
+        const url = `https://localhost:7221/api/SanPhamCT/exists?idSanPham=${selectedProductId}&idMau=${selectedColorId}&idSize=${selectedSizeId}&idChatLieu=${selectedMaterialId}`;
+        console.log('Fetching URL:', url);
+
+        fetch(url, {
+            method: 'GET',
+            headers: { 'accept': '*/*' },
+            mode: 'cors'
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            return response.json();
+        })
+        .then(async exists => {
+            console.log('Exists response:', exists);
+            if (exists) {
+                const ctResponse = await fetch(`https://localhost:7221/api/SanPhamCT/by-sanpham/${selectedProductId}`, {
+                    method: 'GET',
+                    headers: { 'accept': '*/*' },
+                    mode: 'cors'
+                });
+                console.log('ChiTiet response status:', ctResponse.status);
+                if (!ctResponse.ok) throw new Error(`HTTP error! Status: ${ctResponse.status}`);
+                const chiTiets = await ctResponse.json();
+                console.log('ChiTiet response full:', chiTiets);
+                const selectedCT = chiTiets.find(ct =>
+                    ct.idSize.toLowerCase() === selectedSizeId.toLowerCase() &&
+                    ct.idChatLieu.toLowerCase() === selectedMaterialId.toLowerCase() &&
+                    ct.idMauSac.toLowerCase() === selectedColorId.toLowerCase()
+                );
+                console.log('Selected CT:', selectedCT);
+                if (selectedCT) {
+                    const maxQuantity = selectedCT.soLuongTonKho || 0;
+                    if (quantity > maxQuantity) {
+                        quantityError.textContent = `Số lượng tối đa là ${maxQuantity}!`;
+                        quantityError.style.display = 'inline';
+                        return;
+                    }
+                    quantityError.style.display = 'none';
+                    addToCartAPI(selectedCT.idSanPhamCT, quantity);
+                } else {
+                    alert('Sản phẩm chi tiết không tìm thấy trong danh sách!');
+                }
+            } else {
+                alert('Kết hợp chất liệu, size, màu sắc không tồn tại!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Lỗi kiểm tra sản phẩm chi tiết! (Chi tiết: ' + error.message + ')');
+        });
+    }
+
+    async function addToCartAPI(idSanPhamCT, quantity) {
+        const userId = '@ViewBag.UserId';
+        const token = '@ViewBag.Token';
+        console.log('Raw UserId from ViewBag:', '@ViewBag.UserId');
+        console.log('Parsed UserId:', userId);
+        console.log('Token:', token);
+
+        if (!userId) {
+            alert('Vui lòng đăng nhập để thêm vào giỏ hàng!');
+            return;
+        }
+
+        try {
+            const response = await fetch('https://localhost:7221/api/GioHang/them', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : ''
+                },
+                body: JSON.stringify({
+                    idSanPhamCT: idSanPhamCT,
+                    idNguoiDung: userId,
+                    soLuong: quantity
+                })
+            });
+
+            console.log('API Response Status:', response.status);
+            let result;
+            const text = await response.text();
+            console.log('Raw Response Text:', text);
+            try {
+                result = text ? JSON.parse(text) : { message: 'No response data' };
+            } catch (parseError) {
+                console.error('Parse Error:', parseError);
+                result = { message: 'Không thể parse response từ server' };
+            }
+            console.log('API Response:', result);
+
+            if (response.ok) {
+                const message = result.message || 'Thêm vào giỏ hàng thành công!';
+                const soLuong = result.data?.soLuong || quantity;
+                alert(`${message} (Số lượng: ${soLuong})`);
+                window.location.href = '/GioHang';
+            } else {
+                alert(`Thêm vào giỏ hàng thất bại: ${result.message || `Mã lỗi: ${response.status}`}`);
+            }
+        } catch (error) {
+            console.error('Lỗi API:', error);
+            alert('Lỗi kết nối. Vui lòng thử lại! (Chi tiết: ' + error.message + ')');
+        }
+    }
+</script>

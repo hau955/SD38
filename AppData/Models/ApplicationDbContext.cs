@@ -137,8 +137,7 @@ namespace AppData.Models
                 .HasForeignKey(spct => spct.IdChatLieu)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // 1-n: TaAo - SanPhamChiTiet
-
+          
 
             // Kiểu decimal mặc định là (18,2)
             foreach (var property in builder.Model.GetEntityTypes()

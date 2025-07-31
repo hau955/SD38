@@ -1,186 +1,153 @@
-﻿using AppData.Models;
+﻿using AppApi.IService;
+using AppData.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace AppApi.Service
 {
-    public class GioHangService
+    public class GioHangService : IGioHangService
     {
-        private readonly ApplicationDbContext _db;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public GioHangService(ApplicationDbContext db, IHttpContextAccessor httpContextAccessor)
+        private readonly ApplicationDbContext _context;
+        public GioHangService(ApplicationDbContext context)
         {
-            _db = db ?? throw new ArgumentNullException(nameof(db));
-            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            _context = context;
         }
-
-        public async Task<GioHang> GetOrCreateGioHangAsync()
+        public async Task<GioHang?> GetByUserIdAsync(Guid userId)
         {
-            var userId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId)) throw new UnauthorizedAccessException("Người dùng chưa đăng nhập.");
-
-            if (!Guid.TryParse(userId, out Guid userGuid))
-                throw new ArgumentException("ID người dùng không hợp lệ.");
-
-            var gioHang = await _db.GioHangs
-                .Include(g => g.GioHangChiTiets)
-                .ThenInclude(gct => gct.SanPham)
-                .FirstOrDefaultAsync(g => g.IDGioHang == userGuid);
-
-            if (gioHang == null)
-            {
-                gioHang = new GioHang
-                {
-                    IDGioHang = userGuid,
-                    TrangThai = true,
-                    GioHangChiTiets = new List<GioHangCT>()
-                };
-                _db.GioHangs.Add(gioHang);
-                await _db.SaveChangesAsync();
-                Console.WriteLine($"Đã tạo mới GioHang với ID: {gioHang.IDGioHang}");
-            }
-            return gioHang;
+            return await _context.GioHangs
+         .Include(g => g.GioHangChiTiets)
+         .FirstOrDefaultAsync(g => g.User.Id == userId);
         }
-
-        public async Task AddToGioHangAsync(Guid sanPhamId, int soLuong)
+        
+        public async Task<object> CapNhatSoLuong(Guid idGioHangChiTiet, int soLuong)
         {
-            var userId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId)) throw new UnauthorizedAccessException("Người dùng chưa đăng nhập.");
-
-            if (!Guid.TryParse(userId, out Guid userGuid))
-                throw new ArgumentException("ID người dùng không hợp lệ.");
-
-            var gioHang = await GetOrCreateGioHangAsync();
-
-            var trackedGioHang = await _db.GioHangs
-                .Include(g => g.GioHangChiTiets)
-                .ThenInclude(gct => gct.SanPham)
-                .FirstOrDefaultAsync(g => g.IDGioHang == userGuid);
-            if (trackedGioHang == null) throw new Exception("Không thể tải giỏ hàng.");
-
-            var sanPham = await _db.SanPhams
-                .Include(s => s.SanPhamChiTiets)
-                .FirstOrDefaultAsync(s => s.IDSanPham == sanPhamId);
-
-            if (sanPham == null)
-                throw new Exception("Sản phẩm không tồn tại.");
-
-            var sanPhamChiTiets = sanPham.SanPhamChiTiets?.Where(sct => sct.TrangThai).ToList() ?? new List<SanPhamCT>();
-            Console.WriteLine($"Số lượng SanPhamChiTiets cho IDSanPham {sanPhamId}: {sanPhamChiTiets.Count}");
-            if (!sanPhamChiTiets.Any())
-                throw new Exception("Sản phẩm không có chi tiết tồn kho hợp lệ.");
-
-            var totalStock = sanPhamChiTiets.Sum(sct => sct.SoLuongTonKho);
-            Console.WriteLine($"Tổng tồn kho cho IDSanPham {sanPhamId}: {totalStock}");
-            if (totalStock < soLuong)
-                throw new Exception($"Số lượng vượt quá tồn kho. Yêu cầu: {soLuong}, Tồn kho: {totalStock}");
-
-            decimal donGia = sanPhamChiTiets.FirstOrDefault()?.GiaBan ?? 0m;
-            if (donGia <= 0) throw new Exception("Giá bán không hợp lệ.");
-            Console.WriteLine($"Đơn giá cho IDSanPham {sanPhamId}: {donGia}");
-
-            var existingItem = trackedGioHang.GioHangChiTiets
-                .FirstOrDefault(g => g.IDSanPham == sanPhamId); // Cần mở rộng để kiểm tra chi tiết nếu có
-
-            if (existingItem != null)
-            {
-                existingItem.SoLuong += soLuong;
-                if (totalStock < existingItem.SoLuong)
-                    throw new Exception($"Số lượng vượt quá tồn kho. Yêu cầu: {existingItem.SoLuong}, Tồn kho: {totalStock}");
-                _db.Entry(existingItem).State = EntityState.Modified;
-            }
-            else
-            {
-                var gioHangCT = new GioHangCT
-                {
-                    IDGioHangChiTiet = Guid.NewGuid(),
-                    IDGioHang = trackedGioHang.IDGioHang,
-                    IDSanPham = sanPhamId,
-                    SoLuong = soLuong,
-                    DonGia = donGia,
-                    TrangThai = true
-                };
-                trackedGioHang.GioHangChiTiets.Add(gioHangCT);
-                _db.GioHangChiTiets.Add(gioHangCT);
-            }
-
             try
             {
-                await _db.SaveChangesAsync();
-                Console.WriteLine($"Đã thêm GioHangCT với ID: {trackedGioHang.GioHangChiTiets.Last().IDGioHangChiTiet}, IDGioHang: {trackedGioHang.IDGioHang}, IDSanPham: {sanPhamId}");
+                var chiTiet = await _context.GioHangChiTiets
+                    .Include(ct => ct.SanPhamCT)
+                    .FirstOrDefaultAsync(ct => ct.IDGioHangChiTiet == idGioHangChiTiet);
+                if (chiTiet == null)
+                {
+                    return new { success = false, message = "Chi tiết giỏ hàng không tồn tại" };
+                }
+
+                if (chiTiet.SanPhamCT == null || chiTiet.SanPhamCT.SoLuongTonKho < soLuong)
+                {
+                    return new { success = false, message = "Số lượng vượt quá tồn kho" };
+                }
+
+                chiTiet.SoLuong = soLuong;
+                _context.GioHangChiTiets.Update(chiTiet);
+                await _context.SaveChangesAsync();
+                Console.WriteLine($"Updated SoLuong for IDGioHangChiTiet {idGioHangChiTiet} to {soLuong}");
+                return new { success = true, soLuong = chiTiet.SoLuong, message = "Cập nhật số lượng thành công" };
             }
-            catch (DbUpdateConcurrencyException ex)
+            catch (DbUpdateException ex)
             {
-                var entry = ex.Entries.Single();
-                entry.Reload();
-                await _db.SaveChangesAsync();
-                Console.WriteLine($"Xử lý concurrency cho GioHangCT với ID: {trackedGioHang.GioHangChiTiets.Last().IDGioHangChiTiet}");
+                Console.WriteLine($"DbUpdateException in CapNhatSoLuong: {ex.InnerException?.Message}");
+                return new { success = false, message = "Lỗi cập nhật cơ sở dữ liệu.", detail = ex.InnerException?.Message };
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Lỗi khi lưu: {ex.Message}");
-                throw;
+                Console.WriteLine($"Error in CapNhatSoLuong: {ex.Message}");
+                return new { success = false, message = "Lỗi server. Vui lòng thử lại.", detail = ex.Message };
             }
         }
 
-        public async Task UpdateGioHangAsync(Guid gioHangCTId, int soLuong)
+        public async Task<List<GioHangCT>> LayDanhSachGioHang(Guid idUser)
         {
-            var item = await _db.GioHangChiTiets
-                .Include(g => g.SanPham)
-                .ThenInclude(s => s.SanPhamChiTiets)
-                .FirstOrDefaultAsync(g => g.IDGioHangChiTiet == gioHangCTId);
-
-            if (item == null) throw new Exception("Không tìm thấy sản phẩm trong giỏ hàng.");
-            var totalStock = item.SanPham.SanPhamChiTiets?.Sum(sct => sct.SoLuongTonKho) ?? 0;
-            if (totalStock < soLuong)
-                throw new Exception("Số lượng vượt quá tồn kho.");
-
-            item.SoLuong = soLuong;
-            await _db.SaveChangesAsync();
+            return await _context.GioHangChiTiets
+        .Where(ct => ct.IDGioHang == idUser && ct.TrangThai) 
+        .Include(ct => ct.SanPhamCT)
+        .ThenInclude(spct => spct.SanPham)
+        .AsNoTracking()
+        .ToListAsync();
         }
 
-        public async Task RemoveFromGioHangAsync(Guid gioHangCTId)
+        public async Task<object> ThemVaoGioHang(Guid idSanPhamCT, Guid idUser, int soLuong)
         {
-            var item = await _db.GioHangChiTiets.FindAsync(gioHangCTId);
-            if (item != null)
-            {
-                _db.GioHangChiTiets.Remove(item);
-                await _db.SaveChangesAsync();
-            }
-        }
-
-        public async Task<List<GioHangCT>> GetGioHangChiTietsAsync()
-        {
-            var userId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId)) throw new UnauthorizedAccessException("Người dùng chưa đăng nhập.");
-
-            if (!Guid.TryParse(userId, out Guid userGuid))
-                throw new ArgumentException("ID người dùng không hợp lệ.");
-
-            var gioHang = await _db.GioHangs
+            // Tìm giỏ hàng dựa trên IdNguoiDung (User.Id)
+            var gioHang = await _context.GioHangs
                 .Include(g => g.GioHangChiTiets)
-                .ThenInclude(gct => gct.SanPham)
-                .FirstOrDefaultAsync(g => g.IDGioHang == userGuid);
+                .FirstOrDefaultAsync(g => g.User.Id == idUser);
 
             if (gioHang == null)
             {
+                // Kiểm tra xem ApplicationUser có tồn tại không
+                var user = await _context.Users.FindAsync(idUser);
+                if (user == null)
+                {
+                    throw new InvalidOperationException("Người dùng không tồn tại.");
+                }
+
                 gioHang = new GioHang
                 {
-                    IDGioHang = userGuid,
-                    TrangThai = true,
-                    GioHangChiTiets = new List<GioHangCT>()
+                    IDGioHang = Guid.NewGuid(), // Tạo ID mới cho giỏ hàng
+                    User = user,               // Liên kết với ApplicationUser
+                    TrangThai = true
                 };
-                _db.GioHangs.Add(gioHang);
-                await _db.SaveChangesAsync();
-                Console.WriteLine($"Đã tạo mới GioHang với ID: {gioHang.IDGioHang} vì không tìm thấy.");
+                _context.GioHangs.Add(gioHang);
+                await _context.SaveChangesAsync(); // Lưu để lấy IDGioHang
+            }
+
+            var chiTiet = await _context.GioHangChiTiets
+                .FirstOrDefaultAsync(ct => ct.IDGioHang == gioHang.IDGioHang && ct.IDSanPhamCT == idSanPhamCT);
+
+            if (chiTiet != null)
+            {
+                chiTiet.SoLuong += soLuong;
+                _context.GioHangChiTiets.Update(chiTiet);
             }
             else
             {
-                Console.WriteLine($"Đã tìm thấy GioHang với ID: {gioHang.IDGioHang}, Số lượng GioHangChiTiets: {gioHang.GioHangChiTiets?.Count ?? 0}");
+                // Kiểm tra tồn kho
+                var sanPhamCT = await _context.SanPhamChiTiets
+                    .FirstOrDefaultAsync(sp => sp.IDSanPhamCT == idSanPhamCT);
+                if (sanPhamCT == null || sanPhamCT.SoLuongTonKho < soLuong)
+                {
+                    throw new InvalidOperationException("Sản phẩm không đủ tồn kho hoặc không tồn tại.");
+                }
+
+                chiTiet = new GioHangCT
+                {
+                    IDGioHangChiTiet = Guid.NewGuid(),
+                    IDGioHang = gioHang.IDGioHang,
+                    IDSanPhamCT = idSanPhamCT,
+                    SoLuong = soLuong,
+                    DonGia = await GetGiaBanSanPham(idSanPhamCT),
+                    TrangThai = true
+                };
+                _context.GioHangChiTiets.Add(chiTiet);
             }
 
-            return gioHang.GioHangChiTiets.Where(g => g.TrangThai).ToList();
+            await _context.SaveChangesAsync();
+            return new { success = true, soLuong = chiTiet.SoLuong, idGioHangChiTiet = chiTiet.IDGioHangChiTiet };
+        }
+
+        public async Task<object> XoaKhoiGioHang(Guid idGioHangChiTiet)
+        {
+            try
+            {
+                var chiTiet = await _context.GioHangChiTiets.FindAsync(idGioHangChiTiet);
+                if (chiTiet == null)
+                {
+                    return new { success = false, message = "Chi tiết giỏ hàng không tồn tại" };
+                }
+
+                _context.GioHangChiTiets.Remove(chiTiet);
+                await _context.SaveChangesAsync();
+                return new { success = true, message = "Xóa sản phẩm thành công" };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in XoaKhoiGioHang: {ex.Message}");
+                return new { success = false, message = "Lỗi server. Vui lòng thử lại.", detail = ex.Message };
+            }
+        }
+        private async Task<decimal> GetGiaBanSanPham(Guid idSanPhamCT)
+        {
+            var spct = await _context.SanPhamChiTiets.FindAsync(idSanPhamCT);
+            return spct?.GiaBan ?? 0;
         }
     }
 }

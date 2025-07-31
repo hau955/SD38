@@ -139,6 +139,10 @@ namespace AppData.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("SoDienThoai")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<bool>("TrangThai")
                         .HasColumnType("bit");
 
@@ -323,7 +327,7 @@ namespace AppData.Migrations
                     b.Property<Guid>("IDGioHang")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IDSanPham")
+                    b.Property<Guid?>("IDSanPhamCT")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("SoLuong")
@@ -336,7 +340,7 @@ namespace AppData.Migrations
 
                     b.HasIndex("IDGioHang");
 
-                    b.HasIndex("IDSanPham");
+                    b.HasIndex("IDSanPhamCT");
 
                     b.ToTable("GioHangChiTiets");
                 });
@@ -370,75 +374,6 @@ namespace AppData.Migrations
                     b.ToTable("HinhThucTTs");
                 });
 
-            modelBuilder.Entity("AppData.Models.HoaDon", b =>
-                {
-                    b.Property<Guid>("IDHoaDon")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("GhiChu")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<Guid?>("IDDiaChiNhanHang")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("IDHinhThucTT")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("IDNguoiTao")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("IDUser")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("NgaySua")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("NgayTao")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("NgayThanhToan")
-                        .HasColumnType("datetime2");
-
-                    b.Property<float?>("PhanTramGiamGiaHoaDon")
-                        .HasColumnType("real");
-
-                    b.Property<decimal>("TienGiam")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<decimal?>("TienGiamHoaDon")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<decimal>("TongTienSauGiam")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<decimal>("TongTienTruocGiam")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<string>("TrangThaiDonHang")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("TrangThaiThanhToan")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("IDHoaDon");
-
-                    b.HasIndex("IDDiaChiNhanHang");
-
-                    b.HasIndex("IDHinhThucTT");
-
-                    b.HasIndex("IDNguoiTao");
-
-                    b.HasIndex("IDUser");
-
-                    b.ToTable("HoaDons");
-                });
-
             modelBuilder.Entity("AppData.Models.HoaDonCT", b =>
                 {
                     b.Property<Guid>("IDHoaDonChiTiet")
@@ -454,7 +389,7 @@ namespace AppData.Migrations
                     b.Property<Guid>("IDHoaDon")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IDSanPham")
+                    b.Property<Guid>("IDSanPhamCT")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("NgaySua")
@@ -478,7 +413,7 @@ namespace AppData.Migrations
 
                     b.HasIndex("IDHoaDon");
 
-                    b.HasIndex("IDSanPham");
+                    b.HasIndex("IDSanPhamCT");
 
                     b.ToTable("HoaDonChiTiets");
                 });
@@ -606,7 +541,7 @@ namespace AppData.Migrations
                     b.Property<Guid>("IDGiamGia")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IDSanPham")
+                    b.Property<Guid?>("IDSanPhamCT")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("NgaySua")
@@ -625,7 +560,7 @@ namespace AppData.Migrations
 
                     b.HasIndex("IDGiamGia");
 
-                    b.HasIndex("IDSanPham");
+                    b.HasIndex("IDSanPhamCT");
 
                     b.ToTable("SanPhamGiamGias");
                 });
@@ -653,6 +588,75 @@ namespace AppData.Migrations
                     b.HasKey("IDSize");
 
                     b.ToTable("Sizes");
+                });
+
+            modelBuilder.Entity("HoaDon", b =>
+                {
+                    b.Property<Guid>("IDHoaDon")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("GhiChu")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid?>("IDDiaChiNhanHang")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("IDHinhThucTT")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("IDNguoiTao")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("IDUser")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("NgaySua")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayTao")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayThanhToan")
+                        .HasColumnType("datetime2");
+
+                    b.Property<float?>("PhanTramGiamGiaHoaDon")
+                        .HasColumnType("real");
+
+                    b.Property<decimal>("TienGiam")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<decimal?>("TienGiamHoaDon")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<decimal>("TongTienSauGiam")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<decimal>("TongTienTruocGiam")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<string>("TrangThaiDonHang")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TrangThaiThanhToan")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("IDHoaDon");
+
+                    b.HasIndex("IDDiaChiNhanHang");
+
+                    b.HasIndex("IDHinhThucTT");
+
+                    b.HasIndex("IDNguoiTao");
+
+                    b.HasIndex("IDUser");
+
+                    b.ToTable("HoaDons");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -799,65 +803,32 @@ namespace AppData.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AppData.Models.SanPham", "SanPham")
+                    b.HasOne("AppData.Models.SanPhamCT", "SanPhamCT")
                         .WithMany("GioHangChiTiets")
-                        .HasForeignKey("IDSanPham")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("IDSanPhamCT");
 
                     b.Navigation("GioHang");
 
-                    b.Navigation("SanPham");
-                });
-
-            modelBuilder.Entity("AppData.Models.HoaDon", b =>
-                {
-                    b.HasOne("AppData.Models.DiaChiNhanHang", "DiaChiNhanHang")
-                        .WithMany("HoaDons")
-                        .HasForeignKey("IDDiaChiNhanHang")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("AppData.Models.HinhThucTT", "HinhThucTT")
-                        .WithMany("HoaDons")
-                        .HasForeignKey("IDHinhThucTT")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("AppData.Models.ApplicationUser", "User2")
-                        .WithMany("HoaDonsAsNguoiTao")
-                        .HasForeignKey("IDNguoiTao")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("AppData.Models.ApplicationUser", "User")
-                        .WithMany("HoaDonsAsKhachHang")
-                        .HasForeignKey("IDUser")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("DiaChiNhanHang");
-
-                    b.Navigation("HinhThucTT");
-
-                    b.Navigation("User");
-
-                    b.Navigation("User2");
+                    b.Navigation("SanPhamCT");
                 });
 
             modelBuilder.Entity("AppData.Models.HoaDonCT", b =>
                 {
-                    b.HasOne("AppData.Models.HoaDon", "HoaDon")
+                    b.HasOne("HoaDon", "HoaDon")
                         .WithMany("HoaDonChiTiets")
                         .HasForeignKey("IDHoaDon")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AppData.Models.SanPham", "SanPham")
+                    b.HasOne("AppData.Models.SanPhamCT", "SanPhamCT")
                         .WithMany("HoaDonChiTiets")
-                        .HasForeignKey("IDSanPham")
+                        .HasForeignKey("IDSanPhamCT")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("HoaDon");
 
-                    b.Navigation("SanPham");
+                    b.Navigation("SanPhamCT");
                 });
 
             modelBuilder.Entity("AppData.Models.SanPham", b =>
@@ -914,15 +885,44 @@ namespace AppData.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AppData.Models.SanPham", "SanPham")
+                    b.HasOne("AppData.Models.SanPhamCT", "SanPhamCT")
                         .WithMany("SanPhamGiamGias")
-                        .HasForeignKey("IDSanPham")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("IDSanPhamCT");
 
                     b.Navigation("GiamGia");
 
-                    b.Navigation("SanPham");
+                    b.Navigation("SanPhamCT");
+                });
+
+            modelBuilder.Entity("HoaDon", b =>
+                {
+                    b.HasOne("AppData.Models.DiaChiNhanHang", "DiaChiNhanHang")
+                        .WithMany("HoaDons")
+                        .HasForeignKey("IDDiaChiNhanHang")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("AppData.Models.HinhThucTT", "HinhThucTT")
+                        .WithMany("HoaDons")
+                        .HasForeignKey("IDHinhThucTT")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("AppData.Models.ApplicationUser", "User2")
+                        .WithMany("HoaDonsAsNguoiTao")
+                        .HasForeignKey("IDNguoiTao")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("AppData.Models.ApplicationUser", "User")
+                        .WithMany("HoaDonsAsKhachHang")
+                        .HasForeignKey("IDUser")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("DiaChiNhanHang");
+
+                    b.Navigation("HinhThucTT");
+
+                    b.Navigation("User");
+
+                    b.Navigation("User2");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -1017,11 +1017,6 @@ namespace AppData.Migrations
                     b.Navigation("HoaDons");
                 });
 
-            modelBuilder.Entity("AppData.Models.HoaDon", b =>
-                {
-                    b.Navigation("HoaDonChiTiets");
-                });
-
             modelBuilder.Entity("AppData.Models.MauSac", b =>
                 {
                     b.Navigation("SanPhamChiTiets");
@@ -1031,11 +1026,14 @@ namespace AppData.Migrations
                 {
                     b.Navigation("AnhSanPhams");
 
+                    b.Navigation("SanPhamChiTiets");
+                });
+
+            modelBuilder.Entity("AppData.Models.SanPhamCT", b =>
+                {
                     b.Navigation("GioHangChiTiets");
 
                     b.Navigation("HoaDonChiTiets");
-
-                    b.Navigation("SanPhamChiTiets");
 
                     b.Navigation("SanPhamGiamGias");
                 });
@@ -1043,6 +1041,11 @@ namespace AppData.Migrations
             modelBuilder.Entity("AppData.Models.Size", b =>
                 {
                     b.Navigation("SanPhamChiTiets");
+                });
+
+            modelBuilder.Entity("HoaDon", b =>
+                {
+                    b.Navigation("HoaDonChiTiets");
                 });
 #pragma warning restore 612, 618
         }

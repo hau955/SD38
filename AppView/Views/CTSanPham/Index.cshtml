@@ -1,360 +1,135 @@
 ﻿@model List<AppView.ViewModels.SanPham.SanPhamView>
-@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Danh sách sản phẩm";
+}
 
 <style>
-    .form-wrapper {
-        background: #fffaf0;
-        border-radius: 1rem;
-        padding: 2rem 2.5rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        font-family: 'Segoe UI', sans-serif;
-    }
-
-    h2 {
-        color: #8B0000;
-        font-weight: 600;
-        border-bottom: 2px solid #d4af37;
-        padding-bottom: 0.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .btn-success {
-        background-color: #d4af37;
-        border: none;
-        font-weight: 500;
-        color: white;
-    }
-
-        .btn-success:hover {
-            background-color: #b8941f;
-        }
-
-    .btn-secondary {
-        background-color: #8B0000;
-        border: none;
-        color: white;
-        font-weight: 500;
-    }
-
-        .btn-secondary:hover {
-            background-color: #a52a2a;
-        }
-
-    .card-title {
-        font-weight: 600;
-        color: #8B0000;
-    }
-
-    .card:hover {
-        transform: translateY(-2px);
-        transition: 0.3s ease;
-    }
-
-    .modal-header {
-        background-color: #fffaf0;
-    }
-
-    .modal-content {
-        border-radius: 1rem;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-        font-family: 'Segoe UI', sans-serif;
-    }
-
-    .card-img-top {
-        border-top-left-radius: 1rem;
-        border-top-right-radius: 1rem;
-    }
-
     .product-box {
-        position: relative;
-        background: #fff;
-        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
         overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        transition: transform 0.3s ease;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        padding: 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
     }
 
         .product-box:hover {
             transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .product-box img {
             width: 100%;
-            height: 250px;
+            height: 200px;
             object-fit: cover;
-            object-position: top center;
         }
 
     .product-details {
-        padding: 16px 20px;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
+        padding: 10px;
+        text-align: center;
     }
 
-        .product-details h1 {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #4E4E4E;
+        .product-details h4 {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
 
         .product-details p {
-            font-size: 0.9rem;
-            margin: 5px 0 10px;
-            color: #4E4E4E;
+            color: #666;
+            margin-bottom: 10px;
         }
-
-    .btn-group {
-        margin-top: auto;
-        display: flex;
-        gap: 8px;
-    }
-
-        .btn-group .btn-detail {
-            background-color: #C3A1A0;
-            padding: 10px 16px;
-            flex-grow: 1;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            border: none;
-            color: white;
-            cursor: pointer;
-        }
-
-    #product-detail-modal {
-        display: none;
-        position: fixed;
-        top: 5%;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 700px;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.3);
-        padding: 20px;
-        z-index: 1000;
-    }
-
-        #product-detail-modal .sizes {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, 40px);
-            grid-gap: 6px;
-            margin-bottom: 15px;
-            width: 100%;
-        }
-
-    .size {
-        padding: 8px;
-        border: 1px solid #E0C9CB;
-        font-size: 0.8rem;
-        text-align: center;
-        cursor: pointer;
-        color: #BA7E7E;
-        transition: all .3s ease-in-out;
-    }
-
-        .size:hover, .size.focus {
-            background-color: #BA7E7E;
-            color: #fff;
-        }
-
-    #overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0,0,0,0.5);
-        z-index: 999;
-        display: none;
-    }
-
-    .btn-detail,
-    .btn-add {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease-in-out;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    }
 
     .btn-detail {
-        background-color: #f1f1f1;
-        color: #333;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.3s;
     }
 
         .btn-detail:hover {
-            background-color: #ddd;
-            color: #000;
+            background-color: #45a049;
         }
 
-    .btn-add {
-        background-color: #C3A1A0;
-        color: #fff;
+    .container {
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 0 15px;
     }
 
-        .btn-add:hover {
-            background-color: #a2807e;
-        }
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
 
-    #quantity {
-        width: 100px;
-        display: inline-block;
-        margin-left: 10px;
+    .alert {
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 4px;
+        text-align: center;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert-info {
+        background-color: #cce5ff;
+        color: #004085;
+        border: 1px solid #b8daff;
     }
 </style>
 
-<section class="container mt-5 form-wrapper">
-    <h2 class="text-center">Danh sách sản phẩm</h2>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        @foreach (var sp in Model)
-        {
-            <div class="col">
+<div class="container">
+    <h2 class="text-center mb-4" style="font-size: 2em; font-weight: bold; color: #333;">Danh sách sản phẩm</h2>
+    @if (!string.IsNullOrEmpty(ViewBag.Error))
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+    else if (!string.IsNullOrEmpty(ViewBag.Info))
+    {
+        <div class="alert alert-info">@ViewBag.Info</div>
+    }
+    else if (Model != null && Model.Any())
+    {
+        <div class="product-grid">
+            @foreach (var product in Model)
+            {
+                var hinhAnh = product.DanhSachAnh?.FirstOrDefault(a => a.AnhChinh)?.DuongDanAnh ?? "/images/anh1.jpg";
+                var giaBan = product.ChiTiets?.FirstOrDefault()?.GiaBan ?? 0;
                 <div class="product-box">
-                    <img src="@(sp.HinhAnh?.Split(';').FirstOrDefault() ?? "/images/default.jpg")" alt="Ảnh sản phẩm" />
+                    <img src="@hinhAnh" alt="Product Image" />
                     <div class="product-details">
-                        <h1>@sp.TenSanPham</h1>
-                        <p>@(sp.MoTa ?? "Không có mô tả")</p>
-                        <button class="btn-detail" onclick='showDetail(@Html.Raw(JsonSerializer.Serialize(sp, new JsonSerializerOptions { PropertyNamingPolicy = null })))'>
-                            Xem chi tiết
-                        </button>
+                        <h4>@product.TenSanPham</h4>
+                        <p>
+                            Giá: @giaBan.ToString("N0") VNĐ
+                            @if (product.ChiTiets == null || !product.ChiTiets.Any())
+                            {
+                                <span style="color: red; font-size: 0.8em;"> (Không có giá)</span>
+                            }
+                        </p>
+                        <a asp-controller="SanPhamChiTiet" asp-action="Detail" asp-route-id="@product.IDSanPham" class="btn-detail">Xem chi tiết</a>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
-</section>
-
-<!-- Overlay & Modal -->
-<div id="overlay"></div>
-<div id="product-detail-modal">
-    <button onclick="closeModal()" style="float:right; font-size:1.2rem; border:none; background:none;">✖</button>
-    <h3 id="detail-title"></h3>
-    <img id="detail-img" src="" style="width: 100%; height: 250px; object-fit: contain;" />
-    <p id="detail-description"></p>
-    <div id="detail-sizes"></div>
-    <div id="detail-mau"></div>
-    <div id="detail-coao"></div>
-    <div id="detail-taao"></div>
-    <div class="mt-3">
-        <label for="quantity">Số lượng:</label>
-        <input type="number" id="quantity" class="form-control" min="1" value="1" />
-    </div>
-    <button class="btn-add" onclick="addToCart()">Thêm vào giỏ hàng</button>
-    <p id="login-prompt" style="display:none; color:red;">Vui lòng <a href="/Auth/Auth/Login">đăng nhập</a> hoặc <a href="/Auth/Auth/Register">đăng ký</a>!</p>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="text-center" style="color: #666;">Không có sản phẩm nào.</p>
+    }
 </div>
-
-<script>
-    let selectedProduct = null;
-
-    function showDetail(sp) {
-        selectedProduct = sp;
-        document.getElementById('overlay').style.display = 'block';
-        document.getElementById('product-detail-modal').style.display = 'block';
-
-        document.getElementById('detail-title').innerText = sp.TenSanPham || 'Không có tiêu đề';
-        document.getElementById('detail-img').src = (sp.HinhAnh?.split(';')[0] || '/images/default.jpg');
-        document.getElementById('detail-description').innerText = sp.MoTa || 'Không có mô tả';
-
-        const chiTiets = sp.ChiTiets?.filter(c => c.TrangThai) || [];
-
-        function renderOptions(label, list, key, containerId) {
-            const unique = [...new Set(list.map(x => x[key]).filter(x => !!x))];
-            const container = document.getElementById(containerId);
-            if (unique.length > 0) {
-                container.innerHTML = `<p><strong>${label}</strong></p><div class="sizes">` +
-                    unique.map(val => `<div class="size" data-value="${val}">${val}</div>`).join('') +
-                    `</div>`;
-            } else {
-                container.innerHTML = '';
-            }
-        }
-
-        renderOptions("Chọn size", chiTiets, "Size", "detail-sizes");
-        renderOptions("Chọn màu sắc", chiTiets, "MauSac", "detail-mau");
-        renderOptions("Chọn cổ áo", chiTiets, "CoAo", "detail-coao");
-        renderOptions("Chọn tà áo", chiTiets, "TaAo", "detail-taao");
-    }
-
-    function closeModal() {
-        document.getElementById('overlay').style.display = 'none';
-        document.getElementById('product-detail-modal').style.display = 'none';
-        selectedProduct = null;
-    }
-
-    document.addEventListener('click', function (e) {
-        if (e.target.classList.contains('size')) {
-            const parent = e.target.closest('.sizes');
-            parent.querySelectorAll('.size').forEach(el => el.classList.remove('focus'));
-            e.target.classList.add('focus');
-        }
-    });
-
-    async function addToCart() {
-        if (!selectedProduct) return;
-
-        const selectedSize = document.querySelector('#detail-sizes .focus')?.dataset.value;
-        const selectedMau = document.querySelector('#detail-mau .focus')?.dataset.value;
-        const selectedCoAo = document.querySelector('#detail-coao .focus')?.dataset.value;
-        const selectedTaAo = document.querySelector('#detail-taao .focus')?.dataset.value;
-        const quantity = parseInt(document.getElementById('quantity').value) || 1;
-
-        if (!selectedSize && !selectedMau && !selectedCoAo && !selectedTaAo) {
-            alert('Vui lòng chọn ít nhất một tùy chọn!');
-            return;
-        }
-
-        const chiTiets = selectedProduct.ChiTiets?.filter(c => c.TrangThai) || [];
-        const selectedChiTiet = chiTiets.find(c =>
-            (!selectedSize || c.Size === selectedSize) &&
-            (!selectedMau || c.MauSac === selectedMau) &&
-            (!selectedCoAo || c.CoAo === selectedCoAo) &&
-            (!selectedTaAo || c.TaAo === selectedTaAo)
-        );
-
-        if (!selectedChiTiet || quantity <= 0 || quantity > selectedChiTiet.SoLuongTonKho) {
-            alert('Sản phẩm không hợp lệ hoặc số lượng vượt quá tồn kho!');
-            return;
-        }
-
-        const token = '@ViewBag.Token' || '';
-        if (!token) {
-            document.getElementById('login-prompt').style.display = 'block';
-            return;
-        }
-
-        try {
-            const response = await fetch('https://localhost:7221/api/GioHang/add', { // Thay 7221 bằng port thực tế
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ SanPhamId: selectedProduct.IDSanPham, SoLuong: quantity })
-            });
-
-            const result = await response.json();
-            console.log('API Response:', result);
-            if (response.ok) {
-                // Chuyển hướng đến trang giỏ hàng
-                window.location.href = '/GioHang';
-            } else {
-                alert(`Thêm vào giỏ hàng thất bại: ${result.message || `Mã lỗi: ${response.status}`}`);
-            }
-        } catch (error) {
-            console.error('Lỗi API:', error);
-            alert('Lỗi kết nối. Vui lòng thử lại!');
-        }
-    }
-</script>

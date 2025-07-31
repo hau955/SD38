@@ -8,18 +8,20 @@ using PagedList;
 using System.Net.Http;
 using System.Text.Json;
 using AppData.Models;
+using static System.Net.WebRequestMethods;
 
 namespace AppView.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class SanPhamController : Controller
     {
+        private readonly HttpClient _httpClient;
         private readonly ISanPhamRepo _repo;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public SanPhamController(IHttpClientFactory httpClientFactory, ISanPhamRepo repo)
+        public SanPhamController(IHttpClientFactory httpClientFactory, ISanPhamRepo repo, HttpClient httpClient)
         {
-            _httpClientFactory = httpClientFactory; _repo = repo;
+            _httpClientFactory = httpClientFactory; _repo = repo; _httpClient = httpClient;
         }
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -142,6 +144,34 @@ namespace AppView.Areas.Admin.Controllers
             TempData["Error"] = "Cập nhật thất bại!";
             model.DanhMucList = await LoadDanhMucList(); // load lại danh sách
             return View(model);
+        }
+        [HttpPost]
+        public async Task<IActionResult> SetAsMainImage(Guid idAnh, Guid idSanPham)
+        {
+            var response = await _httpClient.PutAsync($"https://localhost:7221/api/SanPham/sanpham/anh/{idAnh}/chinh", null);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // Xử lý lỗi nếu cần
+                return StatusCode((int)response.StatusCode, "Đặt ảnh chính thất bại");
+            }
+
+            return RedirectToAction("Update", new { id = idSanPham });
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteImage(Guid idAnh, Guid idSanPham)
+        {
+            var response = await _httpClient.DeleteAsync($"https://localhost:7221/api/SanPham/sanpham/anh/{idAnh}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // Xử lý lỗi nếu cần
+                return StatusCode((int)response.StatusCode, "Xóa ảnh thất bại");
+            }
+
+            return RedirectToAction("Update", new { id = idSanPham });
         }
 
     }

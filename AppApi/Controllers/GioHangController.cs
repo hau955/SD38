@@ -1,4 +1,5 @@
-﻿using AppApi.Service;
+﻿using AppApi.IService;
+using AppApi.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,81 +8,85 @@ namespace AppApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class GioHangController : ControllerBase
     {
-        private readonly GioHangService _gioHangService;
+        private readonly IGioHangService _gioHangService;
 
-        public GioHangController(GioHangService gioHangService)
+        public GioHangController(IGioHangService gioHangService)
         {
-            _gioHangService = gioHangService ?? throw new ArgumentNullException(nameof(gioHangService));
+            _gioHangService = gioHangService;
         }
 
-        [HttpPost("add")]
-        public async Task<IActionResult> AddToCart([FromBody] AddToCartDto dto)
+        [HttpGet("lay-gio-hang/{idNguoiDung}")]
+        public async Task<IActionResult> LayDanhSachGioHang(Guid idNguoiDung)
         {
-            try
+            var gioHangChiTiets = await _gioHangService.LayDanhSachGioHang(idNguoiDung);
+            var result = gioHangChiTiets.Select(ct => new
             {
-                await _gioHangService.AddToGioHangAsync(dto.SanPhamId, dto.SoLuong);
-                return Ok(new { message = "Thêm vào giỏ hàng thành công" });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+                ct.IDGioHangChiTiet,
+                ct.IDGioHang,
+                ct.IDSanPhamCT,
+                ct.SoLuong,
+                ct.DonGia,
+                ct.TrangThai,
+                SanPhamCT = new
+                {
+                    ct.SanPhamCT.IDSanPhamCT,
+                    ct.SanPhamCT.IDSanPham, 
+                    ct.SanPhamCT.SoLuongTonKho,
+                    ct.SanPhamCT.GiaBan,
+                    SanPham = new { ct.SanPhamCT.SanPham?.TenSanPham } // Sẽ null do [JsonIgnore]
+                }
+            }).ToList();
+            return Ok(new { message = "Lấy giỏ hàng thành công", data = result });
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetCart()
-        {
-            var items = await _gioHangService.GetGioHangChiTietsAsync();
-            return Ok(items);
-        }
-
-        [HttpPost("update")]
-        public async Task<IActionResult> UpdateCart([FromBody] UpdateCartDto dto)
-        {
-            try
-            {
-                await _gioHangService.UpdateGioHangAsync(dto.GioHangCTId, dto.SoLuong);
-                return Ok(new { message = "Cập nhật giỏ hàng thành công" });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [HttpPost("remove")]
-        public async Task<IActionResult> RemoveFromCart([FromBody] RemoveCartDto dto)
+        [HttpPost("them")]
+        public async Task<IActionResult> ThemVaoGioHang([FromBody] GioHangThemModel model)
         {
             try
             {
-                await _gioHangService.RemoveFromGioHangAsync(dto.GioHangCTId);
-                return Ok(new { message = "Xóa sản phẩm thành công" });
+                if (model == null || model.idSanPhamCT == Guid.Empty || model.idNguoiDung == Guid.Empty || model.soLuong <= 0)
+                {
+                    return BadRequest(new { message = "Dữ liệu không hợp lệ" });
+                }
+                var result = await _gioHangService.ThemVaoGioHang(model.idSanPhamCT, model.idNguoiDung, model.soLuong);
+                return Ok(new { message = "Thêm vào giỏ hàng thành công", data = result });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                Console.WriteLine($"Error in Them: {ex.Message}");
+                return StatusCode(500, new { message = "Lỗi server. Vui lòng thử lại.", detail = ex.Message });
             }
         }
-    }
 
-    public class AddToCartDto
-    {
-        public Guid SanPhamId { get; set; }
-        public int SoLuong { get; set; }
-    }
+        [HttpDelete("xoa/{idGioHangChiTiet}")]
+        public async Task<IActionResult> XoaKhoiGioHang(Guid idGioHangChiTiet)
+        {
+            var result = await _gioHangService.XoaKhoiGioHang(idGioHangChiTiet);
+            return Ok(result);
+        }
 
-    public class UpdateCartDto
-    {
-        public Guid GioHangCTId { get; set; }
-        public int SoLuong { get; set; }
-    }
+        [HttpPut("cap-nhat-so-luong")]
+        public async Task<IActionResult> CapNhatSoLuong([FromBody] CapNhatSoLuongRequest request)
+        {
+            var result = await _gioHangService.CapNhatSoLuong(request.idGioHangChiTiet, request.soLuong);
+            return Ok(result);
+        }
 
-    public class RemoveCartDto
+        // Model để ánh xạ body JSON
+      
+    }
+    public class CapNhatSoLuongRequest
     {
-        public Guid GioHangCTId { get; set; }
+        public Guid idGioHangChiTiet { get; set; }
+        public int soLuong { get; set; }
+    }
+    public class GioHangThemModel
+    {
+        public Guid idSanPhamCT { get; set; }
+        public Guid idNguoiDung { get; set; }
+        public int soLuong { get; set; }
     }
 }
 

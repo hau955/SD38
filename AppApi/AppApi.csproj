@@ -1,26 +1,67 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+		<!-- Thêm các property sau để vô hiệu hóa tính năng nén tài nguyên tĩnh -->
+		<StaticWebAssetPrecompressionEnabled>false</StaticWebAssetPrecompressionEnabled>
+		<EnableCompressionInStaticWebAssets>false</EnableCompressionInStaticWebAssets>
+		<DiscoverPrecompressedAssetsSkipDuplicateItems>true</DiscoverPrecompressedAssetsSkipDuplicateItems>
 
-  <ItemGroup>
-    <PackageReference Include="MailKit" Version="4.13.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.17" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="8.0.16" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.16" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.16">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
-  </ItemGroup>
+		<!-- Thêm property mới để kiểm soát module state web assets -->
+		<DisableModuleStateWebAssets>true</DisableModuleStateWebAssets>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\AppData\AppData.csproj" />
-  </ItemGroup>
+	<!-- Thêm target tùy chỉnh để xử lý lỗi -->
+	<Target Name="DisablePrecompressedAssets" BeforeTargets="Build">
+		<PropertyGroup>
+			<DisablePrecompressedAssetsDiscovery>true</DisablePrecompressedAssetsDiscovery>
+		</PropertyGroup>
+	</Target>
+	<Target Name="ResolveJoinitializerModuleStateWebAssets" BeforeTargets="Build">
+		<PropertyGroup>
+			<_ResolveJoinitializerModuleStateWebAssetsCachePath>$(IntermediateOutputPath)rjimma.cache</_ResolveJoinitializerModuleStateWebAssetsCachePath>
+		</PropertyGroup>
 
+		<ItemGroup>
+			<_3ModuleCandidates Remove="@(_3ModuleCandidates)" />
+			<_3ModuleCandidates Include="@(StateWebAsset)" Condition="'%(SourceType)' == 'Discovered'" />
+		</ItemGroup>
+	</Target>
+
+	<!-- Target để xử lý duplicate assets -->
+	<Target Name="RemoveDuplicateWebAssets" BeforeTargets="ComputeStaticWebAssets">
+		<ItemGroup>
+			<FilteredStateWebAsset Include="@(StateWebAsset)" />
+			<StateWebAsset Remove="@(StateWebAsset)" />
+
+			<!-- Loại bỏ các item trùng lặp dựa trên Identity -->
+			<StateWebAsset Include="@(FilteredStateWebAsset->Distinct())" />
+		</ItemGroup>
+	</Target>
+	<ItemGroup>
+		<PackageReference Include="MailKit" Version="4.13.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.17" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="8.0.16" />
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.16" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.16">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\AppData\AppData.csproj" />
+	</ItemGroup>
+
+	<!-- Thêm phần này để xử lý tài nguyên tĩnh -->
+	<ItemGroup>
+		<Content Update="wwwroot\**">
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</Content>
+	</ItemGroup>
 </Project>

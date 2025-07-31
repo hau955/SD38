@@ -11,7 +11,7 @@ namespace AppData.Models
 
         [ForeignKey("SanPham")]
         public Guid IDSanPham { get; set; }
-        [JsonIgnore]
+        //[JsonIgnore]
         public virtual SanPham? SanPham { get; set; }
 
         [ForeignKey("MauSac")]
@@ -37,5 +37,13 @@ namespace AppData.Models
         public DateTime? NgayTao { get; set; } 
         public DateTime? NgaySua { get; set; } 
         public bool TrangThai { get; set; }
+        [JsonIgnore]
+        // 1 sản phẩm có thể có nhiều record giảm giá khác nhau (theo thời gian hoặc sự kiện)
+        public virtual ICollection<SanPhamGG> SanPhamGiamGias { get; set; } = new List<SanPhamGG>();
+        [JsonIgnore]
+        // 1 sản phẩm có thể xuất hiện nhiều lần trong hóa đơn chi tiết
+        public virtual ICollection<HoaDonCT> HoaDonChiTiets { get; set; } = new List<HoaDonCT>();
+        [JsonIgnore]
+        public virtual ICollection<GioHangCT> GioHangChiTiets { get; set; } = new List<GioHangCT>();
     }
 }

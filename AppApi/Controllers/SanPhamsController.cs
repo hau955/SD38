@@ -1,6 +1,6 @@
 ﻿using AppApi.IService;
 using AppApi.ViewModels.SanPham;
-using AppView.Areas.Admin.ViewModels;
+using ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,9 +18,11 @@ namespace AppApi.Controllers
     public class SanPhamsController : ControllerBase
     {
         private readonly ISanPhamService _sanPhamService;
-        public SanPhamsController(ISanPhamService sanPhamService)
+        private readonly ApplicationDbContext _context;
+        public SanPhamsController(ISanPhamService sanPhamService, ApplicationDbContext context)
         {
             _sanPhamService = sanPhamService;
+            _context = context;
         }
 
         // GET: api/SanPhams
@@ -107,7 +109,37 @@ namespace AppApi.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+        [HttpDelete("sanpham/anh/{id}")]
+        public async Task<IActionResult> XoaAnh(Guid id)
+        {
+            var anh = await _context.AnhSanPham.FindAsync(id);
+            if (anh == null) return NotFound();
 
-       
+            _context.AnhSanPham.Remove(anh);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+        [HttpPut("sanpham/anh/{id}/chinh")]
+        public async Task<IActionResult> DatAnhChinh(Guid id)
+        {
+            var anh = await _context.AnhSanPham.FindAsync(id);
+            if (anh == null) return NotFound();
+
+            var allAnh = _context.AnhSanPham
+                .Where(a => a.IDSanPham == anh.IDSanPham);
+
+            foreach (var a in allAnh)
+            {
+                a.AnhChinh = false;
+            }
+
+            anh.AnhChinh = true;
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+
     }
 }

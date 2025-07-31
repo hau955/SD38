@@ -12,9 +12,9 @@ namespace AppData.Models
 
         // FK - sản phẩm phải thuộc phân loại  public virtual PhanLoai PhanLoai { get; set; }
 
-        [Required]
+
         [MaxLength(255)]
-        public string TenSanPham { get; set; }
+        public string TenSanPham { get; set; } = string.Empty;
 
         public bool? GioiTinh { get; set; }  // Ví dụ: true=Nam, false=Nữ, null=unisex
 
@@ -40,14 +40,9 @@ namespace AppData.Models
         public virtual ICollection<SanPhamCT> SanPhamChiTiets { get; set; } = new List<SanPhamCT>();
         [JsonIgnore]
         public virtual ICollection<AnhSanPham> AnhSanPhams { get; set; } = new List<AnhSanPham>();
-        [JsonIgnore]
-        // 1 sản phẩm có thể có nhiều record giảm giá khác nhau (theo thời gian hoặc sự kiện)
-        public virtual ICollection<SanPhamGG> SanPhamGiamGias { get; set; } = new List<SanPhamGG>();
-        [JsonIgnore]
-        // 1 sản phẩm có thể xuất hiện nhiều lần trong hóa đơn chi tiết
-        public virtual ICollection<HoaDonCT> HoaDonChiTiets { get; set; } = new List<HoaDonCT>();
-        [JsonIgnore] 
-        public virtual ICollection<GioHangCT> GioHangChiTiets { get; set; } = new List<GioHangCT>();
+       
+       
+        
         public Guid DanhMucId { get; set; }  // Khóa ngoại đến DanhMuc
 
         public DanhMuc DanhMuc { get; set; } = null!;

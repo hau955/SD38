@@ -12,8 +12,9 @@ namespace AppApi.ViewModels.SanPham
         public bool GioiTinh { get; set; } 
         public bool TrangThai { get; set; } = true; // Mặc định là true (còn hàng)
         public DateTime NgayTao { get; set; } 
-        public DateTime NgaySua { get; set; } 
-        public IFormFile? ImageFile { get; set; }
-        
+        public DateTime NgaySua { get; set; }
+        public List<IFormFile>? ImageFiles { get; set; }  // Danh sách ảnh
+
+
     }
 }
