@@ -11,7 +11,7 @@ namespace AppData.Models
 
         [ForeignKey("SanPham")]
         public Guid IDSanPham { get; set; }
-        [JsonIgnore]
+        //[JsonIgnore]
         public virtual SanPham? SanPham { get; set; }
 
         [ForeignKey("MauSac")]

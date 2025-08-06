@@ -93,11 +93,15 @@ namespace AppApi.Service
         public async Task<SanPhamView?> GetByID(Guid id)
         {
             return await _context.SanPhams
-               // .Include(s => s.SanPhamGiamGias)
                 .Include(s => s.SanPhamChiTiets)
+                .ThenInclude(ct => ct.MauSac)
+                .Include(s => s.SanPhamChiTiets)
+                .ThenInclude(ct => ct.SizeAo)
+                .Include(s => s.SanPhamChiTiets)
+                .ThenInclude(ct => ct.ChatLieu)
                 .Include(s => s.AnhSanPhams)
                 .Where(sp => sp.IDSanPham == id)
-                .Select(sp=> new SanPhamView
+                .Select(sp => new SanPhamView
                 {
                     IDSanPham = sp.IDSanPham,
                     TenSanPham = sp.TenSanPham,
@@ -117,7 +121,7 @@ namespace AppApi.Service
                     ChiTiets = sp.SanPhamChiTiets.Select(ct => new SanPhamCTViewModel
                     {
                         IDSanPhamCT = ct.IDSanPhamCT,
-                        IDSanPham = ct.IDSanPham, // Đảm bảo không bị null
+                        IDSanPham = ct.IDSanPham, // Đảm bảo không null
                         TenSanPham = sp.TenSanPham,
                         MoTa = sp.MoTa,
                         TrongLuong = sp.TrongLuong,
@@ -126,11 +130,11 @@ namespace AppApi.Service
                         GiaBan = ct.GiaBan,
                         SoLuongTonKho = ct.SoLuongTonKho,
                         IdMauSac = ct.IDMauSac,
-                        MauSac = ct.MauSac != null ? ct.MauSac.TenMau : null,
+                        MauSac = ct.MauSac != null ? ct.MauSac.TenMau : "Không xác định", // Xử lý null với giá trị mặc định
                         IdSize = ct.IDSize,
-                        Size = ct.SizeAo != null ? ct.SizeAo.SoSize : null,
+                        Size = ct.SizeAo != null ? ct.SizeAo.SoSize : "Không xác định", // Xử lý null với giá trị mặc định
                         IDChatLieu = ct.IdChatLieu,
-                        ChatLieu = ct.ChatLieu != null ? ct.ChatLieu.TenChatLieu : null
+                        ChatLieu = ct.ChatLieu != null ? ct.ChatLieu.TenChatLieu : "Không xác định" // Xử lý null với giá trị mặc định
                     }).ToList()
                 }).FirstOrDefaultAsync();
         }

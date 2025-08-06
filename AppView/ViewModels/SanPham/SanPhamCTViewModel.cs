@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
-namespace AppView.ViewModels
+namespace AppView.ViewModels.SanPham
 {
     public class SanPhamCTViewModel
     {
@@ -36,7 +36,7 @@ namespace AppView.ViewModels
 
 
         [Required]
-        public decimal GiaBan { get; set; }
+        public decimal? GiaBan { get; set; }
 
         [Required]
         public int SoLuongTonKho { get; set; }

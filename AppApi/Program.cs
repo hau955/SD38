@@ -6,6 +6,7 @@ using AppApi.IService;
 using AppApi.Service;
 using AppData.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -16,6 +17,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 
 // Configure logging
@@ -127,6 +130,7 @@ builder.Services.AddScoped<IMauSacService, MauSacService>();
 builder.Services.AddScoped<ISizeService, SizeService>();
 builder.Services.AddScoped<IChatLieuService, ChatLieuService>();
 builder.Services.AddScoped<IBanHangService, BanHangService>();
+builder.Services.AddScoped<IGioHangService, GioHangService>();
 builder.Services.AddScoped<IDanhMucSPService, DanhMucSPService>();
 builder.Services.AddScoped<ISanPhamCTService, SanPhamCTService>();
 builder.Services.AddScoped<IProfileServive, ProfileService>();
@@ -136,6 +140,11 @@ builder.Services.AddScoped<IEmployeeManagementService, EmployeeManagementService
 builder.Services.AddScoped<IShippingAddressService, ShippingAddressService>();
 // Configure CORS
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+if (allowedOrigins == null || allowedOrigins.Length == 0)
+{
+    Console.WriteLine("Warning: AllowedOrigins is empty or not configured. Using default https://localhost:7074 for development.");
+    allowedOrigins = new[] { "https://localhost:7074" }; // Giá trị mặc định
+}
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
@@ -179,6 +188,25 @@ app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Thêm middleware lỗi tùy chỉnh
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        context.Response.ContentType = "application/json";
+        var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+        var exception = exceptionHandlerPathFeature?.Error;
+        var result = new
+        {
+            message = "Lỗi server. Vui lòng thử lại.",
+            detail = exception?.Message
+        };
+        await context.Response.WriteAsJsonAsync(result);
+    });
+});
+
 app.MapControllers();
 
 app.Run();

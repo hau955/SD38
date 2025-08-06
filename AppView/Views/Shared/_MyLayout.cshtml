@@ -211,7 +211,9 @@
     </div>
 
     <!-- Login Modal -->
-    @await Html.PartialAsync("_LoginPartial", new LoginViewModel())
+    @{
+        Html.RenderPartial("_LoginPartial");
+    }
 
     <!-- Register Modal -->
     @{
