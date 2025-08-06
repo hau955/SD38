@@ -9,6 +9,7 @@ namespace AppApi.Features.ThongKe.Services
         Task<ProductReportDto> GetProductReportAsync(TimeRangeRequestDto request);
         Task<CustomerReportDto> GetCustomerReportAsync(TimeRangeRequestDto request);
         Task<PromotionReportDto> GetPromotionReportAsync(TimeRangeRequestDto request);
+        Task<EmployeeReportDto> GetEmployeeReportAsync(TimeRangeRequestDto request);
         Task<List<QuickMetricDto>> GetQuickMetricsAsync(TimeRangeRequestDto request);
     }
 }

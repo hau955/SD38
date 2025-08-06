@@ -204,7 +204,114 @@ namespace AppApi.Features.ThongKe.Services
                 InventoryStatus = inventoryStatus
             };
         }
+        public async Task<EmployeeReportDto> GetEmployeeReportAsync(TimeRangeRequestDto request)
+        {
+            // Lấy role Employee
+            var employeeRole = await _context.Roles
+                .FirstOrDefaultAsync(r => r.Name == "Employee");
 
+            if (employeeRole == null)
+            {
+                return new EmployeeReportDto(); // Trả về empty report nếu không có role Employee
+            }
+
+            // Lấy danh sách nhân viên (users có role Employee)
+            var employeeUserIds = await _context.UserRoles
+                .Where(ur => ur.RoleId == employeeRole.Id)
+                .Select(ur => ur.UserId)
+                .ToListAsync();
+
+            // Lấy thông tin nhân viên và hóa đơn họ xử lý
+            var employees = await _context.Users
+                .Where(u => employeeUserIds.Contains(u.Id))
+                .Include(u => u.HoaDonsAsNguoiTao)
+                .ToListAsync();
+
+            // Tính toán thống kê
+            var topPerformers = employees
+                .Select(u => new EmployeePerformanceDto
+                {
+                    EmployeeId = u.Id.GetHashCode(),
+                    EmployeeName = u.HoTen,
+                    OrdersProcessed = u.HoaDonsAsNguoiTao?
+                        .Count(h => h.NgayTao >= request.StartDate &&
+                                  h.NgayTao <= request.EndDate) ?? 0,
+                    RevenueGenerated = u.HoaDonsAsNguoiTao?
+                        .Where(h => h.NgayTao >= request.StartDate &&
+                                   h.NgayTao <= request.EndDate &&
+                                   h.TrangThaiThanhToan == "Đã thanh toán")
+                        .Sum(h => h.TongTienSauGiam) ?? 0,
+                    AverageOrderValue = u.HoaDonsAsNguoiTao?
+                        .Where(h => h.NgayTao >= request.StartDate &&
+                                   h.NgayTao <= request.EndDate &&
+                                   h.TrangThaiThanhToan == "Đã thanh toán")
+                        .Average(h => h.TongTienSauGiam) ?? 0,
+                    PerformanceRating = CalculatePerformance(u),
+                    HireDate = GetEmployeeHireDate(u) // Sử dụng ngày hóa đơn đầu tiên làm ngày vào làm
+                })
+                .OrderByDescending(e => e.RevenueGenerated)
+                .Take(10)
+                .ToList();
+
+            // Thống kê hoạt động (không dùng NgayTao)
+            var employeeActivities = new List<EmployeeActivityDto>();
+
+            // Tổng hợp
+            var totalEmployees = employees.Count;
+            var activeEmployees = employees.Count(u => u.TrangThai);
+
+            return new EmployeeReportDto
+            {
+                TopPerformers = topPerformers,
+                EmployeeActivities = employeeActivities,
+                Summary = new EmployeeSummaryDto
+                {
+                    TotalEmployees = totalEmployees,
+                    ActiveEmployees = activeEmployees,
+                    OnLeaveEmployees = 0,
+                    TurnoverRate = 0,
+                    AverageTenure = CalculateAverageTenure(employees),
+                    EmployeesByDepartment = new Dictionary<string, int> { { "Tổng", totalEmployees } }
+                }
+            };
+        }
+
+        // Hàm xác định ngày vào làm dựa trên hóa đơn đầu tiên
+        private DateTime GetEmployeeHireDate(ApplicationUser user)
+        {
+            return user.HoaDonsAsNguoiTao?
+                .OrderBy(h => h.NgayTao)
+                .Select(h => h.NgayTao)
+                .FirstOrDefault()?.Date ?? DateTime.Now.Date;
+        }
+
+        // Hàm tính điểm hiệu suất
+        private double CalculatePerformance(ApplicationUser user)
+        {
+            var orderCount = user.HoaDonsAsNguoiTao?
+                .Count(h => h.TrangThaiThanhToan == "Đã thanh toán") ?? 0;
+            var revenue = user.HoaDonsAsNguoiTao?
+                .Where(h => h.TrangThaiThanhToan == "Đã thanh toán")
+                .Sum(h => h.TongTienSauGiam) ?? 0;
+
+            // Điểm từ 1-5
+            var score = 1.0 + (orderCount * 0.1) + (double)(revenue / 10000000);
+            return Math.Min(Math.Round(score, 1), 5.0);
+        }
+
+        // Hàm tính thâm niên trung bình
+        private decimal CalculateAverageTenure(List<ApplicationUser> employees)
+        {
+            if (!employees.Any()) return 0;
+
+            var totalDays = employees.Sum(u =>
+            {
+                var hireDate = GetEmployeeHireDate(u);
+                return (DateTime.Now - hireDate).TotalDays;
+            });
+
+            return (decimal)(totalDays / employees.Count / 365); // Trả về số năm
+        }
         public async Task<CustomerReportDto> GetCustomerReportAsync(TimeRangeRequestDto request)
         {
             var customerSegments = await _context.Users

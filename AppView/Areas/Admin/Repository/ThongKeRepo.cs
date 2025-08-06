@@ -100,7 +100,27 @@ namespace AppView.Areas.Admin.Repository
                 return new CustomerReportViewModel();
             }
         }
+        public async Task<EmployeeReportViewModel> GetEmployeeReportAsync(TimeRangeRequestViewModel request)
+        {
+            try
+            {
+                var json = JsonConvert.SerializeObject(request);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
 
+                var response = await _httpClient.PostAsync($"{_baseApiUrl}/thongke/employees", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var apiResponse = JsonConvert.DeserializeObject<ApiResponse<EmployeeReportViewModel>>(responseContent);
+                    return apiResponse?.Data ?? new EmployeeReportViewModel();
+                }
+                return new EmployeeReportViewModel();
+            }
+            catch
+            {
+                return new EmployeeReportViewModel();
+            }
+        }
         public async Task<PromotionReportViewModel> GetPromotionReportAsync(TimeRangeRequestViewModel request)
         {
             try

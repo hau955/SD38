@@ -1,4 +1,6 @@
-﻿using AppApi.Features.Services;
+﻿using AppApi.Features.OrderManagerment.Services;
+using AppApi.Features.Services;
+using AppApi.Features.ShippingAddress.Service;
 using AppApi.Features.ThongKe.Services;
 using AppApi.IService;
 using AppApi.Service;
@@ -128,9 +130,10 @@ builder.Services.AddScoped<IBanHangService, BanHangService>();
 builder.Services.AddScoped<IDanhMucSPService, DanhMucSPService>();
 builder.Services.AddScoped<ISanPhamCTService, SanPhamCTService>();
 builder.Services.AddScoped<IProfileServive, ProfileService>();
+builder.Services.AddScoped<IOrderManagementService, OrderManagementService>();
 builder.Services.AddScoped<IThongKeService, ThongKeService>();
 builder.Services.AddScoped<IEmployeeManagementService, EmployeeManagementService>();
-
+builder.Services.AddScoped<IShippingAddressService, ShippingAddressService>();
 // Configure CORS
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 builder.Services.AddCors(options =>

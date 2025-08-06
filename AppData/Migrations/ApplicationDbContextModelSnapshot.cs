@@ -237,6 +237,9 @@ namespace AppData.Migrations
                     b.Property<Guid>("IDUser")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("NgaySua")
                         .HasColumnType("datetime2");
 

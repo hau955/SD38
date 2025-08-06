@@ -2,6 +2,8 @@
 using AppView.Areas.Admin.IRepo;
 using AppView.Areas.Admin.Repository;
 using AppView.Areas.Auth.Repository;
+using AppView.Areas.OrderManagerment.Repositories;
+using AppView.Helper;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +17,6 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// Cho phép sử dụng các Razor Pages của Identity (nếu bạn dùng Identity UI)
 builder.Services.AddRazorPages();
 var isDev = builder.Environment.IsDevelopment();
 var apiBaseUrl = isDev
@@ -27,7 +28,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 builder.Logging.ClearProviders();
-builder.Logging.AddConsole(); // 👈 Ghi log ra terminal/console
+builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Information);
 builder.Services.AddHttpClient<IAuthRepository, AuthRepository>(client =>
 {
@@ -42,9 +43,15 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
 {
     opt.TokenLifespan = TimeSpan.FromDays(2); // 24 giờ
 });
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Auth/Auth/Login"; // 👈 Chính xác theo route của bạn
+    options.AccessDeniedPath = "/Auth/Auth/AccessDenied"; // Nếu có trang từ chối truy cập
+});
 
 // Cấu hình HttpClient cho từng repo gọi API
-
+// Thêm vào ConfigureServices/AddServices
+builder.Services.AddAutoMapper(typeof(OrderMappingProfile).Assembly);
 builder.Services.AddScoped<IMauSacRepo, MauSacRepo>();
 builder.Services.AddScoped<ISizeRepo, SizeRepo>();
 builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
@@ -55,6 +62,16 @@ builder.Services.AddScoped<IThongKeRepo, ThongKeRepo>();
 builder.Services.AddScoped<IChatLieuRepo, ChatLieuRepo>();
 builder.Services.AddHttpClient<IDanhMucRePo, DanhMucRepo>();
 builder.Services.AddScoped<IProfileRepo, ProfileRepo>();
+builder.Services.AddHttpClient<IOrderManagementRepo, OrderManagementRepo>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+});
+
 builder.Services.AddHttpClient<IEmployeeManagementRepo, EmployeeManagementRepo>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
@@ -107,7 +124,20 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseSession();
-
+app.Use(async (context, next) =>
+{
+    // Đảm bảo API luôn trả về JSON
+    if (context.Request.Path.StartsWithSegments("/OrderManagerment") &&
+        context.Request.Headers["Accept"].Contains("application/json"))
+    {
+        context.Response.OnStarting(() =>
+        {
+            context.Response.ContentType = "application/json";
+            return Task.CompletedTask;
+        });
+    }
+    await next();
+});
 app.UseRouting();
 app.UseCors("AllowAll");
 app.UseAuthentication();

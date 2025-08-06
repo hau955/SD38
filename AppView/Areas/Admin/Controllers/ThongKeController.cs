@@ -132,7 +132,32 @@ namespace AppView.Areas.Admin.Controllers
             ViewBag.Request = request;
             return View(report);
         }
+        [HttpGet]
+        [Route("Employees")]
+        public async Task<IActionResult> Employees()
+        {
+            var request = new TimeRangeRequestViewModel
+            {
+                StartDate = DateTime.Now.AddDays(-30),
+                EndDate = DateTime.Now,
+                GroupType = TimeGroupTypeViewModel.Day
+            };
 
+            var report = await _thongKeRepo.GetEmployeeReportAsync(request);
+            ViewBag.Title = "Báo cáo nhân viên";
+            ViewBag.Request = request;
+            return View(report);
+        }
+
+        [HttpPost]
+        [Route("Employees")]
+        public async Task<IActionResult> Employees(TimeRangeRequestViewModel request)
+        {
+            var report = await _thongKeRepo.GetEmployeeReportAsync(request);
+            ViewBag.Title = "Báo cáo nhân viên";
+            ViewBag.Request = request;
+            return View(report);
+        }
         [HttpPost]
         [Route("QuickMetrics")]
         public async Task<IActionResult> GetQuickMetrics([FromBody] TimeRangeRequestViewModel request)
