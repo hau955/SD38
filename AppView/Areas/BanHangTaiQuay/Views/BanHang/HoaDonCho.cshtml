@@ -6,47 +6,107 @@
     ViewBag.HideHoaDonCho = true;
 }
 
-<!-- THÔNG BÁO -->
+<!-- THÔNG BÁO CẢI THIỆN -->
 @if (TempData["Error"] != null)
 {
-    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
-        ⚠️ @TempData["Error"]
+    <div class="alert alert-danger alert-dismissible fade show mt-3 modern-alert" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <span>@TempData["Error"]</span>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
-        ✅ @TempData["Success"]
+    <div class="alert alert-success alert-dismissible fade show mt-3 modern-alert" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <span>@TempData["Success"]</span>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
 
-<!-- ✅ Đã chuyển sang container-fluid và thêm max-width -->
-<div class="container-fluid px-5 mt-5" style="max-width: 1400px; margin: auto;">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-gradient">
-            <i class="bi bi-receipt-cutoff me-2"></i>Hóa đơn chờ thanh toán
-        </h2>
-        <form asp-area="BanHangTaiQuay" asp-controller="BanHang" asp-action="SanPham" method="get">
-            <button type="submit" class="btn btn-warning">Tạo hóa đơn mới</button>
-        </form>
+<!-- CONTAINER CHÍNH -->
+<div class="container-fluid px-4 mt-4" style="width: 100%; margin: auto;">
 
+    <!-- HEADER SECTION -->
+    <div class="header-section mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="header-title">
+                <h2 class="fw-bold text-gradient mb-1">
+                    <i class="bi bi-receipt-cutoff me-2"></i>Hóa đơn chờ thanh toán
+                </h2>
+                <p class="text-muted mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Tổng <span class="fw-semibold text-primary">@Model.Count()</span> hóa đơn đang chờ xử lý
+                </p>
+            </div>
 
+            <div class="header-actions">
+                <form asp-area="BanHangTaiQuay" asp-controller="BanHang" asp-action="SanPham" method="get">
+                    <button type="submit" class="btn btn-create-new">
+                        <i class="bi bi-plus-circle me-2"></i>Tạo hóa đơn mới
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 
-    <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body p-4">
+    <!-- MAIN CONTENT CARD -->
+    <div class="main-card shadow-lg border-0">
+        <div class="card-header-custom">
+            <div class="d-flex align-items-center justify-content-between">
+                <h5 class="mb-0 fw-semibold text-dark">
+                    <i class="bi bi-list-ul me-2"></i>Danh sách hóa đơn
+                </h5>
+                <div class="header-stats">
+                    <span class="badge bg-primary-soft text-primary">
+                        @Model.Count() hóa đơn
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle text-center">
-                    <thead class="table-dark rounded-top">
+                <table class="table table-modern align-middle mb-0">
+                    <thead>
                         <tr>
-                            <th scope="col">#</th>
-                            <th scope="col"><i class="bi bi-calendar-week"></i> Ngày tạo</th>
-                            <th scope="col"><i class="bi bi-person-circle"></i> Người tạo</th>
-                            <th scope="col"><i class="bi bi-cash-coin"></i> Trước giảm</th>
-                            <th scope="col"><i class="bi bi-tags"></i> Sau giảm</th>
-                            <th scope="col"><i class="bi bi-gear-wide-connected"></i> Hành động</th>
+                            <th scope="col" class="text-center" style="width: 60px;">
+                                <i class="bi bi-hash text-muted"></i>
+                            </th>
+                            <th scope="col">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar-week me-2 text-primary"></i>
+                                    Ngày tạo
+                                </div>
+                            </th>
+                            <th scope="col">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-circle me-2 text-success"></i>
+                                    Người tạo
+                                </div>
+                            </th>
+                            <th scope="col" class="text-end">
+                                <div class="d-flex align-items-center justify-content-end">
+                                    <i class="bi bi-cash-coin me-2 text-warning"></i>
+                                    Trước giảm
+                                </div>
+                            </th>
+                            <th scope="col" class="text-end">
+                                <div class="d-flex align-items-center justify-content-end">
+                                    <i class="bi bi-tags me-2 text-info"></i>
+                                    Sau giảm
+                                </div>
+                            </th>
+                            <th scope="col" class="text-center" style="width: 200px;">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-gear-wide-connected me-2 text-secondary"></i>
+                                    Hành động
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -56,32 +116,72 @@
                         @if (!Model.Any())
                         {
                             <tr>
-                                <td colspan="6" class="text-muted py-4 fst-italic">Không có hóa đơn nào.</td>
+                                <td colspan="6" class="empty-state py-5">
+                                    <div class="text-center">
+                                        <i class="bi bi-inbox display-4 text-muted mb-3"></i>
+                                        <h5 class="text-muted mb-2">Chưa có hóa đơn nào</h5>
+                                        <p class="text-muted small mb-0">Tạo hóa đơn mới để bắt đầu bán hàng</p>
+                                    </div>
+                                </td>
                             </tr>
                         }
                         else
                         {
                             foreach (var hoaDon in Model)
                             {
-                                <tr>
-                                    <td>@stt</td>
-                                    <td>@hoaDon.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td>@hoaDon.NguoiTao</td>
-                                    <td>@hoaDon.TongTienTruocGiam.ToString("N0") đ</td>
-                                    <td>@hoaDon.TongTienSauGiam.ToString("N0") đ</td>
+                                var isRecent = (DateTime.Now - hoaDon.NgayTao).TotalMinutes <= 15;
+                                <tr class="table-row @(isRecent ? "recent-invoice" : "")">
+                                    <td class="text-center">
+                                        <span class="row-number">@stt</span>
+                                    </td>
                                     <td>
-                                        <div class="d-flex justify-content-center gap-2">
-                                            <a asp-area="BanHangTaiQuay" asp-controller="BanHang" asp-action="SanPham" asp-route-idHoaDon="@hoaDon.IDHoaDon" class="btn btn-sm btn-outline-primary rounded-pill">
-                                                <i class="bi bi-pencil-square"></i> Thêm SP
+                                        <div class="date-info">
+                                            <div class="fw-semibold text-dark">@hoaDon.NgayTao.ToString("dd/MM/yyyy")</div>
+                                            <small class="text-muted">@hoaDon.NgayTao.ToString("HH:mm")</small>
+                                            @if (isRecent)
+                                            {
+                                                <span class="badge bg-success-soft text-success ms-2 small">Mới</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="user-info">
+                                            <i class="bi bi-person-fill me-2 text-muted"></i>
+                                            <span class="fw-medium">@hoaDon.NguoiTao</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="amount-info">
+                                            <span class="fw-semibold text-dark">@hoaDon.TongTienTruocGiam.ToString("N0")</span>
+                                            <small class="text-muted"> đ</small>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="amount-info">
+                                            <span class="fw-bold text-primary">@hoaDon.TongTienSauGiam.ToString("N0")</span>
+                                            <small class="text-muted"> đ</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons d-flex justify-content-center gap-2">
+                                            <a asp-area="BanHangTaiQuay" asp-controller="BanHang" asp-action="SanPham" asp-route-idHoaDon="@hoaDon.IDHoaDon"
+                                               class="btn btn-action btn-add-product"
+                                               title="Thêm sản phẩm vào hóa đơn">
+                                                <i class="bi bi-plus-circle me-1"></i>
+                                                <span class="d-none d-md-inline">Thêm SP</span>
                                             </a>
-                                            <form action="/BanHangTaiQuay/BanHang/HuyHoaDon" method="post" onsubmit="return confirm('Xác nhận hủy hóa đơn?');">
+
+                                            <form action="/BanHangTaiQuay/BanHang/HuyHoaDon" method="post"
+                                                  onsubmit="return confirm('⚠️ Xác nhận hủy hóa đơn này?\n\nHành động này không thể hoàn tác.');"
+                                                  class="d-inline">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="idHoaDon" value="@hoaDon.IDHoaDon" />
-                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
-                                                    <i class="bi bi-trash3"></i> Hủy
+                                                <button type="submit" class="btn btn-action btn-cancel"
+                                                        title="Hủy hóa đơn này">
+                                                    <i class="bi bi-trash3 me-1"></i>
+                                                    <span class="d-none d-md-inline">Hủy</span>
                                                 </button>
                                             </form>
-
                                         </div>
                                     </td>
                                 </tr>
@@ -93,36 +193,346 @@
             </div>
         </div>
     </div>
+
+    <!-- FOOTER INFO -->
+    @if (Model.Any())
+    {
+        <div class="footer-info mt-4">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="info-card">
+                        <i class="bi bi-receipt text-primary"></i>
+                        <div>
+                            <div class="fw-semibold">@Model.Count()</div>
+                            <small class="text-muted">Tổng hóa đơn chờ</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="info-card">
+                        <i class="bi bi-cash-stack text-success"></i>
+                        <div>
+                            <div class="fw-semibold">@Model.Sum(x => x.TongTienSauGiam).ToString("N0") đ</div>
+                            <small class="text-muted">Tổng giá trị</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="info-card">
+                        <i class="bi bi-clock text-warning"></i>
+                        <div>
+                            <div class="fw-semibold">@Model.Where(x => (DateTime.Now - x.NgayTao).TotalMinutes <= 15).Count()</div>
+                            <small class="text-muted">Hóa đơn mới (15p)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 <!-- Bootstrap Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 
 <style>
+    /* VARIABLES & COLORS */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        --shadow-soft: 0 2px 20px rgba(0,0,0,0.08);
+        --shadow-hover: 0 5px 30px rgba(0,0,0,0.15);
+        --border-radius: 12px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* UTILITY CLASSES */
+    .bg-primary-soft {
+        background-color: rgba(13, 110, 253, 0.1) !important;
+    }
+
+    .bg-success-soft {
+        background-color: rgba(25, 135, 84, 0.1) !important;
+    }
+
     .text-gradient {
-        background: linear-gradient(to right, #ff8c00, #ffa500);
+        background: var(--primary-gradient);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
-    table.table th, table.table td {
-        vertical-align: middle;
+    /* HEADER */
+    .header-section {
+        padding: 1.5rem 0;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
     }
 
-    .table-hover tbody tr:hover {
-        background-color: #f1f1f1;
-        transition: background-color 0.3s ease;
+    .btn-create-new {
+        background: var(--success-gradient);
+        border: none;
+        color: white;
+        padding: 12px 24px;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        transition: var(--transition);
+        box-shadow: var(--shadow-soft);
     }
 
-    .card {
+        .btn-create-new:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+            color: white;
+        }
+
+    /* MAIN CARD */
+    .main-card {
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        background: white;
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* TABLE STYLES */
+    .table-modern {
+        font-size: 0.95rem;
+    }
+
+        .table-modern thead th {
+            background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+            color: white;
+            border: none;
+            padding: 1rem 1.25rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table-modern tbody td {
+            padding: 1.25rem;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            vertical-align: middle;
+        }
+
+    /* TABLE ROWS */
+    .table-row {
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+        .table-row:hover {
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.02) 0%, rgba(13, 110, 253, 0.05) 100%);
+            transform: scale(1.001);
+            box-shadow: inset 0 0 0 1px rgba(13, 110, 253, 0.1);
+        }
+
+    .recent-invoice {
+        background: linear-gradient(135deg, rgba(25, 135, 84, 0.02) 0%, rgba(25, 135, 84, 0.05) 100%);
+        border-left: 4px solid #198754;
+    }
+
+    .row-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: var(--primary-gradient);
+        color: white;
+        border-radius: 50%;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    /* DATA STYLING */
+    .date-info, .user-info, .amount-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .user-info {
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .amount-info {
+        flex-direction: row;
+        align-items: baseline;
+        justify-content: flex-end;
+        gap: 2px;
+    }
+
+    /* ACTION BUTTONS */
+    .btn-action {
+        padding: 8px 16px;
         border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        transition: var(--transition);
+        border: 2px solid transparent;
+        min-width: 90px;
     }
 
-    .btn {
-        transition: 0.3s ease;
+    .btn-add-product {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
     }
 
-        .btn:hover {
-            transform: scale(1.05);
+        .btn-add-product:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            color: white;
+        }
+
+    .btn-cancel {
+        background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+        color: white;
+    }
+
+        .btn-cancel:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+            color: white;
+        }
+
+    /* EMPTY STATE */
+    .empty-state {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    /* ALERTS */
+    .modern-alert {
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-soft);
+    }
+
+    /* FOOTER INFO */
+    .footer-info {
+        padding: 1.5rem 0;
+    }
+
+    .info-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-soft);
+        transition: var(--transition);
+    }
+
+        .info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .info-card i {
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(13, 110, 253, 0.1);
+        }
+
+    /* RESPONSIVE */
+    @@media (max-width: 768px) {
+        .container-fluid
+
+    {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    .header-section {
+        text-align: center;
+    }
+
+    .header-title h2 {
+        font-size: 1.5rem;
+    }
+
+    .table-modern {
+        font-size: 0.85rem;
+    }
+
+    .btn-action {
+        min-width: auto;
+        padding: 6px 12px;
+    }
+
+    .info-card {
+        padding: 1rem;
+    }
+
+    }
+
+    /* LOADING ANIMATION */
+    @@keyframes fadeInUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .table-row {
+        animation: fadeInUp 0.5s ease forwards;
+    }
+
+        .table-row:nth-child(odd) {
+            animation-delay: 0.1s;
+        }
+
+        .table-row:nth-child(even) {
+            animation-delay: 0.2s;
         }
 </style>
+
+<script>
+    // Thêm hiệu ứng loading nhẹ khi submit form hủy
+    document.addEventListener('DOMContentLoaded', function() {
+        const cancelForms = document.querySelectorAll('form[action*="HuyHoaDon"]');
+
+        cancelForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i><span class="d-none d-md-inline">Đang xử lý...</span>';
+                    submitBtn.disabled = true;
+                }
+            });
+        });
+
+        // Highlight row khi hover
+        const tableRows = document.querySelectorAll('.table-row');
+        tableRows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.002)';
+            });
+
+            row.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    });
+</script>

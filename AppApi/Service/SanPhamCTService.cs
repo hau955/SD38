@@ -27,7 +27,7 @@ namespace AppApi.Service
             existing.IDMauSac = model.IDMauSac;
             existing.IDSize = model.IDSize;
             existing.IdChatLieu = model.IdChatLieu;
-           
+
             existing.SoLuongTonKho = model.SoLuongTonKho;
             existing.GiaBan = model.GiaBan;
             existing.TrangThai = model.TrangThai;
@@ -52,8 +52,8 @@ namespace AppApi.Service
             return await _db.SanPhamChiTiets
                  .Include(x => x.MauSac)
                  .Include(x => x.SizeAo)
-                 
-                // .Include(x => x.ChatLieu)
+
+                  .Include(x => x.ChatLieu)
                  .Where(x => x.IDSanPham == sanPhamId)
                  .ToListAsync();
         }
@@ -71,7 +71,7 @@ namespace AppApi.Service
             await _db.SaveChangesAsync();
         }
 
-       
+
 
         public async Task<bool> ExistsAsync(Guid idSanPham, Guid idMauSac, Guid idSize, Guid idChatlieu)
         {

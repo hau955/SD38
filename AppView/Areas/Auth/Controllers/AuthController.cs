@@ -107,7 +107,7 @@ namespace AppView.Areas.Auth.Controllers
                     ? Url.Action("Index", "SanPham", new { area = "Admin" })
                     : result.Data.Roles.Contains("Employee")
                         ? Url.Action("HoaDonCho", "BanHang", new { area = "BanHangTaiQuay" })
-                        : Url.Action("Index", "Home", new { area = "" })
+                        : Url.Action("Index", "CTSanPham", new { area = "" })
             });
         }
         // ========== Forgot Password ==========

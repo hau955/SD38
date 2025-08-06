@@ -1,143 +1,135 @@
 ﻿@model List<AppView.ViewModels.SanPham.SanPhamView>
-@using System.Text.Json
+
 @{
-   
-    var apiBaseUrl = "https://localhost:7221"; // hoặc đọc từ cấu hình
+    ViewData["Title"] = "Danh sách sản phẩm";
 }
+
 <style>
-    .product-page {
-        flex: 1;
+    .product-box {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
     }
 
-        .product-page h2 {
-            margin-bottom: 20px;
+        .product-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
+
+        .product-box img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+    .product-details {
+        padding: 10px;
+        text-align: center;
+    }
+
+        .product-details h4 {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .product-details p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+    .btn-detail {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.3s;
+    }
+
+        .btn-detail:hover {
+            background-color: #45a049;
+        }
+
+    .container {
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 0 15px;
+    }
 
     .product-grid {
-        display: flex;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 20px;
-        flex-wrap: wrap;
-        margin: 20px;
+        margin-top: 20px;
     }
 
-    .product-card {
-        width: 280px;
-        position: relative;
+    .alert {
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 4px;
+        text-align: center;
     }
 
-    .product-img {
-        position: relative;
-        overflow: hidden;
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
     }
 
-        .product-img img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-    .product-info {
-        margin-top: 10px;
+    .alert-info {
+        background-color: #cce5ff;
+        color: #004085;
+        border: 1px solid #b8daff;
     }
-
-        .product-info p {
-            margin: 0;
-            font-size: 14px;
-        }
-
-        .product-info del {
-            color: #999;
-            font-size: 13px;
-        }
-
-    .badge {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        background: #cc4b37;
-        color: white;
-        font-size: 12px;
-        padding: 3px 8px;
-        border-radius: 3px;
-    }
-
-    .discount {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: #fff;
-        color: red;
-        font-size: 13px;
-        padding: 2px 5px;
-    }
-
-    .overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: 0.3s;
-    }
-
-        .overlay button {
-            padding: 8px 20px;
-            border: 1px solid white;
-            background: transparent;
-            color: white;
-            cursor: pointer;
-        }
-
-    .product-img:hover .overlay {
-        opacity: 1;
-    }
-
 </style>
 
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        @foreach (var sp in Model)
-        {@* 
-            <div class="col">
+<div class="container">
+    <h2 class="text-center mb-4" style="font-size: 2em; font-weight: bold; color: #333;">Danh sách sản phẩm</h2>
+    @if (!string.IsNullOrEmpty(ViewBag.Error))
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+    else if (!string.IsNullOrEmpty(ViewBag.Info))
+    {
+        <div class="alert alert-info">@ViewBag.Info</div>
+    }
+    else if (Model != null && Model.Any())
+    {
+        <div class="product-grid">
+            @foreach (var product in Model)
+            {
+                var hinhAnh = product.DanhSachAnh?.FirstOrDefault(a => a.AnhChinh)?.DuongDanAnh ?? "/images/anh1.jpg";
+                var giaBan = product.ChiTiets?.FirstOrDefault()?.GiaBan ?? 0;
                 <div class="product-box">
-                    <img src="@sp.HinhAnh?.Split(';').FirstOrDefault()" alt="Ảnh sản phẩm" />
+                    <img src="@hinhAnh" alt="Product Image" />
                     <div class="product-details">
-                        <h1>@sp.TenSanPham</h1>
-                        <p>@sp.MoTa</p>
-
-                        <button class="btn-detail"
-                                onclick='showDetail(@Html.Raw(JsonSerializer.Serialize(sp, new JsonSerializerOptions { PropertyNamingPolicy = null })))'>
-                            Xem chi tiết
-                        </button>
+                        <h4>@product.TenSanPham</h4>
+                        <p>
+                            Giá: @giaBan.ToString("N0") VNĐ
+                            @if (product.ChiTiets == null || !product.ChiTiets.Any())
+                            {
+                                <span style="color: red; font-size: 0.8em;"> (Không có giá)</span>
+                            }
+                        </p>
+                        <a asp-controller="SanPhamChiTiet" asp-action="Detail" asp-route-id="@product.IDSanPham" class="btn-detail">Xem chi tiết</a>
                     </div>
                 </div>
-            </div> *@
-            <div class="product-card">
-                <div class="product-img">
-                    <!-- <span class="badge">STORE ONLY</span>
-                    <span class="discount">-50%</span> -->
-                <img src="@($"{apiBaseUrl}/{sp.DanhSachAnh?.FirstOrDefault(a => a.AnhChinh == true)?.DuongDanAnh}")" alt="Ảnh chính" />
-
-
-
-                    <div class="overlay"><button class="btn-detail"
-                                onclick='showDetail(@Html.Raw(JsonSerializer.Serialize(sp, new JsonSerializerOptions { PropertyNamingPolicy = null })))'>
-                            Xem chi tiết
-                        </button></div>
-                </div>
-                <div class="product-info">
-                    <p>@sp.TenSanPham</p>
-                    <strong>849,500₫</strong>
-                    <!-- <del>1,699,000₫</del> -->
-                </div>
-            </div>
-        }
-    </div>
-
-
-<!-- Overlay & Modal -->
-
+            }
+        </div>
+    }
+    else
+    {
+        <p class="text-center" style="color: #666;">Không có sản phẩm nào.</p>
+    }
+</div>
