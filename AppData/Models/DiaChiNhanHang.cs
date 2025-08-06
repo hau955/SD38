@@ -29,8 +29,8 @@ namespace AppData.Models
 
         
         public DateTime? NgayTao { get; set; } 
+        public bool IsDefault { get; set; } = false; // Địa chỉ mặc định cho người dùng
 
-  
         public DateTime? NgaySua { get; set; } 
 
         [Required]

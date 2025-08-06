@@ -1,8 +1,6 @@
 ﻿using AppApi.IService;
 using AppData.Models;
 using Microsoft.AspNetCore.Mvc;
-using AppData.Models;
-
 namespace AppApi.Controllers
 {
     [Route("api/DanhMuc")]

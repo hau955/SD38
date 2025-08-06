@@ -85,7 +85,19 @@ namespace AppApi.Features.ThongKe.Controllers
                 return BadRequest(ApiResponse<PromotionReportDto>.Fail($"Lỗi: {ex.Message}", 500));
             }
         }
-
+        [HttpPost("employees")]
+        public async Task<IActionResult> GetEmployeeReport([FromBody] TimeRangeRequestDto request)
+        {
+            try
+            {
+                var result = await _thongKeService.GetEmployeeReportAsync(request);
+                return Ok(ApiResponse<EmployeeReportDto>.Success(result, "Lấy báo cáo nhân viên thành công"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<EmployeeReportDto>.Fail($"Lỗi: {ex.Message}", 500));
+            }
+        }
         [HttpPost("quick-metrics")]
         public async Task<IActionResult> GetQuickMetrics([FromBody] TimeRangeRequestDto request)
         {

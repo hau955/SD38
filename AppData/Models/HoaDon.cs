@@ -59,7 +59,7 @@ public class HoaDon
 
     public DateTime? NgayTao { get; set; }
 
-        public DateTime? NgaySua { get; set; } 
+    public DateTime? NgaySua { get; set; } 
 
     public virtual ICollection<HoaDonCT> HoaDonChiTiets { get; set; } = new List<HoaDonCT>();
 }

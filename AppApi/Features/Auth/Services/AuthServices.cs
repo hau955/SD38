@@ -103,8 +103,6 @@ namespace AppApi.Features.Services
                 _logger.LogInformation("===== XÁC NHẬN EMAIL =====");
                 _logger.LogInformation($"Email nhận (mã hóa): {email}");
                 _logger.LogInformation($"Token nhận: {token}");
-
-                // ✅ GIẢI MÃ email từ Base64Url
                 try
                 {
                     var emailBytes = WebEncoders.Base64UrlDecode(email);
@@ -116,8 +114,6 @@ namespace AppApi.Features.Services
                     _logger.LogError(ex, "❌ Giải mã email thất bại.");
                     return ApiResponse<object>.Fail("Liên kết xác nhận không hợp lệ", 400);
                 }
-
-                // ✅ GIẢI MÃ token như bạn đã làm
                 string decodedToken;
                 try
                 {

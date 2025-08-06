@@ -44,11 +44,9 @@ async function submitLogin(event) {
             body: formData,
             headers: {
                 'RequestVerificationToken': getCsrfToken(),
-                'Accept': 'application/json' // Yêu cầu server trả về JSON
+                'Accept': 'application/json'
             }
         });
-
-        // Kiểm tra status code trước khi parse JSON
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Đăng nhập thất bại');

@@ -5,169 +5,540 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                <h4 class="mb-sm-0">@ViewData["Title"]</h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="/Admin">Trang chủ</a></li>
-                        <li class="breadcrumb-item active">Thống kê</li>
-                    </ol>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #8b5cf6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #06b6d4;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-warning: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-info: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .container-fluid {
+            padding: 2rem;
+        }
+
+        .page-title-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+            .page-title-box h4 {
+                font-weight: 700;
+                font-size: 2rem;
+                margin: 0;
+            }
+
+        .breadcrumb {
+            background: transparent;
+            margin: 0;
+        }
+
+        .breadcrumb-item a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item.active {
+            color: white;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            border: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+
+            .stats-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: var(--gradient-primary);
+            }
+
+            .stats-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            }
+
+            .stats-card.revenue::before {
+                background: var(--gradient-primary);
+            }
+
+            .stats-card.orders::before {
+                background: var(--gradient-success);
+            }
+
+            .stats-card.customers::before {
+                background: var(--gradient-warning);
+            }
+
+            .stats-card.inventory::before {
+                background: var(--gradient-info);
+            }
+
+        .stats-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+            .stats-icon.revenue {
+                background: var(--gradient-primary);
+            }
+
+            .stats-icon.orders {
+                background: var(--gradient-success);
+            }
+
+            .stats-icon.customers {
+                background: var(--gradient-warning);
+            }
+
+            .stats-icon.inventory {
+                background: var(--gradient-info);
+            }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin: 0.5rem 0;
+        }
+
+        .stats-label {
+            color: #64748b;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .stats-change {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+            .stats-change.positive {
+                background: rgba(16, 185, 129, 0.1);
+                color: var(--success-color);
+            }
+
+            .stats-change.negative {
+                background: rgba(239, 68, 68, 0.1);
+                color: var(--danger-color);
+            }
+
+        .chart-container {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+        }
+
+            .chart-title i {
+                margin-right: 0.5rem;
+                color: var(--primary-color);
+            }
+
+        .canvas-container {
+            position: relative;
+            height: 400px;
+            margin: 1rem 0;
+        }
+
+        .quick-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+            .metric-item:hover {
+                transform: translateY(-3px);
+            }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .progress-custom {
+            height: 8px;
+            border-radius: 10px;
+            background: #e2e8f0;
+            margin: 1rem 0;
+        }
+
+        .progress-bar-custom {
+            height: 100%;
+            border-radius: 10px;
+            background: var(--gradient-primary);
+            transition: width 0.3s ease;
+        }
+
+        @@media (max-width: 768px) {
+            .container-fluid
+
+        {
+            padding: 1rem;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+        }
+
+        .canvas-container {
+            height: 300px;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Page Title -->
+        <div class="page-title-box">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h4>@ViewData["Title"]</h4>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/Admin"><i class="fas fa-home me-1"></i>Trang chủ</a></li>
+                            <li class="breadcrumb-item active">Thống kê</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-chart-line fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="row g-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card revenue">
+                    <div class="stats-icon revenue">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stats-label">Tổng doanh thu</div>
+                    <div class="stats-number" data-target="@Model.Revenue.TotalRevenue">@Model.Revenue.TotalRevenue.ToString("N0")</div>
+                    <div class="stats-change @(Model.Revenue.RevenueChangePercentage >= 0 ? "positive" : "negative")">
+                        <i class="fas fa-arrow-@(Model.Revenue.RevenueChangePercentage >= 0 ? "up" : "down") me-1"></i>
+                        @Model.Revenue.RevenueChangePercentage.ToString("F1")% so với tháng trước
+                    </div>
+                    <div class="progress-custom">
+                        <div class="progress-bar-custom" style="width: @(Math.Min(100, (double)Model.Revenue.TotalRevenue / 10000000000 * 100))%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card orders">
+                    <div class="stats-icon orders">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="stats-label">Tổng đơn hàng</div>
+                    <div class="stats-number" data-target="@Model.Orders.TotalOrders">@Model.Orders.TotalOrders.ToString("N0")</div>
+                    <div class="stats-change positive">
+                        <i class="fas fa-chart-line me-1"></i>
+                        Tỷ lệ chuyển đổi: @Model.Orders.ConversionRate.ToString("F1")%
+                    </div>
+                    <div class="d-flex justify-content-between mt-3">
+                        <span class="text-success"><i class="fas fa-check-circle me-1"></i>@Model.Orders.CompletedOrders hoàn thành</span>
+                        <span class="text-warning"><i class="fas fa-clock me-1"></i>@Model.Orders.PendingOrders đang xử lý</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card customers">
+                    <div class="stats-icon customers">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stats-label">Khách hàng</div>
+                    <div class="stats-number" data-target="@Model.Customers.NewCustomers">@Model.Customers.NewCustomers.ToString("N0")</div>
+                    <div class="stats-change positive">
+                        <i class="fas fa-user-plus me-1"></i>
+                        Tỷ lệ giữ chân: @Model.Customers.RetentionRate.ToString("F1")%
+                    </div>
+                    <div class="d-flex justify-content-between mt-3">
+                        <span class="text-info"><i class="fas fa-user-plus me-1"></i>@Model.Customers.NewCustomers mới</span>
+                        <span class="text-primary"><i class="fas fa-redo me-1"></i>@Model.Customers.ReturningCustomers quay lại</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card inventory">
+                    <div class="stats-icon inventory">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <div class="stats-label">Tồn kho</div>
+                    <div class="stats-number" data-target="@Model.Inventory.ActiveProducts">@Model.Inventory.ActiveProducts.ToString("N0")</div>
+                    <div class="stats-change @(Model.Inventory.OutOfStockItems > 0 || Model.Inventory.LowStockItems > 0 ? "negative" : "positive")">
+                        <i class="fas fa-@(Model.Inventory.OutOfStockItems > 0 || Model.Inventory.LowStockItems > 0 ? "exclamation-triangle" : "check-circle") me-1"></i>
+                        @(Model.Inventory.LowStockItems + Model.Inventory.OutOfStockItems) sản phẩm cần chú ý
+                    </div>
+                    <div class="d-flex justify-content-between mt-3">
+                        <span class="text-danger"><i class="fas fa-times-circle me-1"></i>@Model.Inventory.OutOfStockItems hết hàng</span>
+                        <span class="text-warning"><i class="fas fa-exclamation me-1"></i>@Model.Inventory.LowStockItems sắp hết</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Metrics -->
+        <div class="quick-metrics">
+            <div class="metric-item">
+                <div class="metric-value">@Model.Revenue.AverageOrderValue.ToString("N0")</div>
+                <div class="metric-label">Giá trị đơn trung bình (VNĐ)</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-value">@Model.Orders.ConversionRate.ToString("F1")%</div>
+                <div class="metric-label">Tỷ lệ chuyển đổi</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-value">@(Model.Orders.TotalOrders > 0 ? (Model.Orders.TotalOrders / (decimal)Math.Max(1, Model.Customers.NewCustomers)).ToString("F1") : "0")</div>
+                <div class="metric-label">Đơn hàng/khách</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-value">@((Model.Orders.CompletedOrders * 100.0 / Math.Max(1, Model.Orders.TotalOrders)).ToString("F1"))%</div>
+                <div class="metric-label">Tỷ lệ hoàn thành</div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row g-4">
+            <!-- Revenue Trend Chart -->
+            <div class="col-xl-8">
+                <div class="chart-container">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-line"></i>
+                        Xu hướng doanh thu (7 ngày qua)
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Status Chart -->
+            <div class="col-xl-4">
+                <div class="chart-container">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Trạng thái đơn hàng
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="row">
-        <div class="col-xl-3 col-md-6">
-            <div class="card card-h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Tổng doanh thu</span>
-                            <h4 class="mb-3">
-                                @Model.Revenue.TotalRevenue.ToString("N0") VNĐ
-                            </h4>
-                            <div class="text-nowrap">
-                                <span class="badge badge-soft-@(Model.Revenue.RevenueChangePercentage >= 0 ? "success" : "danger") text-@(Model.Revenue.RevenueChangePercentage >= 0 ? "success" : "danger")">
-                                    @Model.Revenue.RevenueChangePercentage.ToString("F1")%
-                                </span>
-                                <span class="ms-1 text-muted font-size-13">so với tháng trước</span>
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0 text-end dash-widget">
-                            <div id="mini-chart1" data-colors='["#1f58c7"]' class="apex-charts"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card card-h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Tổng đơn hàng</span>
-                            <h4 class="mb-3">@Model.Orders.TotalOrders.ToString("N0")</h4>
-                            <div class="text-nowrap">
-                                <span class="text-success">@Model.Orders.CompletedOrders</span> hoàn thành,
-                                <span class="text-warning">@Model.Orders.PendingOrders</span> đang xử lý
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0 text-end dash-widget">
-                            <div id="mini-chart2" data-colors='["#f56e6e"]' class="apex-charts"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card card-h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Khách hàng mới</span>
-                            <h4 class="mb-3">@Model.Customers.NewCustomers.ToString("N0")</h4>
-                            <div class="text-nowrap">
-                                <span class="text-success">@Model.Customers.RetentionRate.ToString("F1")%</span>
-                                <span class="ms-1 text-muted font-size-13">tỷ lệ giữ chân</span>
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0 text-end dash-widget">
-                            <div id="mini-chart3" data-colors='["#f1c40f"]' class="apex-charts"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card card-h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Tồn kho</span>
-                            <h4 class="mb-3">@Model.Inventory.ActiveProducts.ToString("N0")</h4>
-                            <div class="text-nowrap">
-                                <span class="text-danger">@Model.Inventory.OutOfStockItems</span> hết hàng,
-                                <span class="text-warning">@Model.Inventory.LowStockItems</span> sắp hết
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0 text-end dash-widget">
-                            <div id="mini-chart4" data-colors='["#2eb85c"]' class="apex-charts"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Revenue Trend Chart -->
-    <div class="row">
-        <div class="col-xl-8">
-            <div class="card">
-                <div class="card-header align-items-center d-flex">
-                    <h4 class="card-title mb-0 flex-grow-1">Xu hướng doanh thu (7 ngày qua)</h4>
-                </div>
-                <div class="card-body">
-                    <div id="revenue-chart" class="apex-charts" dir="ltr"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-4">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title mb-0">Trạng thái đơn hàng</h4>
-                </div>
-                <div class="card-body">
-                    <div id="order-status-chart" class="apex-charts" dir="ltr"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Revenue trend chart
-        var revenueOptions = {
-            chart: {
-                type: 'line',
-                height: 350
-            },
-            series: [{
-                name: 'Doanh thu',
-                data: [@string.Join(",", Model.Revenue.Trends.Select(t => t.Revenue))]
-            }],
-            xaxis: {
-                categories: [@string.Join(",", Model.Revenue.Trends.Select(t => $"'{t.Label}'"))]
-            },
-            stroke: {
-                curve: 'smooth'
-            },
-            colors: ['#1f58c7']
-        };
-        var revenueChart = new ApexCharts(document.querySelector("#revenue-chart"), revenueOptions);
-        revenueChart.render();
+        // Chart.js configuration
+        Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+        Chart.defaults.color = '#64748b';
 
-        // Order status chart
-        var orderOptions = {
-            chart: {
-                type: 'donut',
-                height: 300
+        // Revenue Trend Chart - Sử dụng dữ liệu thực từ Model
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        const revenueChart = new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: [@Html.Raw(string.Join(",", Model.Revenue.Trends.Select(t => $"'{t.Label}'")))],
+                datasets: [{
+                    label: 'Doanh thu (VNĐ)',
+                    data: [@string.Join(",", Model.Revenue.Trends.Select(t => t.Revenue))],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 6,
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2
+                }]
             },
-            series: [@Model.Orders.CompletedOrders, @Model.Orders.PendingOrders, @Model.Orders.CancelledOrders],
-            labels: ['Hoàn thành', 'Đang xử lý', 'Đã hủy'],
-            colors: ['#2eb85c', '#f1c40f', '#f56e6e']
-        };
-        var orderChart = new ApexCharts(document.querySelector("#order-status-chart"), orderOptions);
-        orderChart.render();
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Doanh thu: ' + context.parsed.y.toLocaleString('vi-VN') + ' VNĐ';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#e2e8f0'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return (value / 1000000).toFixed(0) + 'M';
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                elements: {
+                    point: {
+                        hoverRadius: 8
+                    }
+                }
+            }
+        });
+
+        // Order Status Chart - Sử dụng dữ liệu thực từ Model
+        const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+        const orderStatusChart = new Chart(orderStatusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Hoàn thành', 'Đang xử lý', 'Đã hủy'],
+                datasets: [{
+                    data: [@Model.Orders.CompletedOrders, @Model.Orders.PendingOrders, @Model.Orders.CancelledOrders],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                    borderWidth: 0,
+                    cutout: '70%'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Add number animation
+        function animateNumbers() {
+            const numbers = document.querySelectorAll('.stats-number[data-target]');
+            numbers.forEach(number => {
+                const target = parseInt(number.getAttribute('data-target'));
+                let current = 0;
+                const increment = target / 100;
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    number.textContent = Math.floor(current).toLocaleString('vi-VN');
+                }, 20);
+            });
+        }
+
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(animateNumbers, 500);
+        });
     </script>
-}
+</body>
+</html>

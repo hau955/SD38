@@ -9,6 +9,7 @@ namespace AppView.Areas.Admin.IRepo
         Task<ProductReportViewModel> GetProductReportAsync(TimeRangeRequestViewModel request);
         Task<CustomerReportViewModel> GetCustomerReportAsync(TimeRangeRequestViewModel request);
         Task<PromotionReportViewModel> GetPromotionReportAsync(TimeRangeRequestViewModel request);
+        Task<EmployeeReportViewModel> GetEmployeeReportAsync(TimeRangeRequestViewModel request);
         Task<List<QuickMetricViewModel>> GetQuickMetricsAsync(TimeRangeRequestViewModel request);
     }
 }

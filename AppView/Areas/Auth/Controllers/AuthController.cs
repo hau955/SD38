@@ -71,48 +71,59 @@ namespace AppView.Areas.Auth.Controllers
                 return Json(new
                 {
                     IsSuccess = false,
-                    Message = "Thông tin không hợp lệ.",
-                    Errors = ModelState.Values.SelectMany(v => v.Errors)
-                                .Select(e => e.ErrorMessage)
+                    Message = "Thông tin đăng nhập không hợp lệ.",
+                    Errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)
                 });
             }
 
+            model.Email = model.Email?.Trim().ToLower();
+
             var result = await _authRepository.LoginAsync(model);
 
-            if (!result.IsSuccess)
+            if (!result.IsSuccess || result.Data == null)
             {
                 return Json(new
                 {
                     IsSuccess = false,
                     Message = result.Message ?? "Đăng nhập thất bại.",
-                    RequiresConfirmation = result.Message?.Contains("xác nhận email") ?? false,
+                    RequiresConfirmation = result.Message?.ToLower().Contains("xác thực") ?? false,
                     Email = model.Email
                 });
             }
 
+            var data = result.Data;
+            var user = await _userManager.FindByEmailAsync(data.Email);
+            if (user != null)
+            {
+                await _signInManager.SignInAsync(user, isPersistent: false);
+            }
             // Lưu session
-            HttpContext.Session.SetString("Token", result.Data.Token ?? "");
-            HttpContext.Session.SetString("Email", result.Data.Email ?? "");
-            HttpContext.Session.SetString("HinhAnh", result.Data.hinhanh ?? "/admin/assets/img/avatars/default.png");
-            HttpContext.Session.SetString("HoTen", result.Data.hoten ?? "");
-            HttpContext.Session.SetString("ID", result.Data.Id.ToString() ?? "");
-            HttpContext.Session.SetString("Roles", result.Data.Roles != null ? string.Join(",", result.Data.Roles) : "");
+            HttpContext.Session.SetString("Token", data.Token ?? "");
+            HttpContext.Session.SetString("Email", data.Email ?? "");
+            HttpContext.Session.SetString("HinhAnh", data.hinhanh ?? "/admin/assets/img/avatars/default.png");
+            HttpContext.Session.SetString("HoTen", data.hoten ?? "");
+            HttpContext.Session.SetString("ID", data.Id.ToString() ?? "");
+            HttpContext.Session.SetString("Roles", data.Roles != null ? string.Join(",", data.Roles) : "");
+
+            // Điều hướng dựa trên role
+            var redirectUrl = data.Roles.Contains("Admin")
+                ? Url.Action("Index", "SanPham", new { area = "Admin" })
+                : data.Roles.Contains("Employee")
+                    ? Url.Action("Index", "OrderManagerment", new { area = "OrderManagerment" })
+                    : Url.Action("Index", "Home", new { area = "" });
 
             return Json(new
             {
                 IsSuccess = true,
-                Email = result.Data.Email,
-                IsAdmin = result.Data.Roles.Contains("Admin"),
-                RedirectUrl = result.Data.Roles.Contains("Admin")
-                    ? Url.Action("Index", "SanPham", new { area = "Admin" })
-                    : result.Data.Roles.Contains("Employee")
-                        ? Url.Action("Index", "Home", new { area = "Employee" })
-                        : Url.Action("Index", "Home", new { area = "" })
+                Email = data.Email,
+                IsAdmin = data.Roles.Contains("Admin"),
+                RedirectUrl = redirectUrl
             });
         }
+
         // ========== Forgot Password ==========
         [HttpGet]
-        public IActionResult ForgotPassword() => View();
+        public IActionResult ForgotPassword() => View(new ForgotPasswordViewModel());
 
         [HttpPost]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
@@ -147,7 +158,7 @@ namespace AppView.Areas.Auth.Controllers
             if (result.IsSuccess)
             {
                 TempData["Success"] = result.Message;
-                return RedirectToAction("Login");
+                return RedirectToAction("Index", "Home", new { area = "" });
             }
 
             TempData["Error"] = result.Message;
@@ -240,7 +251,6 @@ namespace AppView.Areas.Auth.Controllers
                 await _signInManager.SignOutAsync();
                 HttpContext.Session.Clear();
 
-                // Xóa cookie authentication
                 if (HttpContext.Request.Cookies[".AspNetCore.Identity.Application"] != null)
                     HttpContext.Response.Cookies.Delete(".AspNetCore.Identity.Application");
 
