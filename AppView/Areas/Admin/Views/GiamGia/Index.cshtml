@@ -1,0 +1,40 @@
+﻿@model IEnumerable<AppData.Models.GiamGia>
+
+@{
+    ViewData["Title"] = "Danh sách giảm giá";
+}
+
+<h2>Danh sách giảm giá</h2>
+
+<p>
+    <a asp-area="Admin" asp-controller="GiamGia" asp-action="Create" class="btn btn-primary">+ Thêm giảm giá</a>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Tên giảm giá</th>
+            <th>Phần trăm</th>
+            <th>Ngày bắt đầu</th>
+            <th>Ngày kết thúc</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.TenGiamGia</td>
+                <td>@item.LoaiGiamGia %</td>
+                <td>@item.NgayBatDau.ToShortDateString()</td>
+                <td>@item.NgayKetThuc.ToShortDateString()</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.IDGiamGia" class="btn btn-info btn-sm">Chi tiết</a>
+                    <a asp-action="Edit" asp-route-id="@item.IDGiamGia" class="btn btn-warning btn-sm">Sửa</a>
+                    <a asp-action="Delete" asp-route-id="@item.IDGiamGia" class="btn btn-danger btn-sm"
+                       onclick="return confirm('Xóa giảm giá này?')">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

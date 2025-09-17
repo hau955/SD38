@@ -1,0 +1,135 @@
+﻿@model AppView.Areas.Admin.ViewModels.GiamGiaCreateVM
+
+@{
+    ViewData["Title"] = "Tạo giảm giá";
+}
+
+<h2>Tạo giảm giá</h2>
+
+<form asp-area="Admin" asp-controller="GiamGia" asp-action="Create" method="post">
+    <div class="form-group">
+        <label asp-for="GiamGia.TenGiamGia"></label>
+        <input asp-for="GiamGia.TenGiamGia" class="form-control" />
+        <span asp-validation-for="GiamGia.TenGiamGia" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="GiamGia.LoaiGiamGia"></label>
+        <select asp-for="GiamGia.LoaiGiamGia" class="form-control" id="loaiGiamGia">
+            <option value="PhanTram">Phần trăm</option>
+            <option value="SoTien">Số tiền</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="GiamGia.GiaTri"></label>
+        <input asp-for="GiamGia.GiaTri" type="number" class="form-control" id="giaTriInput" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="GiamGia.NgayBatDau"></label>
+        <input asp-for="GiamGia.NgayBatDau" type="date" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="GiamGia.NgayKetThuc"></label>
+        <input asp-for="GiamGia.NgayKetThuc" type="date" class="form-control" />
+    </div>
+
+    <hr />
+
+    <!-- Liên kết với sản phẩm / danh mục -->
+    <div class="form-group">
+        <label>Chọn Sản phẩm</label>
+        <select id="sanPhamSelect" asp-for="SelectedSanPhams"
+                asp-items="@(new SelectList(Model.SanPhams, "IDSanPham", "TenSanPham"))"
+                class="form-control">
+            <option value="">-- Chọn sản phẩm --</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Chọn Danh mục</label>
+        <select id="danhMucSelect" asp-for="SelectedDanhMucs"
+                asp-items="@(new SelectList(Model.DanhMucs, "DanhMucId", "TenDanhMuc"))"
+                class="form-control">
+            <option value="">-- Chọn danh mục --</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Chọn Sản phẩm chi tiết</label>
+        <select id="sanPhamCTSelect" asp-for="SelectedSanPhamCTs" class="form-control">
+            <option value="">-- Chọn sản phẩm chi tiết --</option>
+        </select>
+    </div>
+
+    <input type="submit" value="Lưu" class="btn btn-primary" />
+    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            const $sanPham = $("#sanPhamSelect");
+            const $danhMuc = $("#danhMucSelect");
+            const $sanPhamCT = $("#sanPhamCTSelect");
+            const $giaTri = $("#giaTriInput");
+            const $loai = $("#loaiGiamGia");
+
+            // Validate loại giảm giá & giá trị
+            $loai.change(function () {
+                if ($(this).val() === "PhanTram") {
+                    $giaTri.attr({ min: 1, max: 100, placeholder: "Nhập % (1 - 100)" });
+                } else {
+                    $giaTri.attr({ min: 1000, max: 500000, placeholder: "Nhập số tiền (1000 - 500000)" });
+                }
+            }).trigger("change");
+
+            $giaTri.on("input", function () {
+                let val = parseInt($(this).val() || 0);
+                let min = parseInt($(this).attr("min"));
+                let max = parseInt($(this).attr("max"));
+                if (val < min) $(this).val(min);
+                if (val > max) $(this).val(max);
+            });
+
+            // Khi chọn sản phẩm
+            $sanPham.change(function () {
+                if ($(this).val()) {
+                    $danhMuc.prop("disabled", true);
+                    $sanPhamCT.prop("disabled", false);
+                    loadSanPhamCT($(this).val());
+                } else {
+                    $danhMuc.prop("disabled", false);
+                    $sanPhamCT.prop("disabled", true).empty()
+                        .append($("<option>", { value: "", text: "-- Chọn sản phẩm chi tiết --" }));
+                }
+            });
+
+            // Khi chọn danh mục
+            $danhMuc.change(function () {
+                if ($(this).val()) {
+                    $sanPham.prop("disabled", true);
+                    $sanPhamCT.prop("disabled", true).val("");
+                } else {
+                    $sanPham.prop("disabled", false);
+                    $sanPhamCT.prop("disabled", false);
+                }
+            });
+
+            // Load SPCT bằng AJAX
+            function loadSanPhamCT(sanPhamId) {
+                $.getJSON("/Admin/GiamGia/GetSanPhamCTsBySanPhamId", { id: sanPhamId }, function (data) {
+                    $sanPhamCT.empty().append($("<option>", { value: "", text: "-- Chọn sản phẩm chi tiết --" }));
+                    $.each(data, function (i, item) {
+                        $sanPhamCT.append($("<option>", {
+                            value: item.idSanPhamCT,
+                            text: item.tenSanPham + " - " + item.size + " - " + item.mauSac + " - " + item.chatlieu
+                        }));
+                    });
+                });
+            }
+        });
+    </script>
+}

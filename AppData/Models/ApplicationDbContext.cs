@@ -15,12 +15,8 @@ namespace AppData.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-<<<<<<< HEAD
-            optionsBuilder.UseSqlServer("Server=LAPTOP-Q4DACOEF\\MSSQLSERVER02;Database=AoDaiModel1;Trusted_Connection=True;TrustServerCertificate=True");//Server=KHUATNGAT201;Database=AoDaiModel;User Id=sa;Password=123456;TrustServerCertificate=true;");/*"Server=DESKTOP-A99GQBL;Database=AoDaiModell;Trusted_Connection=True;TrustServerCertificate=True")*/
-=======
-            optionsBuilder.UseSqlServer("Server=QUOC-AN\\QUOC_AN;Database=AoDaiModel;User Id=SA;Password=An344763;TrustServerCertificate=true;");//Server=KHUATNGAT201;Database=AoDaiModel;User Id=sa;Password=123456;TrustServerCertificate=true;");/*"Server=DESKTOP-A99GQBL;Database=AoDaiModell;Trusted_Connection=True;TrustServerCertificate=True")*/
->>>>>>> dc16ff1cd6412598990aef0dd6281c72c3b7436a
-            //Server = QUOC - AN\QUOC_AN; Database = NET1041_Bai3; User Id = SA; Password = An344763; TrustServerCertificate = true;
+            optionsBuilder.UseSqlServer("Server=HAU-2005;Database=AoDaiModel;User Id=sa;Password=Hauhoang0905!;TrustServerCertificate=True;");//Server=KHUATNGAT201;Database=AoDaiModel;User Id=sa;Password=123456;TrustServerCertificate=true;");/*"Server=DESKTOP-A99GQBL;Database=AoDaiModell;Trusted_Connection=True;TrustServerCertificate=True")*/  "Server=QUOC-AN\\QUOC_AN;Database=AoDaiModel;User Id=SA;Password=An344763;TrustServerCertificate=true;"
+
         }
         public DbSet<GioHang> GioHangs { get; set; }
         public DbSet<GioHangCT> GioHangChiTiets { get; set; }
@@ -32,12 +28,15 @@ namespace AppData.Models
         public DbSet<ChatLieu> ChatLieus { get; set; }
         public DbSet<AnhSanPham> AnhSanPham { get; set; }
 
-        public DbSet<SanPhamGG> SanPhamGiamGias { get; set; }
+        public DbSet<GiamGiaSPCT> GiamGiaSPCT { get; set; }
         public DbSet<GiamGia> GiamGias { get; set; }
         public DbSet<SanPhamCT> SanPhamChiTiets { get; set; }
         public DbSet<MauSac> MauSacs { get; set; }
         public DbSet<Size> Sizes { get; set; }
-
+        public DbSet<GiamGiaDanhMuc> GiamGiaDanhMuc { get; set; }
+        public DbSet<GiamGiaSanPham> GiamGiaSanPham { get; set; }
+        public DbSet<Voucher> Vouchers { get; set; }
+       
         public DbSet<DanhMuc> DanhMucs { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -56,6 +55,12 @@ namespace AppData.Models
                 .WithOne(u => u.GioHang)
                 .HasForeignKey<GioHang>(g => g.IDGioHang)
                 .OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<Voucher>()
+               .HasOne(g => g.HoaDons)
+               .WithOne(u => u.Voucher)
+               .HasForeignKey<Voucher>(g => g.IdVoucher)
+               .OnDelete(DeleteBehavior.Cascade);
+
             builder.Entity<DanhMuc>()
                 .HasMany(d => d.SanPhams)
                 .WithOne(sp => sp.DanhMuc)

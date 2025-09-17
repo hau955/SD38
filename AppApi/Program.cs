@@ -124,6 +124,7 @@ builder.Services.AddSwaggerGen(c =>
 
 // Register application services
 builder.Services.AddScoped<IAuthServices, AuthServices>();
+builder.Services.AddScoped<IGiamGiaService, GiamGiaService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ISanPhamService, SanPhamService>();
 builder.Services.AddScoped<IMauSacService, MauSacService>();

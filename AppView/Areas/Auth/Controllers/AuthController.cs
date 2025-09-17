@@ -115,9 +115,13 @@ namespace AppView.Areas.Auth.Controllers
             return Json(new
             {
                 IsSuccess = true,
-                Email = data.Email,
-                IsAdmin = data.Roles.Contains("Admin"),
-                RedirectUrl = redirectUrl
+                Email = result.Data.Email,
+                IsAdmin = result.Data.Roles.Contains("Admin"),
+                RedirectUrl = result.Data.Roles.Contains("Admin")
+                    ? Url.Action("Index", "SanPham", new { area = "Admin" })
+                    : result.Data.Roles.Contains("Employee")
+                        ? Url.Action("HoaDonCho", "BanHang", new { area = "BanHangTaiQuay" })
+                        : Url.Action("Index", "CTSanPham", new { area = "" })
             });
         }
 

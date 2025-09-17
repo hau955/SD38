@@ -24,7 +24,13 @@ namespace AppApi.Controllers
             _sanPhamService = sanPhamService;
             _context = context;
         }
-
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetSanPhamChiTiet(Guid id)
+        {
+            var result = await _sanPhamService.GetSanPhamChiTiet(id);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
         // GET: api/SanPhams
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -51,7 +57,7 @@ namespace AppApi.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("by-id/{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             try

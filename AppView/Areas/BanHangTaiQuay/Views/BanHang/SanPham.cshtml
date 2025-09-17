@@ -1,0 +1,857 @@
+﻿@using AppView.Areas.BanHangTaiQuay.ViewModels.BanHangViewModels
+@model List<AppView.Areas.Admin.ViewModels.SanPhamViewModels.SanPhamView>
+@{
+    Layout = "~/Areas/BanHangTaiQuay/Views/Shared/_BanHangTaiQuayLayout.cshtml";
+    var idHoaDon = Context.Request.Query["IDHoaDon"].ToString();
+    bool isThemVaoHoaDon = !string.IsNullOrEmpty(idHoaDon);
+    var idnguoitao = Context.Session.GetString("ID");
+}
+@{
+    int pageSize = 10;
+    int page = string.IsNullOrEmpty(Context.Request.Query["page"]) ? 1 : int.Parse(Context.Request.Query["page"]);
+    int totalProducts = Model.Count;
+    int totalPages = (int)Math.Ceiling((double)totalProducts / pageSize);
+    var pagedProducts = Model.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<style>
+    :root {
+        --primary: #6366f1;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --light: #f8fafc;
+        --dark: #1f2937;
+        --border-radius: 12px;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-card {
+        background: linear-gradient(135deg, var(--primary), #8b5cf6);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .product-list {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    .product-item {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+        .product-item:hover {
+            background: #f9fafb;
+            transform: translateX(4px);
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        .product-item.expanded {
+            background: linear-gradient(to right, #eff6ff, #f0f9ff);
+            border-left: 4px solid var(--primary);
+        }
+
+    .product-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .product-name {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--dark);
+        margin: 0;
+    }
+
+    .product-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .status-available {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-limited {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-out {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .expand-icon {
+        transition: transform 0.3s ease;
+        color: #6b7280;
+    }
+
+    .product-item.expanded .expand-icon {
+        transform: rotate(180deg);
+    }
+
+    .product-details {
+        display: none;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+        animation: slideDown 0.3s ease;
+    }
+
+    @@keyframes slideDown {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .selection-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .selection-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        font-size: 0.875rem;
+    }
+
+    .selection-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .btn-select {
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.875rem;
+    }
+
+        .btn-select:hover:not(:disabled) {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .btn-select.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f3f4f6;
+        }
+
+    .quantity-section {
+        background: linear-gradient(135deg, var(--success), #059669);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        color: white;
+        margin-top: 1rem;
+        display: none;
+        animation: slideUp 0.3s ease;
+    }
+
+    @@keyframes slideUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .quantity-input {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        text-align: center;
+        padding: 0.75rem;
+    }
+
+        .quantity-input:focus {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.6);
+            outline: none;
+        }
+
+        .quantity-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+    .btn-reset {
+        background: #6b7280;
+        border: none;
+        border-radius: 20px;
+        padding: 0.5rem 1rem;
+        color: white;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+        .btn-reset:hover {
+            background: #4b5563;
+            transform: translateY(-1px);
+        }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary), #8b5cf6);
+        border: none;
+        border-radius: 50px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow);
+    }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+    .loading-spinner {
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0%
+
+    {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+
+    }
+
+    .pagination .page-link {
+        border: none;
+        border-radius: 8px;
+        margin: 0 0.25rem;
+        color: #6b7280;
+        transition: all 0.2s ease;
+    }
+
+        .pagination .page-link:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+    .pagination .page-item.active .page-link {
+        background: var(--primary);
+        color: white;
+    }
+
+    @@media (max-width: 768px) {
+        .product-header
+
+    {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .selection-buttons {
+        flex-direction: column;
+    }
+
+    .btn-select {
+        width: 100%;
+    }
+
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="header-card">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <h2 class="mb-0">
+                <i class="fas fa-shopping-cart me-2"></i>
+                @(isThemVaoHoaDon ? "Thêm sản phẩm vào hóa đơn" : "Tạo hóa đơn mới")
+            </h2>
+            <div class="badge bg-white text-primary fs-6 px-3 py-2">
+                <i class="fas fa-boxes me-1"></i>
+                @Model.Count sản phẩm
+            </div>
+        </div>
+    </div>
+
+    <form id="mainForm" asp-area="BanHangTaiQuay" asp-controller="BanHang" asp-action="@(isThemVaoHoaDon ? "ThemSanPhamVaoHoaDonCho" : "BanTaiQuay")" method="post">
+        @if (isThemVaoHoaDon)
+        {
+            <input type="hidden" name="IDHoaDon" value="@idHoaDon" />
+        }
+        else
+        {
+            <input type="hidden" name="IsHoaDonCho" value="true" />
+        }
+        <input type="hidden" name="IDNguoiTao" value="@idnguoitao" />
+
+        <!-- Product List -->
+        <div class="product-list">
+            @for (int i = 0; i < pagedProducts.Count; i++)
+            {
+                var sp = pagedProducts[i];
+                var hetHang = sp.ChiTiets.All(x => x.SoLuongTonKho == 0);
+                var tongTon = sp.ChiTiets.Sum(x => x.SoLuongTonKho);
+                var statusClass = hetHang ? "status-out" : tongTon < 10 ? "status-limited" : "status-available";
+                var statusText = hetHang ? "Hết hàng" : tongTon < 10 ? $"Còn {tongTon}" : "Còn hàng";
+                var statusIcon = hetHang ? "fa-times-circle" : tongTon < 10 ? "fa-exclamation-triangle" : "fa-check-circle";
+
+                <div class="product-item" data-product="@sp.IDSanPham" data-index="@i" onclick="@(hetHang ? "" : $"toggleProduct('{sp.IDSanPham}', {i})")">
+                    <div class="product-header">
+                        <h5 class="product-name">@sp.TenSanPham</h5>
+                        <div class="product-status">
+                            <span class="status-badge @statusClass">
+                                <i class="fas @statusIcon me-1"></i>
+                                @statusText
+                            </span>
+                            @if (!hetHang)
+                            {
+                                <i class="fas fa-chevron-down expand-icon"></i>
+                            }
+                        </div>
+                    </div>
+
+                    @if (!hetHang)
+                    {
+                        <div class="product-details" id="details-@sp.IDSanPham-@i">
+                            <div class="row">
+                                <!-- Colors -->
+                                <div class="col-md-4">
+                                    <div class="selection-group">
+                                        <label class="selection-label">
+                                            <i class="fas fa-palette text-primary me-2"></i>
+                                            Màu sắc
+                                        </label>
+                                        <div class="selection-buttons color-group" data-product="@sp.IDSanPham" data-index="@i">
+                                            @foreach (var mau in sp.ChiTiets.Select(x => x.MauSac).Distinct())
+                                            {
+                                                var hetMau = sp.ChiTiets.Where(c => c.MauSac == mau).All(c => c.SoLuongTonKho == 0);
+                                                <button type="button" class="btn-select" data-value="@mau" @(hetMau ? "disabled" : "")>
+                                                    <i class="fas fa-circle me-1" style="color: @mau.ToLower()"></i>
+                                                    @mau
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sizes -->
+                                <div class="col-md-4">
+                                    <div class="selection-group">
+                                        <label class="selection-label">
+                                            <i class="fas fa-ruler text-warning me-2"></i>
+                                            Kích thước
+                                        </label>
+                                        <div class="selection-buttons size-group" data-product="@sp.IDSanPham" data-index="@i">
+                                            @foreach (var size in sp.ChiTiets.Select(x => x.Size).Distinct())
+                                            {
+                                                var hetSize = sp.ChiTiets.Where(c => c.Size == size).All(c => c.SoLuongTonKho == 0);
+                                                <button type="button" class="btn-select" data-value="@size" @(hetSize ? "disabled" : "")>
+                                                    @size
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Materials -->
+                                <div class="col-md-4">
+                                    <div class="selection-group">
+                                        <label class="selection-label">
+                                            <i class="fas fa-tshirt text-success me-2"></i>
+                                            Chất liệu
+                                        </label>
+                                        <div class="selection-buttons material-group" data-product="@sp.IDSanPham" data-index="@i">
+                                            @foreach (var cl in sp.ChiTiets.Select(x => x.ChatLieu).Distinct())
+                                            {
+                                                var hetCl = sp.ChiTiets.Where(c => c.ChatLieu == cl).All(c => c.SoLuongTonKho == 0);
+                                                <button type="button" class="btn-select" data-value="@cl" @(hetCl ? "disabled" : "")>
+                                                    @cl
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center mb-3">
+                                <button type="button" class="btn-reset" onclick="resetProduct('@sp.IDSanPham', @i)">
+                                    <i class="fas fa-redo me-1"></i> Chọn lại
+                                </button>
+                            </div>
+
+                            <div class="quantity-section" id="qty-@sp.IDSanPham-@i">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-check-circle fs-2"></i>
+                                    <h6 class="mt-2">Đã chọn sản phẩm!</h6>
+                                </div>
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Số lượng:</label>
+                                        <input type="number" class="form-control quantity-input" value="1" min="1" max="999">
+                                        <input type="hidden" class="product-id">
+                                    </div>
+                                    <div class="col-md-6 text-center">
+                                        <small class="stock-info">
+                                            <i class="fas fa-boxes me-1"></i>
+                                            <span class="stock-count">0</span> có sẵn
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-2">
+                                    <strong>Giá bán:</strong>
+                                    <span class="product-price text-success fw-bold">0 VNĐ</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages > 1)
+        {
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(page <= 1 ? "disabled" : "")">
+                        <a class="page-link" href="?page=@(page - 1)&IDHoaDon=@idHoaDon">Trước</a>
+                    </li>
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == page ? "active" : "")">
+                            <a class="page-link" href="?page=@i&IDHoaDon=@idHoaDon">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(page >= totalPages ? "disabled" : "")">
+                        <a class="page-link" href="?page=@(page + 1)&IDHoaDon=@idHoaDon">Tiếp</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+
+        @if (!isThemVaoHoaDon)
+        {
+            <div class="mt-4">
+                <div class="card">
+                    <div class="card-body">
+                        <label for="ghichu" class="form-label">
+                            <i class="fas fa-sticky-note text-info me-2"></i>
+                            Ghi chú:
+                        </label>
+                        <textarea id="ghichu" name="GhiChu" class="form-control" rows="3" placeholder="Nhập ghi chú..."></textarea>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+                <span class="loading-spinner spinner-border spinner-border-sm me-2" style="display: none;"></span>
+                <i class="fas fa-@(isThemVaoHoaDon ? "plus" : "file-invoice") me-2"></i>
+                @(isThemVaoHoaDon ? "Thêm vào hóa đơn" : "Tạo hóa đơn")
+            </button>
+        </div>
+    </form>
+
+    <!-- Enhanced Invoice Details -->
+    @if (isThemVaoHoaDon && ViewBag.HoaDonChiTiet != null)
+    {
+        var hd = ViewBag.HoaDonChiTiet as HoaDonChiTietViewModel;
+
+        <div class="card mt-4" style="border-radius: var(--border-radius); box-shadow: var(--shadow-lg);">
+            <div class="card-header" style="background: linear-gradient(135deg, var(--primary), #8b5cf6); color: white; border: none;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="fas fa-receipt me-2"></i>
+                        Chi tiết hóa đơn
+                    </h4>
+                    <form asp-area="BanHangTaiQuay" asp-controller="BanHang" asp-action="ThanhToanHoaDonCho" method="post" id="printForm">
+                        <input type="hidden" name="IDHoaDon" value="@idHoaDon" />
+                        <input type="hidden" name="GhiChuThanhToan" value="" />
+                        <button type="button" class="btn btn-success" onclick="submitAndPrint()" id="paymentBtn">
+                            <span class="loading-spinner spinner-border spinner-border-sm me-2" style="display: none;"></span>
+                            <i class="fas fa-credit-card me-2"></i>
+                            Thanh toán
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- Invoice Info -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-3 p-3" style="background: #f8fafc; border-radius: 8px;">
+                            <i class="fas fa-clock text-primary me-3 fs-4"></i>
+                            <div>
+                                <strong class="d-block">Ngày tạo:</strong>
+                                <span class="text-muted">@hd.NgayTao.ToString("dd/MM/yyyy HH:mm")</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3 p-3" style="background: #f8fafc; border-radius: 8px;">
+                            <i class="fas fa-user-edit text-primary me-3 fs-4"></i>
+                            <div>
+                                <strong class="d-block">Người tạo:</strong>
+                                <span class="text-muted">@(string.IsNullOrEmpty(hd.TenNguoiTao) ? "Không có" : hd.TenNguoiTao)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center mb-3 p-3" style="background: #f8fafc; border-radius: 8px;">
+                            <i class="fas fa-user-tie text-primary me-3 fs-4"></i>
+                            <div>
+                                <strong class="d-block">Người mua:</strong>
+                                <span class="text-muted">@(string.IsNullOrEmpty(hd.NguoiMuaHang) ? "Không có" : hd.NguoiMuaHang)</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start mb-3 p-3" style="background: #f8fafc; border-radius: 8px;">
+                            <i class="fas fa-comment text-primary me-3 fs-4 mt-1"></i>
+                            <div>
+                                <strong class="d-block">Ghi chú:</strong>
+                                <span class="text-muted">@Html.Raw(string.IsNullOrEmpty(hd.GhiChu) ? "<em>Không có</em>" : hd.GhiChu)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Table -->
+                <div class="table-responsive">
+                    <table class="table" style="border-radius: 8px; overflow: hidden; border: none;">
+                        <thead style="background: linear-gradient(135deg, #2d3748, #4a5568); color: white;">
+                            <tr>
+                                <th class="text-center">#</th>
+                                <th><i class="fas fa-tag me-2"></i>Tên sản phẩm</th>
+                                <th class="text-center"><i class="fas fa-cubes me-2"></i>Số lượng</th>
+                                <th class="text-end"><i class="fas fa-money-bill me-2"></i>Đơn giá</th>
+                                <th class="text-end"><i class="fas fa-money-bill me-2"></i>Giảm</th>
+                                <th class="text-end"><i class="fas fa-calculator me-2"></i>Thành tiền</th>
+                                <th class="text-center"><i class="fas fa-cogs me-2"></i>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < hd.DanhSachSanPham.Count; i++)
+                            {
+                                var sp = hd.DanhSachSanPham[i];
+                                <tr style="transition: all 0.2s ease;">
+                                    <td class="text-center">
+                                        <span class="badge bg-primary rounded-pill px-3 py-2">@(i + 1)</span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold">@sp.TenSanPham</div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-info px-3 py-2">@sp.SoLuong</span>
+                                    </td>
+                                    <td class="text-end fw-semibold">@sp.DonGia.ToString("N0") VNĐ</td>
+                                    <td class="text-end fw-semibold">@sp.GiaDuocGiam.ToString("N0") VNĐ</td>
+                                    <td class="text-end fw-bold text-success">@sp.ThanhTien.ToString("N0") VNĐ</td>
+                                    <td class="text-center">
+                                        <form asp-area="BanHangTaiQuay" asp-controller="BanHang" asp-action="TruSanPhamKhoiHoaDonCho" method="post" class="mb-0">
+                                            <input type="hidden" name="IDHoaDon" value="@idHoaDon" />
+                                            <input type="hidden" name="IDSanPhamCT" value="@sp.IDSanPhamCT" />
+                                            <input type="hidden" name="SoLuong" value="1" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                                <i class="fas fa-minus me-1"></i>Trừ 1
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr style="border-top: 2px solid #e5e7eb;">
+                                <td colspan="4" class="text-end fw-bold fs-5 p-3">
+                                    <i class="fas fa-calculator me-2 text-primary"></i>
+                                    Tổng tiền trước giảm:
+                                </td>
+                                <td class="text-end fw-bold fs-5 p-3">
+                                    <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                                        @hd.TongTienTruocGiam.ToString("N0") VNĐ
+                                    </span>
+                                </td>
+                                <td></td>
+                            </tr>
+                            <tr style="border-top: 2px solid #e5e7eb;">
+                                <td colspan="4" class="text-end fw-bold fs-5 p-3">
+                                    <i class="fas fa-calculator me-2 text-primary"></i>
+                                    Tiền được giảm:
+                                </td>
+                                <td class="text-end fw-bold fs-5 p-3">
+                                    <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                                        @hd.TienGiam.ToString("N0") VNĐ
+                                    </span>
+                                </td>
+                                <td></td>
+                            </tr>
+                            <tr style="background: #f8fafc;">
+                                <td colspan="4" class="text-end fw-bold fs-4 p-3">
+                                    <i class="fas fa-money-bill-wave me-2 text-success"></i>
+                                    Thanh Toán:
+                                </td>
+                                <td class="text-end fw-bold fs-4 p-3">
+                                    <span class="badge bg-success fs-5 px-4 py-3">
+                                        @hd.TongTienSauGiam.ToString("N0") VNĐ
+                                    </span>
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    const chiTietMap = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
+        Model.SelectMany(sp => sp.ChiTiets.Select(ct => new
+        {
+            ct.IDSanPhamCT,
+            ct.MauSac,
+            ct.Size,
+            ct.ChatLieu,
+            ct.GiaBan,
+            ct.SoLuongTonKho,
+            spID = sp.IDSanPham
+        }))
+    ));
+
+    const selections = {};
+
+    function toggleProduct(productId, index) {
+        const item = document.querySelector(`[data-product='${productId}'][data-index='${index}']`);
+        const details = document.getElementById(`details-${productId}-${index}`);
+
+        // Chỉ đóng nếu đang mở, không đóng khi đang chọn sản phẩm
+        if (item.classList.contains('expanded')) {
+            // Kiểm tra xem có đang trong quá trình chọn không
+            const hasSelections = details.querySelector('.btn-select.active');
+            if (!hasSelections) {
+                item.classList.remove('expanded');
+                details.style.display = 'none';
+            }
+        } else {
+            // Đóng tất cả sản phẩm khác trước
+            document.querySelectorAll('.product-item.expanded').forEach(otherItem => {
+                otherItem.classList.remove('expanded');
+                otherItem.querySelector('.product-details').style.display = 'none';
+            });
+
+            // Mở sản phẩm hiện tại
+            item.classList.add('expanded');
+            details.style.display = 'block';
+        }
+    }
+
+    function handleSelection(button, type) {
+        const group = button.closest('.selection-buttons');
+        const productId = group.dataset.product;
+        const index = group.dataset.index;
+        const key = `${productId}-${index}`;
+
+        // Clear other selections in group
+        group.querySelectorAll('.btn-select').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+
+        // Update selections
+        if (!selections[key]) selections[key] = {};
+        selections[key][type] = button.dataset.value;
+
+        // Không đóng sản phẩm, chỉ kiểm tra đầy đủ để hiện quantity
+        checkComplete(productId, index, key);
+    }
+
+    function checkComplete(productId, index, key) {
+        const selected = selections[key];
+        if (selected.MauSac && selected.Size && selected.ChatLieu) {
+            const found = chiTietMap.find(ct =>
+                ct.spID == productId &&
+                ct.MauSac === selected.MauSac &&
+                ct.Size === selected.Size &&
+                ct.ChatLieu === selected.ChatLieu
+            );
+
+            if (found && found.SoLuongTonKho > 0) {
+                showQuantity(productId, index, found);
+            }
+        }
+    }
+
+    function showQuantity(productId, index, detail) {
+        const qtySection = document.getElementById(`qty-${productId}-${index}`);
+        const hiddenInput = qtySection.querySelector('.product-id');
+        const stockSpan = qtySection.querySelector('.stock-count');
+
+        qtySection.style.display = 'block';
+        hiddenInput.value = detail.IDSanPhamCT;
+        stockSpan.textContent = detail.SoLuongTonKho;
+    }
+
+    function resetProduct(productId, index) {
+        const key = `${productId}-${index}`;
+        delete selections[key];
+
+        // Reset buttons
+        document.querySelectorAll(`[data-product='${productId}'][data-index='${index}'] .btn-select`)
+            .forEach(btn => btn.classList.remove('active'));
+
+        // Hide quantity nhưng KHÔNG đóng sản phẩm
+        const qtySection = document.getElementById(`qty-${productId}-${index}`);
+        qtySection.style.display = 'none';
+        qtySection.querySelector('.product-id').value = '';
+
+        // Sản phẩm vẫn mở để người dùng chọn lại
+    }
+
+    // Form submission
+    document.getElementById('mainForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const submitBtn = document.getElementById('submitBtn');
+        const spinner = submitBtn.querySelector('.loading-spinner');
+
+        submitBtn.disabled = true;
+        spinner.style.display = 'inline-block';
+
+        // Process form data
+        let index = 0;
+        document.querySelectorAll('.quantity-section').forEach(section => {
+            const hiddenInput = section.querySelector('.product-id');
+            const qtyInput = section.querySelector('.quantity-input');
+
+            if (hiddenInput.value) {
+                hiddenInput.name = `DanhSachSanPham[${index}].IDSanPhamCT`;
+                qtyInput.name = `DanhSachSanPham[${index}].SoLuong`;
+                index++;
+            }
+        });
+
+        setTimeout(() => this.submit(), 1000);
+    });
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.color-group .btn-select').forEach(btn => {
+            btn.addEventListener('click', () => handleSelection(btn, 'MauSac'));
+        });
+
+        document.querySelectorAll('.size-group .btn-select').forEach(btn => {
+            btn.addEventListener('click', () => handleSelection(btn, 'Size'));
+        });
+
+        document.querySelectorAll('.material-group .btn-select').forEach(btn => {
+            btn.addEventListener('click', () => handleSelection(btn, 'ChatLieu'));
+        });
+    });
+
+    // Payment and print function
+    function submitAndPrint() {
+        const hoaDonId = '@idHoaDon';
+        const paymentBtn = document.getElementById('paymentBtn');
+
+        if (hoaDonId) {
+            if (confirm("Bạn có chắc chắn muốn thanh toán hóa đơn này không?")) {
+                const spinner = paymentBtn.querySelector('.loading-spinner');
+
+                paymentBtn.disabled = true;
+                spinner.style.display = 'inline-block';
+
+                // Open print window
+                window.open('/BanHangTaiQuay/BanHang/InHoaDon?id=' + hoaDonId, '_blank');
+
+                // Submit form after delay
+                setTimeout(() => {
+                    document.getElementById("printForm").submit();
+                }, 1500);
+            }
+        } else {
+            alert("Không tìm thấy ID hóa đơn để in.");
+        }
+    }
+        function showQuantity(productId, index, detail) {
+        const qtySection = document.getElementById(`qty-${productId}-${index}`);
+        const hiddenInput = qtySection.querySelector('.product-id');
+        const stockSpan = qtySection.querySelector('.stock-count');
+        const priceSpan = qtySection.querySelector('.product-price');
+
+        qtySection.style.display = 'block';
+        hiddenInput.value = detail.IDSanPhamCT;
+        stockSpan.textContent = detail.SoLuongTonKho;
+        priceSpan.textContent = detail.GiaBan.toLocaleString() + " VNĐ"; // Cập nhật giá
+    }
+
+    // Make functions global
+    window.toggleProduct = toggleProduct;
+    window.resetProduct = resetProduct;
+    window.submitAndPrint = submitAndPrint;
+</script>

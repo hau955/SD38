@@ -1,0 +1,162 @@
+﻿@using AppView.Areas.BanHangTaiQuay.ViewModels.BanHangViewModels
+@model HoaDonChiTietViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>In hóa đơn</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            margin: 0 auto;
+            width: 80mm;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+            .header img {
+                width: 60px;
+                height: auto;
+                margin-bottom: 5px;
+            }
+
+        .info, .footer {
+            font-size: 14px;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border-bottom: 1px dashed #000;
+            padding: 4px;
+            text-align: left;
+        }
+
+        .total-row {
+            font-weight: bold;
+        }
+
+        .qr-watermark {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            opacity: 0.1;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+        }
+
+        .signature {
+            margin-top: 20px;
+            font-size: 13px;
+            text-align: right;
+            padding-right: 10px;
+        }
+
+        @@media print {
+            body {
+                font-family: 'Times New Roman', serif;
+                margin: 0 auto;
+                width: 58mm; /* hoặc 80mm tùy máy */
+                position: relative;
+            }
+        }
+    </style>
+</head>
+<body onload="window.print()">
+    <!-- ✅ QR watermark -->
+    <div class="qr-watermark">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@Model.IDHoaDon" alt="QR Code" />
+    </div>
+
+    <!-- ✅ Header -->
+    <div class="header">
+        <img src="@Url.Content("~/images/image.png")" alt="Logo" /> <!-- logo của shop -->
+        <h2>HÓA ĐƠN BÁN HÀNG</h2>
+        <div class="info">
+            CỬA HÀNG ÁO DÀI VIỆT NAM<br />
+            123 Phú Minh, Bắc Từ Liêm, Hà Nội<br />
+            MST: 0101234567 – Hotline: 0354617934
+        </div>
+    </div>
+
+    <!-- ✅ Thông tin hóa đơn -->
+    <div class="info">
+      @*  Mã hóa đơn: <strong>@Model.IDHoaDon</strong><br /> *@
+        Ngày tạo hóa đơn: @Model.NgayTao.ToString("dd/MM/yyyy HH:mm")<br />
+       @*  Ngày ngày thanh toán: @Model.NgayThanhToan.ToString("dd/MM/yyyy HH:mm")<br /> *@
+        Nhân viên: @Model.TenNguoiTao<br />
+        Người Mua: @Model.NguoiMuaHang<br />
+        Ghi chú: @(string.IsNullOrEmpty(Model.GhiChu) ? "Không có" : Model.GhiChu)
+    </div>
+
+    <!-- ✅ Bảng sản phẩm -->
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Tên SP</th>
+                <th>SL</th>
+                <th>Đơn giá</th>
+                <th>Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.DanhSachSanPham.Count; i++)
+            {
+                var sp = Model.DanhSachSanPham[i];
+                <tr>
+                    <td>@(i + 1)</td>
+                    <td>@sp.TenSanPham</td>
+                    <td>@sp.SoLuong</td>
+                    <td>@sp.DonGia.ToString("N0")</td>
+                    <td>@sp.ThanhTien.ToString("N0")</td>
+                </tr>
+            }
+
+            <tr class="total-row">
+                <td colspan="4">Tổng tiền trước giảm</td>
+                <td>@Model.TongTienTruocGiam.ToString("N0") đ</td>
+            </tr>
+            <tr class="total-row">
+                <td colspan="4">Tổng tiền sau giảm</td>
+                <td>@Model.TongTienSauGiam.ToString("N0") đ</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- ✅ Ký tên -->
+    <div class="signature">
+        Hà Nội, ngày @DateTime.Now.ToString("dd/MM/yyyy HH:mm")<br />
+
+        <strong>Người lập hóa đơn</strong><br />
+        @Model.TenNguoiTao
+    </div>
+
+    <!-- ✅ Footer -->
+    <div class="footer">
+        <hr />
+        Cảm ơn quý khách đã mua hàng!<br />
+        Quý khách vui lòng kiểm tra kỹ sản phẩm và hóa đơn trước khi rời khỏi cửa hàng.<br />
+        -------------------------------
+    </div>
+</body>
+</html>
+
+<script>
+    window.onafterprint = function () {
+        window.location.href = '@Url.Action("HoaDonCho", "BanHang", new { area = "Admin" })';
+    };
+</script>

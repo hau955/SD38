@@ -43,8 +43,7 @@ namespace AppView.Areas.Admin.Controllers
                 model.IDChatLieu = Guid.NewGuid();
                 model.NgayTao = DateTime.Now;
                 model.NgaySua = DateTime.Now;
-                model.TrangThai = true;
-
+     
                 await _ChatLieuRepo.Create(model);
                 TempData["Message"] = "✅ Tạo ChatLieu thành công!";
                 return RedirectToAction("Index");

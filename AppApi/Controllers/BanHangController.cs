@@ -40,10 +40,10 @@ namespace AppApi.Controllers
             return BadRequest(new { message = result.Message });
         }
         [HttpGet("hoa-don-cho")]
-        public async Task<IActionResult> GetHoaDonCho()
+        public async Task<IActionResult> GetHoaDonCho([FromQuery] Guid idNguoiTao)
         {
             var hoaDons = await _context.HoaDons
-                .Where(h => h.TrangThaiDonHang == "Chờ thanh toán" && h.TrangThaiThanhToan == "Chưa thanh toán")
+                .Where(h => h.TrangThaiDonHang == "Chờ thanh toán" && h.TrangThaiThanhToan == "Chưa thanh toán" && h.IDNguoiTao==idNguoiTao)
                 .OrderByDescending(h => h.NgayTao)
                 .Include(h => h.User2) // <<-- Nạp User2
                 .Select(h => new
@@ -95,6 +95,19 @@ namespace AppApi.Controllers
                 return NotFound(result.Message);
 
             return Ok(result.Data);
+        }
+        [HttpGet("tao-link")]
+        public async Task<IActionResult> TaoLinkThanhToan([FromQuery] Guid hoaDonId)
+        {
+            var url = await _banHangService.TaoUrlThanhToanAsync(hoaDonId);
+            return Ok(new { Url = url });
+        }
+
+        [HttpGet("vnpay-return")]
+        public async Task<IActionResult> VnPayCallback()
+        {
+            var result = await _banHangService.XuLyKetQuaThanhToanAsync(Request.Query);
+            return Ok(result);
         }
 
     }
