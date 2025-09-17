@@ -30,6 +30,9 @@ namespace AppView.Areas.Admin.Repository
             response.EnsureSuccessStatusCode();
 
             var result = await response.Content.ReadFromJsonAsync<ApiResponse<ChatLieu>>();
+            Console.WriteLine("Request gửi đi: " + JsonSerializer.Serialize(ChatLieu));
+            Console.WriteLine("Response trả về: " + result);
+
             return result!.Data;
         }
 

@@ -1,0 +1,1236 @@
+﻿@using AppView.Areas.OrderManagerment.ViewModels
+@model OrderDetailViewModel
+@{
+    ViewData["Title"] = $"Chi tiết đơn hàng #{Model.IDHoaDon.ToString().Substring(0, 8)}";
+    var nextStatuses = ViewBag.NextStatuses as List<string>;
+    var paymentStatuses = ViewBag.PaymentStatuses as List<string>;
+    var statusColors = ViewBag.StatusColors as Dictionary<string, string>;
+    var paymentColors = ViewBag.PaymentColors as Dictionary<string, string>;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --secondary-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        .header-section {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 50px 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .header-section::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+                animation: float 6s ease-in-out infinite;
+            }
+
+        .modern-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+            .modern-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            }
+
+        .card-header-modern {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .modern-table {
+            background: transparent;
+        }
+
+            .modern-table thead th {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                padding: 1rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                font-size: 0.85rem;
+                letter-spacing: 0.5px;
+            }
+
+            .modern-table tbody tr {
+                border: none;
+                transition: all 0.3s ease;
+            }
+
+                .modern-table tbody tr:hover {
+                    background: rgba(102, 126, 234, 0.1);
+                    transform: scale(1.01);
+                }
+
+            .modern-table td {
+                padding: 1.2rem 1rem;
+                border: none;
+                vertical-align: middle;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            color: white;
+        }
+
+            .status-badge::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+                transition: left 0.5s;
+            }
+
+            .status-badge:hover::before {
+                left: 100%;
+            }
+
+        .bg-warning {
+            background: var(--warning-gradient) !important;
+        }
+
+        .bg-info {
+            background: var(--info-gradient) !important;
+        }
+
+        .bg-success {
+            background: var(--success-gradient) !important;
+        }
+
+        .bg-danger {
+            background: var(--danger-gradient) !important;
+        }
+
+        .bg-primary {
+            background: var(--primary-gradient) !important;
+        }
+
+        .bg-secondary {
+            background: var(--secondary-gradient) !important;
+        }
+
+        .modern-btn {
+            border-radius: 15px;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+            .modern-btn::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                transition: left 0.5s;
+            }
+
+            .modern-btn:hover::before {
+                left: 100%;
+            }
+
+            .modern-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            border: none;
+        }
+
+        .btn-warning {
+            background: var(--warning-gradient);
+            border: none;
+        }
+
+        .btn-danger {
+            background: var(--danger-gradient);
+            border: none;
+        }
+
+        .btn-info {
+            background: var(--info-gradient);
+            border: none;
+        }
+
+        .btn-outline-primary {
+            border: 2px solid #667eea;
+            color: #667eea;
+            background: transparent;
+        }
+
+            .btn-outline-primary:hover {
+                background: var(--primary-gradient);
+                border-color: transparent;
+                color: white;
+            }
+
+        .btn-outline-secondary {
+            border: 2px solid #a8a8a8;
+            color: #a8a8a8;
+            background: transparent;
+        }
+
+            .btn-outline-secondary:hover {
+                background: var(--secondary-gradient);
+                border-color: transparent;
+                color: white;
+            }
+
+        .breadcrumb {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .breadcrumb-item a {
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+            .breadcrumb-item a:hover {
+                color: rgba(255, 255, 255, 0.8);
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            }
+
+        .breadcrumb-item.active {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .order-id {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+            .timeline::before {
+                content: '';
+                position: absolute;
+                left: 15px;
+                top: 0;
+                bottom: 0;
+                width: 3px;
+                background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+                border-radius: 2px;
+            }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: -25px;
+            top: 2px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .timeline-content {
+            padding-left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 15px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+            .timeline-content:hover {
+                background: rgba(255, 255, 255, 0.15);
+                transform: translateX(5px);
+            }
+
+        .action-buttons .btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            margin: 0 3px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            border: 2px solid currentColor;
+        }
+
+            .action-buttons .btn:hover {
+                transform: scale(1.1) rotate(5deg);
+            }
+
+        .form-control, .form-select {
+            border-radius: 15px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 0.8rem 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+            .form-control:focus, .form-select:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+                transform: translateY(-2px);
+                background: white;
+            }
+
+        .modal-content {
+            border-radius: 25px;
+            border: none;
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .modal-header {
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 25px 25px 0 0;
+        }
+
+        .icon-animation {
+            animation: pulse 2s infinite;
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 15px;
+            border: 3px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.3s ease;
+        }
+
+            .product-image:hover {
+                transform: scale(1.1);
+                border-color: #667eea;
+            }
+
+        .info-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-table {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1rem;
+        }
+
+        @@keyframes float {
+            0%, 100%
+
+        {
+            transform: translateY(0px) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-20px) rotate(180deg);
+        }
+
+        }
+
+        @@keyframes pulse {
+            0%
+
+        {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+
+        }
+
+        /* Print Styles */
+        @@media print {
+            .btn, .card-header-modern, .timeline, nav, .modal, .header-section
+
+        {
+            display: none !important;
+        }
+
+        .modern-card {
+            border: 1px solid #ddd !important;
+            box-shadow: none !important;
+            background: white !important;
+        }
+
+        body {
+            background: white !important;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="container-fluid">
+            <div>
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index">Quản lý đơn hàng</a></li>
+                        <li class="breadcrumb-item active">Chi tiết đơn hàng</li>
+                    </ol>
+                </nav>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="mb-0 fw-bold">
+                            <i class="fas fa-file-invoice me-3 icon-animation"></i>
+                            Đơn hàng <span class="order-id">#@Model.IDHoaDon.ToString().Substring(0, 8)</span>
+                            @{
+                                var statusColor = statusColors?.GetValueOrDefault(Model.TrangThaiDonHang, "secondary");
+                            }
+                            <span class="status-badge bg-@statusColor ms-3">@Model.TrangThaiDonHang</span>
+                        </h1>
+                        <p class="mb-0 mt-2 opacity-75">Chi tiết thông tin đơn hàng</p>
+                    </div>
+                    <div>
+                        <a asp-action="Index" class="btn modern-btn btn-light me-2">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại
+                        </a>
+                        <button class="btn modern-btn btn-light" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>In đơn hàng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid px-4">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Order Information -->
+                <div class="modern-card">
+                    <div class="card-header-modern">
+                        <i class="fas fa-info-circle me-2"></i>Thông tin đơn hàng
+                    </div>
+                    <div class="p-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-card">
+                                    <h6 class="text-primary fw-bold mb-3">
+                                        <i class="fas fa-user me-2"></i>Thông tin khách hàng
+                                    </h6>
+                                    <table class="table table-sm table-borderless">
+                                        <tr>
+                                            <td width="120"><strong>Tên:</strong></td>
+                                            <td>@Model.TenKhachHang</td>
+                                        </tr>
+                                        @if (!string.IsNullOrEmpty(Model.EmailKhachHang))
+                                        {
+                                            <tr>
+                                                <td><strong>Email:</strong></td>
+                                                <td>@Model.EmailKhachHang</td>
+                                            </tr>
+                                        }
+                                        @if (!string.IsNullOrEmpty(Model.SoDienThoai))
+                                        {
+                                            <tr>
+                                                <td><strong>SĐT:</strong></td>
+                                                <td>@Model.SoDienThoai</td>
+                                            </tr>
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card">
+                                    <h6 class="text-success fw-bold mb-3">
+                                        <i class="fas fa-shopping-cart me-2"></i>Chi tiết đơn hàng
+                                    </h6>
+                                    <table class="table table-sm table-borderless">
+                                        <tr>
+                                            <td width="120"><strong>Ngày tạo:</strong></td>
+                                            <td>@Model.NgayTao?.ToString("dd/MM/yyyy HH:mm")</td>
+                                        </tr>
+                                        @if (!string.IsNullOrEmpty(Model.TenNguoiTao))
+                                        {
+                                            <tr>
+                                                <td><strong>Người tạo:</strong></td>
+                                                <td>@Model.TenNguoiTao</td>
+                                            </tr>
+                                        }
+                                        @if (Model.NgayThanhToan.HasValue)
+                                        {
+                                            <tr>
+                                                <td><strong>Thanh toán:</strong></td>
+                                                <td>@Model.NgayThanhToan?.ToString("dd/MM/yyyy HH:mm")</td>
+                                            </tr>
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.DiaChiGiaoHang))
+                        {
+                            <div class="info-card">
+                                <h6 class="text-info fw-bold mb-3">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Địa chỉ giao hàng
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <table class="table table-sm table-borderless">
+                                            @if (!string.IsNullOrEmpty(Model.TenNguoiNhan))
+                                            {
+                                                <tr>
+                                                    <td width="120"><strong>Người nhận:</strong></td>
+                                                    <td>@Model.TenNguoiNhan</td>
+                                                </tr>
+                                            }
+                                            @if (!string.IsNullOrEmpty(Model.SoDienThoaiNhan))
+                                            {
+                                                <tr>
+                                                    <td><strong>SĐT nhận:</strong></td>
+                                                    <td>@Model.SoDienThoaiNhan</td>
+                                                </tr>
+                                            }
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Địa chỉ:</strong><br>
+                                        <span>@Model.DiaChiGiaoHang</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.GhiChu))
+                        {
+                            <div class="info-card">
+                                <h6 class="text-warning fw-bold mb-3">
+                                    <i class="fas fa-sticky-note me-2"></i>Ghi chú
+                                </h6>
+                                <div class="alert alert-light border-0">
+                                    @Html.Raw(Model.GhiChu.Replace("\n", "<br>"))
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="modern-card">
+                    <div class="card-header-modern">
+                        <i class="fas fa-shopping-bag me-2"></i>Sản phẩm (@Model.ChiTietSanPhams.Count)
+                    </div>
+                    <div class="table-responsive">
+                        <table class="modern-table table mb-0">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-image me-2"></i>Hình ảnh</th>
+                                    <th><i class="fas fa-box me-2"></i>Sản phẩm</th>
+                                    <th><i class="fas fa-sort-numeric-up me-2"></i>SL</th>
+                                    <th><i class="fas fa-tag me-2"></i>Đơn giá</th>
+                                    <th><i class="fas fa-percentage me-2"></i>Giá sau giảm</th>
+                                    <th><i class="fas fa-calculator me-2"></i>Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.ChiTietSanPhams)
+                                {
+                                    <tr>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(item.HinhAnh))
+                                            {
+                                                <img src="@item.HinhAnh" alt="@item.TenSanPham" class="product-image">
+                                            }
+                                            else
+                                            {
+                                                <div class="d-flex align-items-center justify-content-center product-image bg-light">
+                                                    <i class="fas fa-image text-muted"></i>
+                                                </div>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <strong class="text-primary">@item.TenSanPham</strong>
+                                                <div class="mt-1">
+                                                    @if (!string.IsNullOrEmpty(item.MauSac))
+                                                    {
+                                                        <span class="status-badge bg-info me-1">@item.MauSac</span>
+                                                    }
+                                                    @if (!string.IsNullOrEmpty(item.Size))
+                                                    {
+                                                        <span class="status-badge bg-warning me-1">@item.Size</span>
+                                                    }
+                                                    @if (!string.IsNullOrEmpty(item.ChatLieu))
+                                                    {
+                                                        <span class="status-badge bg-secondary">@item.ChatLieu</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="status-badge bg-primary">@item.SoLuongSanPham</span>
+                                        </td>
+                                        <td class="text-end">
+                                            @if (item.GiaSanPham != item.GiaSauGiamGia)
+                                            {
+                                                <span class="text-decoration-line-through text-muted">@item.GiaSanPham.ToString("N0")đ</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@item.GiaSanPham.ToString("N0")đ</span>
+                                            }
+                                        </td>
+                                        <td class="text-end">
+                                            <strong class="text-success">@item.GiaSauGiamGia.ToString("N0")đ</strong>
+                                        </td>
+                                        <td class="text-end">
+                                            <strong class="text-primary fs-6">@((item.GiaSauGiamGia * item.SoLuongSanPham).ToString("N0"))đ</strong>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="modern-card">
+                    <div class="card-header-modern">
+                        <i class="fas fa-calculator me-2"></i>Tổng kết đơn hàng
+                    </div>
+                    <div class="p-4">
+                        <div class="row">
+                            <div class="col-md-6 offset-md-6">
+                                <div class="summary-table">
+                                    <table class="table table-sm mb-0">
+                                        <tr>
+                                            <td><strong>Tổng tiền hàng:</strong></td>
+                                            <td class="text-end">@Model.TongTienTruocGiam.ToString("N0")đ</td>
+                                        </tr>
+                                        @if (Model.TienGiam > 0)
+                                        {
+                                            <tr class="text-success">
+                                                <td><strong>Giảm giá:</strong></td>
+                                                <td class="text-end">-@Model.TienGiam.ToString("N0")đ</td>
+                                            </tr>
+                                        }
+                                        <tr class="border-top border-primary border-3">
+                                            <td><strong>Tổng thanh toán:</strong></td>
+                                            <td class="text-end"><strong class="text-primary fs-4">@Model.TongTienSauGiam.ToString("N0")đ</strong></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Status & Payment -->
+                <div class="modern-card">
+                    <div class="card-header-modern">
+                        <i class="fas fa-cogs me-2"></i>Trạng thái & Thanh toán
+                    </div>
+                    <div class="p-4">
+                        <div class="info-card">
+                            <label class="form-label fw-bold text-primary">
+                                <i class="fas fa-flag me-2"></i>Trạng thái đơn hàng
+                            </label>
+                            <div class="d-flex align-items-center justify-content-between">
+                                @{
+                                    statusColor = statusColors?.GetValueOrDefault(Model.TrangThaiDonHang, "secondary");
+                                }
+                                <span class="status-badge bg-@statusColor">@Model.TrangThaiDonHang</span>
+                                @if (nextStatuses != null && nextStatuses.Any() && !nextStatuses.All(s => s == "Đã hủy"))
+                                {
+                                    <button class="btn modern-btn btn-primary btn-sm" onclick="showUpdateStatusModal()">
+                                        <i class="fas fa-edit me-1"></i> Cập nhật
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <label class="form-label fw-bold text-success">
+                                <i class="fas fa-credit-card me-2"></i>Trạng thái thanh toán
+                            </label>
+                            <div class="d-flex align-items-center justify-content-between">
+                                @{
+                                    var paymentColor = paymentColors?.GetValueOrDefault(Model.TrangThaiThanhToan, "secondary");
+                                }
+                                <span class="status-badge bg-@paymentColor">@Model.TrangThaiThanhToan</span>
+                                @if (Model.TrangThaiDonHang != "Đã hủy")
+                                {
+                                    <button class="btn modern-btn btn-success btn-sm" onclick="showUpdatePaymentModal()">
+                                        <i class="fas fa-credit-card me-1"></i> Cập nhật
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="modern-card">
+                    <div class="card-header-modern">
+                        <i class="fas fa-bolt me-2"></i>Thao tác nhanh
+                    </div>
+                    <div class="p-4">
+                        @if (Model.TrangThaiDonHang == "Chờ xác nhận")
+                        {
+                            <button class="btn modern-btn btn-success w-100 mb-3" onclick="confirmOrder()">
+                                <i class="fas fa-check me-2"></i>Xác nhận đơn hàng
+                            </button>
+                        }
+
+                        @if (nextStatuses != null && nextStatuses.Contains("Đang giao hàng"))
+                        {
+                            <button class="btn modern-btn btn-primary w-100 mb-3" onclick="quickUpdateStatus('Đang giao hàng')">
+                                <i class="fas fa-truck me-2"></i>Chuyển sang giao hàng
+                            </button>
+                        }
+
+                        @if (nextStatuses != null && nextStatuses.Contains("Hoàn tất"))
+                        {
+                            <button class="btn modern-btn btn-success w-100 mb-3" onclick="quickUpdateStatus('Hoàn tất')">
+                                <i class="fas fa-check-circle me-2"></i>Hoàn tất đơn hàng
+                            </button>
+                        }
+
+                        @if (Model.TrangThaiDonHang != "Hoàn tất" && Model.TrangThaiDonHang != "Đã hủy")
+                        {
+                            <button class="btn modern-btn btn-danger w-100" onclick="showCancelModal()">
+                                <i class="fas fa-times me-2"></i>Hủy đơn hàng
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- Order Timeline -->
+                <div class="modern-card">
+                    <div class="card-header-modern">
+                        <i class="fas fa-history me-2"></i>Lịch sử đơn hàng
+                    </div>
+                    <div class="p-4">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-primary"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1 fw-bold">Đơn hàng được tạo</h6>
+                                    <small class="text-muted">@Model.NgayTao?.ToString("dd/MM/yyyy HH:mm")</small>
+                                </div>
+                            </div>
+
+                            @if (Model.TrangThaiDonHang != "Chờ xác nhận")
+                            {
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-success"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1 fw-bold">Đã xác nhận</h6>
+                                        <small class="text-muted">Được xác nhận bởi @Model.TenNguoiTao</small>
+                                    </div>
+                                </div>
+                            }
+
+                            @if (Model.TrangThaiDonHang == "Đang giao hàng" || Model.TrangThaiDonHang == "Hoàn tất")
+                            {
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-info"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1 fw-bold">Đang giao hàng</h6>
+                                        <small class="text-muted">Đơn hàng đang được vận chuyển</small>
+                                    </div>
+                                </div>
+                            }
+
+                            @if (Model.TrangThaiDonHang == "Hoàn tất")
+                            {
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-success"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1 fw-bold">Hoàn tất</h6>
+                                        <small class="text-muted">Đơn hàng đã được giao thành công</small>
+                                    </div>
+                                </div>
+                            }
+
+                            @if (Model.TrangThaiDonHang == "Đã hủy")
+                            {
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-danger"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1 fw-bold">Đã hủy</h6>
+                                        <small class="text-muted">Đơn hàng đã bị hủy</small>
+                                    </div>
+                                </div>
+                            }
+
+                            @if (Model.NgayThanhToan.HasValue)
+                            {
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-warning"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1 fw-bold">Đã thanh toán</h6>
+                                        <small class="text-muted">@Model.NgayThanhToan?.ToString("dd/MM/yyyy HH:mm")</small>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Status Modal -->
+    <div class="modal fade" id="updateStatusModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i>Cập nhật trạng thái đơn hàng
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form asp-action="UpdateStatus" method="post">
+                    <div class="modal-body p-4">
+                        <input type="hidden" name="IDHoaDon" value="@Model.IDHoaDon" />
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-flag me-2 text-muted"></i>Trạng thái hiện tại
+                            </label>
+                            <input type="text" class="form-control" value="@Model.TrangThaiDonHang" readonly />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-flag me-2 text-primary"></i>Trạng thái mới
+                            </label>
+                            <select name="TrangThaiMoi" class="form-select" required>
+                                @if (nextStatuses != null)
+                                {
+                                    @foreach (var status in nextStatuses.Where(s => s != "Đã hủy"))
+                                    {
+                                        <option value="@status">@status</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-comment me-2 text-info"></i>Ghi chú
+                            </label>
+                            <textarea name="GhiChu" class="form-control" rows="4" placeholder="Ghi chú về việc cập nhật trạng thái..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light p-4">
+                        <button type="button" class="btn modern-btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Hủy
+                        </button>
+                        <button type="submit" class="btn modern-btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Cập nhật
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Payment Modal -->
+    <div class="modal fade" id="updatePaymentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success">
+                    <h5 class="modal-title text-white">
+                        <i class="fas fa-credit-card me-2"></i>Cập nhật trạng thái thanh toán
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="updatePaymentForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body p-4">
+                        <input type="hidden" name="IDHoaDon" value="@Model.IDHoaDon" />
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-credit-card me-2 text-muted"></i>Trạng thái thanh toán hiện tại
+                            </label>
+                            <input type="text" class="form-control" value="@Model.TrangThaiThanhToan" readonly />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-credit-card me-2 text-success"></i>Trạng thái thanh toán mới
+                            </label>
+                            <select name="TrangThaiThanhToan" class="form-select" required>
+                                @if (paymentStatuses != null)
+                                {
+                                    @foreach (var status in paymentStatuses)
+                                    {
+                                        <option value="@status" selected="@(status == Model.TrangThaiThanhToan)">@status</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-calendar me-2 text-info"></i>Ngày thanh toán
+                            </label>
+                            <input type="datetime-local" name="NgayThanhToan" class="form-control"
+                                   value="@(Model.NgayThanhToan?.ToString("yyyy-MM-ddTHH:mm") ?? DateTime.Now.ToString("yyyy-MM-ddTHH:mm"))" />
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light p-4">
+                        <button type="button" class="btn modern-btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Hủy
+                        </button>
+                        <button type="submit" class="btn modern-btn btn-success">
+                            <i class="fas fa-save me-2"></i>Cập nhật
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Order Modal -->
+    <div class="modal fade" id="cancelOrderModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h5 class="modal-title text-white">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Hủy đơn hàng
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form asp-action="CancelOrder" method="post">
+                    <div class="modal-body p-4">
+                        <input type="hidden" name="IDHoaDon" value="@Model.IDHoaDon" />
+                        <div class="alert alert-warning border-0 mb-4">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Cảnh báo!</strong> Bạn có chắc chắn muốn hủy đơn hàng <strong>#@Model.IDHoaDon.ToString().Substring(0, 8)</strong>? Hành động này không thể hoàn tác.
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-comment-slash me-2 text-danger"></i>Lý do hủy <span class="text-danger">*</span>
+                            </label>
+                            <textarea name="LyDoHuy" class="form-control" rows="4" required placeholder="Nhập lý do hủy đơn hàng..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light p-4">
+                        <button type="button" class="btn modern-btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-arrow-left me-2"></i>Không
+                        </button>
+                        <button type="submit" class="btn modern-btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Hủy đơn hàng
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Add loading overlay functionality
+        function showLoading() {
+            document.body.insertAdjacentHTML('beforeend', `
+                <div class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+                     style="background: rgba(0,0,0,0.5); z-index: 9999;" id="loadingOverlay">
+                    <div class="text-center text-white">
+                        <div class="spinner-border mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p>Đang xử lý...</p>
+                    </div>
+                </div>
+            `);
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+
+        function confirmOrder() {
+            if (confirm('Bạn có chắc chắn muốn xác nhận đơn hàng này?')) {
+                showLoading();
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("ConfirmOrder")';
+
+                // Add anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    form.appendChild(token.cloneNode());
+                }
+
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'id';
+                input.value = '@Model.IDHoaDon';
+                form.appendChild(input);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function showUpdateStatusModal() {
+            new bootstrap.Modal(document.getElementById('updateStatusModal')).show();
+        }
+
+        function showUpdatePaymentModal() {
+            new bootstrap.Modal(document.getElementById('updatePaymentModal')).show();
+        }
+
+        function showCancelModal() {
+            new bootstrap.Modal(document.getElementById('cancelOrderModal')).show();
+        }
+
+        async function quickUpdateStatus(newStatus) {
+            if (confirm(`Bạn có chắc chắn muốn chuyển đơn hàng sang trạng thái "${newStatus}"?`)) {
+                showLoading();
+                try {
+                    const response = await fetch('@Url.Action("QuickUpdateStatus")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: JSON.stringify({
+                            IDHoaDon: '@Model.IDHoaDon',
+                            TrangThaiMoi: newStatus,
+                            GhiChu: `Cập nhật nhanh sang trạng thái: ${newStatus}`
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Show success message and reload page
+                        alert(result.message);
+                        window.location.reload();
+                    } else {
+                        alert(result.message);
+                        hideLoading();
+                    }
+                } catch (error) {
+                    alert('Có lỗi xảy ra khi cập nhật trạng thái');
+                    console.error('Error:', error);
+                    hideLoading();
+                }
+            }
+        }
+                // Xử lý form cập nhật trạng thái thanh toán
+        document.getElementById('updatePaymentModal').querySelector('form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            showLoading();
+
+            try {
+                const formData = {
+                    IDHoaDon: '@Model.IDHoaDon',
+                    TrangThaiThanhToan: this.querySelector('[name="TrangThaiThanhToan"]').value,
+                    NgayThanhToan: this.querySelector('[name="NgayThanhToan"]').value,
+                    __RequestVerificationToken: this.querySelector('[name="__RequestVerificationToken"]').value
+                };
+
+                const response = await fetch('@Url.Action("UpdatePayment")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': formData.__RequestVerificationToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                // Kiểm tra content type
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    throw new Error(`Server trả về không phải JSON: ${text.substring(0, 100)}...`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Đóng modal và reload trang
+                    bootstrap.Modal.getInstance(document.getElementById('updatePaymentModal')).hide();
+                    window.location.reload();
+                } else {
+                    alert(`Lỗi: ${result.message || 'Cập nhật không thành công'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Có lỗi xảy ra: ${error.message}`);
+            } finally {
+                hideLoading();
+            }
+        });
+        // Form submission handling
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                showLoading();
+            });
+        });
+
+        // Add smooth animations on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate cards on page load
+            const cards = document.querySelectorAll('.modern-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+
+            // Add ripple effect to buttons
+            document.querySelectorAll('.modern-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('div');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+
+                    ripple.style.cssText = `
+                        position: absolute;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        background: rgba(255,255,255,0.3);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        pointer-events: none;
+                    `;
+
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+
+            // Add CSS animation keyframes
+            const style = document.createElement('style');
+            style.textContent = `
+                @@keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>

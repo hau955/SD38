@@ -23,7 +23,6 @@ namespace AppView.Areas.Auth.ViewModel
 
     public class ResetPasswordViewModel
     {
-        public string UserId { get; set; }
         [Required]
         public string Token { get; set; }
 

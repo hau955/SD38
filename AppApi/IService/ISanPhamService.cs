@@ -6,6 +6,7 @@ namespace AppApi.IService
 {
     public interface ISanPhamService
     {
+        Task<SanPhamGiamGiaView?> GetSanPhamChiTiet(Guid idSanPham);
         Task<List<SanPhamView>> GetAll();
         Task<SanPhamView?> GetByID(Guid id);
         Task<List<SanPhamView>> GetAllSanPhamsAsync();

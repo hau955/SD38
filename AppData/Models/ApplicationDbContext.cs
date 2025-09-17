@@ -28,12 +28,15 @@ namespace AppData.Models
         public DbSet<ChatLieu> ChatLieus { get; set; }
         public DbSet<AnhSanPham> AnhSanPham { get; set; }
 
-        public DbSet<SanPhamGG> SanPhamGiamGias { get; set; }
+        public DbSet<GiamGiaSPCT> GiamGiaSPCT { get; set; }
         public DbSet<GiamGia> GiamGias { get; set; }
         public DbSet<SanPhamCT> SanPhamChiTiets { get; set; }
         public DbSet<MauSac> MauSacs { get; set; }
         public DbSet<Size> Sizes { get; set; }
-
+        public DbSet<GiamGiaDanhMuc> GiamGiaDanhMuc { get; set; }
+        public DbSet<GiamGiaSanPham> GiamGiaSanPham { get; set; }
+        public DbSet<Voucher> Vouchers { get; set; }
+       
         public DbSet<DanhMuc> DanhMucs { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -52,6 +55,12 @@ namespace AppData.Models
                 .WithOne(u => u.GioHang)
                 .HasForeignKey<GioHang>(g => g.IDGioHang)
                 .OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<Voucher>()
+               .HasOne(g => g.HoaDons)
+               .WithOne(u => u.Voucher)
+               .HasForeignKey<Voucher>(g => g.IdVoucher)
+               .OnDelete(DeleteBehavior.Cascade);
+
             builder.Entity<DanhMuc>()
                 .HasMany(d => d.SanPhams)
                 .WithOne(sp => sp.DanhMuc)

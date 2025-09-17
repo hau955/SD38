@@ -23,7 +23,11 @@
         public string TenSanPham { get; set; }
         public int SoLuong { get; set; }
         public decimal DonGia { get; set; }
-        public decimal ThanhTien => SoLuong * DonGia;
+        public decimal GiaSauGiamGia { get; set; }
+        public decimal GiaDuocGiam => (DonGia - GiaSauGiamGia) * SoLuong;
+        public decimal ThanhTien => GiaSauGiamGia * SoLuong;
+
+        
     }
 
 }

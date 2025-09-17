@@ -23,6 +23,7 @@
         public OrderSummaryDto Orders { get; set; } = new();
         public CustomerSummaryDto Customers { get; set; } = new();
         public InventorySummaryDto Inventory { get; set; } = new();
+        public EmployeeSummaryDto Employees { get; set; } = new();
     }
 
     public class RevenueSummaryDto
@@ -185,5 +186,48 @@
         public decimal Value { get; set; }
         public string Unit { get; set; } = "VND";
         public decimal? CompareToPreviousPeriod { get; set; }
+    }
+
+    public class EmployeeReportDto
+    {
+        public List<EmployeePerformanceDto> TopPerformers { get; set; } = new();
+        public List<EmployeeActivityDto> EmployeeActivities { get; set; } = new();
+        public EmployeeSummaryDto Summary { get; set; } = new();
+    }
+
+    public class EmployeePerformanceDto
+    {
+        public int EmployeeId { get; set; }
+        public string EmployeeName { get; set; } = string.Empty;
+        // Thống kê hiệu suất
+        public int OrdersProcessed { get; set; }
+        public decimal RevenueGenerated { get; set; }
+        public int NewCustomersAcquired { get; set; }
+        public decimal AverageOrderValue { get; set; }
+        public decimal ConversionRate { get; set; }
+
+        // Đánh giá
+        public double PerformanceRating { get; set; } // 1-5 sao
+        public DateTime HireDate { get; set; }
+    }
+
+    public class EmployeeActivityDto
+    {
+        public DateTime Date { get; set; }
+        public int ActiveEmployees { get; set; }
+        public int OnLeaveEmployees { get; set; }
+        public int NewHires { get; set; }
+        public int Terminations { get; set; }
+    }
+
+    public class EmployeeSummaryDto
+    {
+        public int TotalEmployees { get; set; }
+        public int ActiveEmployees { get; set; }
+        public int OnLeaveEmployees { get; set; }
+        public decimal TurnoverRate { get; set; }
+        public decimal AverageTenure { get; set; } // Số năm trung bình
+        public Dictionary<string, int> EmployeesByDepartment { get; set; } = new();
+        public Dictionary<string, int> EmployeesByPosition { get; set; } = new();
     }
 }

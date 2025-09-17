@@ -8,19 +8,21 @@ namespace AppApi.Service
     public class BanHangService : IBanHangService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IGiamGiaService _giamGiaService;
         private readonly IConfiguration _config;
-        public BanHangService(ApplicationDbContext context, IConfiguration config)
+        public BanHangService(ApplicationDbContext context, IConfiguration config, IGiamGiaService giamGiaService)
         {
             _context = context;
             _config = config;
+            _giamGiaService = giamGiaService;
         }
+
         public async Task<(bool IsSuccess, string Message, Guid? HoaDonId)> BanTaiQuayAsync(BanHangViewModel request)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                // ✅ Kiểm tra số lượng hóa đơn chờ
                 if (request.IsHoaDonCho)
                 {
                     var hoaDonChoCount = await _context.HoaDons
@@ -37,20 +39,20 @@ namespace AppApi.Service
                     IDHoaDon = Guid.NewGuid(),
                     NgayTao = DateTime.Now,
                     IDUser = new Guid("07E1FC26-D86A-44F6-AC5A-F28452D4E22B"),
-
                     IDNguoiTao = request.IDNguoiTao,
                     TrangThaiDonHang = request.IsHoaDonCho ? "Chờ thanh toán" : "Đã bán",
                     TrangThaiThanhToan = request.IsHoaDonCho ? "Chưa thanh toán" : "Đã thanh toán",
                     GhiChu = request.GhiChu
                 };
 
-                decimal tongTien = 0;
+                decimal tongTienTruocGiam = 0m;
+                decimal tongTienSauGiam = 0m;
 
                 foreach (var sp in request.DanhSachSanPham)
                 {
                     var sanPhamCT = await _context.SanPhamChiTiets
-                       .Include(x => x.SanPham)
-                       .FirstOrDefaultAsync(x => x.IDSanPhamCT == sp.IDSanPhamCT);
+                        .Include(x => x.SanPham)
+                        .FirstOrDefaultAsync(x => x.IDSanPhamCT == sp.IDSanPhamCT);
 
                     if (sanPhamCT == null)
                         return (false, $"Không tìm thấy sản phẩm chi tiết {sp.IDSanPhamCT}", null);
@@ -58,32 +60,51 @@ namespace AppApi.Service
                     if (sanPhamCT.SoLuongTonKho < sp.SoLuong)
                         return (false, $"Sản phẩm \"{sanPhamCT.SanPham?.TenSanPham}\" không đủ tồn kho", null);
 
-                    // ✅ Trừ kho luôn (nếu bạn muốn hóa đơn chờ cũng trừ kho)
+                    // Trừ kho
                     sanPhamCT.SoLuongTonKho -= sp.SoLuong;
+                    _context.Entry(sanPhamCT).Property(x => x.SoLuongTonKho).IsModified = true;
 
-                    var thanhTien = sanPhamCT.GiaBan * sp.SoLuong;
-                    tongTien += thanhTien;
+                    // Tính giá bằng service (áp dụng giảm sản phẩm hoặc danh mục)
+                    var danhMucId = sanPhamCT.SanPham?.DanhMucId ?? Guid.Empty;
+                    var giamGiaInfo = await _giamGiaService.TinhGiaSauGiamAsync(sanPhamCT.IDSanPhamCT, danhMucId);
 
+                    if (!giamGiaInfo.HasValue)
+                        return (false, $"Không tính được giá cho sản phẩm {sanPhamCT.SanPham?.TenSanPham}", null);
+
+                    var (giaGocInfo, giaSauGiamInfo, soTienGiamInfo) = giamGiaInfo.Value;
+
+                    decimal giaGoc = giaGocInfo;
+                    decimal giaSauGiam = giaSauGiamInfo;
+
+                    // Thành tiền
+                    decimal thanhTienGoc = giaGoc * sp.SoLuong;
+                    decimal thanhTienSauGiam = giaSauGiam * sp.SoLuong;
+
+                    tongTienTruocGiam += thanhTienGoc;
+                    tongTienSauGiam += thanhTienSauGiam;
+
+                    // Thêm chi tiết hóa đơn
                     hoaDon.HoaDonChiTiets.Add(new HoaDonCT
                     {
                         IDHoaDonChiTiet = Guid.NewGuid(),
                         IDHoaDon = hoaDon.IDHoaDon,
                         IDSanPhamCT = sanPhamCT.IDSanPhamCT,
-                        TenSanPham = sanPhamCT.SanPham!.TenSanPham ,
+                        TenSanPham = sanPhamCT.SanPham!.TenSanPham,
                         SoLuongSanPham = sp.SoLuong,
-                        GiaSanPham = sanPhamCT.GiaBan,
-                        GiaSauGiamGia = sanPhamCT.GiaBan,
+                        GiaSanPham = giaGoc,
+                        GiaSauGiamGia = giaSauGiam,
                         NgayTao = DateTime.Now,
                         TrangThai = true
                     });
+
+                    // Attach entity state if needed (sanPhamCT already tracked because we loaded it)
                 }
 
-                decimal tienGiam = 0;
-
-                hoaDon.TongTienTruocGiam = tongTien;
-                hoaDon.TienGiam = tienGiam;
-                hoaDon.TongTienSauGiam = tongTien - tienGiam;
-                hoaDon.TienGiamHoaDon = tienGiam;
+                // Cập nhật tổng
+                hoaDon.TongTienTruocGiam = tongTienTruocGiam;
+                hoaDon.TongTienSauGiam = tongTienSauGiam;
+                hoaDon.TienGiam = tongTienTruocGiam - tongTienSauGiam;
+                hoaDon.TienGiamHoaDon = hoaDon.TienGiam;
 
                 _context.HoaDons.Add(hoaDon);
                 await _context.SaveChangesAsync();
@@ -103,6 +124,7 @@ namespace AppApi.Service
                 return (false, $"Lỗi không xác định: {ex.Message}", null);
             }
         }
+
         public async Task<(bool IsSuccess, string Message)> ThanhToanHoaDonChoAsync(ThanhToanHoaDonRequest request)
         {
             var hoaDon = await _context.HoaDons
@@ -119,12 +141,13 @@ namespace AppApi.Service
             hoaDon.TrangThaiThanhToan = "Đã thanh toán";
             hoaDon.NgayThanhToan = DateTime.Now;
             hoaDon.NgaySua = DateTime.Now;
-           
-            hoaDon.GhiChu += " | " + request.GhiChuThanhToan;
+
+            hoaDon.GhiChu += string.IsNullOrWhiteSpace(request.GhiChuThanhToan) ? "" : " | " + request.GhiChuThanhToan;
 
             await _context.SaveChangesAsync();
             return (true, "Thanh toán hóa đơn thành công");
         }
+
         public async Task<(bool IsSuccess, string Message)> ThemSanPhamVaoHoaDonChoAsync(ThemSanPham request)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -136,7 +159,8 @@ namespace AppApi.Service
                 if (hoaDon == null || hoaDon.TrangThaiThanhToan == "Đã thanh toán")
                     return (false, "Hóa đơn không hợp lệ hoặc đã thanh toán");
 
-                decimal tongTienThem = 0;
+                decimal tongTienGocThem = 0m;
+                decimal tongTienSauGiamThem = 0m;
 
                 foreach (var sp in request.DanhSachSanPham)
                 {
@@ -144,40 +168,53 @@ namespace AppApi.Service
                         .Include(x => x.SanPham)
                         .FirstOrDefaultAsync(x => x.IDSanPhamCT == sp.IDSanPhamCT);
 
-
                     if (sanPhamCT == null)
                         return (false, $"Không tìm thấy sản phẩm chi tiết {sp.IDSanPhamCT}");
 
                     if (sanPhamCT.SoLuongTonKho < sp.SoLuong)
-                        return (false, $"Sản phẩm không đủ tồn kho");
+                        return (false, $"Sản phẩm {sanPhamCT.SanPham?.TenSanPham} không đủ tồn kho");
 
+                    // Trừ tồn kho
                     sanPhamCT.SoLuongTonKho -= sp.SoLuong;
-
-                    if (_context.Entry(sanPhamCT).State == EntityState.Detached)
-                        _context.SanPhamChiTiets.Attach(sanPhamCT);
-
                     _context.Entry(sanPhamCT).Property(x => x.SoLuongTonKho).IsModified = true;
 
-                    var thanhTien = sanPhamCT.GiaBan * sp.SoLuong;
-                    tongTienThem += thanhTien;
+                    // Tính giá qua service
+                    var danhMucId = sanPhamCT.SanPham?.DanhMucId ?? Guid.Empty;
+                    var tinhGia = await _giamGiaService.TinhGiaSauGiamAsync(sanPhamCT.IDSanPhamCT, danhMucId);
 
+                    if (!tinhGia.HasValue)
+                        return (false, $"Không tính được giá cho sản phẩm {sanPhamCT.SanPham?.TenSanPham}");
+
+                    decimal giaGoc = tinhGia.Value.GiaGoc;
+                    decimal giaSauGiam = tinhGia.Value.GiaSauGiam;
+
+                    // Cộng tổng
+                    tongTienGocThem += giaGoc * sp.SoLuong;
+                    tongTienSauGiamThem += giaSauGiam * sp.SoLuong;
+
+                    // Thêm chi tiết hóa đơn
                     _context.HoaDonChiTiets.Add(new HoaDonCT
                     {
                         IDHoaDonChiTiet = Guid.NewGuid(),
                         IDHoaDon = hoaDon.IDHoaDon,
                         IDSanPhamCT = sanPhamCT.IDSanPhamCT,
-                        TenSanPham = sanPhamCT.SanPham!.TenSanPham ,
+                        TenSanPham = sanPhamCT.SanPham!.TenSanPham,
                         SoLuongSanPham = sp.SoLuong,
-                        GiaSanPham = sanPhamCT.GiaBan,
-                        GiaSauGiamGia = sanPhamCT.GiaBan,
+                        GiaSanPham = giaGoc,
+                        GiaSauGiamGia = giaSauGiam,
                         NgayTao = DateTime.Now,
                         TrangThai = true
                     });
-
                 }
 
-                hoaDon.TongTienTruocGiam += tongTienThem;
-                hoaDon.TongTienSauGiam += tongTienThem;
+                // Update totals
+                // Update totals
+                hoaDon.TongTienTruocGiam += tongTienGocThem;
+                hoaDon.TongTienSauGiam += tongTienSauGiamThem;
+                hoaDon.TienGiam = hoaDon.TongTienTruocGiam - hoaDon.TongTienSauGiam;
+                hoaDon.TienGiamHoaDon = hoaDon.TienGiam;
+
+
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -195,7 +232,6 @@ namespace AppApi.Service
                 var inner = ex.InnerException?.Message ?? ex.Message;
                 return (false, $"Lỗi hệ thống chi tiết: {inner}");
             }
-
         }
 
         public async Task<(bool IsSuccess, string Message)> TruSanPhamKhoiHoaDonChoAsync(TruSanPham request)
@@ -210,7 +246,6 @@ namespace AppApi.Service
                 if (hoaDon == null || hoaDon.TrangThaiThanhToan == "Đã thanh toán")
                     return (false, "Hóa đơn không tồn tại hoặc đã thanh toán");
 
-                // ✅ Tìm chi tiết hóa đơn theo ID sản phẩm chi tiết
                 var chiTiet = hoaDon.HoaDonChiTiets
                     .FirstOrDefault(x => x.IDSanPhamCT == request.IDSanPhamCT && x.TrangThai);
 
@@ -220,20 +255,25 @@ namespace AppApi.Service
                 if (request.SoLuong > chiTiet.SoLuongSanPham)
                     return (false, "Số lượng cần trừ lớn hơn số lượng trong hóa đơn");
 
-                // ✅ Cộng lại tồn kho
+                // Tìm SanPhamCT để trả kho
                 var sanPhamCT = await _context.SanPhamChiTiets
                     .FirstOrDefaultAsync(sp => sp.IDSanPhamCT == request.IDSanPhamCT);
 
                 if (sanPhamCT == null)
                     return (false, "Không tìm thấy sản phẩm chi tiết");
 
+                // Tính tiền trừ: phải tách tiền gốc và tiền sau giảm
+                decimal giaGoc = chiTiet.GiaSanPham;
+                decimal giaSauGiam = chiTiet.GiaSauGiamGia;
+                decimal tienTruTruocGiam = giaGoc * request.SoLuong;
+                decimal tienTruSauGiam = giaSauGiam * request.SoLuong;
+
+                // Trả tồn kho
                 sanPhamCT.SoLuongTonKho += request.SoLuong;
+                _context.SanPhamChiTiets.Update(sanPhamCT);
 
-                // ✅ Trừ số lượng, hoặc xóa nếu hết
-                var tienTru = request.SoLuong * chiTiet.GiaSauGiamGia;
-
+                // Cập nhật chi tiết hóa đơn
                 chiTiet.SoLuongSanPham -= request.SoLuong;
-
                 if (chiTiet.SoLuongSanPham <= 0)
                 {
                     _context.HoaDonChiTiets.Remove(chiTiet);
@@ -244,12 +284,13 @@ namespace AppApi.Service
                     _context.HoaDonChiTiets.Update(chiTiet);
                 }
 
-                // ✅ Cập nhật tổng tiền
-                hoaDon.TongTienTruocGiam -= tienTru;
-                hoaDon.TongTienSauGiam -= tienTru;
+                // Cập nhật tổng tiền hóa đơn: trừ đúng từng trường hợp
+                hoaDon.TongTienTruocGiam -= tienTruTruocGiam;
+                hoaDon.TongTienSauGiam -= tienTruSauGiam;
+                hoaDon.TienGiam = hoaDon.TongTienTruocGiam - hoaDon.TongTienSauGiam;
+                hoaDon.TienGiamHoaDon = hoaDon.TienGiam;
 
                 _context.HoaDons.Update(hoaDon);
-                _context.SanPhamChiTiets.Update(sanPhamCT);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -278,16 +319,14 @@ namespace AppApi.Service
                 if (hoaDon.TrangThaiThanhToan == "Đã thanh toán")
                     return (false, "Hóa đơn đã thanh toán, không thể hủy");
 
-                if (hoaDon.TrangThaiThanhToan == "Đã hủy")
-                    return (false, "Hóa đơn đã bị hủy trước đó");
-                if (hoaDon.TrangThaiDonHang == "Đã hủy")
+                if (hoaDon.TrangThaiDonHang == "Đã hủy" || hoaDon.TrangThaiThanhToan == "Đã hủy")
                     return (false, "Hóa đơn đã bị hủy trước đó");
 
-                // ✅ Trả lại tồn kho & xóa chi tiết hóa đơn
+                // Trả lại tồn kho & xóa chi tiết hóa đơn
                 foreach (var ct in hoaDon.HoaDonChiTiets.ToList())
                 {
                     var spCT = await _context.SanPhamChiTiets
-                        .FirstOrDefaultAsync(x => x.IDSanPham == ct.IDSanPhamCT);
+                        .FirstOrDefaultAsync(x => x.IDSanPhamCT == ct.IDSanPhamCT);
 
                     if (spCT != null)
                     {
@@ -295,14 +334,17 @@ namespace AppApi.Service
                         _context.SanPhamChiTiets.Update(spCT);
                     }
 
-                    _context.HoaDonChiTiets.Remove(ct); // 👉 XÓA
+                    _context.HoaDonChiTiets.Remove(ct); // xóa chi tiết
                 }
 
-                // ✅ Cập nhật hóa đơn
+                // Cập nhật hóa đơn
                 hoaDon.TongTienTruocGiam = 0;
                 hoaDon.TongTienSauGiam = 0;
+                hoaDon.TienGiam = 0;
+                hoaDon.TienGiamHoaDon = 0;
+                hoaDon.TrangThaiDonHang = "Đã hủy";
                 hoaDon.TrangThaiThanhToan = "Đã hủy";
-                hoaDon.NgayTao = DateTime.Now;
+                hoaDon.NgaySua = DateTime.Now;
 
                 _context.HoaDons.Update(hoaDon);
 
@@ -318,41 +360,35 @@ namespace AppApi.Service
             }
         }
 
-
         public async Task<(bool IsSuccess, string Message, HoaDonChiTietViewModel? Data)> XemChiTietHoaDonAsync(Guid idHoaDon)
         {
             var hoaDon = await _context.HoaDons
-     .Include(h => h.HoaDonChiTiets)
-         .ThenInclude(ct => ct.SanPhamCT)
-             .ThenInclude(spct => spct.SanPham)
-     .Include(h => h.HoaDonChiTiets)
-         .ThenInclude(ct => ct.SanPhamCT)
-             .ThenInclude(spct => spct.SizeAo)
-     .Include(h => h.HoaDonChiTiets)
-         .ThenInclude(ct => ct.SanPhamCT)
-             .ThenInclude(spct => spct.MauSac)
-             .Include(h => h.HoaDonChiTiets)
-         .ThenInclude(ct => ct.SanPhamCT)
-             .ThenInclude(spct => spct.ChatLieu)
-             .Include(h => h.User2).Include(h => h.User)
-     .FirstOrDefaultAsync(h => h.IDHoaDon == idHoaDon);
-                
-     
-
+                .Include(h => h.HoaDonChiTiets)
+                    .ThenInclude(ct => ct.SanPhamCT)
+                        .ThenInclude(spct => spct.SanPham)
+                .Include(h => h.HoaDonChiTiets)
+                    .ThenInclude(ct => ct.SanPhamCT)
+                        .ThenInclude(spct => spct.SizeAo)
+                .Include(h => h.HoaDonChiTiets)
+                    .ThenInclude(ct => ct.SanPhamCT)
+                        .ThenInclude(spct => spct.MauSac)
+                .Include(h => h.HoaDonChiTiets)
+                    .ThenInclude(ct => ct.SanPhamCT)
+                        .ThenInclude(spct => spct.ChatLieu)
+                .Include(h => h.User2)
+                .Include(h => h.User)
+                .FirstOrDefaultAsync(h => h.IDHoaDon == idHoaDon);
 
             if (hoaDon == null)
-            {
                 return (false, "Không tìm thấy hóa đơn", null);
-            }
 
             var result = new HoaDonChiTietViewModel
             {
                 IDHoaDon = hoaDon.IDHoaDon,
                 NgayTao = hoaDon.NgayTao ?? DateTime.Now,
                 NgayThanhToan = hoaDon.NgayThanhToan ?? DateTime.Now,
-
                 TenNguoiTao = hoaDon.User2?.HoTen ?? "Không rõ",
-                NguoiMuaHang=hoaDon.User?.HoTen?? "Không rõ",
+                NguoiMuaHang = hoaDon.User?.HoTen ?? "Không rõ",
                 TrangThaiDonHang = hoaDon.TrangThaiDonHang,
                 TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
                 TongTienTruocGiam = hoaDon.TongTienTruocGiam,
@@ -360,20 +396,20 @@ namespace AppApi.Service
                 TongTienSauGiam = hoaDon.TongTienSauGiam,
                 GhiChu = hoaDon.GhiChu,
                 DanhSachSanPham = hoaDon.HoaDonChiTiets
-    .GroupBy(ct => ct.IDSanPhamCT)
-    .Select(g =>
-    {
-        var first = g.First();
-        return new ChiTietSanPhamViewModel
-        {
-            IDSanPhamCT = g.Key,
-            TenSanPham = $"{first.SanPhamCT.SanPham.TenSanPham} - Chất liệu: {first.SanPhamCT.ChatLieu.TenChatLieu} - Màu: {first.SanPhamCT.MauSac.TenMau} - Size: {first.SanPhamCT.SizeAo.SoSize}  - {first.SanPhamCT.GiaBan:N0} đ",
-            SoLuong = g.Sum(x => x.SoLuongSanPham),
-            DonGia = first.GiaSanPham
-        };
-    })
-    .ToList()
-
+                    .GroupBy(ct => ct.IDSanPhamCT)
+                    .Select(g =>
+                    {
+                        var first = g.First();
+                        return new ChiTietSanPhamViewModel
+                        {
+                            IDSanPhamCT = g.Key,
+                            TenSanPham = $"{first.SanPhamCT?.SanPham?.TenSanPham} - Chất liệu: {first.SanPhamCT?.ChatLieu?.TenChatLieu} - Màu: {first.SanPhamCT?.MauSac?.TenMau} - Size: {first.SanPhamCT?.SizeAo?.SoSize}  - {first.GiaSanPham:N0} đ",
+                            SoLuong = g.Sum(x => x.SoLuongSanPham),
+                            DonGia = first.GiaSanPham,
+                            GiaSauGiamGia= first.GiaSauGiamGia
+                        };
+                    })
+                    .ToList()
             };
 
             return (true, "Lấy chi tiết hóa đơn thành công", result);
@@ -390,7 +426,7 @@ namespace AppApi.Service
             var vnp_Url = _config["VnPay:Url"];
             var vnp_Returnurl = _config["VnPay:ReturnUrl"];
 
-            var price = (int)hoaDon.TongTienSauGiam * 100;
+            var price = (int)(hoaDon.TongTienSauGiam * 100);
 
             var vnPay = new VnPayLibrary();
             vnPay.AddRequestData("vnp_Version", "2.1.0");
@@ -399,15 +435,13 @@ namespace AppApi.Service
             vnPay.AddRequestData("vnp_Amount", price.ToString());
             vnPay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
             vnPay.AddRequestData("vnp_CurrCode", "VND");
-            vnPay.AddRequestData("vnp_IpAddr", "127.0.0.1"); // dùng IP client nếu có
+            vnPay.AddRequestData("vnp_IpAddr", "127.0.0.1");
             vnPay.AddRequestData("vnp_Locale", "vn");
             vnPay.AddRequestData("vnp_OrderInfo", "Thanh toan hoa don #" + hoaDonId);
             vnPay.AddRequestData("vnp_OrderType", "other");
             vnPay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
             vnPay.AddRequestData("vnp_TxnRef", hoaDonId.ToString());
             vnPay.AddRequestData("vnp_SecureHashType", "HMACSHA512");
-
-
 
             var paymentUrl = vnPay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
             return paymentUrl;

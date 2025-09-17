@@ -466,6 +466,10 @@
                                         </small>
                                     </div>
                                 </div>
+                                <div class="text-center mt-2">
+                                    <strong>Giá bán:</strong>
+                                    <span class="product-price text-success fw-bold">0 VNĐ</span>
+                                </div>
                             </div>
                         </div>
                     }
@@ -588,6 +592,7 @@
                                 <th><i class="fas fa-tag me-2"></i>Tên sản phẩm</th>
                                 <th class="text-center"><i class="fas fa-cubes me-2"></i>Số lượng</th>
                                 <th class="text-end"><i class="fas fa-money-bill me-2"></i>Đơn giá</th>
+                                <th class="text-end"><i class="fas fa-money-bill me-2"></i>Giảm</th>
                                 <th class="text-end"><i class="fas fa-calculator me-2"></i>Thành tiền</th>
                                 <th class="text-center"><i class="fas fa-cogs me-2"></i>Thao tác</th>
                             </tr>
@@ -607,6 +612,7 @@
                                         <span class="badge bg-info px-3 py-2">@sp.SoLuong</span>
                                     </td>
                                     <td class="text-end fw-semibold">@sp.DonGia.ToString("N0") VNĐ</td>
+                                    <td class="text-end fw-semibold">@sp.GiaDuocGiam.ToString("N0") VNĐ</td>
                                     <td class="text-end fw-bold text-success">@sp.ThanhTien.ToString("N0") VNĐ</td>
                                     <td class="text-center">
                                         <form asp-area="BanHangTaiQuay" asp-controller="BanHang" asp-action="TruSanPhamKhoiHoaDonCho" method="post" class="mb-0">
@@ -634,10 +640,22 @@
                                 </td>
                                 <td></td>
                             </tr>
+                            <tr style="border-top: 2px solid #e5e7eb;">
+                                <td colspan="4" class="text-end fw-bold fs-5 p-3">
+                                    <i class="fas fa-calculator me-2 text-primary"></i>
+                                    Tiền được giảm:
+                                </td>
+                                <td class="text-end fw-bold fs-5 p-3">
+                                    <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                                        @hd.TienGiam.ToString("N0") VNĐ
+                                    </span>
+                                </td>
+                                <td></td>
+                            </tr>
                             <tr style="background: #f8fafc;">
                                 <td colspan="4" class="text-end fw-bold fs-4 p-3">
                                     <i class="fas fa-money-bill-wave me-2 text-success"></i>
-                                    Tổng tiền sau giảm:
+                                    Thanh Toán:
                                 </td>
                                 <td class="text-end fw-bold fs-4 p-3">
                                     <span class="badge bg-success fs-5 px-4 py-3">
@@ -662,6 +680,7 @@
             ct.MauSac,
             ct.Size,
             ct.ChatLieu,
+            ct.GiaBan,
             ct.SoLuongTonKho,
             spID = sp.IDSanPham
         }))
@@ -818,6 +837,17 @@
         } else {
             alert("Không tìm thấy ID hóa đơn để in.");
         }
+    }
+        function showQuantity(productId, index, detail) {
+        const qtySection = document.getElementById(`qty-${productId}-${index}`);
+        const hiddenInput = qtySection.querySelector('.product-id');
+        const stockSpan = qtySection.querySelector('.stock-count');
+        const priceSpan = qtySection.querySelector('.product-price');
+
+        qtySection.style.display = 'block';
+        hiddenInput.value = detail.IDSanPhamCT;
+        stockSpan.textContent = detail.SoLuongTonKho;
+        priceSpan.textContent = detail.GiaBan.toLocaleString() + " VNĐ"; // Cập nhật giá
     }
 
     // Make functions global

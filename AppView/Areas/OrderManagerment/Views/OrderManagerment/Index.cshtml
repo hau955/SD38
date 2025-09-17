@@ -1,0 +1,1176 @@
+﻿@using AppView.Areas.OrderManagerment.ViewModels
+@using AppView.Helper
+
+@model PagedResult<OrderListViewModel>
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+    var filter = ViewBag.Filter as OrderFilterViewModel;
+    var statistics = ViewBag.Statistics as Dictionary<string, int>;
+    var orderStatuses = ViewBag.OrderStatuses as List<string>;
+    var paymentStatuses = ViewBag.PaymentStatuses as List<string>;
+    var statusColors = ViewBag.StatusColors as Dictionary<string, string>;
+    var paymentColors = ViewBag.PaymentColors as Dictionary<string, string>;
+}
+@{
+    Func<int, string> GetPageUrl = (page) =>
+    {
+        var query = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var key in Context.Request.Query.Keys)
+        {
+            query[key] = Context.Request.Query[key]!;
+        }
+        query["Page"] = page.ToString();
+        return Url.Action("Index", query);
+    };
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --secondary-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            color: white;
+        }
+
+            .stats-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: var(--primary-gradient);
+                transition: all 0.3s ease;
+            }
+
+            .stats-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            }
+
+            .stats-card.bg-warning::before {
+                background: var(--warning-gradient);
+            }
+
+            .stats-card.bg-info::before {
+                background: var(--info-gradient);
+            }
+
+            .stats-card.bg-primary::before {
+                background: var(--primary-gradient);
+            }
+
+            .stats-card.bg-success::before {
+                background: var(--success-gradient);
+            }
+
+            .stats-card.bg-danger::before {
+                background: var(--danger-gradient);
+            }
+
+            .stats-card.bg-secondary::before {
+                background: var(--secondary-gradient);
+            }
+
+        .header-section {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 50px 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .header-section::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+                animation: float 6s ease-in-out infinite;
+            }
+
+        .filter-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .modern-table {
+            background: transparent;
+        }
+
+            .modern-table thead th {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                padding: 1rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                font-size: 0.85rem;
+                letter-spacing: 0.5px;
+            }
+
+            .modern-table tbody tr {
+                border: none;
+                transition: all 0.3s ease;
+            }
+
+                .modern-table tbody tr:hover {
+                    background: rgba(102, 126, 234, 0.1);
+                    transform: scale(1.01);
+                }
+
+            .modern-table td {
+                padding: 1.2rem 1rem;
+                border: none;
+                vertical-align: middle;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            color: white;
+        }
+
+            .status-badge::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+                transition: left 0.5s;
+            }
+
+            .status-badge:hover::before {
+                left: 100%;
+            }
+
+        .bg-warning {
+            background: var(--warning-gradient) !important;
+        }
+
+        .bg-info {
+            background: var(--info-gradient) !important;
+        }
+
+        .bg-success {
+            background: var(--success-gradient) !important;
+        }
+
+        .bg-danger {
+            background: var(--danger-gradient) !important;
+        }
+
+        .bg-primary {
+            background: var(--primary-gradient) !important;
+        }
+
+        .bg-secondary {
+            background: var(--secondary-gradient) !important;
+        }
+
+        .modern-btn {
+            border-radius: 15px;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+            .modern-btn::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                transition: left 0.5s;
+            }
+
+            .modern-btn:hover::before {
+                left: 100%;
+            }
+
+            .modern-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            border: none;
+        }
+
+        .btn-warning {
+            background: var(--warning-gradient);
+            border: none;
+        }
+
+        .btn-danger {
+            background: var(--danger-gradient);
+            border: none;
+        }
+
+        .btn-info {
+            background: var(--info-gradient);
+            border: none;
+        }
+
+        .action-buttons .btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            padding: 0;
+            margin: 0 2px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+            .action-buttons .btn:hover {
+                transform: scale(1.1) rotate(5deg);
+            }
+
+        .pagination .page-link {
+            border-radius: 15px;
+            margin: 0 2px;
+            border: none;
+            background: rgba(255, 255, 255, 0.8);
+            color: #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .pagination .page-item.active .page-link {
+            background: var(--primary-gradient);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .form-control, .form-select {
+            border-radius: 15px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 0.8rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+            .form-control:focus, .form-select:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+                transform: translateY(-2px);
+            }
+
+        .modal-content {
+            border-radius: 25px;
+            border: none;
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .modal-header {
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 25px 25px 0 0;
+        }
+
+        .icon-animation {
+            animation: pulse 2s infinite;
+        }
+
+        .order-id {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+
+        .collapse {
+            transition: all 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-0 fw-bold">
+                        <i class="fas fa-shopping-cart me-3 icon-animation"></i>
+                        Quản lý đơn hàng
+                    </h1>
+                    <p class="mb-0 mt-2 opacity-75">Hệ thống quản lý đơn hàng thông minh</p>
+                </div>
+                <div>
+                    <button class="btn modern-btn btn-light me-2" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel me-2"></i>Xuất Excel
+                    </button>
+                    <button class="btn modern-btn btn-light" onclick="refreshData()">
+                        <i class="fas fa-sync-alt me-2"></i>Làm mới
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid px-4">
+        <!-- Statistics Cards -->
+        <div class="row mb-5">
+            <div class="col-md-2 mb-3">
+                <div class="stats-card bg-warning text-white p-4 h-100" data-status="Chờ xác nhận">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase fw-bold mb-2 opacity-75">Chờ xác nhận</h6>
+                            <h2 class="mb-0 fw-bold">@(statistics?.GetValueOrDefault("Chờ xác nhận", 0) ?? 0)</h2>
+                        </div>
+                        <div class="text-end">
+                            <i class="fas fa-clock fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="stats-card bg-info text-white p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase fw-bold mb-2 opacity-75">Đã xác nhận</h6>
+                            <h2 class="mb-0 fw-bold">@(statistics?.GetValueOrDefault("Đã xác nhận", 0) ?? 0)</h2>
+                        </div>
+                        <div class="text-end">
+                            <i class="fas fa-check fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="stats-card bg-primary text-white p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase fw-bold mb-2 opacity-75">Đang giao</h6>
+                            <h2 class="mb-0 fw-bold">@(statistics?.GetValueOrDefault("Đang giao hàng", 0) ?? 0)</h2>
+                        </div>
+                        <div class="text-end">
+                            <i class="fas fa-truck fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="stats-card bg-success text-white p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase fw-bold mb-2 opacity-75">Hoàn tất</h6>
+                            <h2 class="mb-0 fw-bold">@(statistics?.GetValueOrDefault("Đã bán", 0) ?? 0)</h2>
+                        </div>
+                        <div class="text-end">
+                            <i class="fas fa-check-circle fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="stats-card bg-danger text-white p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase fw-bold mb-2 opacity-75">Đã hủy</h6>
+                            <h2 class="mb-0 fw-bold">@(statistics?.GetValueOrDefault("Đã hủy", 0) ?? 0)</h2>
+                        </div>
+                        <div class="text-end">
+                            <i class="fas fa-times-circle fa-3x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Form -->
+        <div class="filter-card mb-5">
+            <div class="p-4 border-bottom">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-filter me-2 text-primary"></i>Bộ lọc tìm kiếm
+                    <button class="btn btn-sm btn-outline-primary ms-3" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </h5>
+            </div>
+            <div class="collapse show" id="filterCollapse">
+                <div class="p-4">
+                    <form asp-action="Index" method="get" id="filterForm">
+                        <div class="row g-4">
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Trạng thái đơn hàng</label>
+                                <select name="TrangThaiDonHang" class="form-select">
+                                    <option value="">Tất cả trạng thái</option>
+                                    @if (orderStatuses != null)
+                                    {
+                                        @foreach (var status in orderStatuses)
+                                        {
+                                            <option value="@status" selected="@(filter?.TrangThaiDonHang == status)">@status</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Trạng thái thanh toán</label>
+                                <select name="TrangThaiThanhToan" class="form-select">
+                                    <option value="">Tất cả</option>
+                                    @if (paymentStatuses != null)
+                                    {
+                                        @foreach (var status in paymentStatuses)
+                                        {
+                                            <option value="@status" selected="@(filter?.TrangThaiThanhToan == status)">@status</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Từ ngày</label>
+                                <input type="date" name="TuNgay" class="form-control" value="@filter?.TuNgay?.ToString("yyyy-MM-dd")" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Đến ngày</label>
+                                <input type="date" name="DenNgay" class="form-control" value="@filter?.DenNgay?.ToString("yyyy-MM-dd")" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Số điện thoại</label>
+                                <input type="text" name="SoDienThoai" class="form-control" value="@filter?.SoDienThoai" placeholder="Số điện thoại" />
+                            </div>
+                        </div>
+                        <div class="row g-4 mt-2">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Tên khách hàng</label>
+                                <input type="text" name="TenKhachHang" class="form-control" value="@filter?.TenKhachHang" placeholder="Tên khách hàng" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Sắp xếp theo</label>
+                                <select name="SortBy" class="form-select">
+                                    <option value="NgayTao" selected="@(filter?.SortBy == "NgayTao")">Ngày tạo</option>
+                                    <option value="TongTien" selected="@(filter?.SortBy == "TongTien")">Tổng tiền</option>
+                                    <option value="TrangThai" selected="@(filter?.SortBy == "TrangThai")">Trạng thái</option>
+                                    <option value="KhachHang" selected="@(filter?.SortBy == "KhachHang")">Khách hàng</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Thứ tự</label>
+                                <select name="SortDirection" class="form-select">
+                                    <option value="desc" selected="@(filter?.SortDirection == "desc")">Giảm dần</option>
+                                    <option value="asc" selected="@(filter?.SortDirection == "asc")">Tăng dần</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="submit" class="btn modern-btn btn-primary me-3">
+                                    <i class="fas fa-search me-2"></i>Tìm kiếm
+                                </button>
+                                <a asp-action="Index" class="btn modern-btn btn-outline-secondary">
+                                    <i class="fas fa-undo me-2"></i>Đặt lại
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="table-card">
+            <div class="p-4 border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-list me-2 text-primary"></i>
+                        Danh sách đơn hàng (@Model.TotalCount đơn)
+                    </h5>
+                    <div class="d-flex align-items-center">
+                        <label class="me-2 fw-semibold">Hiển thị:</label>
+                        <select class="form-select form-select-sm" style="width: auto;" onchange="changePageSize(this.value)">
+                            <option value="20" selected="@(filter?.PageSize == 20)">20/trang</option>
+                            <option value="50" selected="@(filter?.PageSize == 50)">50/trang</option>
+                            <option value="100" selected="@(filter?.PageSize == 100)">100/trang</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table modern-table mb-0">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-hashtag me-2"></i>Mã đơn</th>
+                            <th><i class="fas fa-user me-2"></i>Khách hàng</th>
+                            <th><i class="fas fa-calendar me-2"></i>Ngày tạo</th>
+                            <th><i class="fas fa-money-bill me-2"></i>Tổng tiền</th>
+                            <th><i class="fas fa-shipping-fast me-2"></i>Trạng thái đơn</th>
+                            <th><i class="fas fa-credit-card me-2"></i>Thanh toán</th>
+                            <th><i class="fas fa-boxes me-2"></i>Số SP</th>
+                            <th><i class="fas fa-cogs me-2"></i>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Items.Any())
+                        {
+                            @foreach (var order in Model.Items)
+                            {
+                                <tr>
+                                    <td>
+                                        <span class="order-id">#@order.IDHoaDon.ToString().Substring(0, 8)</span>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>@order.TenKhachHang</strong>
+                                            @if (!string.IsNullOrEmpty(order.SoDienThoai))
+                                            {
+                                                <br>
+                                                <small class="text-muted">@order.SoDienThoai</small>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="fw-semibold">@order.NgayTao?.ToString("dd/MM/yyyy")</span>
+                                        <br><small class="text-muted">@order.NgayTao?.ToString("HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        <strong class="text-success fs-6">@order.TongTienSauGiam.ToString("N0") đ</strong>
+                                    </td>
+                                    <td>
+                                        @{
+                                            var statusColor = statusColors?.GetValueOrDefault(order.TrangThaiDonHang, "secondary");
+                                        }
+                                        <span class="status-badge bg-@statusColor">@order.TrangThaiDonHang</span>
+                                    </td>
+                                    <td>
+                                        @{
+                                            var paymentColor = paymentColors?.GetValueOrDefault(order.TrangThaiThanhToan, "secondary");
+                                        }
+                                        <span class="status-badge bg-@paymentColor">@order.TrangThaiThanhToan</span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge bg-info">@order.SoLuongSanPham SP</span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="#"
+                                               onclick="event.preventDefault(); window.location.href='@Url.Action("Details", "OrderManagerment", new { area = "OrderManagerment", id = order.IDHoaDon })'"
+                                               class="btn btn-outline-primary"
+                                               title="Xem chi tiết">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (order.TrangThaiDonHang == "Chờ xác nhận")
+                                            {
+                                                <button class="btn btn-outline-success" onclick="confirmOrder('@order.IDHoaDon')" title="Xác nhận">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            }
+                                            @if (order.TrangThaiDonHang != "Hoàn tất" && order.TrangThaiDonHang != "Đã hủy")
+                                            {
+                                                <button class="btn btn-outline-warning" onclick="showUpdateStatusModal('@order.IDHoaDon', '@order.TrangThaiDonHang')" title="Cập nhật trạng thái">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" onclick="showCancelModal('@order.IDHoaDon')" title="Hủy đơn">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-5">
+                                    <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                                    <p class="text-muted fs-5">Không có đơn hàng nào</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <div class="p-4 border-top">
+                    <nav aria-label="Phân trang">
+                        <ul class="pagination justify-content-center mb-3">
+                            @if (Model.HasPreviousPage)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@GetPageUrl(1)"><i class="fas fa-angle-double-left"></i></a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="@GetPageUrl(Model.CurrentPage - 1)"><i class="fas fa-angle-left"></i></a>
+                                </li>
+                            }
+
+                            @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                            {
+                                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="@GetPageUrl(i)">@i</a>
+                                </li>
+                            }
+
+                            @if (Model.HasNextPage)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@GetPageUrl(Model.CurrentPage + 1)"><i class="fas fa-angle-right"></i></a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="@GetPageUrl(Model.TotalPages)"><i class="fas fa-angle-double-right"></i></a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+
+                    <div class="text-center">
+                        <small class="text-muted">
+                            Hiển thị
+                            @{
+                                var pageSize = filter?.PageSize ?? 20;
+                                var start = (Model.CurrentPage - 1) * pageSize + 1;
+                                var end = Math.Min(Model.CurrentPage * pageSize, Model.TotalCount);
+                            }
+                            @start - @end trong tổng số @Model.TotalCount đơn hàng
+                        </small>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Update Status Modal -->
+    <div class="modal fade" id="updateStatusModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i>Cập nhật trạng thái đơn hàng
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="updateStatusForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body p-4">
+                        <input type="hidden" name="IDHoaDon" id="updateOrderId" />
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-flag me-2 text-primary"></i>Trạng thái mới
+                            </label>
+                            <select name="TrangThaiMoi" id="newStatus" class="form-select" required>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-comment me-2 text-primary"></i>Ghi chú
+                            </label>
+                            <textarea name="GhiChu" class="form-control" rows="4"
+                                      placeholder="Ghi chú về việc cập nhật trạng thái..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light p-4">
+                        <button type="button" class="btn modern-btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Hủy
+                        </button>
+                        <button type="submit" class="btn modern-btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Cập nhật
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="cancelOrderModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-times-circle me-2"></i>Hủy đơn hàng
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="cancelOrderForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body p-4">
+                        <input type="hidden" name="IDHoaDon" id="cancelOrderId" />
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-exclamation-triangle me-2 text-danger"></i>Lý do hủy <span class="text-danger">*</span>
+                            </label>
+                            <textarea name="LyDoHuy" class="form-control" rows="4" required
+                                      placeholder="Nhập lý do hủy đơn hàng..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light p-4">
+                        <button type="button" class="btn modern-btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Đóng
+                        </button>
+                        <button type="submit" class="btn modern-btn btn-danger">
+                            <i class="fas fa-trash-alt me-2"></i>Xác nhận hủy
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Constants
+        const orderStatuses = @Html.Raw(Json.Serialize(orderStatuses));
+               const allowedTransitions = {
+            "Chờ xác nhận": ["Đã xác nhận", "Đã hủy"],
+            "Đã xác nhận": ["Đang giao hàng", "Đã hủy"],
+            "Đang giao hàng": ["Hoàn tất", "Đã hủy"],
+            "Hoàn tất": [],
+            "Đã hủy": []
+        };
+
+               function showLoading() {
+            const overlay = document.createElement('div');
+            overlay.id = 'loadingOverlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 9999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                backdrop-filter: blur(3px);
+            `;
+
+            overlay.innerHTML = `
+                <div style="background: white; padding: 2rem; border-radius: 15px; text-align: center;">
+                    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h5 class="text-primary">Đang xử lý yêu cầu...</h5>
+                    <p class="text-muted mt-2">Vui lòng chờ trong giây lát</p>
+                    <div class="progress mt-3" style="height: 6px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+
+        // Quick actions
+        function confirmOrder(orderId) {
+            if (confirm('Bạn có chắc chắn muốn xác nhận đơn hàng này?')) {
+                showLoading();
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("ConfirmOrder")';
+
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    form.appendChild(token.cloneNode());
+                }
+
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'id';
+                input.value = orderId;
+                form.appendChild(input);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function showUpdateStatusModal(orderId, currentStatus) {
+            document.getElementById('updateOrderId').value = orderId;
+
+            // Populate next statuses
+            const nextStatuses = allowedTransitions[currentStatus] || [];
+            const select = document.getElementById('newStatus');
+            select.innerHTML = '';
+
+            nextStatuses.forEach(status => {
+                if (status !== 'Đã hủy') { // Cancel is handled separately
+                    const option = document.createElement('option');
+                    option.value = status;
+                    option.textContent = status;
+                    select.appendChild(option);
+                }
+            });
+
+            if (nextStatuses.length === 0) {
+                select.innerHTML = '<option value="">Không có trạng thái tiếp theo</option>';
+            }
+
+            new bootstrap.Modal(document.getElementById('updateStatusModal')).show();
+        }
+                // Thêm sự kiện submit cho form update status
+        document.getElementById('updateStatusForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            showLoading();
+
+            try {
+                const formData = {
+                    IDHoaDon: document.getElementById('updateOrderId').value,
+                    TrangThaiMoi: document.getElementById('newStatus').value,
+                    GhiChu: document.querySelector('#updateStatusForm textarea[name="GhiChu"]').value,
+                    __RequestVerificationToken: document.querySelector('input[name="__RequestVerificationToken"]').value
+                };
+
+                const response = await fetch('@Url.Action("UpdateStatus")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': formData.__RequestVerificationToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                // Kiểm tra content type
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    throw new Error(`Server trả về không phải JSON: ${text.substring(0, 100)}...`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Đóng modal và reload trang
+                    bootstrap.Modal.getInstance(document.getElementById('updateStatusModal')).hide();
+                    window.location.reload();
+                } else {
+                    alert(`Lỗi: ${result.message || 'Cập nhật không thành công'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Có lỗi xảy ra: ${error.message}`);
+            } finally {
+                hideLoading();
+            }
+        });
+       
+            async function submitCancelOrder(form) {
+            showLoading();
+
+            try {
+                const formData = {
+                    IDHoaDon: document.getElementById('cancelOrderId').value,
+                    LyDoHuy: form.querySelector('[name="LyDoHuy"]').value,
+                    __RequestVerificationToken: document.querySelector('input[name="__RequestVerificationToken"]').value
+                };
+
+                const response = await fetch('@Url.Action("CancelOrder", "OrderManagerment")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': formData.__RequestVerificationToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                // Kiểm tra nếu response không phải JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    throw new Error(`Server trả về không phải JSON: ${text.substring(0, 100)}...`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    if (result.redirectUrl) {
+                        window.location.href = result.redirectUrl;
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    alert(`Lỗi: ${result.message || 'Không thể hủy đơn hàng'}`);
+                }
+            } catch (error) {
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    response: error.response ? await error.response.text() : null
+                });
+
+                let errorMessage = error.message;
+
+                if (error.message.includes('401')) {
+                    errorMessage = 'Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.';
+                }
+                else if (error.message.includes('500')) {
+                    errorMessage = 'Lỗi hệ thống. Vui lòng thử lại sau.';
+                }
+                alert(`Lỗi: ${errorMessage}`);
+            } finally {
+                hideLoading();
+            }
+        }
+                  function showCancelModal(orderId) {
+            // Đảm bảo modal tồn tại
+            const modalElement = document.getElementById('cancelOrderModal');
+            if (!modalElement) {
+                console.error('Không tìm thấy modal hủy đơn hàng');
+                return;
+            }
+
+            // Đặt ID đơn hàng vào form
+            document.getElementById('cancelOrderId').value = orderId;
+
+            // Xử lý sự kiện submit form
+            const form = document.getElementById('cancelOrderForm');
+            form.onsubmit = async function(e) {
+                e.preventDefault();
+
+                const reason = form.querySelector('[name="LyDoHuy"]').value.trim();
+                if (!reason) {
+                    alert('Vui lòng nhập lý do hủy đơn hàng');
+                    return;
+                }
+
+                if (confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
+                    await submitCancelOrder(form);
+                }
+            };
+
+            // Hiển thị modal
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        }
+        function refreshData() {
+            showLoading();
+            window.location.reload();
+        }
+
+        function exportToExcel() {
+            showLoading();
+            const form = document.getElementById('filterForm');
+            const newForm = form.cloneNode(true);
+            newForm.action = '@Url.Action("ExportToExcel")';
+            document.body.appendChild(newForm);
+            newForm.submit();
+            document.body.removeChild(newForm);
+            setTimeout(hideLoading, 2000);
+        }
+
+        function changePageSize(pageSize) {
+            showLoading();
+            const form = document.getElementById('filterForm');
+            const pageSizeInput = document.createElement('input');
+            pageSizeInput.type = 'hidden';
+            pageSizeInput.name = 'PageSize';
+            pageSizeInput.value = pageSize;
+            form.appendChild(pageSizeInput);
+
+            const pageInput = document.createElement('input');
+            pageInput.type = 'hidden';
+            pageInput.name = 'Page';
+            pageInput.value = '1';
+            form.appendChild(pageInput);
+
+            form.submit();
+        }
+
+        // Form submission handling
+        document.getElementById('updateStatusForm').addEventListener('submit', function(e) {
+            showLoading();
+        });
+        document.getElementById('filterForm').addEventListener('submit', function(e) {
+            showLoading();
+        });
+                async function quickUpdateStatus(newStatus) {
+            if (confirm(`Bạn có chắc chắn muốn chuyển đơn hàng sang trạng thái "${newStatus}"?`)) {
+                showLoading();
+                try {
+                    const response = await fetch('@Url.Action("QuickUpdateStatus")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: JSON.stringify({
+                            IDHoaDon: '@@Model.IDHoaDon',
+                            TrangThaiMoi: newStatus,
+                            GhiChu: `Cập nhật nhanh sang trạng thái: ${newStatus}`
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        alert(result.message);
+                        window.location.reload();
+                    } else {
+                        alert(`Lỗi: ${result.message || 'Không có thông báo lỗi từ server'}`);
+                        hideLoading();
+                    }
+                } catch (error) {
+                    alert(`Có lỗi xảy ra: ${error.message}`);
+                    console.error('Error details:', error);
+                    hideLoading();
+                }
+            }
+        }
+        // Auto-refresh statistics every 30 seconds
+               // Thay thế đoạn auto-refresh statistics bằng:
+        setInterval(async function() {
+            try {
+                const response = await fetch('@Url.Action("GetOrderStatistics", "OrderManagerment")');
+                if (!response.ok) {
+                    console.error('Statistics API error:', response.status);
+                    return;
+                }
+
+                const data = await response.json();
+                if (data && data.isSuccess) {
+                    // Update statistics cards
+                    Object.keys(data.data).forEach(key => {
+                        const card = document.querySelector(`[data-status="${key}"]`);
+                        if (card) {
+                            const countElement = card.querySelector('h2');
+                            if (countElement) {
+                                countElement.textContent = data.data[key];
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error refreshing statistics:', error);
+            }
+        }, 30000);
+        // Add smooth animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate cards on page load
+            const cards = document.querySelectorAll('.stats-card, .filter-card, .table-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+
+            // Add ripple effect to buttons
+            document.querySelectorAll('.modern-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('div');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+
+                    ripple.style.cssText = `
+                        position: absolute;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        background: rgba(255,255,255,0.3);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        pointer-events: none;
+                    `;
+
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

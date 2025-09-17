@@ -1,689 +1,1504 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Html
 @{
     var avatarPath = Context.Session.GetString("HinhAnh") ?? "/admin/assets/img/avatars/1.png";
     var hoten = Context.Session.GetString("HoTen");
 }
-
-<!-- =========================================================
-* Sneat - Bootstrap 5 HTML Admin Template - Pro | v1.0.0
-==============================================================
-* Product Page: https://themeselection.com/products/sneat-bootstrap-html-admin-template/
-* Created by: ThemeSelection
-* License: You must have a valid license purchased in order to legally use the theme for your project.
-* Copyright ThemeSelection (https://themeselection.com)
-=========================================================
- -->
-<html lang="vi"
-      class="light-style layout-menu-fixed"
-      dir="ltr"
-      data-theme="theme-default"
-      data-assets-path="/admin/assets/"
-      data-template="vertical-menu-template-free">
+<!DOCTYPE html>
+<html lang="vi" class="light-style" dir="ltr" data-theme="theme-default" data-assets-path="/admin/assets/" data-template="vertical-menu-template-free">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <title>Quản Lý Áo Dài Việt Nam | Hệ Thống Bán Hàng</title>
-
     <meta name="description" content="Hệ thống quản lý bán áo dài truyền thống Việt Nam" />
-
-    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/admin/assets/img/favicon/favicon.ico" />
-
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-    <!-- Icons -->
-    <link rel="stylesheet" href="/admin/assets/vendor/fonts/boxicons.css" />
-
-    <!-- Core CSS -->
-    <link rel="stylesheet" href="/admin/assets/vendor/css/core.css" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="/admin/assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/admin/assets/vendor/css/core.css" />
+    <link rel="stylesheet" href="/admin/assets/vendor/css/theme-default.css" />
     <link rel="stylesheet" href="/admin/assets/css/demo.css" />
-
-    <!-- Vendors CSS -->
     <link rel="stylesheet" href="/admin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
     <link rel="stylesheet" href="/admin/assets/vendor/libs/apex-charts/apex-charts.css" />
-
-    <!-- Helpers -->
     <script src="/admin/assets/vendor/js/helpers.js"></script>
     <script src="/admin/assets/js/config.js"></script>
-
     <style>
-        /* ===== FORM STYLING ===== */
-        .form-wrapper {
-            background-color: #ffffff;
-            border-radius: 0.75rem;
-            padding: 2rem 2.5rem;
-            box-shadow: 0 0.375rem 1.5rem rgba(161, 172, 184, 0.15);
-            font-family: "Public Sans", sans-serif;
+        :root {
+            --primary-red: #dc2626;
+            --primary-gold: #f59e0b;
+            --accent-cream: #fef3c7;
+            --neutral-dark: #1e293b;
+            --neutral-light: #f8fafc;
+            --neutral-border: #e2e8f0;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 70px;
+            --transition-speed: 0.3s;
+            --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            color: var(--neutral-dark);
+            line-height: 1.6;
+        }
+
+        /* ===== LAYOUT STRUCTURE ===== */
+        .layout-wrapper {
+            display: flex;
+            min-height: 100vh;
+            transition: all var(--transition-speed) ease;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #ffffff 0%, #fefefe 100%);
+            border-right: 1px solid var(--neutral-border);
+            box-shadow: var(--shadow-sm);
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 1000;
+            transition: all var(--transition-speed) ease;
+            overflow: hidden;
+        }
+
+            .sidebar.collapsed {
+                width: var(--sidebar-collapsed-width);
+            }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--neutral-border);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-height: 70px;
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-gold) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .sidebar-brand {
+            opacity: 0;
+            width: 0;
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            right: 10px;
+            top: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--neutral-dark);
+            z-index: 1;
+        }
+
+            .sidebar-toggle:hover {
+                background: rgba(255, 255, 255, 0.3);
+            }
+
+        .sidebar.collapsed .sidebar-toggle {
+            right: 50%;
+            transform: translateX(50%);
+        }
+
+        /* Thêm animation cho icon */
+        .sidebar-toggle i {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.collapsed .sidebar-toggle i {
+            transform: rotate(0deg); /* Hamburger icon - không xoay */
+        }
+
+        .sidebar:not(.collapsed) .sidebar-toggle i {
+            transform: rotate(180deg); /* Xoay ngược lại khi mở */
+        }
+        /* Điều chỉnh lại padding cho sidebar-header để phù hợp */
+        .sidebar-header {
+            padding: 1rem 1.5rem 1rem 1rem; /* Thêm padding phải nhiều hơn để chừa chỗ cho nút toggle */
+            position: relative; /* Đảm bảo nút toggle định vị tương đối với header */
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+            .sidebar.collapsed .sidebar-brand,
+            .sidebar.collapsed .menu-section-title,
+            .sidebar.collapsed .menu-text {
+                opacity: 0;
+                width: 0;
+                height: 0;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                display: none;
+            }
+
+            .sidebar.collapsed .menu-link {
+                justify-content: center;
+                padding: 0.75rem;
+            }
+
+            .sidebar.collapsed .menu-item {
+                margin: 0.25rem 0.5rem;
+            }
+
+            .sidebar.collapsed ~ .main-content {
+                margin-left: 70px;
+                width: calc(100% - 70px);
+            }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+            .sidebar-menu::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            .sidebar-menu::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            .sidebar-menu::-webkit-scrollbar-thumb {
+                background: var(--neutral-border);
+                border-radius: 2px;
+            }
+
+        .menu-section {
             margin-bottom: 2rem;
         }
 
-        h2 {
-            color: #696cff;
+        .menu-section-title {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            border-bottom: 2px solid #d4af37;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1.5rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            transition: opacity var(--transition-speed) ease;
         }
 
-        .btn-success {
-            background-color: #d4af37 !important;
-            border-color: #d4af37 !important;
-            font-weight: 500;
-            color: white !important;
+        .sidebar.collapsed .menu-section-title {
+            opacity: 0;
+            height: 0;
+            margin: 0;
+            padding: 0;
         }
 
-            .btn-success:hover {
-                background-color: #b8941f !important;
-                border-color: #b8941f !important;
-            }
-
-        .btn-secondary {
-            background-color: #8B0000 !important;
-            border-color: #8B0000 !important;
-            color: white !important;
-            font-weight: 500;
+        .menu-item {
+            margin: 0.25rem 1rem;
         }
 
-            .btn-secondary:hover {
-                background-color: #a52a2a !important;
-                border-color: #a52a2a !important;
-            }
-
-        .form-check-label,
-        .form-label {
-            font-weight: 500;
-            color: #566a7f;
-        }
-
-        .text-danger {
-            font-size: 0.875rem;
-        }
-
-        input.form-control,
-        select.form-select,
-        textarea.form-control {
-            box-shadow: none !important;
-            border: 1px solid #d9dee3;
-            transition: border-color 0.2s ease-in-out;
-        }
-
-            input.form-control:focus,
-            select.form-select:focus,
-            textarea.form-control:focus {
-                border-color: #696cff;
-                box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.25) !important;
-            }
-
-        /* ===== VIETNAMESE AO DAI THEME ===== */
-        .ao-dai-theme {
-            --ao-dai-red: #dc2626;
-            --ao-dai-gold: #f59e0b;
-            --ao-dai-cream: #fef3c7;
-            --ao-dai-brown: #92400e;
-            --ao-dai-dark: #1f2937;
-        }
-
-        /* ===== BASE STYLING ===== */
-        body {
-            font-family: 'Inter', sans-serif !important;
-            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
-            min-height: 100vh;
-        }
-
-        /* ===== BRAND STYLING ===== */
-        .app-brand-text {
-            font-family: 'Playfair Display', serif !important;
-            font-weight: 700 !important;
-            background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%) !important;
-            -webkit-background-clip: text !important;
-            -webkit-text-fill-color: transparent !important;
-            background-clip: text !important;
-        }
-
-        /* ===== MENU STYLING ===== */
-        .layout-menu {
-            background: linear-gradient(180deg, #fff 0%, #fef3c7 100%) !important;
-            border-right: 3px solid #f59e0b !important;
-            box-shadow: 4px 0 20px rgba(220, 38, 38, 0.1) !important;
-        }
-
-        .menu-item.active > .menu-link {
-            background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%) !important;
-            color: white !important;
-            border-radius: 12px !important;
-            margin: 0 8px !important;
-            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3) !important;
+        .sidebar.collapsed .menu-item {
+            margin: 0.25rem 0.75rem;
         }
 
         .menu-link {
-            padding: 12px 16px !important;
-            border-radius: 8px !important;
-            margin: 2px 8px !important;
-            transition: all 0.3s ease !important;
-            color: #1f2937 !important;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            color: var(--neutral-dark);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 48px;
         }
 
-            .menu-link:hover {
-                background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
-                transform: translateX(4px) !important;
-                box-shadow: 0 2px 10px rgba(220, 38, 38, 0.15) !important;
+        .sidebar.collapsed .menu-link {
+            justify-content: center;
+            padding: 0.75rem;
+            gap: 0;
+        }
+
+        .menu-link:hover {
+            background: linear-gradient(135deg, var(--accent-cream) 0%, #fef7ed 100%);
+            color: var(--primary-red);
+            text-decoration: none;
+        }
+
+        .menu-link.active {
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-gold) 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+            margin-left: 0; /* Thêm dòng này để loại bỏ margin trái */
+            padding-left: 1rem; /* Đảm bảo padding trái đủ rộng */
+        }
+
+        /* Nếu vẫn còn khoảng trắng, thêm các thuộc tính sau */
+        .menu-item {
+            margin-left: 0; /* Đảm bảo menu-item không có margin trái */
+            padding-left: 0; /* Đảm bảo không có padding trái */
+        }
+
+        /* Hoặc nếu bạn muốn màu cam chạy sát lề trái */
+        .menu-link.active::before {
+            display: none; /* Ẩn thanh indicator bên trái nếu có */
+        }
+
+        /* Đảm bảo menu-link chiếm toàn bộ chiều rộng */
+        .menu-link {
+            width: 100%;
+        }
+
+        .menu-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1rem;
+        }
+
+        .menu-text {
+            font-weight: 500;
+            white-space: nowrap;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+            width: 0;
+            display: none;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            transition: all var(--transition-speed) ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.collapsed + .main-content {
+            margin-left: var(--sidebar-collapsed-width);
+            width: calc(100% - var(--sidebar-collapsed-width));
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            background: white;
+            border-bottom: 1px solid var(--neutral-border);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .navbar-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* ===== SEARCH ===== */
+        .search-container {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            border: 1px solid var(--neutral-border);
+            border-radius: 25px;
+            background: var(--neutral-light);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+            .search-input:focus {
+                outline: none;
+                border-color: var(--primary-gold);
+                box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+                background: white;
             }
 
-        .menu-header-text {
-            color: #92400e !important;
-            font-weight: 600 !important;
-            font-size: 0.75rem !important;
-            letter-spacing: 1px !important;
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 0.9rem;
         }
 
-        /* ===== NAVBAR STYLING ===== */
-        .layout-navbar {
-            background: white !important;
-            border-bottom: 3px solid #f59e0b !important;
-            box-shadow: 0 2px 20px rgba(220, 38, 38, 0.1) !important;
+        /* ===== NOTIFICATIONS ===== */
+        .notification-btn {
+            position: relative;
+            background: none;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 12px;
+            color: var(--neutral-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        .navbar-brand-logo {
-            width: 40px !important;
-            height: 40px !important;
-            background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%) !important;
-            border-radius: 50% !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            color: white !important;
-            font-size: 1.2rem !important;
+            .notification-btn:hover {
+                background: var(--neutral-light);
+            }
+
+        .notification-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--primary-red);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
         }
 
-        /* ===== CONTENT STYLING ===== */
-        .content-wrapper {
-            background: rgba(255, 255, 255, 0.9) !important;
-            backdrop-filter: blur(10px) !important;
-            border-radius: 20px 20px 0 0 !important;
-            margin: 20px !important;
-            box-shadow: 0 8px 32px rgba(220, 38, 38, 0.1) !important;
+        /* ===== USER DROPDOWN - FIX ===== */
+        .user-dropdown {
+            position: relative;
         }
 
-        /* ===== DROPDOWN STYLING ===== */
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 2px solid var(--primary-gold);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+            .user-avatar:hover {
+                box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+            }
+
+        /* Bootstrap dropdown fix */
+        .dropdown-toggle::after {
+            display: none;
+        }
+
         .dropdown-menu {
-            border: none !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
-            border-radius: 12px !important;
+            border: none;
+            box-shadow: var(--shadow-lg);
+            border-radius: 12px;
+            padding: 0.5rem;
+            min-width: 200px;
+            animation: fadeInDown 0.2s ease;
         }
 
-        .dropdown-item:hover {
-            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
-            color: #1f2937 !important;
+        @@keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        /* ===== FOOTER STYLING ===== */
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .dropdown-item:hover {
+                background: var(--neutral-light);
+            }
+
+        .dropdown-item-text {
+            padding: 0.75rem 1rem;
+        }
+
+        .dropdown-divider {
+            margin: 0.5rem 0;
+            border-color: var(--neutral-border);
+        }
+
+        /* ===== CONTENT AREA ===== */
+        .content-area {
+            flex: 1;
+            padding: 2rem;
+            background: transparent;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--neutral-border);
+            overflow: hidden;
+            padding: 1.5rem;
+        }
+
+        /* ===== TABLE STYLING ===== */
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+            .table thead {
+                background: linear-gradient(135deg, var(--neutral-light) 0%, #f1f5f9 100%);
+            }
+
+                .table thead th {
+                    border: none;
+                    padding: 1rem;
+                    font-weight: 600;
+                    color: var(--neutral-dark);
+                    font-size: 0.9rem;
+                }
+
+            .table tbody td {
+                padding: 1rem;
+                border-bottom: 1px solid var(--neutral-border);
+                vertical-align: middle;
+            }
+
+            .table tbody tr:hover {
+                background: rgba(245, 158, 11, 0.05);
+            }
+
+        /* ===== BUTTON IMPROVEMENTS ===== */
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-gold) 100%);
+            color: white;
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-1px);
+                box-shadow: var(--shadow-md);
+                color: white;
+            }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+            .btn-success:hover {
+                background: #059669;
+                transform: translateY(-1px);
+                color: white;
+            }
+
+        .btn-warning {
+            background: var(--primary-gold);
+            color: white;
+        }
+
+            .btn-warning:hover {
+                background: #d97706;
+                transform: translateY(-1px);
+                color: white;
+            }
+
+        .btn-info {
+            background: #0ea5e9;
+            color: white;
+        }
+
+            .btn-info:hover {
+                background: #0284c7;
+                transform: translateY(-1px);
+                color: white;
+            }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+            .btn-danger:hover {
+                background: #dc2626;
+                transform: translateY(-1px);
+                color: white;
+            }
+
+        /* ===== BADGE STYLING ===== */
+        .badge {
+            padding: 0.5rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+            .badge.bg-primary {
+                background: #0ea5e9 !important;
+            }
+
+            .badge.bg-success {
+                background: #10b981 !important;
+            }
+
+            .badge.bg-info {
+                background: #06b6d4 !important;
+            }
+
+        /* ===== FOOTER ===== */
         .footer {
-            background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%) !important;
-            color: white !important;
-            border-radius: 0 !important;
+            background: white;
+            border-top: 1px solid var(--neutral-border);
+            padding: 1.5rem 2rem;
+            margin-top: auto;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #64748b;
         }
 
             .footer a {
-                color: #fef3c7 !important;
+                color: var(--primary-red);
+                text-decoration: none;
+                font-weight: 500;
             }
 
-        /* ===== SEARCH BOX STYLING ===== */
-        .search-box {
-            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%) !important;
-            border: 2px solid #f59e0b !important;
-            border-radius: 25px !important;
-            padding: 8px 20px !important;
-        }
-
-            .search-box input {
-                background: transparent !important;
-                border: none !important;
-                outline: none !important;
-                color: #1f2937 !important;
-            }
-
-                .search-box input::placeholder {
-                    color: #92400e !important;
+                .footer a:hover {
+                    color: var(--primary-gold);
                 }
 
-        /* ===== AVATAR STYLING ===== */
-        .avatar {
-            border: 3px solid #f59e0b !important;
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2) !important;
+        /* ===== RESPONSIVE ===== */
+        @@media (max-width: 1024px) {
+            .search-container {
+                width: 200px;
+            }
         }
 
-        /* ===== BACKGROUND PATTERN ===== */
-        .lotus-pattern {
+        @@media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+                .sidebar.show {
+                    transform: translateX(0);
+                }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .sidebar.collapsed + .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .navbar {
+                padding: 1rem;
+            }
+
+            .search-container {
+                display: none;
+            }
+
+            .content-area {
+                padding: 1rem;
+            }
+
+            .mobile-toggle {
+                display: block;
+                background: none;
+                border: none;
+                padding: 0.5rem;
+                border-radius: 8px;
+                color: var(--neutral-dark);
+                cursor: pointer;
+            }
+
+            .content-card {
+                border-radius: 12px;
+                padding: 1rem;
+            }
+
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+
+            .btn {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        @@media (min-width: 769px) {
+            .mobile-toggle {
+                display: none;
+            }
+        }
+
+        /* ===== OVERLAY ===== */
+        .sidebar-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f59e0b' fill-opacity='0.05'%3E%3Cpath d='M30 30c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20zm0 0c0-11.046 8.954-20 20-20s20 8.954 20 20-8.954 20-20 20-20-8.954-20-20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: -1;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
         }
+
+            .sidebar-overlay.show {
+                opacity: 1;
+                visibility: visible;
+            }
 
         /* ===== ANIMATIONS ===== */
-        .fade-in-up {
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUpAnimation 0.6s ease-out forwards;
-        }
-
-        @@keyframes fadeInUpAnimation {
-            from
-
-        {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        }
-
-        /* ===== CUSTOM CARD STYLING ===== */
-        .vietnamese-card {
-            border: none !important;
-            border-radius: 15px !important;
-            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.1) !important;
-            overflow: hidden !important;
-        }
-
-        .vietnamese-gradient-text {
-            background: linear-gradient(135deg, #dc2626 0%, #f59e0b 100%) !important;
-            -webkit-background-clip: text !important;
-            -webkit-text-fill-color: transparent !important;
-            background-clip: text !important;
-        }
-
-        /* ===== NOTIFICATION BADGE ===== */
-        .notification-badge {
-            background: #dc2626 !important;
-            font-size: 0.6rem !important;
-        }
-
-        /* ===== HOVER EFFECTS ===== */
-        .hover-lift {
-            transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-        }
-
-            .hover-lift:hover {
-                transform: translateY(-5px) !important;
-                box-shadow: 0 12px 35px rgba(220, 38, 38, 0.15) !important;
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* ===== FORM STYLING ===== */
+        .form-control {
+            border: 1px solid var(--neutral-border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s ease;
+        }
+
+            .form-control:focus {
+                border-color: var(--primary-gold);
+                box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+                outline: none;
+            }
+
+        .form-select {
+            border: 1px solid var(--neutral-border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s ease;
+        }
+
+            .form-select:focus {
+                border-color: var(--primary-gold);
+                box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+                outline: none;
+            }
+
+        /* ===== PAGE HEADER ===== */
+        .page-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--neutral-dark);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+            .page-title i {
+                color: var(--primary-red);
+            }
+
+        /* ===== LOADING STATE ===== */
+        .btn.loading {
+            position: relative;
+            color: transparent;
+        }
+
+            .btn.loading::after {
+                content: '';
+                position: absolute;
+                width: 16px;
+                height: 16px;
+                border: 2px solid transparent;
+                border-top: 2px solid currentColor;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: white;
+            }
+
+        @@keyframes spin {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* ===== TOOLTIP IMPROVEMENTS ===== */
+        .tooltip {
+            font-size: 0.8rem;
+        }
+
+        .tooltip-inner {
+            background: var(--neutral-dark);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+        }
     </style>
 </head>
-
-<body class="ao-dai-theme">
-    <div class="lotus-pattern"></div>
-    <div class="layout-wrapper layout-content-navbar">
-        <div class="layout-container">
-            <!-- ===== SIDEBAR MENU ===== -->
-            <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-                <div class="app-brand demo text-center p-3">
-                    <a href="/Admin/Home/Index" class="app-brand-link d-flex align-items-center">
-                        <img src="~/images/logoAoDai.png" alt="Logo Áo Dài VN" style="height: 40px;" />
-                    </a>
-                    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
-                        <i class="bx bx-chevron-left bx-sm align-middle"></i>
-                    </a>
-                </div>
-
-                <div class="menu-inner-shadow"></div>
-
-                <ul class="menu-inner py-1">
-                    <!-- Dashboard -->
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Quản Lý Bán Hàng</span>
-                    </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
-                        <a href="/Admin/ThongKe/Dashboard" class="menu-link">
-                            <i class="menu-icon fas fa-chart-line"></i>
-                            <div data-i18n="Analytics">Bán Hàng Tại Quầy</div>
-                        </a>
-                    </li>
-
-                    <!-- Quản lý sản phẩm -->
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Quản Lý Sản Phẩm</span>
-                    </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "SanPham" ? "active" : "")">
-                        <a href="/Admin/SanPham/Index" class="menu-link">
-                            <i class="menu-icon fas fa-tshirt"></i>
-                            <div data-i18n="AoDai">Áo Dài</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "MauSac" ? "active" : "")">
-                        <a href="/Admin/MauSac/Index" class="menu-link">
-                            <i class="menu-icon fas fa-palette"></i>
-                            <div data-i18n="MauSac">Màu Sắc</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Size" ? "active" : "")">
-                        <a href="/Admin/Size/Index" class="menu-link">
-                            <i class="menu-icon fas fa-ruler"></i>
-                            <div data-i18n="Size">Kích Thước</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ChatLieu" ? "active" : "")">
-                        <a href="/Admin/ChatLieu/Index" class="menu-link">
-                            <i class="menu-icon fas fa-leaf"></i>
-                            <div data-i18n="ChatLieu">Chất Liệu</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "DanhMuc" ? "active" : "")">
-                        <a href="/Admin/DanhMuc/Index" class="menu-link">
-                            <i class="menu-icon fas fa-tags"></i>
-                            <div data-i18n="DanhMuc">Danh Mục</div>
-                        </a>
-                    </li>
-
-                    <!-- Quản lý đơn hàng -->
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Quản Lý Đơn Hàng</span>
-                    </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "DonHang" ? "active" : "")">
-                        <a href="/Admin/DonHang/Index" class="menu-link">
-                            <i class="menu-icon fas fa-shopping-cart"></i>
-                            <div data-i18n="DonHang">Đơn Hàng</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "KhachHang" ? "active" : "")">
-                        <a href="/Admin/KhachHang/Index" class="menu-link">
-                            <i class="menu-icon fas fa-users"></i>
-                            <div data-i18n="KhachHang">Khách Hàng</div>
-                        </a>
-                    </li>
-
-                    <!-- Báo cáo & Thống kê -->
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Báo Cáo & Thống Kê</span>
-                    </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ThongKe" && ViewContext.RouteData.Values["action"]?.ToString() == "Customers" ? "active" : "")">
-                        <a href="/Admin/ThongKe/Customers" class="menu-link">
-                            <i class="menu-icon fas fa-users"></i>
-                            <div data-i18n="Customers">Khách hàng</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ThongKe" && ViewContext.RouteData.Values["action"]?.ToString() == "Revenue" ? "active" : "")">
-                        <a href="/Admin/ThongKe/Revenue" class="menu-link">
-                            <i class="menu-icon fas fa-coins"></i>
-                            <div data-i18n="Revenue">Doanh Thu</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ThongKe" && ViewContext.RouteData.Values["action"]?.ToString() == "Products" ? "active" : "")">
-                        <a href="/Admin/ThongKe/Products" class="menu-link">
-                            <i class="menu-icon fas fa-warehouse"></i>
-                            <div data-i18n="Products">Tồn Kho</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ThongKe" && ViewContext.RouteData.Values["action"]?.ToString() == "Promotions" ? "active" : "")">
-                        <a href="/Admin/ThongKe/Promotions" class="menu-link">
-                            <i class="menu-icon fas fa-tags"></i>
-                            <div data-i18n="Promotions">Giảm giá</div>
-                        </a>
-                    </li>
-
-                    <!-- Cài đ                    <!-- Cài đặt -->
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Hệ Thống</span>
-                    </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "CaiDat" ? "active" : "")">
-                        <a href="/Admin/CaiDat/Index" class="menu-link">
-                            <i class="menu-icon fas fa-cog"></i>
-                            <div data-i18n="CaiDat">Cài Đặt</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "EmployeeManagement" ? "active" : "")">
-                        <a href="/Admin/EmployeeManagement" class="menu-link">
-                            <i class="menu-icon fas fa-user-tie"></i>
-                            <div data-i18n="EmployeeManagement">Quản Lý Nhân Viên</div>
-                        </a>
-                    </li>
-                </ul>
-            </aside>
-            <!-- / Menu -->
-            <!-- Layout container -->
-            <div class="layout-page">
-                <!-- ===== NAVBAR ===== -->
-                <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
-                    <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
-                        <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
-                            <i class="bx bx-menu bx-sm"></i>
-                        </a>
-                    </div>
-
-                    <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-                        <!-- Search -->
-                        <div class="navbar-nav align-items-center">
-                            <div class="nav-item d-flex align-items-center search-box">
-                                <i class="fas fa-search fs-5 lh-0 me-2"></i>
-                                <input type="text"
-                                       class="form-control border-0 shadow-none"
-                                       placeholder="Tìm kiếm áo dài, khách hàng..."
-                                       aria-label="Search..." />
-                            </div>
-                        </div>
-                        <!-- /Search -->
-
-                        <ul class="navbar-nav flex-row align-items-center ms-auto">
-                            <!-- Notifications -->
-                            <li class="nav-item navbar-dropdown dropdown me-3">
-                                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
-                                    <i class="fas fa-bell fs-4 text-warning position-relative">
-                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill notification-badge">
-                                            3
-                                        </span>
-                                    </i>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li class="px-3 py-2">
-                                        <h6 class="mb-0">Thông báo mới</h6>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item" href="#">
-                                            <i class="fas fa-shopping-cart me-2 text-primary"></i>
-                                            Đơn hàng mới #1234
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#">
-                                            <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
-                                            Sắp hết hàng: Áo dài lụa đỏ
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-
-                            <!-- User -->
-                            <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
-                                    <div class="avatar avatar-online">
-                                        <img src="@avatarPath" alt class="w-px-40 h-auto rounded-circle" />
-                                    </div>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li>
-                                        <a class="dropdown-item" href="#">
-                                            <div class="d-flex">
-                                                <div class="flex-shrink-0 me-3">
-                                                    <div class="avatar avatar-online">
-                                                        <img src="@avatarPath" alt class="w-px-40 h-auto rounded-circle" />
-                                                    </div>
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <small class="text-muted">@hoten</small>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <div class="dropdown-divider"></div>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="/Admin/Profile">
-                                            <i class="fas fa-user me-2"></i>
-                                            <span class="align-middle">Hồ Sơ Cá Nhân</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="/Admin/Account/Settings">
-                                            <i class="fas fa-cog me-2"></i>
-                                            <span class="align-middle">Cài Đặt</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <div class="dropdown-divider"></div>
-                                    </li>
-                                    <li>
-                                        <form id="adminLogoutForm" asp-area="Auth" asp-controller="Auth" asp-action="Logout" method="post" class="d-inline" autocomplete="off">
-                                            @Html.AntiForgeryToken()
-                                            <a class="dropdown-item" href="javascript:void(0)" onclick="handleAdminLogout(event)">
-                                                <i class="fas fa-sign-out-alt me-2"></i>
-                                                <span class="align-middle">Đăng xuất</span>
-                                            </a>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </li>
-                            <!--/ User -->
-                        </ul>
-                    </div>
-                </nav>
-                <!-- / Navbar -->
-                <!-- ===== CONTENT WRAPPER ===== -->
-                <div class="content-wrapper fade-in-up">
-                    <!-- Content -->
-                    <div class="container-xxl">
-                        <main role="main" class="py-4">
-                            @RenderBody()
-                        </main>
-                    </div>
-                    <!-- / Content -->
-                    <!-- ===== FOOTER ===== -->
-                    <footer class="content-footer footer bg-footer-theme">
-                        <div class="container-xxl d-flex flex-wrap justify-content-between py-3 flex-md-row flex-column">
-                            <div class="mb-2 mb-md-0">
-                                ©
-                                <script>
-                                    document.write(new Date().getFullYear());
-                                </script>
-                                , được tạo với ❤️ bởi
-                                <a href="#" target="_blank" class="footer-link fw-bolder">Đội Ngũ Phát Triển Áo Dài VN</a>
-                            </div>
-                            <div>
-                                <a href="#" class="footer-link me-4">Hỗ Trợ</a>
-                                <a href="#" class="footer-link">Liên Hệ</a>
-                            </div>
-                        </div>
-                    </footer>
-                    <!-- / Footer -->
-
-                    <div class="content-backdrop fade"></div>
-                </div>
-                <!-- Content wrapper -->
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="layout-wrapper">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo"><i class="fas fa-leaf"></i></div>
+                <div class="sidebar-brand">Áo Dài Việt Nam</div>
+                <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-chevron-right"></i></button>
             </div>
-            <!-- / Layout page -->
-        </div>
-
-        <!-- Overlay -->
-        <div class="layout-overlay layout-menu-toggle"></div>
+            <nav class="sidebar-menu">
+                @* Dashboard *@
+                <div class="menu-section">
+                    <div class="menu-item">
+                        <a href="/Admin/ThongKe/Dashboard" class="menu-link @(IsActive("Home", "Index"))">
+                            <div class="menu-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="menu-text">Tổng Quan</div>
+                        </a>
+                    </div>
+                </div>
+                @* Quản lý sản phẩm *@
+                <div class="menu-section">
+                    <div class="menu-section-title">Quản Lý Sản Phẩm</div>
+                    @MenuItem("/Admin/SanPham/Index", "SanPham", "fas fa-tshirt", "Áo Dài")
+                    @MenuItem("/Admin/MauSac/Index", "MauSac", "fas fa-palette", "Màu Sắc")
+                    @MenuItem("/Admin/Size/Index", "Size", "fas fa-ruler", "Kích Thước")
+                    @MenuItem("/Admin/ChatLieu/Index", "ChatLieu", "fas fa-leaf", "Chất Liệu")
+                    @MenuItem("/Admin/DanhMuc/Index", "DanhMuc", "fas fa-tags", "Danh Mục")
+                    @MenuItem("/Admin/GiamGia/Index", "GiamGia", "fas fa-tags", "Giảm Giá")
+                </div>
+                @* Quản lý đơn hàng *@
+                <div class="menu-section">
+                    <div class="menu-section-title">Quản Lý Đơn Hàng</div>
+                    @MenuItem("/Admin/DonHang/Index", "DonHang", "fas fa-shopping-cart", "Đơn Hàng")
+                    @MenuItem("/Admin/KhachHang/Index", "KhachHang", "fas fa-users", "Khách Hàng")
+                </div>
+                @* Báo cáo & Thống kê *@
+                <div class="menu-section">
+                    <div class="menu-section-title">Báo Cáo & Thống Kê</div>
+                    @MenuItem("/Admin/ThongKe/Customers", "ThongKe", "fas fa-users", "Khách hàng", "Customers")
+                    @MenuItem("/Admin/ThongKe/Revenue", "ThongKe", "fas fa-coins", "Doanh Thu", "Revenue")
+                    @MenuItem("/Admin/ThongKe/Products", "ThongKe", "fas fa-warehouse", "Tồn Kho", "Products")
+                    @MenuItem("/Admin/ThongKe/Promotions", "ThongKe", "fas fa-tags", "Giảm giá", "Promotions")
+                </div>
+                @* Hệ thống *@
+                <div class="menu-section">
+                    <div class="menu-section-title">Hệ Thống</div>
+                    @MenuItem("/Admin/CaiDat/Index", "CaiDat", "fas fa-cog", "Cài Đặt")
+                    @MenuItem("/Admin/EmployeeManagement", "EmployeeManagement", "fas fa-user-tie", "Quản Lý Nhân Viên")
+                </div>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <nav class="navbar">
+                <div class="navbar-content">
+                    <div class="navbar-left">
+                        <button class="mobile-toggle" id="mobileToggle"><i class="fas fa-bars"></i></button>
+                        <div class="search-container">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="search-input" placeholder="Tìm kiếm áo dài, khách hàng...">
+                        </div>
+                    </div>
+                    <div class="navbar-right">
+                        <div class="dropdown">
+                            <button class="notification-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge">3</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li class="px-3 py-2"><h6 class="mb-0 fw-semibold">Thông báo mới</h6></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center" href="#">
+                                        <i class="fas fa-shopping-cart me-2 text-primary"></i>
+                                        <div>
+                                            <div class="fw-medium">Đơn hàng mới #1234</div>
+                                            <small class="text-muted">5 phút trước</small>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center" href="#">
+                                        <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                                        <div>
+                                            <div class="fw-medium">Sắp hết hàng</div>
+                                            <small class="text-muted">Áo dài lụa đỏ</small>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="dropdown user-dropdown">
+                            <img src="@avatarPath" alt="Avatar" class="user-avatar dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" role="button">
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <div class="dropdown-item-text">
+                                        <div class="d-flex align-items-center">
+                                            <img src="@avatarPath" alt="Avatar" class="rounded-circle me-2" width="32" height="32">
+                                            <div>
+                                                <div class="fw-medium">@hoten</div>
+                                                <small class="text-muted">Quản trị viên</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="/Admin/Profile">
+                                        <i class="fas fa-user me-2"></i>
+                                        Hồ Sơ Cá Nhân
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/Admin/Account/Settings">
+                                        <i class="fas fa-cog me-2"></i>
+                                        Cài Đặt
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form id="adminLogoutForm" asp-area="Auth" asp-controller="Auth" asp-action="Logout" method="post" class="d-inline" autocomplete="off">
+                                        @Html.AntiForgeryToken()
+                                        <a class="dropdown-item" href="javascript:void(0)" onclick="handleAdminLogout(event)">
+                                            <i class="fas fa-sign-out-alt me-2"></i>
+                                            Đăng xuất
+                                        </a>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            <div class="content-area fade-in-up">
+                <div class="content-card">
+                    @RenderBody()
+                </div>
+            </div>
+            <footer class="footer">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            © <script>document.write(new Date().getFullYear());</script>, được tạo với ❤️ bởi
+                            <a href="#" class="fw-medium">Đội Ngũ Phát Triển Áo Dài VN</a>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <a href="#" class="me-3">Hỗ Trợ</a>
+                            <a href="#">Liên Hệ</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </main>
     </div>
-    <!-- / Layout wrapper -->
-    <!-- ===== CORE JS ===== -->
     <script src="/admin/assets/vendor/libs/jquery/jquery.js"></script>
     <script src="/admin/assets/vendor/libs/popper/popper.js"></script>
     <script src="/admin/assets/vendor/js/bootstrap.js"></script>
     <script src="/admin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
     <script src="/admin/assets/vendor/js/menu.js"></script>
-
-    <!-- Vendors JS -->
     <script src="/admin/assets/vendor/libs/apex-charts/apexcharts.js"></script>
-
-    <!-- Main JS -->
     <script src="/admin/assets/js/main.js"></script>
     <script src="/admin/assets/js/dashboards-analytics.js"></script>
-
-    <!-- External Libraries -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- ===== CUSTOM SCRIPTS ===== -->
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Form confirmation handler
-            const forms = document.querySelectorAll("form[data-confirm]");
-
-            forms.forEach(function(form) {
-                form.addEventListener("submit", function(e) {
-                    e.preventDefault();
-                    const confirmMessage = form.getAttribute("data-confirm");
-
-                    Swal.fire({
-                        title: 'Bạn có chắc chắn?',
-                        text: confirmMessage,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#dc2626',
-                        cancelButtonColor: '#6b7280',
-                        confirmButtonText: 'Đồng ý',
-                        cancelButtonText: 'Hủy bỏ'
-                    }).then(function(result) {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        }
-                    });
-                });
-            });
-
-            // Smooth menu interactions
-            document.querySelectorAll('.menu-link').forEach(function(link) {
-                link.addEventListener('click', function(e) {
-                    document.querySelectorAll('.menu-item').forEach(function(item) {
-                        item.classList.remove('active');
-                    });
-                    e.target.closest('.menu-item').classList.add('active');
-                });
-            });
-
-            // Search functionality
-            const searchInput = document.querySelector('.search-box input');
-            if (searchInput) {
-                searchInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        performSearch(this.value);
-                    }
-                });
+        // ===== PAGE VISIBILITY API =====
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // Page is hidden - pause heavy operations
+                console.log('Page hidden - pausing operations');
+            } else {
+                // Page is visible - resume operations
+                console.log('Page visible - resuming operations');
             }
         });
 
-        // Admin logout handler
+        // ===== ERROR HANDLING =====
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error);
+            if (window.AoDaiAdmin) {
+                window.AoDaiAdmin.showError('Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.');
+            }
+        });
+
+        // ===== PERFORMANCE MONITORING =====
+        if ('performance' in window) {
+            window.addEventListener('load', function() {
+                setTimeout(() => {
+                    const perfData = performance.getEntriesByType('navigation')[0];
+                    console.log(`⚡ Page loaded in ${Math.round(perfData.loadEventEnd - perfData.loadEventStart)}ms`);
+                }, 0);
+            });
+        }
+        class SidebarManager {
+                 constructor() {
+            this.sidebar = document.getElementById('sidebar');
+            this.sidebarToggle = document.getElementById('sidebarToggle');
+            this.mobileToggle = document.getElementById('mobileToggle');
+            this.sidebarOverlay = document.getElementById('sidebarOverlay');
+            this.isMobile = window.innerWidth <= 768;
+            this.isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+            // Áp dụng trạng thái ban đầu
+            if (this.isCollapsed) {
+                this.sidebar.classList.add('collapsed');
+            }
+            this.updateToggleIcon(); // Cập nhật icon ban đầu
+
+            this.init();
+        }
+
+        init() {
+            // Desktop toggle
+            if (this.sidebarToggle) {
+                this.sidebarToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.toggleSidebar();
+                });
+            }
+
+            // Mobile toggle
+            if (this.mobileToggle) {
+                this.mobileToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.toggleMobileSidebar();
+                });
+            }
+
+            // Overlay click
+            if (this.sidebarOverlay) {
+                this.sidebarOverlay.addEventListener('click', () => {
+                    this.closeMobileSidebar();
+                });
+            }
+
+            // Window resize handler
+            window.addEventListener('resize', () => {
+                this.handleResize();
+            });
+
+            // Close mobile sidebar when clicking on menu links
+            const menuLinks = this.sidebar.querySelectorAll('.menu-link');
+            menuLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (this.isMobile) {
+                        this.closeMobileSidebar();
+                    }
+                });
+            });
+        }
+
+             toggleSidebar() {
+            if (this.isMobile) {
+                this.toggleMobileSidebar();
+            } else {
+                this.sidebar.classList.toggle('collapsed');
+                this.isCollapsed = this.sidebar.classList.contains('collapsed');
+
+                // Lưu trạng thái vào localStorage
+                localStorage.setItem('sidebarCollapsed', this.isCollapsed);
+
+                // Cập nhật icon
+                this.updateToggleIcon();
+            }
+        }
+
+
+             updateToggleIcon() {
+            const icon = this.sidebarToggle?.querySelector('i');
+            if (icon) {
+                if (this.isCollapsed) {
+                    // Khi sidebar đóng, hiển thị icon hamburger
+                    icon.className = 'fas fa-bars';
+                } else {
+                    // Khi sidebar mở, hiển thị icon mũi tên phải
+                    icon.className = 'fas fa-chevron-right';
+                }
+            }
+        }
+
+            handleResize() {
+                const wasMobile = this.isMobile;
+                this.isMobile = window.innerWidth <= 768;
+
+                if (wasMobile !== this.isMobile) {
+                    // Reset mobile states when switching to desktop
+                    if (!this.isMobile) {
+                        this.sidebar.classList.remove('show');
+                        this.sidebarOverlay.classList.remove('show');
+                        document.body.style.overflow = '';
+
+                        // Restore sidebar state from localStorage
+                        const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+                        if (isCollapsed) {
+                            this.sidebar.classList.add('collapsed');
+                        }
+                        this.updateToggleIcon();
+                    } else {
+                        // Reset desktop states when switching to mobile
+                        this.sidebar.classList.remove('collapsed');
+                        this.updateToggleIcon();
+                    }
+                }
+            }
+        }
+
+        // ===== SEARCH FUNCTIONALITY =====
+        class SearchManager {
+            constructor() {
+                this.searchInput = document.querySelector('.search-input');
+                this.searchIcon = document.querySelector('.search-icon');
+                this.init();
+            }
+
+            init() {
+                if (this.searchInput) {
+                    this.searchInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.performSearch(this.searchInput.value);
+                        }
+                    });
+
+                    // Clear search on escape
+                    this.searchInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape') {
+                            this.searchInput.value = '';
+                            this.searchInput.blur();
+                        }
+                    });
+
+                    // Add search suggestions (placeholder for future implementation)
+                    this.searchInput.addEventListener('input', (e) => {
+                        this.handleSearchInput(e.target.value);
+                    });
+                }
+            }
+
+            performSearch(query) {
+                if (query.trim() === '') return;
+
+                // Show loading state
+                this.showSearchLoading();
+
+                // Simulate search - replace with actual search logic
+                setTimeout(() => {
+                    this.hideSearchLoading();
+                    console.log('Searching for:', query);
+
+                    // Example: redirect to search results
+                    // window.location.href = `/Admin/Search?q=${encodeURIComponent(query)}`;
+
+                    // Show toast notification
+                    if (window.AoDaiAdmin) {
+                        window.AoDaiAdmin.showInfo(`Đang tìm kiếm: "${query}"`);
+                    }
+                }, 1000);
+            }
+
+            handleSearchInput(value) {
+                // Implement search suggestions here
+                if (value.length > 2) {
+                    // Show suggestions dropdown (implement later)
+                }
+            }
+
+            showSearchLoading() {
+                if (this.searchIcon) {
+                    this.searchIcon.className = 'fas fa-spinner fa-spin search-icon';
+                }
+            }
+
+            hideSearchLoading() {
+                if (this.searchIcon) {
+                    this.searchIcon.className = 'fas fa-search search-icon';
+                }
+            }
+        }
+        class DropdownManager {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                document.addEventListener('click', (e) => {
+                    const dropdowns = document.querySelectorAll('.dropdown-menu.show');
+                    dropdowns.forEach(dropdown => {
+                        const toggle = dropdown.previousElementSibling;
+                        if (toggle && !toggle.contains(e.target) && !dropdown.contains(e.target)) {
+                            const bsDropdown = bootstrap.Dropdown.getInstance(toggle);
+                            if (bsDropdown) {
+                                bsDropdown.hide();
+                            }
+                        }
+                    });
+                });
+                const dropdownTriggers = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+                dropdownTriggers.forEach(trigger => {
+                    if (!bootstrap.Dropdown.getInstance(trigger)) {
+                        new bootstrap.Dropdown(trigger);
+                    }
+
+                    trigger.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        const dropdown = bootstrap.Dropdown.getInstance(trigger);
+                        if (dropdown) {
+                            dropdown.toggle();
+                        }
+                    });
+                });
+            }
+        }
+
+        // ===== FORM ENHANCEMENT =====
+        class FormManager {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                // Enhanced form validation messages
+                this.setupValidationMessages();
+
+                // Form confirmation handlers
+                this.setupFormConfirmations();
+
+                // Loading states for buttons
+                this.setupButtonLoadingStates();
+
+                // Auto-resize textareas
+                this.setupAutoResizeTextareas();
+            }
+
+            setupValidationMessages() {
+                if (typeof jQuery !== 'undefined' && jQuery.validator) {
+                    jQuery.extend(jQuery.validator.messages, {
+                        required: "Trường này là bắt buộc.",
+                        remote: "Vui lòng sửa trường này.",
+                        email: "Vui lòng nhập email hợp lệ.",
+                        url: "Vui lòng nhập URL hợp lệ.",
+                        date: "Vui lòng nhập ngày hợp lệ.",
+                        dateISO: "Vui lòng nhập ngày hợp lệ (ISO).",
+                        number: "Vui lòng nhập số hợp lệ.",
+                        digits: "Vui lòng chỉ nhập số.",
+                        creditcard: "Vui lòng nhập số thẻ tín dụng hợp lệ.",
+                        equalTo: "Vui lòng nhập cùng giá trị.",
+                        extension: "Vui lòng nhập tệp với phần mở rộng hợp lệ.",
+                        maxlength: jQuery.validator.format("Vui lòng nhập không quá {0} ký tự."),
+                        minlength: jQuery.validator.format("Vui lòng nhập ít nhất {0} ký tự."),
+                        rangelength: jQuery.validator.format("Vui lòng nhập từ {0} đến {1} ký tự."),
+                        range: jQuery.validator.format("Vui lòng nhập từ {0} đến {1}."),
+                        max: jQuery.validator.format("Vui lòng nhập nhỏ hơn hoặc bằng {0}."),
+                        min: jQuery.validator.format("Vui lòng nhập lớn hơn hoặc bằng {0}.")
+                    });
+                }
+            }
+
+            setupFormConfirmations() {
+                const forms = document.querySelectorAll("form[data-confirm]");
+                forms.forEach(form => {
+                    form.addEventListener("submit", (e) => {
+                        e.preventDefault();
+                        const confirmMessage = form.getAttribute("data-confirm");
+
+                        Swal.fire({
+                            title: 'Bạn có chắc chắn?',
+                            text: confirmMessage,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: 'var(--primary-red)',
+                            cancelButtonColor: '#6b7280',
+                            confirmButtonText: 'Đồng ý',
+                            cancelButtonText: 'Hủy bỏ',
+                            borderRadius: '12px'
+                        }).then(result => {
+                            if (result.isConfirmed) {
+                                form.submit();
+                            }
+                        });
+                    });
+                });
+            }
+
+            setupButtonLoadingStates() {
+                const buttons = document.querySelectorAll('.btn[type="submit"]');
+                buttons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        const form = this.closest('form');
+                        if (form && form.checkValidity()) {
+                            this.classList.add('loading');
+                            this.disabled = true;
+
+                            // Remove loading after 3 seconds max
+                            setTimeout(() => {
+                                this.classList.remove('loading');
+                                this.disabled = false;
+                            }, 3000);
+                        }
+                    });
+                });
+            }
+
+            setupAutoResizeTextareas() {
+                const textareas = document.querySelectorAll('textarea');
+                textareas.forEach(textarea => {
+                    textarea.addEventListener('input', function() {
+                        this.style.height = 'auto';
+                        this.style.height = this.scrollHeight + 'px';
+                    });
+                });
+            }
+        }
+
+        // ===== NOTIFICATION SYSTEM =====
+        class NotificationManager {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                // Setup notification click handlers
+                this.setupNotificationHandlers();
+
+                // Auto-hide notification badges after interaction
+                this.setupBadgeAutoHide();
+            }
+
+            setupNotificationHandlers() {
+                const notificationBtn = document.querySelector('.notification-btn');
+                if (notificationBtn) {
+                    notificationBtn.addEventListener('click', () => {
+                        this.markNotificationsAsRead();
+                    });
+                }
+            }
+
+            setupBadgeAutoHide() {
+                const notificationItems = document.querySelectorAll('.dropdown-menu .dropdown-item');
+                notificationItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        this.markNotificationsAsRead();
+                    });
+                });
+            }
+
+            markNotificationsAsRead() {
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    setTimeout(() => {
+                        badge.style.display = 'none';
+                    }, 1000);
+                }
+            }
+
+            showToast(type, message, duration = 3000) {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: duration,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'swal2-toast-custom'
+                    },
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer);
+                        toast.addEventListener('mouseleave', Swal.resumeTimer);
+                    }
+                });
+
+                Toast.fire({
+                    icon: type,
+                    title: message
+                });
+            }
+        }
+
+        // ===== TABLE ENHANCEMENTS =====
+        class TableManager {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.enhanceTables();
+                this.setupTableResponsive();
+                this.setupTableSorting();
+            }
+
+            enhanceTables() {
+                const tables = document.querySelectorAll('table:not(.enhanced)');
+                tables.forEach(table => {
+                    table.classList.add('table', 'table-hover', 'enhanced');
+
+                    // Wrap in responsive container if not already wrapped
+                    if (!table.closest('.table-responsive')) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'table-responsive';
+                        table.parentNode.insertBefore(wrapper, table);
+                        wrapper.appendChild(table);
+                    }
+
+                    // Add zebra striping
+                    table.classList.add('table-striped');
+                });
+            }
+
+            setupTableResponsive() {
+                // Add mobile-friendly table scrolling
+                const tableWrappers = document.querySelectorAll('.table-responsive');
+                tableWrappers.forEach(wrapper => {
+                    wrapper.style.overflowX = 'auto';
+                    wrapper.style.webkitOverflowScrolling = 'touch';
+                });
+            }
+
+            setupTableSorting() {
+                // Basic table sorting (you can replace with a library like DataTables)
+                const sortableHeaders = document.querySelectorAll('th[data-sort]');
+                sortableHeaders.forEach(header => {
+                    header.style.cursor = 'pointer';
+                    header.addEventListener('click', () => {
+                        this.sortTable(header);
+                    });
+                });
+            }
+
+            sortTable(header) {
+                // Basic sorting implementation
+                console.log('Sorting by:', header.textContent);
+                // Implement actual sorting logic here
+            }
+        }
+
+        // ===== ADMIN LOGOUT HANDLER =====
         async function handleAdminLogout(event) {
             event.preventDefault();
+
             const result = await Swal.fire({
                 title: 'Bạn có chắc muốn đăng xuất?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Đăng xuất',
                 cancelButtonText: 'Hủy',
-                confirmButtonColor: '#dc2626',
-                cancelButtonColor: '#6b7280'
+                confirmButtonColor: 'var(--primary-red)',
+                cancelButtonColor: '#6b7280',
+                borderRadius: '12px'
             });
 
             if (!result.isConfirmed) return;
@@ -708,7 +1523,8 @@
                         title: 'Đăng xuất thành công',
                         text: 'Bạn đã đăng xuất khỏi hệ thống',
                         timer: 2000,
-                        showConfirmButton: false
+                        showConfirmButton: false,
+                        borderRadius: '12px'
                     });
 
                     window.location.href = data.redirectUrl || '/';
@@ -717,134 +1533,123 @@
                 }
             } catch (error) {
                 console.error('Logout failed:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Đăng xuất thất bại',
-                    text: error.message || 'Có lỗi xảy ra khi đăng xuất'
-                });
+                if (window.notificationManager) {
+                    notificationManager.showToast('error', error.message || 'Có lỗi xảy ra khi đăng xuất');
+                }
             }
         }
 
-        // Get CSRF token helper
+        // ===== UTILITY FUNCTIONS =====
         function getCsrfToken() {
             const input = document.querySelector('input[name="__RequestVerificationToken"]');
             return input ? input.value : '';
         }
 
-        // Search functionality
-        function performSearch(query) {
-            if (query.trim() === '') return;
-
-            // Show loading
-            Swal.fire({
-                title: 'Đang tìm kiếm...',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            // Simulate search - replace with actual search logic
-            setTimeout(() => {
-                Swal.close();
-                // Redirect to search results or update current page
-                console.log('Searching for:', query);
-            }, 1000);
-        }
-
-        // Toast notification helper
-        function showToast(type, message) {
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer);
-                    toast.addEventListener('mouseleave', Swal.resumeTimer);
-                }
-            });
-
-            Toast.fire({
-                icon: type,
-                title: message
-            });
-        }
-
-        // Form validation enhancement
-        function enhanceFormValidation() {
-            // Custom validation messages in Vietnamese
-            if (typeof jQuery !== 'undefined' && jQuery.validator) {
-                jQuery.extend(jQuery.validator.messages, {
-                    required: "Trường này là bắt buộc.",
-                    remote: "Vui lòng sửa trường này.",
-                    email: "Vui lòng nhập email hợp lệ.",
-                    url: "Vui lòng nhập URL hợp lệ.",
-                    date: "Vui lòng nhập ngày hợp lệ.",
-                    dateISO: "Vui lòng nhập ngày hợp lệ (ISO).",
-                    number: "Vui lòng nhập số hợp lệ.",
-                    digits: "Vui lòng chỉ nhập số.",
-                    creditcard: "Vui lòng nhập số thẻ tín dụng hợp lệ.",
-                    equalTo: "Vui lòng nhập cùng giá trị.",
-                    extension: "Vui lòng nhập tệp với phần mở rộng hợp lệ.",
-                    maxlength: jQuery.validator.format("Vui lòng nhập không quá {0} ký tự."),
-                    minlength: jQuery.validator.format("Vui lòng nhập ít nhất {0} ký tự."),
-                    rangelength: jQuery.validator.format("Vui lòng nhập từ {0} đến {1} ký tự."),
-                    range: jQuery.validator.format("Vui lòng nhập từ {0} đến {1}."),
-                    max: jQuery.validator.format("Vui lòng nhập nhỏ hơn hoặc bằng {0}."),
-                    min: jQuery.validator.format("Vui lòng nhập lớn hơn hoặc bằng {0}.")
-                });
-            }
-        }
-
-        // Initialize enhancements when document is ready
-        document.addEventListener("DOMContentLoaded", function() {
-            enhanceFormValidation();
-        });
-
-        // Utility functions for common operations
+        // ===== GLOBAL API =====
         window.AoDaiAdmin = {
-            // Show success message
-            showSuccess: function(message) {
-                showToast('success', message);
-            },
+            showSuccess: (message) => notificationManager.showToast('success', message),
+            showError: (message) => notificationManager.showToast('error', message),
+            showWarning: (message) => notificationManager.showToast('warning', message),
+            showInfo: (message) => notificationManager.showToast('info', message),
 
-            // Show error message
-            showError: function(message) {
-                showToast('error', message);
-            },
-
-            // Show warning message
-            showWarning: function(message) {
-                showToast('warning', message);
-            },
-
-            // Show info message
-            showInfo: function(message) {
-                showToast('info', message);
-            },
-
-            // Confirm action
-            confirm: function(title, text, callback) {
+            confirm: (title, text, callback) => {
                 Swal.fire({
                     title: title,
                     text: text,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#dc2626',
+                    confirmButtonColor: 'var(--primary-red)',
                     cancelButtonColor: '#6b7280',
                     confirmButtonText: 'Đồng ý',
-                    cancelButtonText: 'Hủy bỏ'
-                }).then(function(result) {
+                    cancelButtonText: 'Hủy bỏ',
+                    borderRadius: '12px'
+                }).then(result => {
                     if (result.isConfirmed && callback) {
                         callback();
                     }
                 });
-            }
-        };
-    </script>
+            },
 
+            // Utility functions
+            toggleSidebar: () => sidebarManager?.toggleSidebar(),
+            closeMobileSidebar: () => sidebarManager?.closeMobileSidebar()
+        };
+
+        // ===== INITIALIZATION =====
+        let sidebarManager, searchManager, formManager, notificationManager, dropdownManager, tableManager;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all managers
+            sidebarManager = new SidebarManager();
+            searchManager = new SearchManager();
+            formManager = new FormManager();
+            notificationManager = new NotificationManager();
+            dropdownManager = new DropdownManager();
+            tableManager = new TableManager();
+
+            // Initialize tooltips and popovers
+            if (typeof bootstrap !== 'undefined') {
+                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+                const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+                popoverTriggerList.map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+            }
+
+            // Add smooth scrolling
+            document.documentElement.style.scrollBehavior = 'smooth';
+
+            console.log('🎉 Áo Dài Admin Panel Initialized Successfully!');
+        });
+
+        // ===== KEYBOARD SHORTCUTS =====
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + B: Toggle sidebar
+            if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+                e.preventDefault();
+                sidebarManager?.toggleSidebar();
+            }
+
+            // Ctrl/Cmd + K: Focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const searchInput = document.querySelector('.search-input');
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            }
+
+            // ESC: Close mobile sidebar
+            if (e.key === 'Escape') {
+                sidebarManager?.closeMobileSidebar();
+            }
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+@functions {
+    private string IsActive(string controller, string? action = null)
+    {
+        var routeData = ViewContext.RouteData.Values;
+        var currentController = routeData["controller"]?.ToString();
+        var currentAction = routeData["action"]?.ToString();
+        if (action == null)
+            return currentController == controller ? "active" : "";
+        return currentController == controller && currentAction == action ? "active" : "";
+    }
+
+    private IHtmlContent MenuItem(string href, string controller, string icon, string text, string? action = null)
+    {
+        var active = IsActive(controller, action);
+        return new HtmlString($@"
+            <div class='menu-item'>
+                <a href='{href}' class='menu-link {active}'>
+                    <div class='menu-icon'><i class='{icon}'></i></div>
+                    <div class='menu-text'>{text}</div>
+                </a>
+            </div>");
+    }
+}
