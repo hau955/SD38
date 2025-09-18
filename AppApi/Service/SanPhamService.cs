@@ -283,6 +283,84 @@ namespace AppApi.Service
             return result;
         }
 
-       
+        public async Task<SanPhamGiamGiaView?> GetSanPhamChiTiet(Guid idSanPham)
+        {
+            var sp = await _context.SanPhams
+                .Include(x => x.SanPhamChiTiets)
+                .Include(x => x.DanhMuc)
+                .FirstOrDefaultAsync(x => x.IDSanPham == idSanPham);
+
+            if (sp == null) return null;
+
+            var giaGoc = sp.SanPhamChiTiets.FirstOrDefault()?.GiaBan ?? 0;
+
+            // 🔎 Lấy tất cả giảm giá sản phẩm
+            var giamGiaSPs = await _context.GiamGiaSanPham
+                .Include(x => x.GiamGia)
+                .Where(x => x.IDSanPham == idSanPham &&
+                            x.GiamGia.NgayBatDau <= DateTime.Now &&
+                            x.GiamGia.NgayKetThuc >= DateTime.Now &&
+                            x.GiamGia.TrangThai)
+                .Select(x => x.GiamGia)
+                .ToListAsync();
+
+            // 🔎 Lấy tất cả giảm giá theo danh mục
+            var giamGiaDMs = await _context.GiamGiaDanhMuc
+                .Include(x => x.GiamGia)
+                .Where(x => x.DanhMucId == sp.DanhMucId &&
+                            x.GiamGia.NgayBatDau <= DateTime.Now &&
+                            x.GiamGia.NgayKetThuc >= DateTime.Now &&
+                            x.GiamGia.TrangThai)
+                .Select(x => x.GiamGia)
+                .ToListAsync();
+
+            // Gộp lại → nhưng ưu tiên sản phẩm trước
+            var allDiscounts = giamGiaSPs.Any() ? giamGiaSPs : giamGiaDMs;
+
+            decimal giaSauGiam = giaGoc;
+            decimal? giaTriGiam = null;
+            GiamGia? bestDiscount = null;
+
+            foreach (var giamGia in allDiscounts)
+            {
+                decimal giaTmp = giaGoc;
+                decimal soTienGiam = 0;
+
+                if (giamGia.LoaiGiamGia == "PhanTram")
+                {
+                    soTienGiam = giaGoc * (giamGia.GiaTri / 100);
+                    if (giamGia.GiaTriGiamToiDa.HasValue)
+                        soTienGiam = Math.Min(soTienGiam, giamGia.GiaTriGiamToiDa.Value);
+
+                    giaTmp = giaGoc - soTienGiam;
+                }
+                else if (giamGia.LoaiGiamGia == "SoTien")
+                {
+                    soTienGiam = giamGia.GiaTri;
+                    giaTmp = Math.Max(0, giaGoc - soTienGiam);
+                }
+
+                // Chọn cái giảm nhiều nhất
+                if (giaTmp < giaSauGiam)
+                {
+                    giaSauGiam = giaTmp;
+                    giaTriGiam = soTienGiam;
+                    bestDiscount = giamGia;
+                }
+            }
+
+            return new SanPhamGiamGiaView
+            {
+                IDSanPham = sp.IDSanPham,
+                TenSanPham = sp.TenSanPham,
+                GiaGoc = giaGoc,
+                GiaSauGiam = giaSauGiam,
+                TenGiamGia = bestDiscount?.TenGiamGia,
+                LoaiGiamGia = bestDiscount?.LoaiGiamGia,
+                GiaTriGiam = giaTriGiam
+            };
+        }
+
+
     }
 }

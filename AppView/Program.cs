@@ -2,6 +2,8 @@
 using AppView.Areas.Admin.IRepo;
 using AppView.Areas.Admin.Repository;
 using AppView.Areas.Auth.Repository;
+using AppView.Areas.BanHangTaiQuay.IRepo;
+using AppView.Areas.BanHangTaiQuay.Repository;
 using AppView.Areas.OrderManagerment.Repositories;
 using AppView.Helper;
 using Microsoft.AspNetCore.Http.Features;
@@ -57,6 +59,7 @@ builder.Services.AddScoped<ISizeRepo, SizeRepo>();
 builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
 
 builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
+builder.Services.AddScoped<IGiamGiaRepo, GiamGiaRepo>();
 builder.Services.AddScoped<IBanHangfRepo, BanHangRepo>();
 builder.Services.AddScoped<IThongKeRepo, ThongKeRepo>();
 builder.Services.AddScoped<IChatLieuRepo, ChatLieuRepo>();

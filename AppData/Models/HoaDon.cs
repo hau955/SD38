@@ -59,7 +59,11 @@ public class HoaDon
 
     public DateTime? NgayTao { get; set; }
 
-    public DateTime? NgaySua { get; set; } 
+    public DateTime? NgaySua { get; set; }
+    [ForeignKey("Voucher")]
+    [MaxLength(50)]
+    public Guid? IdVoucher { get; set; }
+    public virtual Voucher? Voucher { get; set; }
 
     public virtual ICollection<HoaDonCT> HoaDonChiTiets { get; set; } = new List<HoaDonCT>();
 }

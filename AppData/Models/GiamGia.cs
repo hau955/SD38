@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace AppData.Models
 {
@@ -9,18 +10,18 @@ namespace AppData.Models
         public Guid IDGiamGia { get; set; }
 
         [Required]
-        [MaxLength(50)]
-        public string TenMaGiamGia { get; set; } // VD: "SUMMER20", "NEWUSER"
+        [MaxLength(100)]
+        public string TenGiamGia { get; set; } = string.Empty; // Ví dụ: "SUMMER20"
 
-        [Range(0, 1)]
-        public float? GiamTheoPhanTram { get; set; } // Ví dụ: 0.1 cho 10%
+        [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal GiaTri { get; set; }   // Có thể là % hoặc số tiền
 
-        [Column(TypeName = "decimal(18, 2)")]
-        [Range(0, double.MaxValue)]
-        public decimal? GiamTheoTien { get; set; } // Số tiền giảm cố định
-
-        [MaxLength(500)]
-        public string? DieuKienGiamGia { get; set; }
+        [Required]
+        [MaxLength(20)]
+        public string LoaiGiamGia { get; set; } = "PhanTram"; // "PhanTram" | "SoTien"
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? GiaTriGiamToiDa { get; set; }
 
         [Required]
         public DateTime NgayBatDau { get; set; }
@@ -28,19 +29,18 @@ namespace AppData.Models
         [Required]
         public DateTime NgayKetThuc { get; set; }
 
-        [Required]
-        public bool LoaiGiamGia { get; set; } // false = Percentage, true = Fixed Amount
+        public DateTime NgayTao { get; set; } = DateTime.Now;
+        public DateTime NgaySua { get; set; } = DateTime.Now;
 
-       
-        public DateTime NgayTao { get; set; } 
+        public bool TrangThai { get; set; } = true;
 
-      
-        public DateTime NgaySua { get; set; } 
+        // Navigation
+        [JsonIgnore]
+        public virtual ICollection<GiamGiaSanPham> GiamGiaSanPhams { get; set; } = new List<GiamGiaSanPham>();
 
-      
-        public bool TrangThai { get; set; } // Active, Expired, Draft, v.v.
-
-        // Navigation property
-        public virtual ICollection<SanPhamGG> SanPhamGiamGias { get; set; } = new List<SanPhamGG>();
+        [JsonIgnore]
+        public virtual ICollection<GiamGiaDanhMuc> GiamGiaDanhMucs { get; set; } = new List<GiamGiaDanhMuc>();
+        [JsonIgnore]
+        public virtual ICollection<GiamGiaSPCT> GiamGiaSPCTs { get; set; } = new List<GiamGiaSPCT>();
     }
 }
