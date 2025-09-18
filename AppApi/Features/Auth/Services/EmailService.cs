@@ -3,6 +3,7 @@ using MailKit.Security;
 using MimeKit;
 using MimeKit.Text;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace AppApi.Features.Services
 {
@@ -28,7 +29,6 @@ namespace AppApi.Features.Services
             // Get email settings with validation
             var emailSettings = _configuration?.GetSection("EmailSettings")
                 ?? throw new InvalidOperationException("Cấu hình email không tồn tại");
-
             var fromName = emailSettings["FromName"] ?? "Áo Dài Việt";
             var fromEmail = emailSettings["FromEmail"];
             var host = emailSettings["Host"];
@@ -128,7 +128,7 @@ namespace AppApi.Features.Services
 
                 // Send email
                 await client.SendAsync(emailMessage);
-            }
+        }
             catch (SmtpCommandException ex)
             {
                 throw new InvalidOperationException($"Lỗi SMTP khi gửi email: {ex.Message} (Status: {ex.StatusCode})", ex);

@@ -12,6 +12,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TheAoDai</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=Dancing+Script:wght@700&family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/duan.css">
     <link rel="stylesheet" href="~/css/login.css" />
     <link rel="stylesheet" href="~/css/site.css">
@@ -60,19 +62,20 @@
             <div class="nav-right" id="userHeader">
                 @if (isLoggedIn)
                 {
-                    <!-- User logged in -->
-                    <a href="#" class="position-relative text-dark">🛒 Giỏ hàng</a>
                     <div class="dropdown">
+                        <a href="#" class="position-relative text-dark">🛒 Giỏ hàng</a>
                         <a href="#" class="text-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                             👤 @email
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Thông tin cá nhân</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-shopping-bag me-2"></i>Đơn hàng của tôi</a></li>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/Account/Profile"><i class="fas fa-user me-2"></i>Thông tin cá nhân</a></li>
+                            <li><a class="dropdown-item" href="/Account/Orders"><i class="fas fa-shopping-bag me-2"></i>Đơn hàng của tôi</a></li>
+                            <li><a class="dropdown-item" href="/Account/Address"><i class="fas fa-map-marker-alt me-2"></i>Sổ địa chỉ</a></li>
+                            <li><a class="dropdown-item" href="/Account/ChangePassword"><i class="fas fa-lock me-2"></i>Đổi mật khẩu</a></li>
                             @if (isAdmin)
                             {
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-cogs me-2"></i>Quản trị</a></li>
+                                <li><a class="dropdown-item" href="/Admin/Dashboard"><i class="fas fa-cogs me-2"></i>Quản trị</a></li>
                             }
                             <li><hr class="dropdown-divider"></li>
                             <li>

@@ -4,68 +4,63 @@ using AppApi.Features.OrderManagerment.DTOs;
 using AppApi.Helpers;
 using AppData.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace AppApi.Features.OrderManagerment.Services
 {
+    /// <summary>
+    /// Service quản lý đơn hàng: truy vấn, xác nhận, cập nhật, hủy, thống kê...
+    /// </summary>
     public class OrderManagementService : IOrderManagementService
     {
+        #region Fields
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<OrderManagementService> _logger;
+        #endregion
 
-        public OrderManagementService(ApplicationDbContext context)
+        #region Constructor
+        public OrderManagementService(ApplicationDbContext context, ILogger<OrderManagementService> logger)
         {
             _context = context;
+            _logger = logger;
         }
+        #endregion
 
+        #region CRUD & Business Methods
+        /// <summary>
+        /// Lấy danh sách đơn hàng có phân trang, lọc, sắp xếp.
+        /// </summary>
         public async Task<PagedResult<OrderListDto>> GetOrdersAsync(OrderFilterDto filter)
         {
             try
             {
                 var query = _context.HoaDons
-    .Include(h => h.User)
-    .Include(h => h.User2)
-    .Include(h => h.DiaChiNhanHang)
-    .Include(h => h.HoaDonChiTiets)
-    .AsQueryable();
+                    .AsNoTracking()
+                    .Include(h => h.User)
+                    .Include(h => h.User2)
+                    .Include(h => h.DiaChiNhanHang)
+                    .Include(h => h.HoaDonChiTiets)
+                    .AsQueryable();
 
                 // Áp dụng bộ lọc
                 if (!string.IsNullOrEmpty(filter.TrangThaiDonHang))
-                {
                     query = query.Where(h => h.TrangThaiDonHang == filter.TrangThaiDonHang);
-                }
-
                 if (!string.IsNullOrEmpty(filter.TrangThaiThanhToan))
-                {
                     query = query.Where(h => h.TrangThaiThanhToan == filter.TrangThaiThanhToan);
-                }
-
                 if (filter.TuNgay.HasValue)
-                {
                     query = query.Where(h => h.NgayTao >= filter.TuNgay.Value);
-                }
-
                 if (filter.DenNgay.HasValue)
-                {
                     query = query.Where(h => h.NgayTao <= filter.DenNgay.Value.AddDays(1));
-                }
-
                 if (!string.IsNullOrEmpty(filter.TenKhachHang))
-                {
-                    query = query.Where(h => h.User != null &&
-                        h.User.HoTen.Contains(filter.TenKhachHang));
-                }
-
+                    query = query.Where(h => h.User != null && h.User.HoTen.Contains(filter.TenKhachHang));
                 if (!string.IsNullOrEmpty(filter.SoDienThoai))
-                {
-                    query = query.Where(h => h.User != null &&
-                        h.User.PhoneNumber != null &&
-                        h.User.PhoneNumber.Contains(filter.SoDienThoai));
-                }
+                    query = query.Where(h => h.User != null && h.User.PhoneNumber != null && h.User.PhoneNumber.Contains(filter.SoDienThoai));
 
                 // Đếm tổng số
                 var totalCount = await query.CountAsync();
 
                 // Sắp xếp
-                query = ApplySorting(query, filter.SortBy, filter.SortDirection);
+                query = OrderQueryHelper.ApplySorting(query, filter.SortBy, filter.SortDirection);
 
                 // Phân trang
                 var orders = await query
@@ -99,32 +94,36 @@ namespace AppApi.Features.OrderManagerment.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("❌ ERROR in GetOrdersAsync: " + ex.Message);
-                throw; // hoặc return null
+                _logger.LogError(ex, "❌ ERROR in GetOrdersAsync: {Message}", ex.Message);
+                throw;
             }
         }
 
+        /// <summary>
+        /// Lấy chi tiết đơn hàng theo ID.
+        /// </summary>
         public async Task<OrderDetailDto?> GetOrderDetailAsync(Guid orderId)
         {
             try
             {
                 var order = await _context.HoaDons
-              .Include(h => h.User)
-              .Include(h => h.User2)
-              .Include(h => h.DiaChiNhanHang)
-              .Include(h => h.HoaDonChiTiets)
-                  .ThenInclude(ct => ct.SanPhamCT)
-                      .ThenInclude(sp => sp.SanPham)
-              .Include(h => h.HoaDonChiTiets)
-                  .ThenInclude(ct => ct.SanPhamCT)
-                      .ThenInclude(sp => sp.MauSac)
-              .Include(h => h.HoaDonChiTiets)
-                  .ThenInclude(ct => ct.SanPhamCT)
-                      .ThenInclude(sp => sp.SizeAo)
-              .Include(h => h.HoaDonChiTiets)
-                  .ThenInclude(ct => ct.SanPhamCT)
-                      .ThenInclude(sp => sp.ChatLieu)
-              .FirstOrDefaultAsync(h => h.IDHoaDon == orderId);
+                    .AsNoTracking()
+                    .Include(h => h.User)
+                    .Include(h => h.User2)
+                    .Include(h => h.DiaChiNhanHang)
+                    .Include(h => h.HoaDonChiTiets)
+                        .ThenInclude(ct => ct.SanPhamCT)
+                            .ThenInclude(sp => sp.SanPham)
+                    .Include(h => h.HoaDonChiTiets)
+                        .ThenInclude(ct => ct.SanPhamCT)
+                            .ThenInclude(sp => sp.MauSac)
+                    .Include(h => h.HoaDonChiTiets)
+                        .ThenInclude(ct => ct.SanPhamCT)
+                            .ThenInclude(sp => sp.SizeAo)
+                    .Include(h => h.HoaDonChiTiets)
+                        .ThenInclude(ct => ct.SanPhamCT)
+                            .ThenInclude(sp => sp.ChatLieu)
+                    .FirstOrDefaultAsync(h => h.IDHoaDon == orderId);
 
                 if (order == null) return null;
 
@@ -163,10 +162,14 @@ namespace AppApi.Features.OrderManagerment.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ ERROR in GetOrderDetailAsync: {ex.Message}\n{ex.StackTrace}");
-                throw; // vẫn để throw để giữ nguyên response code 500 cho dev biết
+                _logger.LogError(ex, "❌ ERROR in GetOrderDetailAsync: {Message}", ex.Message);
+                throw;
             }
         }
+
+        /// <summary>
+        /// Xác nhận đơn hàng (chuyển trạng thái sang Đã xác nhận).
+        /// </summary>
         public async Task<ApiResponse<bool>> ConfirmOrderAsync(Guid orderId, Guid userId)
         {
             try
@@ -188,19 +191,23 @@ namespace AppApi.Features.OrderManagerment.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "❌ ERROR in ConfirmOrderAsync: {Message}", ex.Message);
                 return new ApiResponse<bool>
                 {
                     IsSuccess = false,
                     Message = "Có lỗi xảy ra khi xác nhận đơn hàng",
                     StatusCode = 500,
                     Errors = new Dictionary<string, string[]>
-            {
-                { "Exception", new[] { ex.Message } }
-            }
+                    {
+                        { "Exception", new[] { ex.Message } }
+                    }
                 };
             }
         }
 
+        /// <summary>
+        /// Cập nhật trạng thái đơn hàng.
+        /// </summary>
         public async Task<ApiResponse<bool>> UpdateOrderStatusAsync(UpdateOrderStatusDto dto)
         {
             try
@@ -233,19 +240,23 @@ namespace AppApi.Features.OrderManagerment.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "❌ ERROR in UpdateOrderStatusAsync: {Message}", ex.Message);
                 return new ApiResponse<bool>
                 {
                     IsSuccess = false,
                     Message = "Có lỗi xảy ra khi cập nhật trạng thái đơn hàng",
                     StatusCode = 500,
                     Errors = new Dictionary<string, string[]>
-            {
-                { "Exception", new[] { ex.Message } }
-            }
+                    {
+                        { "Exception", new[] { ex.Message } }
+                    }
                 };
             }
         }
 
+        /// <summary>
+        /// Cập nhật trạng thái thanh toán đơn hàng.
+        /// </summary>
         public async Task<ApiResponse<bool>> UpdatePaymentStatusAsync(UpdatePaymentStatusDto dto)
         {
             try
@@ -272,19 +283,23 @@ namespace AppApi.Features.OrderManagerment.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "❌ ERROR in UpdatePaymentStatusAsync: {Message}", ex.Message);
                 return new ApiResponse<bool>
                 {
                     IsSuccess = false,
                     Message = "Có lỗi xảy ra khi cập nhật trạng thái thanh toán",
                     StatusCode = 500,
                     Errors = new Dictionary<string, string[]>
-            {
-                { "Exception", new[] { ex.Message } }
-            }
+                    {
+                        { "Exception", new[] { ex.Message } }
+                    }
                 };
             }
         }
 
+        /// <summary>
+        /// Hủy đơn hàng.
+        /// </summary>
         public async Task<ApiResponse<bool>> CancelOrderAsync(CancelOrderDto dto)
         {
             try
@@ -314,32 +329,39 @@ namespace AppApi.Features.OrderManagerment.Services
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "❌ ERROR in CancelOrderAsync: {Message}", ex.Message);
                 return new ApiResponse<bool>
                 {
                     IsSuccess = false,
                     Message = "Có lỗi xảy ra khi hủy đơn hàng",
                     StatusCode = 500,
                     Errors = new Dictionary<string, string[]>
-            {
-                { "Exception", new[] { ex.Message } }
-            }
+                    {
+                        { "Exception", new[] { ex.Message } }
+                    }
                 };
             }
         }
+        #endregion
+
+        #region Statistics
+        /// <summary>
+        /// Thống kê số lượng đơn hàng theo trạng thái.
+        /// </summary>
         public async Task<Dictionary<string, int>> GetOrderStatisticsAsync()
         {
             try
             {
                 var stats = await _context.HoaDons
+                    .AsNoTracking()
                     .GroupBy(h => h.TrangThaiDonHang)
                     .Select(g => new { Status = g.Key, Count = g.Count() })
                     .ToDictionaryAsync(x => x.Status, x => x.Count);
 
                 // Log raw data
-                Console.WriteLine("Raw statistics from database:");
                 foreach (var stat in stats)
                 {
-                    Console.WriteLine($"{stat.Key}: {stat.Value}");
+                    _logger.LogInformation("Order status: {Status} - Count: {Count}", stat.Key, stat.Value);
                 }
 
                 // Đảm bảo tất cả trạng thái đều có trong kết quả
@@ -355,24 +377,44 @@ namespace AppApi.Features.OrderManagerment.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ ERROR in GetOrderStatisticsAsync: {ex.Message}\n{ex.StackTrace}");
+                _logger.LogError(ex, "❌ ERROR in GetOrderStatisticsAsync: {Message}", ex.Message);
                 throw;
             }
         }
+        #endregion
+
+        #region Validation
+        /// <summary>
+        /// Kiểm tra có thể chuyển trạng thái đơn hàng sang trạng thái mới không.
+        /// </summary>
         public async Task<bool> CanUpdateOrderStatusAsync(Guid orderId, string newStatus)
         {
-            var order = await _context.HoaDons.FindAsync(orderId);
-            if (order == null) return false;
-
-            return OrderStatus.AllowedTransitions.ContainsKey(order.TrangThaiDonHang) &&
-                   OrderStatus.AllowedTransitions[order.TrangThaiDonHang].Contains(newStatus);
+            try
+            {
+                var order = await _context.HoaDons.FindAsync(orderId);
+                if (order == null) return false;
+                return OrderStatus.AllowedTransitions.ContainsKey(order.TrangThaiDonHang) &&
+                       OrderStatus.AllowedTransitions[order.TrangThaiDonHang].Contains(newStatus);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ ERROR in CanUpdateOrderStatusAsync: {Message}", ex.Message);
+                return false;
+            }
         }
+        #endregion
+    }
 
-        private IQueryable<HoaDon> ApplySorting(IQueryable<HoaDon> query, string sortBy, string sortDirection)
+    #region Helper
+    /// <summary>
+    /// Helper cho truy vấn đơn hàng (sắp xếp)
+    /// </summary>
+    public static class OrderQueryHelper
+    {
+        public static IQueryable<HoaDon> ApplySorting(IQueryable<HoaDon> query, string sortBy, string sortDirection)
         {
-            var isAscending = sortDirection.ToLower() == "asc";
-
-            return sortBy.ToLower() switch
+            var isAscending = sortDirection?.ToLower() == "asc";
+            return sortBy?.ToLower() switch
             {
                 "ngaytao" => isAscending ? query.OrderBy(h => h.NgayTao) : query.OrderByDescending(h => h.NgayTao),
                 "tongtien" => isAscending ? query.OrderBy(h => h.TongTienSauGiam) : query.OrderByDescending(h => h.TongTienSauGiam),
@@ -382,4 +424,5 @@ namespace AppApi.Features.OrderManagerment.Services
             };
         }
     }
+    #endregion
 }
