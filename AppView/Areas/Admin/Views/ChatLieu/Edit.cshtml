@@ -71,18 +71,49 @@
                 </h4>
             </div>
             <div class="card-body">
-                <form asp-action="Edit" method="post" class="needs-validation" novalidate>
+                <!-- Hiển thị thông báo thành công -->
+                @if (TempData["Message"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>@TempData["Message"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <!-- Hiển thị thông báo lỗi -->
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>@TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <form asp-area="Admin" asp-controller="ChatLieu" asp-action="Edit" asp-route-id="@Model.IDChatLieu" method="post" class="needs-validation" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="All" class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Vui lòng kiểm tra các lỗi sau:</strong>
+                    </div>
                     <input type="hidden" asp-for="IDChatLieu" />
 
                     <div class="form-floating mb-3">
-                        <input asp-for="TenChatLieu" class="form-control" placeholder="Ten ChatLieu" />
-                        <label asp-for="TenChatLieu">Ten ChatLieu</label>
-                        <span asp-validation-for="TenChatLieu" class="text-danger"></span>
+                        <input asp-for="TenChatLieu"
+                               class="form-control @(ViewData.ModelState.GetValidationState("TenChatLieu") == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid ? "is-invalid" : "")"
+                               placeholder="Nhập tên chất liệu" required />
+                        <label asp-for="TenChatLieu">Tên chất liệu <span class="text-danger">*</span></label>
+                        <span asp-validation-for="TenChatLieu" class="invalid-feedback"></span>
+                        <div class="form-text">
+                            Tên chất liệu phải có từ 2-50 ký tự và chỉ chứa chữ cái, số, dấu gạch ngang và khoảng trắng.
+                        </div>
                     </div>
 
                     <div class="form-check form-switch mb-4">
-                        <input asp-for="TrangThai" class="form-check-input" />
-                        <label asp-for="TrangThai" class="form-check-label">Hoạt động</label>
+                        <input asp-for="TrangThai" class="form-check-input" type="checkbox" />
+                        <label asp-for="TrangThai" class="form-check-label">
+                            <i class="fas fa-toggle-on me-1"></i>Trạng thái hoạt động
+                        </label>
+                        <div class="form-text">Bật/tắt để kích hoạt hoặc vô hiệu hóa chất liệu này.</div>
                     </div>
 
                     <div class="d-flex justify-content-between">

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AppData.Models;
 using AppApi.IService;
+using AppData.Models.DTO;
 
 namespace AppApi.Controllers
 {
@@ -39,7 +40,11 @@ namespace AppApi.Controllers
         {
             var result = await _service.GetChatLieuByIdAsync(id);
             if (result == null) return NotFound();
-            return Ok(result);
+            return Ok(new ApiResponse<ChatLieu>
+            {
+                Message = "Lấy thông tin chất liệu thành công",
+                Data = result
+            });
         }
 
         // PUT: api/ChatLieux/5
@@ -51,7 +56,11 @@ namespace AppApi.Controllers
                 return BadRequest("ID không khớp.");
 
             var updated = await _service.UpdateChatLieuAsync(chatLieu);
-            return updated ? Ok() : NotFound();
+            return updated ? Ok(new ApiResponse<ChatLieu>
+            {
+                Message = "Cập nhật chất liệu thành công",
+                Data = chatLieu
+            }) : NotFound();
         }
        
 
@@ -71,11 +80,20 @@ namespace AppApi.Controllers
         public async Task<IActionResult> Delete(Guid id)
         {
             var deleted = await _service.DeleteChatLieuAsync(id);
-            return deleted ? Ok() : NotFound();
+            return deleted ? Ok(new ApiResponse<object>
+            {
+                Message = "Xóa chất liệu thành công",
+                Data = null
+            }) : NotFound();
         }
-       
-        
-
+        [HttpPut("toggle/{id}")]
+        public async Task<IActionResult> Toggle(Guid id)
+        {
+            var result = await _service.ToggleChatLieuAsync(id);
+            return result
+                ? Ok(new ApiResponse<string> {Message = "Đổi trạng thái thành công", Data = "OK" })
+                : NotFound(new ApiResponse<string> {Message = "Không tìm thấy chất liệu" });
+        }
 
     }
 }

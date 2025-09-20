@@ -41,11 +41,21 @@ namespace AppView.Areas.Admin.Repository
                 : null;
         }
 
-        public async Task<bool> Delete(Guid id)
+        public async Task<string> Delete(Guid id)
         {
             var response = await _httpClient.DeleteAsync($"https://localhost:7221/api/MauSac/{id}");
-            return response.IsSuccessStatusCode;
+            var content = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();
+
+            if (response.IsSuccessStatusCode)
+            {
+                return content?.Message ?? "Xoá thành công";
+            }
+            else
+            {
+                return content?.Message ?? "Xoá thất bại";
+            }
         }
+
 
         public async Task<string> Toggle(Guid id)
         {

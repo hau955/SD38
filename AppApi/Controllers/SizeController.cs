@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AppApi.IService;
 using AppData.Models;
+using AppData.Models.DTO;
 
 namespace AppApi.Controllers
 {
@@ -92,12 +93,5 @@ namespace AppApi.Controllers
                 Data = size.TrangThai ? "Hoạt động" : "Không hoạt động"
             });
         }
-    }
-
-    // Bổ sung class ApiResponse nếu chưa có
-    public class ApiResponse<T>
-    {
-        public string Message { get; set; } = string.Empty;
-        public T Data { get; set; } = default!;
     }
 }

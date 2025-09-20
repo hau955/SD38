@@ -10,5 +10,6 @@ namespace AppApi.IService
         Task<bool> UpdateChatLieuAsync(ChatLieu chatLieu);
         Task<bool> DeleteChatLieuAsync(Guid id);
         Task<bool> ChatLieuExistsAsync(Guid id);
+        Task<bool> ToggleChatLieuAsync(Guid id);
     }
 }

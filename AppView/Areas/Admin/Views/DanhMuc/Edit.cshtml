@@ -4,8 +4,7 @@
 }
 
 <h2>@ViewData["Title"]</h2>
-
-<form asp-area="Admin" asp-controller="DanhMuc" asp-action="Edit" method="post">
+<form asp-area="Admin" asp-controller="DanhMuc" asp-action="Edit" method="post" class="needs-validation" novalidate>
     <input type="hidden" asp-for="DanhMucId" />
     <div class="mb-3">
         <label asp-for="TenDanhMuc" class="form-label"></label>

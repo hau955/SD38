@@ -113,13 +113,22 @@
                                     <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@item.IDChatLieu">
                                         <i class="fas fa-edit"></i> Sửa
                                     </a>
-                                    <a class="btn btn-sm btn-warning" asp-action="ToggleStatus" asp-route-id="@item.IDChatLieu">
-                                        <i class="fas fa-sync-alt"></i> Trạng thái
-                                    </a>
-                                    <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.IDChatLieu"
-                                       onclick="return confirm('Bạn có chắc chắn muốn xoá chatlieu này không?');">
-                                        <i class="fas fa-trash-alt"></i> Xoá
-                                    </a>
+                                    <form asp-area="Admin" asp-controller="ChatLieu" asp-action="ToggleStatus"
+                                          asp-route-id="@item.IDChatLieu" method="post" style="display:inline;">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-sync-alt"></i> Trạng thái
+                                        </button>
+                                    </form>
+                                    <form asp-area="Admin" asp-controller="ChatLieu" asp-action="DeleteCL"
+                                          asp-route-id="@item.IDChatLieu" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger"
+                                                onclick="return confirm('Bạn có chắc chắn muốn xoá chất liệu này không?');">
+                                            <i class="fas fa-trash-alt"></i> Xoá
+                                        </button>
+                                    </form>
+
                                 </div>
                             </td>
                         </tr>
