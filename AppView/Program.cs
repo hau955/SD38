@@ -5,6 +5,8 @@ using AppView.Areas.Auth.Repository;
 using AppView.Areas.BanHangTaiQuay.IRepo;
 using AppView.Areas.BanHangTaiQuay.Repository;
 using AppView.Areas.OrderManagerment.Repositories;
+using AppView.Clients;
+using AppView.Clients.ApiClients;
 using AppView.Helper;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
@@ -57,6 +59,7 @@ builder.Services.AddAutoMapper(typeof(OrderMappingProfile).Assembly);
 builder.Services.AddScoped<IMauSacRepo, MauSacRepo>();
 builder.Services.AddScoped<ISizeRepo, SizeRepo>();
 builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
+builder.Services.AddScoped<IGioHangChiTietService, GioHangChiTietService>();
 
 builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
 builder.Services.AddScoped<IGiamGiaRepo, GiamGiaRepo>();

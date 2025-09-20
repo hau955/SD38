@@ -132,6 +132,8 @@ builder.Services.AddScoped<ISizeService, SizeService>();
 builder.Services.AddScoped<IChatLieuService, ChatLieuService>();
 builder.Services.AddScoped<IBanHangService, BanHangService>();
 builder.Services.AddScoped<IGioHangService, GioHangService>();
+builder.Services.AddScoped<IGioHangCTService, GioHangCTService>();
+builder.Services.AddScoped<IHoaDonService, HoaDonService>();
 builder.Services.AddScoped<IDanhMucSPService, DanhMucSPService>();
 builder.Services.AddScoped<ISanPhamCTService, SanPhamCTService>();
 builder.Services.AddScoped<IProfileServive, ProfileService>();

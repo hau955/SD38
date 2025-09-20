@@ -7,75 +7,78 @@
 <h2>Tạo giảm giá</h2>
 
 <form asp-area="Admin" asp-controller="GiamGia" asp-action="Create" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <!-- Tên giảm giá -->
     <div class="form-group">
         <label asp-for="GiamGia.TenGiamGia"></label>
         <input asp-for="GiamGia.TenGiamGia" class="form-control" />
         <span asp-validation-for="GiamGia.TenGiamGia" class="text-danger"></span>
     </div>
 
-    <div class="form-group">
-        <label asp-for="GiamGia.LoaiGiamGia"></label>
-        <select asp-for="GiamGia.LoaiGiamGia" class="form-control" id="loaiGiamGia">
-            <option value="PhanTram">Phần trăm</option>
-            <option value="SoTien">Số tiền</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="GiamGia.GiaTri"></label>
-        <input asp-for="GiamGia.GiaTri" type="number" class="form-control" id="giaTriInput" />
-    </div>
-
+    <!-- Ngày bắt đầu -->
     <div class="form-group">
         <label asp-for="GiamGia.NgayBatDau"></label>
         <input asp-for="GiamGia.NgayBatDau" type="date" class="form-control" />
+        <span asp-validation-for="GiamGia.NgayBatDau" class="text-danger"></span>
     </div>
 
+    <!-- Ngày kết thúc -->
     <div class="form-group">
         <label asp-for="GiamGia.NgayKetThuc"></label>
         <input asp-for="GiamGia.NgayKetThuc" type="date" class="form-control" />
+        <span asp-validation-for="GiamGia.NgayKetThuc" class="text-danger"></span>
     </div>
 
-    <hr />
-
-    <!-- Liên kết với sản phẩm / danh mục -->
+    <!-- Giá trị giảm -->
     <div class="form-group">
-        <label>Chọn Sản phẩm</label>
-        <select id="sanPhamSelect" asp-for="SelectedSanPhams"
-                asp-items="@(new SelectList(Model.SanPhams, "IDSanPham", "TenSanPham"))"
-                class="form-control">
-            <option value="">-- Chọn sản phẩm --</option>
+        <label asp-for="GiamGia.GiaTri"></label>
+        <input asp-for="GiamGia.GiaTri" class="form-control" />
+        <span asp-validation-for="GiamGia.GiaTri" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="GiamGia.GiaTriGiamToiDa"></label>
+        <input asp-for="GiamGia.GiaTriGiamToiDa" class="form-control" />
+        <span asp-validation-for="GiamGia.GiaTriGiamToiDa" class="text-danger"></span>
+    </div>
+    <!-- Danh mục -->
+    <div class="form-group">
+        <label>Chọn danh mục</label>
+        <select id="DanhMucId" name="SelectedDanhMucs" class="form-control select2" multiple>
+            @foreach (var dm in Model.DanhMucs)
+            {
+                <option value="@dm.DanhMucId">@dm.TenDanhMuc</option>
+            }
         </select>
     </div>
 
+    <!-- Sản phẩm -->
     <div class="form-group">
-        <label>Chọn Danh mục</label>
-        <select id="danhMucSelect" asp-for="SelectedDanhMucs"
-                asp-items="@(new SelectList(Model.DanhMucs, "DanhMucId", "TenDanhMuc"))"
-                class="form-control">
-            <option value="">-- Chọn danh mục --</option>
+        <label>Chọn sản phẩm</label>
+        <select id="SanPhamId" name="SelectedSanPhams" class="form-control select2" multiple>
+            @foreach (var sp in Model.SanPhams)
+            {
+                <option value="@sp.IDSanPham">@sp.TenSanPham</option>
+            }
         </select>
     </div>
 
-    <div class="form-group">
-        <label>Chọn Sản phẩm chi tiết</label>
-        <select id="sanPhamCTSelect" asp-for="SelectedSanPhamCTs" class="form-control">
-            <option value="">-- Chọn sản phẩm chi tiết --</option>
-        </select>
-    </div>
-
-    <input type="submit" value="Lưu" class="btn btn-primary" />
-    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    <input type="submit" value="Lưu Test" />
 </form>
 
 @section Scripts {
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <script>
         $(document).ready(function () {
-            const $sanPham = $("#sanPhamSelect");
-            const $danhMuc = $("#danhMucSelect");
-            const $sanPhamCT = $("#sanPhamCTSelect");
-            const $giaTri = $("#giaTriInput");
-            const $loai = $("#loaiGiamGia");
+            $('.select2').select2();
+
+            const $giaTri = $("#GiaTriInput");
+            const $loai = $("#LoaiGiamGia");
 
             // Validate loại giảm giá & giá trị
             $loai.change(function () {
@@ -93,43 +96,28 @@
                 if (val < min) $(this).val(min);
                 if (val > max) $(this).val(max);
             });
+                  $(document).ready(function () {
+            $('.select2').select2({
+                allowClear: true,  // Cho phép bỏ chọn
+                placeholder: "Chọn giá trị"
+            });
 
-            // Khi chọn sản phẩm
-            $sanPham.change(function () {
-                if ($(this).val()) {
-                    $danhMuc.prop("disabled", true);
-                    $sanPhamCT.prop("disabled", false);
-                    loadSanPhamCT($(this).val());
+            const $danhMuc = $("#DanhMucId");
+            const $sanPham = $("#SanPhamId");
+
+            function toggleSelects() {
+                if ($danhMuc.val() && $danhMuc.val().length > 0) {
+                    $sanPham.prop("disabled", true).val(null).trigger("change");
+                } else if ($sanPham.val() && $sanPham.val().length > 0) {
+                    $danhMuc.prop("disabled", true).val(null).trigger("change");
                 } else {
                     $danhMuc.prop("disabled", false);
-                    $sanPhamCT.prop("disabled", true).empty()
-                        .append($("<option>", { value: "", text: "-- Chọn sản phẩm chi tiết --" }));
-                }
-            });
-
-            // Khi chọn danh mục
-            $danhMuc.change(function () {
-                if ($(this).val()) {
-                    $sanPham.prop("disabled", true);
-                    $sanPhamCT.prop("disabled", true).val("");
-                } else {
                     $sanPham.prop("disabled", false);
-                    $sanPhamCT.prop("disabled", false);
                 }
-            });
-
-            // Load SPCT bằng AJAX
-            function loadSanPhamCT(sanPhamId) {
-                $.getJSON("/Admin/GiamGia/GetSanPhamCTsBySanPhamId", { id: sanPhamId }, function (data) {
-                    $sanPhamCT.empty().append($("<option>", { value: "", text: "-- Chọn sản phẩm chi tiết --" }));
-                    $.each(data, function (i, item) {
-                        $sanPhamCT.append($("<option>", {
-                            value: item.idSanPhamCT,
-                            text: item.tenSanPham + " - " + item.size + " - " + item.mauSac + " - " + item.chatlieu
-                        }));
-                    });
-                });
             }
+
+            $danhMuc.on("change", toggleSelects);
+            $sanPham.on("change", toggleSelects);
         });
     </script>
 }

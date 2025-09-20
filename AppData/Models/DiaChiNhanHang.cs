@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace AppData.Models
 {
@@ -37,6 +38,7 @@ namespace AppData.Models
         public bool TrangThai { get; set; } = true;
 
         // Quan hệ 1 - N với HoaDon
+        [JsonIgnore]
         public virtual ICollection<HoaDon> HoaDons { get; set; } = new List<HoaDon>();
     }
 }

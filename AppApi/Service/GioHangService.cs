@@ -1,153 +1,161 @@
 ﻿using AppApi.IService;
 using AppData.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace AppApi.Service
 {
     public class GioHangService : IGioHangService
     {
         private readonly ApplicationDbContext _context;
+
         public GioHangService(ApplicationDbContext context)
         {
             _context = context;
         }
-        public async Task<GioHang?> GetByUserIdAsync(Guid userId)
-        {
-            return await _context.GioHangs
-         .Include(g => g.GioHangChiTiets)
-         .FirstOrDefaultAsync(g => g.User.Id == userId);
-        }
-        
-        public async Task<object> CapNhatSoLuong(Guid idGioHangChiTiet, int soLuong)
-        {
-            try
-            {
-                var chiTiet = await _context.GioHangChiTiets
-                    .Include(ct => ct.SanPhamCT)
-                    .FirstOrDefaultAsync(ct => ct.IDGioHangChiTiet == idGioHangChiTiet);
-                if (chiTiet == null)
-                {
-                    return new { success = false, message = "Chi tiết giỏ hàng không tồn tại" };
-                }
 
-                if (chiTiet.SanPhamCT == null || chiTiet.SanPhamCT.SoLuongTonKho < soLuong)
-                {
-                    return new { success = false, message = "Số lượng vượt quá tồn kho" };
-                }
-
-                chiTiet.SoLuong = soLuong;
-                _context.GioHangChiTiets.Update(chiTiet);
-                await _context.SaveChangesAsync();
-                Console.WriteLine($"Updated SoLuong for IDGioHangChiTiet {idGioHangChiTiet} to {soLuong}");
-                return new { success = true, soLuong = chiTiet.SoLuong, message = "Cập nhật số lượng thành công" };
-            }
-            catch (DbUpdateException ex)
-            {
-                Console.WriteLine($"DbUpdateException in CapNhatSoLuong: {ex.InnerException?.Message}");
-                return new { success = false, message = "Lỗi cập nhật cơ sở dữ liệu.", detail = ex.InnerException?.Message };
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in CapNhatSoLuong: {ex.Message}");
-                return new { success = false, message = "Lỗi server. Vui lòng thử lại.", detail = ex.Message };
-            }
-        }
-
-        public async Task<List<GioHangCT>> LayDanhSachGioHang(Guid idUser)
+        // ✅ Nếu user chưa có giỏ thì tạo mới
+        public async Task<GioHang> TaoGioHangNeuChuaCoAsync(Guid idUser)
         {
-            return await _context.GioHangChiTiets
-        .Where(ct => ct.IDGioHang == idUser && ct.TrangThai) 
-        .Include(ct => ct.SanPhamCT)
-        .ThenInclude(spct => spct.SanPham)
-        .AsNoTracking()
-        .ToListAsync();
-        }
-
-        public async Task<object> ThemVaoGioHang(Guid idSanPhamCT, Guid idUser, int soLuong)
-        {
-            // Tìm giỏ hàng dựa trên IdNguoiDung (User.Id)
             var gioHang = await _context.GioHangs
-                .Include(g => g.GioHangChiTiets)
-                .FirstOrDefaultAsync(g => g.User.Id == idUser);
+                .FirstOrDefaultAsync(g => g.IDGioHang == idUser);
 
             if (gioHang == null)
             {
-                // Kiểm tra xem ApplicationUser có tồn tại không
-                var user = await _context.Users.FindAsync(idUser);
-                if (user == null)
-                {
-                    throw new InvalidOperationException("Người dùng không tồn tại.");
-                }
-
                 gioHang = new GioHang
                 {
-                    IDGioHang = Guid.NewGuid(), // Tạo ID mới cho giỏ hàng
-                    User = user,               // Liên kết với ApplicationUser
+                    IDGioHang = idUser,
                     TrangThai = true
                 };
+
                 _context.GioHangs.Add(gioHang);
-                await _context.SaveChangesAsync(); // Lưu để lấy IDGioHang
+                await _context.SaveChangesAsync();
             }
 
+            return gioHang;
+        }
+
+        // ✅ Lấy giá sau giảm (nếu có khuyến mãi)
+        private async Task<decimal> TinhGiaSauGiam(Guid idSanPham, decimal giaGoc)
+        {
+            var sp = await _context.SanPhams
+                .Include(x => x.DanhMuc)
+                .FirstOrDefaultAsync(x => x.IDSanPham == idSanPham);
+
+            if (sp == null) return giaGoc;
+
+            // Lấy giảm giá theo sản phẩm
+            var giamGiaSPs = await _context.GiamGiaSanPham
+                .Include(x => x.GiamGia)
+                .Where(x => x.IDSanPham == idSanPham &&
+                            x.GiamGia.NgayBatDau <= DateTime.Now &&
+                            x.GiamGia.NgayKetThuc >= DateTime.Now &&
+                            x.GiamGia.TrangThai)
+                .Select(x => x.GiamGia)
+                .ToListAsync();
+
+            // Lấy giảm giá theo danh mục
+            var giamGiaDMs = await _context.GiamGiaDanhMuc
+                .Include(x => x.GiamGia)
+                .Where(x => x.DanhMucId == sp.DanhMucId &&
+                            x.GiamGia.NgayBatDau <= DateTime.Now &&
+                            x.GiamGia.NgayKetThuc >= DateTime.Now &&
+                            x.GiamGia.TrangThai)
+                .Select(x => x.GiamGia)
+                .ToListAsync();
+
+            var allDiscounts = giamGiaSPs.Any() ? giamGiaSPs : giamGiaDMs;
+
+            decimal giaSauGiam = giaGoc;
+
+            foreach (var giamGia in allDiscounts)
+            {
+                decimal giaTmp = giaGoc;
+
+                if (giamGia.LoaiGiamGia == "PhanTram")
+                {
+                    var soTienGiam = giaGoc * (giamGia.GiaTri / 100);
+                    if (giamGia.GiaTriGiamToiDa.HasValue)
+                        soTienGiam = Math.Min(soTienGiam, giamGia.GiaTriGiamToiDa.Value);
+
+                    giaTmp = giaGoc - soTienGiam;
+                }
+                else if (giamGia.LoaiGiamGia == "SoTien")
+                {
+                    giaTmp = Math.Max(0, giaGoc - giamGia.GiaTri);
+                }
+
+                if (giaTmp < giaSauGiam)
+                {
+                    giaSauGiam = giaTmp;
+                }
+            }
+
+            return giaSauGiam;
+        }
+
+        // ✅ Thêm sản phẩm vào giỏ (có giảm giá)
+        public async Task<string> ThemSanPhamVaoGioAsync(Guid idUser, Guid idSanPhamCT, int soLuong)
+        {
+            // B1: lấy hoặc tạo giỏ hàng cho user
+            var gioHang = await TaoGioHangNeuChuaCoAsync(idUser);
+
+            // B2: kiểm tra sản phẩm chi tiết
+            var sanPhamCT = await _context.SanPhamChiTiets
+                .Include(ct => ct.SanPham)
+                .FirstOrDefaultAsync(ct => ct.IDSanPhamCT == idSanPhamCT);
+
+            if (sanPhamCT == null) return "❌ Sản phẩm không tồn tại";
+
+            // B3: tính giá sau giảm
+            var giaSauGiam = await TinhGiaSauGiam(sanPhamCT.IDSanPham, sanPhamCT.GiaBan);
+
+            // B4: tìm xem sản phẩm đã có trong giỏ chưa
             var chiTiet = await _context.GioHangChiTiets
                 .FirstOrDefaultAsync(ct => ct.IDGioHang == gioHang.IDGioHang && ct.IDSanPhamCT == idSanPhamCT);
 
             if (chiTiet != null)
             {
                 chiTiet.SoLuong += soLuong;
-                _context.GioHangChiTiets.Update(chiTiet);
+                chiTiet.DonGia = giaSauGiam; // cập nhật lại giá theo KM mới
             }
             else
             {
-                // Kiểm tra tồn kho
-                var sanPhamCT = await _context.SanPhamChiTiets
-                    .FirstOrDefaultAsync(sp => sp.IDSanPhamCT == idSanPhamCT);
-                if (sanPhamCT == null || sanPhamCT.SoLuongTonKho < soLuong)
-                {
-                    throw new InvalidOperationException("Sản phẩm không đủ tồn kho hoặc không tồn tại.");
-                }
-
                 chiTiet = new GioHangCT
                 {
                     IDGioHangChiTiet = Guid.NewGuid(),
                     IDGioHang = gioHang.IDGioHang,
                     IDSanPhamCT = idSanPhamCT,
                     SoLuong = soLuong,
-                    DonGia = await GetGiaBanSanPham(idSanPhamCT),
+                    DonGia = giaSauGiam,
                     TrangThai = true
                 };
                 _context.GioHangChiTiets.Add(chiTiet);
             }
 
             await _context.SaveChangesAsync();
-            return new { success = true, soLuong = chiTiet.SoLuong, idGioHangChiTiet = chiTiet.IDGioHangChiTiet };
+            return "✅ Đã thêm sản phẩm vào giỏ hàng";
         }
 
-        public async Task<object> XoaKhoiGioHang(Guid idGioHangChiTiet)
+        // ✅ Lấy danh sách sản phẩm trong giỏ (có giảm giá)
+        public async Task<IEnumerable<GioHangCT>> LayDanhSachSanPhamAsync(Guid idUser)
         {
-            try
-            {
-                var chiTiet = await _context.GioHangChiTiets.FindAsync(idGioHangChiTiet);
-                if (chiTiet == null)
-                {
-                    return new { success = false, message = "Chi tiết giỏ hàng không tồn tại" };
-                }
+            var gioHang = await TaoGioHangNeuChuaCoAsync(idUser);
 
-                _context.GioHangChiTiets.Remove(chiTiet);
-                await _context.SaveChangesAsync();
-                return new { success = true, message = "Xóa sản phẩm thành công" };
-            }
-            catch (Exception ex)
+            var chiTiets = await _context.GioHangChiTiets
+                .Where(ct => ct.IDGioHang == gioHang.IDGioHang)
+                .Include(ct => ct.SanPhamCT)
+                    .ThenInclude(sp => sp.SanPham)
+                .ToListAsync();
+
+            // cập nhật lại giá theo KM mới nhất
+            foreach (var ct in chiTiets)
             {
-                Console.WriteLine($"Error in XoaKhoiGioHang: {ex.Message}");
-                return new { success = false, message = "Lỗi server. Vui lòng thử lại.", detail = ex.Message };
+                var giaSauGiam = await TinhGiaSauGiam(ct.SanPhamCT.IDSanPham, ct.SanPhamCT.GiaBan);
+                ct.DonGia = giaSauGiam;
             }
+
+            return chiTiets;
         }
-        private async Task<decimal> GetGiaBanSanPham(Guid idSanPhamCT)
-        {
-            var spct = await _context.SanPhamChiTiets.FindAsync(idSanPhamCT);
-            return spct?.GiaBan ?? 0;
-        }
+
     }
 }

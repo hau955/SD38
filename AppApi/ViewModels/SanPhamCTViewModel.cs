@@ -35,7 +35,8 @@ namespace ViewModels
 
         [Required]
         public decimal GiaBan { get; set; }
-
+        [Required]
+        public decimal GiaSauGiam { get; set; }
         [Required]
         public int SoLuongTonKho { get; set; }
 

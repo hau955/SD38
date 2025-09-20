@@ -18,4 +18,12 @@ namespace AppApi.ViewModels.SanPham
         public List<AnhSanPhamViewModel>? DanhSachAnh { get; set; }
 
     }
+    public class SanPhamDetailWithDiscountView : SanPhamView
+    {
+        public decimal GiaGoc { get; set; }
+        public decimal GiaSauGiam { get; set; }
+        public decimal? GiaTriGiam { get; set; }
+        public string? TenGiamGia { get; set; }
+        public string? LoaiGiamGia { get; set; }
+    }
 }

@@ -1,6 +1,7 @@
 ﻿using AppData.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace AppData.Models
 {
@@ -38,6 +39,7 @@ namespace AppData.Models
         public DbSet<Voucher> Vouchers { get; set; }
        
         public DbSet<DanhMuc> DanhMucs { get; set; }
+        public DbSet<HoaDonTrangThai> HoaDonTrangThai { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder); // Cần thiết cho Identity
@@ -60,6 +62,11 @@ namespace AppData.Models
                .WithOne(u => u.Voucher)
                .HasForeignKey<Voucher>(g => g.IdVoucher)
                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<HoaDonTrangThai>()
+    .HasOne(x => x.HoaDon)
+    .WithMany(h => h.HoaDonTrangThais)
+    .HasForeignKey(x => x.IDHoaDon);
 
             builder.Entity<DanhMuc>()
                 .HasMany(d => d.SanPhams)

@@ -2,6 +2,7 @@
 using AppData.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 public class HoaDon
 {
@@ -32,6 +33,8 @@ public class HoaDon
 
     [Column(TypeName = "decimal(18, 2)")]
     public decimal TongTienTruocGiam { get; set; }
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal? PhiVanChuyen { get; set; }
 
     [Column(TypeName = "decimal(18, 2)")]
     public decimal TongTienSauGiam { get; set; }
@@ -64,6 +67,9 @@ public class HoaDon
     [MaxLength(50)]
     public Guid? IdVoucher { get; set; }
     public virtual Voucher? Voucher { get; set; }
-
+    [JsonIgnore]
     public virtual ICollection<HoaDonCT> HoaDonChiTiets { get; set; } = new List<HoaDonCT>();
+    [JsonIgnore]
+    public virtual ICollection<HoaDonTrangThai> HoaDonTrangThais { get; set; } = new List<HoaDonTrangThai>();
+
 }

@@ -14,11 +14,10 @@ namespace AppView.Areas.Admin.ViewModels
         // Các lựa chọn từ view (checkbox)
         public List<Guid> SelectedSanPhams { get; set; } = new();
         public List<Guid> SelectedDanhMucs { get; set; } = new();
-        public List<Guid> SelectedSanPhamCTs { get; set; } = new();
-
+       
         // Dữ liệu hiển thị (đổ ra dropdown/checkbox list)
         public List<SanPhamView> SanPhams { get; set; } = new();
         public List<DanhMucViewModel> DanhMucs { get; set; } = new();
-        public List<SanPhamCTViewModel> SanPhamCTs { get; set; } = new();
+       
     }
 }

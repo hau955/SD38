@@ -4,10 +4,8 @@ namespace AppApi.IService
 {
     public interface IGioHangService 
     {
-        Task<object> ThemVaoGioHang(Guid idSanPhamCT, Guid idNguoiDung, int soLuong);
-        Task<object> XoaKhoiGioHang(Guid idGioHangChiTiet);
-        Task<object> CapNhatSoLuong(Guid idGioHangChiTiet, int soLuong);
-        Task<List<GioHangCT>> LayDanhSachGioHang(Guid idNguoiDung);
-        Task<GioHang?> GetByUserIdAsync(Guid userId);
+        Task<GioHang> TaoGioHangNeuChuaCoAsync(Guid idUser);
+        Task<string> ThemSanPhamVaoGioAsync(Guid idUser, Guid idSanPhamCT, int soLuong);
+        Task<IEnumerable<GioHangCT>> LayDanhSachSanPhamAsync(Guid idUser);
     }
 }

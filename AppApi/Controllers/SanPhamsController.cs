@@ -24,13 +24,13 @@ namespace AppApi.Controllers
             _sanPhamService = sanPhamService;
             _context = context;
         }
-        [HttpGet("{id:guid}")]
-        public async Task<IActionResult> GetSanPhamChiTiet(Guid id)
-        {
-            var result = await _sanPhamService.GetSanPhamChiTiet(id);
-            if (result == null) return NotFound();
-            return Ok(result);
-        }
+        //[HttpGet("{id:guid}")]
+        //public async Task<IActionResult> GetSanPhamChiTiet(Guid id)
+        //{
+        //    var result = await _sanPhamService.GetSanPhamChiTiet(id);
+        //    if (result == null) return NotFound();
+        //    return Ok(result);
+        //}
         // GET: api/SanPhams
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -62,7 +62,7 @@ namespace AppApi.Controllers
         {
             try
             {
-                var sanPham = await _sanPhamService.GetByID(id);
+                var sanPham = await _sanPhamService.GetSanPhamDetailWithDiscountAsync(id);
 
                 if (sanPham == null)
                     return NotFound(new { message = "Không tìm thấy sản phẩm", data = (object?)null });
@@ -146,6 +146,14 @@ namespace AppApi.Controllers
             return Ok();
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetSanPhamById(Guid id)
+        {
+            var result = await _sanPhamService.GetSanPhamDetailWithDiscountAsync(id);
+            if (result == null)
+                return NotFound(new { message = "Không tìm thấy sản phẩm" });
 
+            return Ok(result);
+        }
     }
 }

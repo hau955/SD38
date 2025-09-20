@@ -31,11 +31,6 @@
         border-color: #d4af37;
     }
 
-   
-   
-
-
-
 </style>
 
 
@@ -101,7 +96,7 @@
 
                             <!-- Nút xóa -->
                             <div id="delete-form-@anh.IdAnh" action="@Url.Action("DeleteImage", "SanPham")" method="post"
-                                  class="position-absolute top-0 end-0 m-1" style="z-index: 10;">
+                                 class="position-absolute top-0 end-0 m-1" style="z-index: 10;">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="idAnh" value="@anh.IdAnh" />
                                 <input type="hidden" name="idSanPham" value="@Model.IDSanPham" />
@@ -135,7 +130,7 @@
                         </div>
                     </div>
 
-                    }
+                }
             </div>
 
 
