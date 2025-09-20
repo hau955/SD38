@@ -9,6 +9,7 @@ namespace AppApi.IService
         Task<MauSac> CreateMauSacAsync(MauSac mauSac);
         Task<bool> UpdateMauSacAsync(Guid id,MauSac mauSac);
         Task<bool> DeleteMauSacAsync(Guid id);
+        Task<bool> ToggleStatusAsync(Guid id);
         Task<bool> MauSacExistsAsync(Guid id);
     }
 }

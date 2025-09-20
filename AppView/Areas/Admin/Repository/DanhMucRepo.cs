@@ -61,12 +61,18 @@ namespace AppView.Areas.Admin.Repository
         }
 
 
-        public async Task<bool> UpdateDanhMucAsync(DanhMucViewModel model)
+        public async Task<DanhMucViewModel?> UpdateDanhMucAsync(DanhMucViewModel model)
         {
             var content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
             var response = await _httpClient.PutAsync($"DanhMuc/{model.DanhMucId}", content);
-            return response.IsSuccessStatusCode;
+
+            if (!response.IsSuccessStatusCode) return null;
+
+            var json = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<ApiResponse<DanhMucViewModel>>(json);
+            return result?.Data;
         }
+
 
         public async Task<bool> DeleteDanhMucAsync(Guid id)
         {

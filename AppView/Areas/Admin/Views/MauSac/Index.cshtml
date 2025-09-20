@@ -110,16 +110,24 @@
                         </td>
                         <td>
                             <div class="d-flex gap-2">
-                                <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@item.IDMauSac">
+                                <a class="btn btn-sm btn-primary" asp-area="Admin" asp-controller="MauSac" asp-action="Edit" asp-route-id="@item.IDMauSac">
                                     <i class="fas fa-edit"></i> Sửa
                                 </a>
-                                <a class="btn btn-sm btn-warning" asp-action="ToggleStatus" asp-route-id="@item.IDMauSac">
-                                    <i class="fas fa-sync-alt"></i> Trạng thái
-                                </a>
-                                <a class="btn btn-sm btn-danger" asp-area="Admin" asp-controller="MauSac" asp-action="Delete" asp-route-id="@item.IDMauSac"
-                                   onclick="return confirm('Bạn có chắc chắn muốn xoá màu này không?');">
-                                    <i class="fas fa-trash"></i> Xoá
-                                </a> 
+                                    <form asp-area="Admin" asp-controller="MauSac" asp-action="ToggleStatus"
+                                          asp-route-id="@item.IDMauSac" method="post" style="display:inline;">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-sync-alt"></i> Trạng thái
+                                        </button>
+                                    </form>
+                                    <form asp-area="Admin" asp-controller="MauSac" asp-action="DeleteMS"
+                                          asp-route-id="@item.IDMauSac" method="post"
+                                          data-confirm="Bạn có chắc chắn muốn xoá màu này không?">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash-alt"></i> Xoá
+                                        </button>
+                                    </form>
                             </div>
                         </td>
                     </tr>

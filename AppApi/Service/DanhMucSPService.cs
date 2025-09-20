@@ -37,34 +37,16 @@ namespace AppApi.Service
         public async Task<bool> UpdateDanhMucSPAsync(DanhMuc danhMuc)
         {
             var existingdanhMuc = await _db.DanhMucs.FindAsync(danhMuc.DanhMucId);
-            if (existingdanhMuc == null)
-            {
-                return false;
-            }
+            if (existingdanhMuc == null) return false;
 
-            existingdanhMuc.TenDanhMuc = danhMuc.TenDanhMuc;
+            existingdanhMuc.TenDanhMuc = danhMuc.TenDanhMuc.Trim();
             existingdanhMuc.TrangThai = danhMuc.TrangThai;
             existingdanhMuc.NgaySua = DateTime.Now;
-            existingdanhMuc.NgayTao = DateTime.Now;
+            // ❌ không được sửa NgayTao
 
             _db.Entry(existingdanhMuc).State = EntityState.Modified;
-
-            try
-            {
-                await _db.SaveChangesAsync();
-                return true;
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await DanhMucSPExistsAsync(danhMuc.DanhMucId))
-                {
-                    return false;
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _db.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> DeleteDanhMucSPAsync(Guid id)

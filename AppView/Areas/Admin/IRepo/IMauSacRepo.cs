@@ -10,7 +10,7 @@ namespace AppView.Areas.Admin.IRepo
         Task<MauSac?> GetByID(Guid id);
         Task<MauSac> Create(MauSac mauSac);
         Task<MauSac?> Update(Guid id, MauSac mauSac);
-        Task<bool> Delete(Guid id);
+        Task<string> Delete(Guid id);
         Task<string> Toggle(Guid id);
     }
 }

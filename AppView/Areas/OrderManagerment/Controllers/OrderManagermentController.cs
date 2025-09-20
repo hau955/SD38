@@ -10,7 +10,7 @@ using System.Security.Claims;
 namespace AppView.Areas.OrderManagerment.Controllers
 {
     [Area("OrderManagerment")]
-    [Authorize(Roles = "Admin,Employee")]
+    //[Authorize(Roles = "Admin,Employee")]
     public class OrderManagermentController : Controller
     {
         private readonly IOrderManagementRepo _orderRepo;

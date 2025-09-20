@@ -46,11 +46,20 @@ namespace AppApi.Controllers
         public async Task<IActionResult> Update(Guid id, [FromBody] DanhMuc danhMuc)
         {
             if (id != danhMuc.DanhMucId)
-                return BadRequest("ID không khớp.");
+                return BadRequest(new ApiResponse<string> { Message = "ID không khớp" });
 
             var updated = await _service.UpdateDanhMucSPAsync(danhMuc);
-            return updated ? Ok() : NotFound();
+            if (!updated)
+                return NotFound(new ApiResponse<string> { Message = "Không tìm thấy để cập nhật" });
+
+            var updatedItem = await _service.GetDanhMucSPByIdAsync(id);
+            return Ok(new ApiResponse<DanhMuc>
+            {
+                Message = "Cập nhật danh mục thành công",
+                Data = updatedItem
+            });
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
