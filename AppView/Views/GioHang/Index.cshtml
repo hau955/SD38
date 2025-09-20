@@ -61,11 +61,16 @@
             <tbody>
                 @foreach (var item in Model)
                 {
-                    <tr>
+                    <tr data-id="@item.IDGioHangChiTiet">
                         <td><input type="checkbox" class="checkbox-select" data-id="@item.IDGioHangChiTiet" /></td>
                         <td>@item.TenSanPham</td>
                         <td>
-                            <input type="number" class="form-control quantity-input" value="@item.SoLuong" min="1" data-id="@item.IDGioHangChiTiet" />
+                            <div class="input-group" style="width:120px;">
+                                <button type="button" class="btn btn-outline-secondary btn-decrease">-</button>
+                                <input type="number" class="form-control quantity-input text-center" value="@item.SoLuong" min="1" data-id="@item.IDGioHangChiTiet" />
+                                <button type="button" class="btn btn-outline-secondary btn-increase">+</button>
+                            </div>
+
                         </td>
                         <td>@item.DonGia.ToString("N0") VNĐ</td>
                         <td>@(item.SoLuong * item.DonGia).ToString("N0") VNĐ</td>
@@ -83,20 +88,50 @@
 
 <script>
     const token = '@ViewBag.Token';
-    const userId = '@ViewBag.UserId';
+    const userId = '@Context.Session.GetString("ID")';
 
+       // Dùng event delegation thay vì gắn trực tiếp
     document.addEventListener('click', (e) => {
+        // Giảm số lượng
+        if (e.target.classList.contains('btn-decrease')) {
+            const input = e.target.closest('tr').querySelector('.quantity-input');
+            let value = parseInt(input.value) || 1;
+            if (value > 1) {
+                input.value = value - 1;
+            }
+        }
+
+        // Tăng số lượng
+        if (e.target.classList.contains('btn-increase')) {
+            const input = e.target.closest('tr').querySelector('.quantity-input');
+            let value = parseInt(input.value) || 1;
+            input.value = value + 1;
+        }
+
+        // Cập nhật giỏ hàng
         if (e.target.classList.contains('btn-update')) {
             const id = e.target.dataset.id;
             const quantityInput = e.target.closest('tr').querySelector('.quantity-input');
             const quantity = parseInt(quantityInput.value) || 1;
             updateCartItem(id, quantity);
-        } else if (e.target.classList.contains('btn-delete')) {
+        }
+
+        // Xóa sản phẩm
+        if (e.target.classList.contains('btn-delete')) {
             const id = e.target.dataset.id;
             deleteCartItem(id);
-        } else if (e.target.id === 'select-all') {
+        }
+
+        // Chọn tất cả
+        if (e.target.id === 'select-all') {
             document.querySelectorAll('.checkbox-select').forEach(cb => cb.checked = e.target.checked);
         }
+    });
+
+
+    // Checkbox select all
+    document.getElementById('select-all').addEventListener('change', (e) => {
+        document.querySelectorAll('.checkbox-select').forEach(cb => cb.checked = e.target.checked);
     });
 
     async function updateCartItem(id, quantity) {
@@ -112,7 +147,7 @@
             const result = await response.json();
             if (response.ok) {
                 alert(result.message || 'Cập nhật thành công!');
-                loadCart(); // Làm mới giao diện
+                loadCart();
             } else {
                 alert(`Cập nhật thất bại: ${result.message || 'Lỗi không xác định'}`);
             }
@@ -133,12 +168,11 @@
             const result = await response.json();
             if (response.ok) {
                 alert(result.message || 'Xóa thành công!');
-                const row = document.querySelector(`tr[data-id="${id}"]`);
-                if (row) row.remove();
+                document.querySelector(`tr[data-id="${id}"]`)?.remove();
                 if (document.querySelectorAll('tbody tr').length === 0) {
                     document.querySelector('tbody').innerHTML = '<tr><td colspan="6">Giỏ hàng trống.</td></tr>';
                 }
-                loadCart(); // Làm mới giao diện
+                loadCart();
             } else {
                 alert(`Xóa thất bại: ${result.message || 'Lỗi không xác định'}`);
             }
@@ -156,17 +190,17 @@
                 }
             });
             const result = await response.json();
-            console.log('LoadCart response:', result); // Log để debug
             if (response.ok) {
                 const tbody = document.querySelector('table tbody');
                 tbody.innerHTML = '';
                 if (result.data && result.data.length > 0) {
                     result.data.forEach(item => {
-                        const tenSanPham = item.sanPhamCT && item.sanPhamCT.sanPham ? item.sanPhamCT.sanPham.tenSanPham || 'Không có tên' : 'Không có tên';
+                        const tenSanPham = item.sanPhamCT?.sanPham?.tenSanPham || 'Không có tên';
                         const donGia = item.donGia || 0;
                         const soLuong = item.soLuong || 1;
                         const tong = soLuong * donGia;
                         const row = document.createElement('tr');
+                        row.setAttribute('data-id', item.idGioHangChiTiet);
                         row.innerHTML = `
                             <td><input type="checkbox" class="checkbox-select" data-id="${item.idGioHangChiTiet}"></td>
                             <td>${tenSanPham}</td>

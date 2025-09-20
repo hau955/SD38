@@ -1,0 +1,491 @@
+/* ---------- RESET & BASE STYLES ---------- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    line-height: 1.6;
+    background-color: #fff;
+    color: #222;
+}
+.banner {
+    width: 100%;
+    overflow: hidden;
+}
+
+.banner-img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+a {
+    text-decoration: none;
+    color: inherit;
+}
+ul {
+    list-style: none;
+}
+
+/* ---------- TOPBAR ---------- */
+.topbar {
+    background-color: #000;
+    color: #fff;
+    font-size: 13px;
+    padding: 6px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: fadeIn 0.6s ease;
+}
+
+/* ---------- NAVBAR ---------- */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+.logo img {
+    height: 45px;
+    transition: transform 0.3s;
+}
+
+.logo:hover img {
+    transform: scale(1.05);
+}
+
+nav ul.menu {
+    display: flex;
+    gap: 30px;
+}
+
+nav ul.menu > li {
+    position: relative;
+}
+
+nav ul.menu > li > a {
+    font-weight: 600;
+    padding: 10px;
+    font-size: 15px;
+    color: #222;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+nav ul.menu > li > a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    width: 0%;
+    background-color: #c70039;
+    transition: width 0.3s;
+}
+
+nav ul.menu > li:hover > a {
+    color: #c70039;
+}
+
+nav ul.menu > li:hover > a::after {
+    width: 100%;
+}
+
+nav ul.menu .dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #fff;
+    border: 1px solid #eee;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    min-width: 160px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+nav ul.menu > li:hover .dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown li a {
+    display: block;
+    padding: 10px 15px;
+    color: #333;
+    transition: 0.2s;
+}
+
+.dropdown li a:hover {
+    background: #f5f5f5;
+    color: #c70039;
+}
+
+/* ---------- ACCOUNT / CART ---------- */
+.account-cart {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.account-cart .dropdown-btn {
+    position: relative;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.account-cart .dropdown-btn:hover {
+    color: #c70039;
+}
+
+.account-cart .dropdown {
+    position: absolute;
+    right: 0;
+    top: 35px;
+    background: #fff;
+    border: 1px solid #ddd;
+    min-width: 160px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 100;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.account-cart .dropdown-btn:hover .dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.account-cart .dropdown li a {
+    display: block;
+    padding: 10px 15px;
+    font-size: 14px;
+    color: #333;
+}
+
+.account-cart .dropdown li a:hover {
+    background-color: #f4f4f4;
+    color: #c70039;
+}
+
+/* ---------- BREADCRUMB ---------- */
+.breadcrumb {
+    text-align: center;
+    font-size: 14px;
+    color: #777;
+    margin: 15px 0;
+    letter-spacing: 1px;
+}
+
+/* ---------- SIDEBAR + PRODUCT LIST ---------- */
+.container {
+    display: flex;
+    gap: 30px;
+    max-width: 1280px;
+    padding: 30px;
+    margin: auto;
+}
+
+.sidebar {
+    flex: 0 0 230px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.sidebar h3 {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.sidebar ul li {
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.sidebar ul li:hover {
+    color: #c70039;
+}
+
+.sidebar ul li > ul {
+    padding-left: 15px;
+    font-weight: normal;
+}
+
+.product-section {
+    flex: 1;
+}
+
+.product-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    margin-bottom: 25px;
+    color: #222;
+}
+
+.product-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    justify-content: center;
+}
+
+.product-card {
+    width: 250px;
+    border: 1px solid #eee;
+    padding: 15px;
+    background: #fff;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(0,0,0,0.03);
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.product-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: orangered;
+    color: white;
+    padding: 3px 8px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.product-name {
+    margin-top: 12px;
+    font-size: 14px;
+    color: #444;
+}
+
+.price {
+    margin-top: 6px;
+    font-size: 15px;
+}
+
+.price-sale {
+    color: red;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.price-old {
+    color: #999;
+    text-decoration: line-through;
+    font-size: 13px;
+}
+
+.price-regular {
+    font-weight: bold;
+}
+
+/* ---------- NEWSLETTER ---------- */
+.newsletter {
+    background: #f9f9f9;
+    padding: 50px 20px;
+    text-align: center;
+}
+
+.newsletter h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.newsletter p {
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.subscribe-form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    max-width: 600px;
+    margin: auto;
+}
+
+.subscribe-form input {
+    padding: 10px;
+    flex: 1;
+    min-width: 200px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.subscribe-form button {
+    background-color: #000;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+.subscribe-form button:hover {
+    background-color: #c70039;
+}
+
+/* Icon mạng xã hội cố định */
+.social-fixed {
+    position: fixed;
+    top: 40%;
+    right: 15px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 9999;
+}
+
+.social-icon {
+    width: 40px;
+    height: 40px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 50%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.social-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.social-icon.fb {
+    background-image: url('img/fb.png'); /* ảnh 40x40 */
+}
+.social-icon.ig {
+    background-image: url('img/ig.png');
+}
+.social-icon.zalo {
+    background-image: url('img/zalo.png');
+}
+
+/* Mobile thu nhỏ icon lại */
+@media (max-width: 600px) {
+    .social-icon {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* ---------- FOOTER ---------- */
+.site-footer {
+    background: #111;
+    color: white;
+    padding: 40px 20px;
+}
+
+.footer-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+.footer-left, .footer-middle, .footer-right {
+    flex: 1;
+    min-width: 250px;
+}
+
+.footer-middle ul {
+    padding: 0;
+}
+
+.footer-middle ul li a {
+    color: white;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.footer-right img {
+    max-width: 160px;
+    margin-bottom: 10px;
+}
+
+/* ---------- BACK TO TOP ---------- */
+#backToTop {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #c70039;
+    color: white;
+    padding: 10px 15px;
+    font-size: 14px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+    display: none;
+    z-index: 999;
+    transition: all 0.3s ease;
+}
+
+#backToTop:hover {
+    background: #000;
+}
+
+/* ---------- ANIMATIONS ---------- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 992px) {
+    .container {
+        flex-direction: column;
+        padding: 20px;
+    }
+    .product-list {
+        justify-content: center;
+    }
+    .sidebar {
+        order: 2;
+    }
+}
+
+@media (max-width: 600px) {
+    .navbar {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
+    .topbar {
+        flex-direction: column;
+        gap: 6px;
+    }
+    .subscribe-form {
+        flex-direction: column;
+    }
+}

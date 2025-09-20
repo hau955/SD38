@@ -17,76 +17,29 @@ namespace AppApi.Controllers
             _gioHangService = gioHangService;
         }
 
-        [HttpGet("lay-gio-hang/{idNguoiDung}")]
-        public async Task<IActionResult> LayDanhSachGioHang(Guid idNguoiDung)
-        {
-            var gioHangChiTiets = await _gioHangService.LayDanhSachGioHang(idNguoiDung);
-            var result = gioHangChiTiets.Select(ct => new
-            {
-                ct.IDGioHangChiTiet,
-                ct.IDGioHang,
-                ct.IDSanPhamCT,
-                ct.SoLuong,
-                ct.DonGia,
-                ct.TrangThai,
-                SanPhamCT = new
-                {
-                    ct.SanPhamCT.IDSanPhamCT,
-                    ct.SanPhamCT.IDSanPham, 
-                    ct.SanPhamCT.SoLuongTonKho,
-                    ct.SanPhamCT.GiaBan,
-                    SanPham = new { ct.SanPhamCT.SanPham?.TenSanPham } // Sẽ null do [JsonIgnore]
-                }
-            }).ToList();
-            return Ok(new { message = "Lấy giỏ hàng thành công", data = result });
-        }
-
+        // ✅ Thêm sản phẩm vào giỏ
         [HttpPost("them")]
-        public async Task<IActionResult> ThemVaoGioHang([FromBody] GioHangThemModel model)
+        public async Task<IActionResult> ThemSanPham([FromBody] ThemSanPhamRequest request)
         {
-            try
-            {
-                if (model == null || model.idSanPhamCT == Guid.Empty || model.idNguoiDung == Guid.Empty || model.soLuong <= 0)
-                {
-                    return BadRequest(new { message = "Dữ liệu không hợp lệ" });
-                }
-                var result = await _gioHangService.ThemVaoGioHang(model.idSanPhamCT, model.idNguoiDung, model.soLuong);
-                return Ok(new { message = "Thêm vào giỏ hàng thành công", data = result });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in Them: {ex.Message}");
-                return StatusCode(500, new { message = "Lỗi server. Vui lòng thử lại.", detail = ex.Message });
-            }
+            var ketQua = await _gioHangService.ThemSanPhamVaoGioAsync(request.IdUser, request.IdSanPhamCT, request.SoLuong);
+            return Ok(new { message = ketQua });
         }
 
-        [HttpDelete("xoa/{idGioHangChiTiet}")]
-        public async Task<IActionResult> XoaKhoiGioHang(Guid idGioHangChiTiet)
+        // ✅ Lấy danh sách sản phẩm trong giỏ
+        [HttpGet("lay-danh-sach/{idUser}")]
+        public async Task<IActionResult> LayDanhSach(Guid idUser)
         {
-            var result = await _gioHangService.XoaKhoiGioHang(idGioHangChiTiet);
-            return Ok(result);
+            var danhSach = await _gioHangService.LayDanhSachSanPhamAsync(idUser);
+            return Ok(danhSach);
         }
-
-        [HttpPut("cap-nhat-so-luong")]
-        public async Task<IActionResult> CapNhatSoLuong([FromBody] CapNhatSoLuongRequest request)
-        {
-            var result = await _gioHangService.CapNhatSoLuong(request.idGioHangChiTiet, request.soLuong);
-            return Ok(result);
-        }
-
-        // Model để ánh xạ body JSON
-      
     }
-    public class CapNhatSoLuongRequest
+
+    // DTO để nhận dữ liệu từ client
+    public class ThemSanPhamRequest
     {
-        public Guid idGioHangChiTiet { get; set; }
-        public int soLuong { get; set; }
-    }
-    public class GioHangThemModel
-    {
-        public Guid idSanPhamCT { get; set; }
-        public Guid idNguoiDung { get; set; }
-        public int soLuong { get; set; }
+        public Guid IdUser { get; set; }
+        public Guid IdSanPhamCT { get; set; }
+        public int SoLuong { get; set; }
     }
 }
 

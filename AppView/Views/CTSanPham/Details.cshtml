@@ -1,0 +1,183 @@
+﻿@model AppApi.ViewModels.SanPham.SanPhamView
+@{
+    var baseUrl = "https://localhost:7221/";
+    var id = Context.Session.GetString("ID"); // 👈 Lấy ID user từ session
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.TenSanPham</title>
+    <link rel="stylesheet" href="~/css/style.css" />
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <!-- Bộ sưu tập ảnh -->
+            <div class="image-gallery">
+                <div class="thumbnails">
+                    @for (int i = 0; i < Model.DanhSachAnh.Count; i++)
+                    {
+                        var anh = Model.DanhSachAnh[i];
+                        <img src="@($"{baseUrl}{anh.DuongDanAnh}")"
+                             alt="Ảnh sản phẩm"
+                             class="thumb @(i==0 ? "active" : "")"
+                             data-src="@($"{baseUrl}{anh.DuongDanAnh}")" />
+                    }
+                </div>
+
+                <div class="main-image" id="mainImageContainer">
+                    <img id="mainImage" src="@($"{baseUrl}{Model.DanhSachAnh.FirstOrDefault()?.DuongDanAnh}")" alt="Ảnh lớn" />
+                    <div id="magnifier"></div>
+                </div>
+            </div>
+
+            <!-- Thông tin sản phẩm -->
+            <div class="product-info">
+                <h1>@Model.TenSanPham</h1>
+                <p class="brand">Thương hiệu: <strong>@Model.TenDanhMuc</strong></p>
+
+                <div class="price">
+                    <span class="old-price" style="text-decoration:line-through; color:#888;">
+                        @Model.ChiTiets.FirstOrDefault()?.GiaBan.ToString("N0")₫
+                    </span>
+                    <span class="new-price" style="color:red; font-weight:bold; margin-left:10px;">
+                        @Model.ChiTiets.FirstOrDefault()?.GiaSauGiam.ToString("N0")₫
+                    </span>
+                </div>
+
+                <a href="#" class="zalo-link">💬 Nhấn để được tư vấn và nhận ưu đãi</a><br />
+                <a href="#" class="size-guide">📏 HƯỚNG DẪN CHỌN SIZE</a>
+
+                <button class="store-btn">CHỈ CÒN TẠI CỬA HÀNG</button>
+
+                <!-- Chọn thuộc tính sản phẩm -->
+                <div class="options" style="margin-top:15px;">
+                    <label for="sizeSelect"><strong>Chọn size:</strong></label>
+                    <select id="sizeSelect" class="form-control">
+                        @foreach (var size in Model.ChiTiets.Select(c => c.Size).Distinct())
+                        {
+                            <option value="@size">@size</option>
+                        }
+                    </select>
+
+                    <label for="colorSelect" style="margin-top:10px;"><strong>Chọn màu sắc:</strong></label>
+                    <select id="colorSelect" class="form-control">
+                        @foreach (var color in Model.ChiTiets.Select(c => c.MauSac).Distinct())
+                        {
+                            <option value="@color">@color</option>
+                        }
+                    </select>
+
+                    <label for="materialSelect" style="margin-top:10px;"><strong>Chọn chất liệu:</strong></label>
+                    <select id="materialSelect" class="form-control">
+                        @foreach (var material in Model.ChiTiets.Select(c => c.ChatLieu).Distinct())
+                        {
+                            <option value="@material">@material</option>
+                        }
+                    </select>
+
+                    <!-- Nhập số lượng -->
+                    <label for="quantityInput" style="margin-top:10px;"><strong>Số lượng:</strong></label>
+                    <input id="quantityInput" type="number" value="1" min="1" class="form-control" style="width:80px;" />
+                </div>
+
+                <!-- Nút thêm giỏ hàng -->
+                <button id="addToCartBtn" class="btn btn-success" style="margin-top:15px;">
+                    🛒 Thêm vào giỏ hàng
+                </button>
+
+                <div class="description" style="margin-top:20px;">
+                    <p><strong>Mô tả:</strong> @Model.MoTa</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup Size -->
+    <div id="sizeGuidePopup" class="size-popup" style="display:none;">
+        <div class="popup-content">
+            <span class="close-btn" onclick="closeSizePopup()">&times;</span>
+            <h2>HƯỚNG DẪN CHỌN SIZE</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>SIZE</th>
+                        <th>S - 02</th>
+                        <th>M - 04</th>
+                        <th>L - 06</th>
+                        <th>XL - 08</th>
+                        <th>2XL - 10</th>
+                        <th>3XL - 12</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>VAI (cm)</td><td>35</td><td>36</td><td>37</td><td>38</td><td>39</td><td>40</td></tr>
+                    <tr><td>NGỰC (cm)</td><td>82</td><td>86</td><td>90</td><td>94</td><td>98</td><td>102</td></tr>
+                    <tr><td>EO (cm)</td><td>66</td><td>70</td><td>75</td><td>80</td><td>84</td><td>88</td></tr>
+                    <tr><td>MÔNG (cm)</td><td>86</td><td>90</td><td>94</td><td>98</td><td>102</td><td>106</td></tr>
+                    <tr><td>CÂN NẶNG (kg)</td><td>45-50</td><td>51-55</td><td>56-60</td><td>61-64</td><td>65-68</td><td>69-70</td></tr>
+                    <tr><td>CHIỀU CAO (cm)</td><td>150-160</td><td>155-160</td><td>155-160</td><td>160-165</td><td>160-165</td><td>160-165</td></tr>
+                </tbody>
+            </table>
+            <p style="margin-top: 10px;">
+                📞 Liên hệ bộ phận bán hàng:
+                <strong style="color: #007bff;">0246.2990998</strong>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    const userId = "@id"; // lấy từ session server đẩy sang client
+    const baseUrl = "https://localhost:7221/";
+
+    // Nút thêm giỏ hàng
+    document.getElementById('addToCartBtn').addEventListener('click', async function () {
+        const size = document.getElementById('sizeSelect').value;
+        const color = document.getElementById('colorSelect').value;
+        const material = document.getElementById('materialSelect').value;
+        const quantity = parseInt(document.getElementById('quantityInput').value) || 1;
+
+        // 👉 tìm chi tiết sản phẩm tương ứng
+        const chiTiets = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChiTiets));
+        const matched = chiTiets.find(ct =>
+            ct.Size === size &&
+            ct.MauSac === color &&
+            ct.ChatLieu === material
+        );
+
+        if (!matched) {
+            alert("❌ Không tìm thấy sản phẩm chi tiết với lựa chọn này!");
+            return;
+        }
+
+        const request = {
+            idUser: userId,
+            idSanPhamCT: matched.IDSanPhamCT,
+            soLuong: quantity
+        };
+
+        try {
+            const response = await fetch(`${baseUrl}api/GioHang/them`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(request)
+            });
+
+            const result = await response.json();
+            alert(result.message ?? `✅ Đã thêm ${quantity} sản phẩm vào giỏ!`);
+        } catch (error) {
+            console.error(error);
+            alert("❌ Lỗi khi thêm vào giỏ hàng");
+        }
+    });
+
+    // Popup chọn size
+    function closeSizePopup() {
+        document.getElementById('sizeGuidePopup').style.display = 'none';
+    }
+</script>

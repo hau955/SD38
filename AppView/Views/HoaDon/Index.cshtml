@@ -1,0 +1,46 @@
+﻿@using AppView.ViewModels
+@model List<HoaDonView>
+
+<h2>Danh sách hóa đơn của bạn</h2>
+
+@if (!Model.Any())
+{
+    <p>Bạn chưa có hóa đơn nào.</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Mã Hóa Đơn</th>
+                <th>Ngày Tạo</th>
+                <th>Trạng Thái</th>
+                <th>Thanh Toán</th>
+                <th>Tổng Tiền</th>
+                <th>Hình Thức TT</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var hd in Model)
+            {
+                <tr>
+                    <td>@hd.IdHoaDon</td>
+                    <td>
+                        @(hd.NgayTao.HasValue ? hd.NgayTao.Value.ToString("dd/MM/yyyy HH:mm") : "")
+                    </td>
+
+                    <td>@hd.TrangThaiDonHang</td>
+                    <td>@hd.TrangThaiThanhToan</td>
+                    <td>@hd.TongTienSauGiam.ToString("N0") VNĐ</td>
+                    <td>@hd.HinhThucTT</td>
+                    <td>
+                        <a class="btn btn-info" href="@Url.Action("Details", "HoaDon", new { idHoaDon = hd.IdHoaDon })">
+                            Xem chi tiết
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

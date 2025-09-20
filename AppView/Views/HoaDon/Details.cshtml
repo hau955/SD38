@@ -1,0 +1,93 @@
+﻿@using AppView.ViewModels
+@model HoaDonView
+@{
+    var baseUrl = "https://localhost:7221/"; // 👈 đổi thành URL API của bạn
+}
+<div class="container mt-4">
+    <h2 class="mb-4 text-primary fw-bold">
+        <i class="bi bi-receipt"></i> Chi tiết hóa đơn
+    </h2>
+
+    <div class="row">
+        <div class="col-12">
+            <!-- Thông tin hóa đơn -->
+            <div class="card shadow-sm mb-4 border-0 rounded-3">
+                <div class="card-body row g-3">
+                    <div class="col-md-4"><strong>Mã hóa đơn:</strong> @Model.IdHoaDon</div>
+                    <div class="col-md-4"><strong>Ngày tạo:</strong> @Model.NgayTao</div>
+                    <div class="col-md-4">
+                        <strong>Trạng thái đơn hàng:</strong>
+                        <span class="badge @(Model.TrangThaiDonHang=="Đã giao" ? "bg-success" : "bg-warning text-dark")">
+                            @Model.TrangThaiDonHang
+                        </span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Trạng thái thanh toán:</strong>
+                        <span class="badge @(Model.TrangThaiThanhToan=="Đã thanh toán" ? "bg-success" : "bg-danger")">
+                            @Model.TrangThaiThanhToan
+                        </span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Tổng tiền:</strong>
+                        <span class="text-danger fw-bold fs-5">@Model.TongTienSauGiam.ToString("N0") VNĐ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <!-- Danh sách sản phẩm -->
+            <h4 class="mb-3 text-secondary">
+                <i class="bi bi-box-seam"></i> Sản phẩm trong hóa đơn
+            </h4>
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-0">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Hình ảnh</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Thông tin</th>
+                                <th class="text-center">Số lượng</th>
+                                <th class="text-end">Giá gốc</th>
+                                <th class="text-end">Giá sau giảm</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var ct in Model.ChiTietSanPhams)
+                            {
+                                <tr>
+                                    <td style="width:90px;">
+                                        <img src="@($"{baseUrl}{ct.DuongDanAnh}")" alt="@ct.TenSanPham"
+                                             class="img-thumbnail rounded" style="max-height:70px;" />
+                                    </td>
+                                    <td class="fw-bold">@ct.TenSanPham</td>
+                                    <td><small>Màu: @ct.MauSac | Size: @ct.Size | Chất liệu: @ct.ChatLieu</small></td>
+                                    <td class="text-center fw-bold">@ct.SoLuong</td>
+                                    <td class="text-end text-muted text-decoration-line-through">
+                                        @ct.DonGia.ToString("N0") VNĐ
+                                    </td>
+                                    <td class="text-end fw-bold text-danger">
+                                        @ct.GiaSauGiam.ToString("N0") VNĐ
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-12 text-end mt-3">
+    @if (Model.TrangThaiDonHang != "Đã giao" && Model.TrangThaiThanhToan != "Đã thanh toán")
+    {
+        <form asp-action="HuyDonHang" asp-controller="HoaDon" method="post">
+            <input type="hidden" name="idHoaDon" value="@Model.IdHoaDon" />
+            <button type="submit" class="btn btn-outline-danger">
+                <i class="bi bi-x-circle"></i> Hủy đơn hàng
+            </button>
+        </form>
+    }
+</div>
+

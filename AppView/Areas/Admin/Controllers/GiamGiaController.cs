@@ -1,5 +1,4 @@
-﻿
-using AppData.Models;
+﻿using AppData.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -32,21 +31,18 @@ namespace AppApi.Controllers
         }
 
         // ---------------- API load sản phẩm chi tiết ----------------
-        [HttpGet("GetSanPhamCTsBySanPhamId")]
+        [HttpGet("/Admin/GiamGia/GetSanPhamCTsBySanPhamId")]
         public async Task<IActionResult> GetSanPhamCTsBySanPhamId([FromQuery] Guid id)
         {
             if (id == Guid.Empty)
-                return Json(new List<SanPhamCTViewModel>());
+                return Json(new List<object>());
 
             var spcts = await _spctRepo.GetBySanPhamIdAsync(id);
 
             var result = spcts.Select(x => new
             {
-                idSanPhamCT = x.IDSanPhamCT,
-                tenSanPham = x.SanPham?.TenSanPham ?? "",
-                size = x.SizeAo,
-                mauSac = x.MauSac,
-                chatlieu = x.ChatLieu
+                id = x.IDSanPhamCT,
+                text = $"{x.SanPham?.TenSanPham} - Size: {x.SizeAo} - Màu: {x.MauSac} - Chất liệu: {x.ChatLieu}"
             });
 
             return Json(result);
@@ -59,7 +55,7 @@ namespace AppApi.Controllers
             return View(list);
         }
 
-        [HttpGet("Create")]
+        [HttpGet]
         public async Task<IActionResult> Create()
         {
             var vm = new GiamGiaCreateVM
@@ -71,50 +67,60 @@ namespace AppApi.Controllers
                 },
                 SanPhams = await _spRepo.GetAllSanPhamAsync(),
                 DanhMucs = await _dmRepo.GetAllDanhMucsAsync(),
-                SanPhamCTs = new List<SanPhamCTViewModel>() // để trống, load bằng AJAX
+              
             };
 
             return View(vm);
         }
 
-        [HttpPost("Create")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(GiamGiaCreateVM vm)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                // Tạo mới giảm giá
-                vm.GiamGia.IDGiamGia = Guid.NewGuid();
-                await _repo.CreateAsync(vm.GiamGia);
-
-                // Gắn sản phẩm
-                foreach (var spId in vm.SelectedSanPhams ?? new List<Guid>())
-                {
-                    await _repo.AddProductToDiscountAsync(vm.GiamGia.IDGiamGia, spId);
-                }
-
-                // Gắn danh mục
-                foreach (var dmId in vm.SelectedDanhMucs ?? new List<Guid>())
-                {
-                    await _repo.AddCategoryToDiscountAsync(vm.GiamGia.IDGiamGia, dmId);
-                }
-
-                // Gắn sản phẩm chi tiết
-                foreach (var spctId in vm.SelectedSanPhamCTs ?? new List<Guid>())
-                {
-                    await _repo.AddSanPhamCTToDiscountAsync(vm.GiamGia.IDGiamGia, spctId);
-                }
-
-                return RedirectToAction(nameof(Index));
+                // load lại dữ liệu nếu form lỗi
+                vm.DanhMucs = await _dmRepo.GetAllDanhMucsAsync();
+                vm.SanPhams = await _spRepo.GetAllSanPhamAsync();
+               // vm.SanPhamCTs = await _repo.GetSanPhamCTAsync();
+                return View(vm);
             }
 
-            // Nếu lỗi validate thì load lại dữ liệu
-            vm.SanPhams = await _spRepo.GetAllSanPhamAsync();
-            vm.DanhMucs = await _dmRepo.GetAllDanhMucsAsync();
-            vm.SanPhamCTs = new List<SanPhamCTViewModel>(); // vẫn để trống, load qua AJAX
+            try
+            {
+                // 1. Tạo Giảm Giá qua API (API sẽ tự sinh Guid)
+                var created = await _repo.CreateAsync(vm.GiamGia);
 
-            return View(vm);
+                // 2. Gắn sản phẩm
+                if (vm.SelectedSanPhams != null)
+                {
+                    foreach (var spId in vm.SelectedSanPhams)
+                    {
+                        await _repo.AddProductToDiscountAsync(created.IDGiamGia, spId);
+                    }
+                }
+
+                // 3. Gắn danh mục
+                if (vm.SelectedDanhMucs != null)
+                {
+                    foreach (var dmId in vm.SelectedDanhMucs)
+                    {
+                        await _repo.AddCategoryToDiscountAsync(created.IDGiamGia, dmId);
+                    }
+                }
+
+
+                TempData["Success"] = "Tạo giảm giá thành công!";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Lỗi khi tạo giảm giá: {ex.Message}");
+                vm.DanhMucs = await _dmRepo.GetAllDanhMucsAsync();
+                vm.SanPhams = await _spRepo.GetAllSanPhamAsync();
+             
+                return View(vm);
+            }
         }
     }
 }
-

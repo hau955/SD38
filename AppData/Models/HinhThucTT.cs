@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace AppData.Models
 {
@@ -20,6 +21,7 @@ namespace AppData.Models
         public bool TrangThai { get; set; } = true;
 
         // Navigation property
+        [JsonIgnore]
         public virtual ICollection<HoaDon> HoaDons { get; set; }
 
         public HinhThucTT()

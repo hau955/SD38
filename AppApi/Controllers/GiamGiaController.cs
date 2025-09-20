@@ -1,4 +1,5 @@
 ﻿using AppApi.IService;
+using AppApi.Service;
 using AppData.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -90,6 +91,6 @@ namespace AppApi.Controllers
         {
             return Ok(await _service.GetSanPhamCTByDiscountAsync(idGiamGia));
         }
-
+       
     }
 }

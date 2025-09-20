@@ -1,0 +1,357 @@
+﻿@model IEnumerable<AppData.Models.GioHangCT>
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    var tongTien = Model.Sum(x => x.SoLuong * x.DonGia);
+}
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f8f8f8;
+        color: #222;
+    }
+
+    .cart-container {
+        max-width: 1000px;
+        margin: 40px auto;
+        background: #fff;
+        padding: 30px 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-radius: 10px;
+    }
+
+    h1 {
+        font-size: 26px;
+        margin-bottom: 30px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 10px;
+    }
+
+    .cart-header {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        font-weight: bold;
+        padding: 10px 0;
+        border-bottom: 2px solid #ddd;
+        text-align: center;
+    }
+
+    .cart-item {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        align-items: center;
+        padding: 20px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .item-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+        .item-info img {
+            width: 90px;
+            height: 90px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+    .details h2 {
+        font-size: 16px;
+        margin: 0 0 6px;
+    }
+
+    .details p {
+        margin: 2px 0;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .remove {
+        font-size: 13px;
+        color: #d00;
+        text-decoration: underline;
+        margin-top: 6px;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .item-price, .item-total {
+        text-align: center;
+    }
+
+        .item-price .current {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .item-price .original {
+            text-decoration: line-through;
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        .item-price .discount {
+            font-size: 12px;
+            background: #444;
+            color: #fff;
+            display: inline-block;
+            padding: 2px 6px;
+            margin-top: 6px;
+            border-radius: 4px;
+        }
+
+    .item-quantity {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .qty-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+        background: #eee;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .item-quantity input {
+        width: 40px;
+        text-align: center;
+        font-size: 16px;
+        padding: 4px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    }
+
+    .cart-note {
+        margin-top: 30px;
+    }
+
+        .cart-note label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .cart-note textarea {
+            width: 100%;
+            height: 100px;
+            font-size: 14px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            resize: vertical;
+        }
+
+    .cart-footer {
+        margin-top: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .total-amount {
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .cart-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+        .cart-buttons button {
+            background-color: #000;
+            color: #fff;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+        }
+
+            .cart-buttons button:hover {
+                background-color: #333;
+            }
+</style>
+<div class="cart-container">
+    <h1>Giỏ hàng</h1>
+
+    <div class="cart-header">
+        <div>Sản phẩm</div>
+        <div>Giá</div>
+        <div>Số lượng</div>
+        <div>Tổng</div>
+    </div>
+
+    @foreach (var item in Model)
+    {
+        <div class="cart-item">
+            <!-- Thông tin sản phẩm -->
+            <div class="item-info">
+                <img alt="@item.SanPhamCT?.SanPham?.TenSanPham" />
+                <div class="details">
+                    <h2>@item.SanPhamCT?.SanPham?.TenSanPham</h2>
+                    <p>Size: @item.SanPhamCT?.SizeAo?.SoSize / Màu: @item.SanPhamCT?.MauSac?.TenMau</p>
+                    <p>Thương hiệu: @item.SanPhamCT?.ChatLieu?.TenChatLieu</p>
+                    <form asp-action="Delete" method="post" style="display:inline">
+                        <input type="hidden" name="IdGioHangCT" value="@item.IDGioHangChiTiet" />
+                        <button type="submit" class="remove">Xóa</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Giá -->
+            <div class="item-price">
+                <div class="current">@item.DonGia.ToString("N0")₫</div>
+            </div>
+
+            <!-- Số lượng -->
+            <div class="item-quantity">
+                <form asp-action="UpdateQty" method="post" class="qty-form">
+                    <input type="hidden" name="IdGioHangCT" value="@item.IDGioHangChiTiet" />
+                    <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
+                    <input type="text" name="SoLuongMoi" value="@item.SoLuong" class="qty-input" readonly />
+                    <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
+                    <button type="submit" class="update-btn">Cập nhật</button>
+                </form>
+            </div>
+
+            <!-- Thành tiền -->
+            <div class="item-total">@((item.SoLuong * item.DonGia).ToString("N0"))₫</div>
+        </div>
+    }
+    <div id="checkoutModal" style="display:none; position:fixed; top:20%; left:30%; background:white; padding:20px; border:1px solid #ccc; z-index:1000; width:40%;">
+        <h3>Chọn địa chỉ nhận hàng</h3>
+        <div id="diaChiList"></div>
+        <textarea id="noteModal" placeholder="Ghi chú cho đơn hàng" style="width:100%; margin-top:10px;"></textarea>
+        <br />
+        <button onclick="confirmCheckout()">Xác nhận thanh toán</button>
+        <button onclick="closeCheckoutModal()">Hủy</button>
+    </div>
+    <!-- Ghi chú -->
+    <div class="cart-note">
+        <label for="note">Ghi chú</label>
+        <textarea id="note" placeholder="Nhập ghi chú cho đơn hàng..."></textarea>
+    </div>
+
+    <!-- Footer -->
+    <div class="cart-footer">
+        <div class="total-amount">
+            Tổng tiền: <strong>@tongTien.ToString("N0") ₫</strong>
+        </div>
+        <div class="cart-buttons">
+            <button type="button" class="checkout-btn" onclick="openCheckoutModal()">Thanh toán</button>
+
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        function changeQty(button, delta) {
+            const form = button.closest(".qty-form");
+            const input = form.querySelector(".qty-input");
+            let value = parseInt(input.value) || 0;
+
+            value += delta;
+            if (value < 1) value = 1;
+
+            input.value = value;
+        }
+
+        async function confirmCheckout() {
+            const idUser = "@Context.Session.GetString("ID")";
+            const idHinhThucTT = "358B1962-99C2-4950-A50D-1643C247C442"; // cố định
+            const note = document.getElementById("noteModal").value;
+
+            // ✅ Kiểm tra chọn địa chỉ
+            const diaChiRadio = document.querySelector("input[name='idDiaChi']:checked");
+            if (!diaChiRadio) {
+                alert("⚠️ Vui lòng chọn địa chỉ nhận hàng trước khi thanh toán!");
+                return;
+            }
+            const idDiaChi = diaChiRadio.value;
+
+            try {
+                const res = await fetch(
+                    `https://localhost:7221/api/HoaDon/checkout?idUser=${idUser}&idHinhThucTT=${idHinhThucTT}&ghiChu=${encodeURIComponent(note)}&idDiaChi=${idDiaChi}`,
+                    { method: "POST" }
+                );
+
+                let data = {};
+                try {
+                    data = await res.json(); // có thể rỗng
+                } catch { }
+
+                if (res.ok) {
+                    alert("✅ Thanh toán thành công");
+                    if (data.hoaDon && data.hoaDon.iDHoaDon) {
+                        window.location.href = "/HoaDon/ChiTiet/" + data.hoaDon.iDHoaDon;
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    alert("❌ Lỗi: " + (data.message || "Thanh toán thất bại"));
+                }
+            } catch (err) {
+                alert("❌ Lỗi kết nối API");
+                console.error(err);
+            }
+        }
+
+        function openCheckoutModal() {
+            document.getElementById("checkoutModal").style.display = "block";
+            loadDiaChiUser();
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById("checkoutModal").style.display = "none";
+        }
+
+        async function loadDiaChiUser() {
+            const idUser = "@Context.Session.GetString("ID")";
+            const res = await fetch(`https://localhost:7221/api/HoaDon/diachi/${idUser}`);
+            const diaChiListDiv = document.getElementById("diaChiList");
+            diaChiListDiv.innerHTML = "";
+
+            if (res.ok) {
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    diaChiListDiv.innerHTML = `<p style="color:red;">⚠️ Bạn chưa có địa chỉ giao hàng</p>`;
+                    return;
+                }
+
+                data.forEach((dc, index) => {
+                    const label = document.createElement("label");
+                    label.style.display = "block";
+                    label.innerHTML = `
+                        <input type="radio" name="idDiaChi" value="${dc.idDiaChiNhanHang}"
+                            ${(dc.isDefault || index === 0) ? "checked" : ""} />
+                        ${dc.hoTenNguoiNhan} - ${dc.diaChiChiTiet} - ${dc.soDienThoai}
+                    `;
+                    diaChiListDiv.appendChild(label);
+                });
+            } else {
+                try {
+                    const data = await res.json();
+                    diaChiListDiv.innerHTML = `<p style="color:red;">${data.message}</p>`;
+                } catch {
+                    diaChiListDiv.innerHTML = `<p style="color:red;">⚠️ Lỗi khi tải địa chỉ</p>`;
+                }
+            }
+        }
+    </script>
+}
+
