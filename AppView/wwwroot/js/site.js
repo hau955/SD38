@@ -158,23 +158,12 @@ async function submitRegistration(event) {
     }
 }
 function initDropdowns() {
-    // Khởi tạo tất cả dropdowns sử dụng data-bs-toggle
-    const dropdownToggles = document.querySelectorAll('[data-bs-toggle="dropdown"]');
-
-    dropdownToggles.forEach(toggle => {
+    // Chỉ cần khởi tạo dropdown Bootstrap, không cần thêm sự kiện click thủ công
+    const dropdownElements = document.querySelectorAll('.dropdown-toggle');
+    dropdownElements.forEach(toggleEl => {
         // Khởi tạo dropdown Bootstrap
-        const dropdown = new bootstrap.Dropdown(toggle, {
-            autoClose: true,
-            popperConfig: (defaultConfig) => ({
-                ...defaultConfig,
-                strategy: 'fixed'
-            })
-        });
-
-        // Thêm hiệu ứng mượt mà khi toggle
-        toggle.addEventListener('click', function (e) {
-            e.preventDefault();
-            dropdown.toggle();
+        new bootstrap.Dropdown(toggleEl, {
+            autoClose: true
         });
     });
 
@@ -401,20 +390,52 @@ async function handleLogout(event) {
         logoutBtn.innerHTML = originalText;
     }
 }
-function showSuccessAlert(message) {
-    Swal.fire({
-        icon: 'success',
-        title: 'Thành công',
-        text: message,
-        confirmButtonText: 'OK'
+// === Notification functions ===
+function showToast(type, message, position = 'top-end', timer = 3000) {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: position,
+        showConfirmButton: false,
+        timer: timer,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
+        }
+    });
+
+    Toast.fire({
+        icon: type,
+        title: message
     });
 }
 
-function showErrorAlert(message) {
+function showSuccess(message, title = 'Thành công', timer = 2000) {
+    Swal.fire({
+        icon: 'success',
+        title: title,
+        text: message,
+        timer: timer,
+        showConfirmButton: timer <= 0
+    });
+}
+
+function showError(message, title = 'Lỗi') {
     Swal.fire({
         icon: 'error',
-        title: 'Lỗi',
+        title: title,
         text: message,
-        confirmButtonText: 'OK'
+        confirmButtonText: 'Đóng'
     });
+}
+
+function showLoading(message = 'Đang xử lý...') {
+    Swal.fire({
+        title: message,
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    return Swal; // Return để có thể đóng sau này
 }

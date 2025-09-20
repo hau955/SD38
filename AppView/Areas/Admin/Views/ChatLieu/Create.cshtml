@@ -57,24 +57,56 @@
     <div class="col-md-6 mx-auto form-wrapper">
         <h2><i class="fas fa-plus-circle me-2"></i> @ViewData["Title"]</h2>
 
-        <form asp-area="Admin" asp-controller="ChatLieu" asp-action="Create" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <!-- Hiển thị thông báo thành công -->
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>@TempData["Message"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Hiển thị thông báo lỗi -->
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>@TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <form asp-area="Admin" asp-controller="ChatLieu" asp-action="Create" method="post" class="needs-validation" novalidate>
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="All" class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>Vui lòng kiểm tra các lỗi sau:</strong>
+            </div>
 
             <div class="form-floating mb-3">
-                <input asp-for="TenChatLieu" class="form-control" placeholder="Nhập tên ChatLieu" />
-                <label asp-for="TenChatLieu">Tên ChatLieu</label>
-                <span asp-validation-for="TenChatLieu" class="text-danger small"></span>
+                <input asp-for="TenChatLieu"
+                       class="form-control @(ViewData.ModelState.GetValidationState("TenChatLieu") == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid ? "is-invalid" : "")"
+                       placeholder="Nhập tên chất liệu" required />
+                <label asp-for="TenChatLieu">Tên chất liệu <span class="text-danger">*</span></label>
+                <span asp-validation-for="TenChatLieu" class="invalid-feedback"></span>
+                <div class="form-text">
+                    Tên chất liệu phải có từ 2-50 ký tự và chỉ chứa chữ cái, số, dấu gạch ngang và khoảng trắng.
+                </div>
             </div>
 
             <div class="form-check form-switch mb-4">
-                <input asp-for="TrangThai" class="form-check-input" />
-                <label asp-for="TrangThai" class="form-check-label">Hoạt động</label>
+                <input asp-for="TrangThai" class="form-check-input" type="checkbox" checked />
+                <label asp-for="TrangThai" class="form-check-label">
+                    <i class="fas fa-toggle-on me-1"></i>Trạng thái hoạt động
+                </label>
+                <div class="form-text">Bật/tắt để kích hoạt hoặc vô hiệu hóa chất liệu này.</div>
             </div>
 
             <div class="d-flex justify-content-between">
-                <input type="submit" value="Lưu Test" />
+                <button type="submit" class="btn btn-success px-4">
+                    <i class="fas fa-save me-1"></i> Tạo mới
+                </button>
                 <a asp-action="Index" class="btn btn-secondary px-4">
-                    <i class="fas fa-arrow-left"></i> Quay lại
+                    <i class="fas fa-arrow-left me-1"></i> Quay lại
                 </a>
             </div>
         </form>

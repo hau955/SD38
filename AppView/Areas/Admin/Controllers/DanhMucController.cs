@@ -50,13 +50,14 @@ namespace AppView.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
-            var result = await _service.UpdateDanhMucAsync(model);
-            if (result)
+            var updated = await _service.UpdateDanhMucAsync(model);
+            if (updated != null)
                 return RedirectToAction("Index");
 
             ModelState.AddModelError("", "Cập nhật thất bại");
             return View(model);
         }
+
 
         public async Task<IActionResult> Delete(Guid id)
         {

@@ -52,11 +52,20 @@ namespace AppView.Areas.Admin.Repository
 
         public async Task<string> Toggle(Guid id)
         {
-            var response = await _httpClient.PatchAsync($"https://localhost:7221/api/ChatLieux/ToggleStatus/{id}", null);
-            var content = await response.Content.ReadAsStringAsync();
-            var json = JsonSerializer.Deserialize<Dictionary<string, string>>(content);
-            return json != null && json.ContainsKey("message") ? json["message"] : "Thành công";
+            // gọi API Toggle
+            var response = await _httpClient.PutAsync($"https://localhost:7221/api/ChatLieux/Toggle/{id}", null);
+
+            // đọc dữ liệu trả về
+            var result = await response.Content.ReadFromJsonAsync<ApiResponse<string>>();
+
+            if (result != null && response.IsSuccessStatusCode)
+            {
+                return result.Message ?? "Đổi trạng thái thành công";
+            }
+
+            return result?.Message ?? "Có lỗi xảy ra khi đổi trạng thái";
         }
+
 
         private class ApiResponse<T>
         {

@@ -1,4 +1,4 @@
-﻿using AppData.Models;
+using AppData.Models;
 using AppView.Areas.Admin.IRepo;
 using Microsoft.AspNetCore.Mvc;
 using AppData.Models;
@@ -47,12 +47,12 @@ namespace AppView.Areas.Admin.Controllers
                 model.TrangThai = true;
 
                 await _sizeRepo.Create(model);
-                TempData["Message"] = "✅ Tạo size thành công!";
+                TempData["Message"] = "? T?o size th�nh c�ng!";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "❌ Lỗi khi tạo size: " + ex.Message);
+                ModelState.AddModelError("", "? L?i khi t?o size: " + ex.Message);
                 return View(model);
             }
         }
@@ -76,7 +76,7 @@ namespace AppView.Areas.Admin.Controllers
             await LoadSizeListAsync();
 
             if (id != model.IDSize)
-                return BadRequest("ID không khớp.");
+                return BadRequest("ID kh�ng kh?p.");
 
             if (!ModelState.IsValid)
                 return View(model);
@@ -88,47 +88,41 @@ namespace AppView.Areas.Admin.Controllers
 
                 if (success == null)
                 {
-                    ModelState.AddModelError("", "Không tìm thấy size để cập nhật.");
+                    ModelState.AddModelError("", "Kh�ng t�m th?y size d? c?p nh?t.");
                     return View(model);
                 }
 
-                TempData["Message"] = "✅ Cập nhật size thành công!";
+                TempData["Message"] = "? C?p nh?t size th�nh c�ng!";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "❌ Lỗi khi cập nhật size: " + ex.Message);
+                ModelState.AddModelError("", "? L?i khi c?p nh?t size: " + ex.Message);
                 return View(model);
             }
         }
-
-        // GET: Size/Delete
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var size = await _sizeRepo.GetByID(id);
-            if (size == null) return NotFound();
-            return View(size);
-        }
-
-        // POST: Size/Delete
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ConfirmDelete(Guid id)
+        public async Task<IActionResult> DeleteS(Guid id)
         {
             try
             {
-                await _sizeRepo.Delete(id);
-                TempData["Message"] = "🗑️ Xoá size thành công!";
+                var deleteSize = await _sizeRepo.Delete(id);
+                if (!deleteSize) { TempData["Message"] = "Xo� size kh�ng th�nh c�ng!"; return RedirectToAction(nameof(Index)); }
+                TempData["Message"] = "? Xo� size th�nh c�ng!";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "❌ Lỗi khi xoá size: " + ex.Message;
+                TempData["Error"] = "? L?i khi xo� size: " + ex.Message;
                 return RedirectToAction(nameof(Index));
             }
         }
 
-        // PATCH: Size/ToggleStatus
+
+        // POST: Size/ToggleStatus
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleStatus(Guid id)
         {
             try
@@ -138,13 +132,13 @@ namespace AppView.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "❌ Lỗi khi đổi trạng thái: " + ex.Message;
+                TempData["Error"] = "? L?i khi d?i tr?ng th�i: " + ex.Message;
             }
             return RedirectToAction(nameof(Index));
         }
 
         /// <summary>
-        /// Gán danh sách size vào ViewBag nếu cần sử dụng dropdown trong View.
+        /// G�n danh s�ch size v�o ViewBag n?u c?n s? d?ng dropdown trong View.
         /// </summary>
         private async Task LoadSizeListAsync()
         {

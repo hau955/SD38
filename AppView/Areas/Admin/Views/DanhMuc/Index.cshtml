@@ -22,7 +22,7 @@
                 <td>@item.MoTa</td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.DanhMucId" class="btn btn-warning btn-sm">Sửa</a>
-                    <a asp-action="Delete" asp-route-id="@item.DanhMucId" class="btn btn-danger btn-sm"
+                    <a asp-area="Admin" asp-controller="DanhMuc" asp-action="Delete" asp-route-id="@item.DanhMucId" class="btn btn-danger btn-sm"
                        onclick="return confirm('Xác nhận xoá?')">Xoá</a>
                 </td>
             </tr>

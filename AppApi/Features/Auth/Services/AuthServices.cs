@@ -82,9 +82,9 @@ namespace AppApi.Features.Services
                 _logger.LogInformation($"[CONFIRMATION] Link: {confirmationLink}");
 
                 var emailBody = $@"
-<p>Nhấn vào link sau để xác nhận email:</p>
-<a href='{confirmationLink}'>XÁC NHẬN EMAIL</a>
-<p>Hoặc mở thủ công: {confirmationLink}</p>";
+                    <p>Nhấn vào link sau để xác nhận email:</p>
+                    <a href='{confirmationLink}'>XÁC NHẬN EMAIL</a>
+                    <p>Hoặc mở thủ công: {confirmationLink}</p>";
 
                 await _emailService.SendEmailAsync(user.Email ?? string.Empty, "Xác nhận email", emailBody);
 
@@ -201,16 +201,16 @@ namespace AppApi.Features.Services
 
             var subject = "Đặt lại mật khẩu";
             var body = $@"
-        <h2>Đặt lại mật khẩu</h2>
-        <p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản tại Áo Dài Việt.</p>
-        <p>Vui lòng nhấn vào nút bên dưới để đặt lại mật khẩu của bạn:</p>
-        <p style='text-align: center; margin: 30px 0;'>
-            <a href='{resetLink}' style='background-color: #fb923c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;'>
-                Đặt Lại Mật Khẩu
-            </a>
-        </p>
-        <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
-        <p>Liên kết này sẽ hết hạn sau 24 giờ.</p>";
+                <h2>Đặt lại mật khẩu</h2>
+                <p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản tại Áo Dài Việt.</p>
+                <p>Vui lòng nhấn vào nút bên dưới để đặt lại mật khẩu của bạn:</p>
+                <p style='text-align: center; margin: 30px 0;'>
+                    <a href='{resetLink}' style='background-color: #fb923c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;'>
+                        Đặt Lại Mật Khẩu
+                    </a>
+                </p>
+                <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
+                <p>Liên kết này sẽ hết hạn sau 24 giờ.</p>";
 
             await _emailService.SendEmailAsync(user.Email ?? string.Empty, subject, body);
             return ApiResponse<object>.Success(new object(), "Nếu email tồn tại, một liên kết đặt lại mật khẩu đã được gửi.");
