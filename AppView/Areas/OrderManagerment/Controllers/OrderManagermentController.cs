@@ -14,7 +14,6 @@ namespace AppView.Areas.OrderManagerment.Controllers
     public class OrderManagermentController : Controller
     {
         private readonly IOrderManagementRepo _orderRepo;
-
         private readonly IMapper _mapper;
 
         public OrderManagermentController(IOrderManagementRepo orderRepo, IMapper mapper)
@@ -44,15 +43,16 @@ namespace AppView.Areas.OrderManagerment.Controllers
                 ViewBag.StatusColors = OrderStatusColors.StatusColors;
                 ViewBag.PaymentColors = OrderStatusColors.PaymentColors;
 
-                return View(orders.Data);
+                return PartialView(orders.Data);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"❌ ERROR in Index: {ex.Message}\n{ex.StackTrace}");
                 TempData["Error"] = $"Có lỗi xảy ra: {ex.Message}";
-                return View(new PagedResult<OrderListViewModel>());
+                return PartialView(new PagedResult<OrderListViewModel>());
             }
         }
+
         public async Task<IActionResult> Details(Guid id)
         {
             try
@@ -87,6 +87,33 @@ namespace AppView.Areas.OrderManagerment.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetOrderStatusHistory(Guid id)
+        {
+            try
+            {
+                var response = await _orderRepo.GetOrderStatusHistoryAsync(id);
+
+                return Json(new
+                {
+                    isSuccess = response.IsSuccess,
+                    data = response.Data,
+                    message = response.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ ERROR in GetOrderStatusHistory: {ex.Message}");
+                return Json(new
+                {
+                    isSuccess = false,
+                    data = (object)null,
+                    message = "Lỗi khi lấy lịch sử trạng thái"
+                });
+            }
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConfirmOrder(Guid id)
@@ -205,6 +232,7 @@ namespace AppView.Areas.OrderManagerment.Controllers
                 });
             }
         }
+
         [HttpGet]
         public async Task<IActionResult> GetOrderStatistics()
         {
@@ -215,6 +243,7 @@ namespace AppView.Areas.OrderManagerment.Controllers
                 data = result.Data
             });
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CancelOrder([FromBody] CancelOrderViewModel vm)

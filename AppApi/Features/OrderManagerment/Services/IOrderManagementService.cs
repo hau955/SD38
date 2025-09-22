@@ -13,6 +13,7 @@ namespace AppApi.Features.OrderManagerment.Services
         Task<ApiResponse<bool>> UpdatePaymentStatusAsync(UpdatePaymentStatusDto dto);
         Task<ApiResponse<bool>> CancelOrderAsync(CancelOrderDto dto);
         Task<Dictionary<string, int>> GetOrderStatisticsAsync();
+        Task<List<OrderStatusHistoryDto>> GetOrderStatusHistoryAsync(Guid orderId);
         Task<bool> CanUpdateOrderStatusAsync(Guid orderId, string newStatus);
     }
 }

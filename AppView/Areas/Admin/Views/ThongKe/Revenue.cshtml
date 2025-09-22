@@ -22,6 +22,28 @@
         </div>
     </div>
 
+    <!-- Error Message -->
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            @ViewBag.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Debug Information -->
+    @if (ViewBag.ShowDebugInfo == true)
+    {
+        <div class="alert alert-info">
+            <h6>Debug Information:</h6>
+            <p><strong>Revenue By Time Count:</strong> @(Model?.RevenueByTime?.Count ?? 0)</p>
+            <p><strong>Revenue By Category Count:</strong> @(Model?.RevenueByCategory?.Count ?? 0)</p>
+            <p><strong>Revenue By Region Count:</strong> @(Model?.RevenueByRegion?.Count ?? 0)</p>
+            <p><strong>API Base URL:</strong> @ViewData["ApiBaseUrl"]</p>
+        </div>
+    }
+
     <!-- Filter Form -->
     <div class="row">
         <div class="col-12">
@@ -38,12 +60,13 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Nhóm theo</label>
-                            <option value="Day" selected="@(request?.GroupType == TimeGroupTypeViewModel.Day ? "selected" : null)">Ngày</option>
-                            <option value="Week" selected="@(request?.GroupType == TimeGroupTypeViewModel.Week ? "selected" : null)">Tuần</option>
-                            <option value="Month" selected="@(request?.GroupType == TimeGroupTypeViewModel.Month ? "selected" : null)">Tháng</option>
-                            <option value="Quarter" selected="@(request?.GroupType == TimeGroupTypeViewModel.Quarter ? "selected" : null)">Quý</option>
-                            <option value="Year" selected="@(request?.GroupType == TimeGroupTypeViewModel.Year ? "selected" : null)">Năm</option>
-
+                            <select class="form-control" name="GroupType">
+                                <option value="Day" selected="@(request?.GroupType == TimeGroupTypeViewModel.Day ? "selected" : null)">Ngày</option>
+                                <option value="Week" selected="@(request?.GroupType == TimeGroupTypeViewModel.Week ? "selected" : null)">Tuần</option>
+                                <option value="Month" selected="@(request?.GroupType == TimeGroupTypeViewModel.Month ? "selected" : null)">Tháng</option>
+                                <option value="Quarter" selected="@(request?.GroupType == TimeGroupTypeViewModel.Quarter ? "selected" : null)">Quý</option>
+                                <option value="Year" selected="@(request?.GroupType == TimeGroupTypeViewModel.Year ? "selected" : null)">Năm</option>
+                            </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">&nbsp;</label>
@@ -101,18 +124,27 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var region in Model.RevenueByRegion.Take(10))
+                                @if (Model?.RevenueByRegion?.Any() == true)
+                                {
+                                    @foreach (var region in Model.RevenueByRegion.Take(10))
+                                    {
+                                        <tr>
+                                            <td>@(region.Region ?? "N/A") - @(region.City ?? "N/A")</td>
+                                            <td>@(region.Revenue.ToString("N0")) VNĐ</td>
+                                            <td>@(region.CustomerCount)</td>
+                                            <td>
+                                                <div class="progress progress-sm">
+                                                    <div class="progress-bar bg-primary" role="progressbar" style="width: @(region.Percentage)%"></div>
+                                                </div>
+                                                @(region.Percentage.ToString("F1"))%
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
                                 {
                                     <tr>
-                                        <td>@region.Region - @region.City</td>
-                                        <td>@region.Revenue.ToString("N0") VNĐ</td>
-                                        <td>@region.CustomerCount</td>
-                                        <td>
-                                            <div class="progress progress-sm">
-                                                <div class="progress-bar bg-primary" role="progressbar" style="width: @region.Percentage%"></div>
-                                            </div>
-                                            @region.Percentage.ToString("F1")%
-                                        </td>
+                                        <td colspan="4" class="text-center text-muted">Không có dữ liệu doanh thu theo khu vực</td>
                                     </tr>
                                 }
                             </tbody>
@@ -144,15 +176,24 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var item in Model.RevenueByTime)
+                                @if (Model?.RevenueByTime?.Any() == true)
+                                {
+                                    @foreach (var item in Model.RevenueByTime)
+                                    {
+                                        <tr>
+                                            <td>@(item.FormattedTimeLabel ?? "N/A")</td>
+                                            <td class="text-success fw-medium">@(item.Revenue.ToString("N0")) VNĐ</td>
+                                            <td>@(item.Cost.ToString("N0")) VNĐ</td>
+                                            <td class="text-primary fw-medium">@(item.Profit.ToString("N0")) VNĐ</td>
+                                            <td>@(item.OrderCount)</td>
+                                            <td>@((item.OrderCount > 0 ? item.Revenue / item.OrderCount : 0).ToString("N0")) VNĐ</td>
+                                        </tr>
+                                    }
+                                }
+                                else
                                 {
                                     <tr>
-                                        <td>@item.FormattedTimeLabel</td>
-                                        <td class="text-success fw-medium">@item.Revenue.ToString("N0") VNĐ</td>
-                                        <td>@item.Cost.ToString("N0") VNĐ</td>
-                                        <td class="text-primary fw-medium">@item.Profit.ToString("N0") VNĐ</td>
-                                        <td>@item.OrderCount</td>
-                                        <td>@((item.OrderCount > 0 ? item.Revenue / item.OrderCount : 0).ToString("N0")) VNĐ</td>
+                                        <td colspan="6" class="text-center text-muted">Không có dữ liệu doanh thu theo thời gian</td>
                                     </tr>
                                 }
                             </tbody>
@@ -165,41 +206,248 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- Load ApexCharts with fallback -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js" 
+            onerror="this.onerror=null; this.src='https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.44.0/apexcharts.min.js';"></script>
+    
     <script>
-        // Revenue by time chart
-        var revenueTimeOptions = {
-            chart: {
-                type: 'bar',
-                height: 350
-            },
-            series: [{
-                name: 'Doanh thu',
-                data: [@string.Join(",", Model.RevenueByTime.Select(r => r.Revenue))]
-            }, {
-                name: 'Lợi nhuận',
-                data: [@string.Join(",", Model.RevenueByTime.Select(r => r.Profit))]
-            }],
-            xaxis: {
-                categories: [@string.Join(",", Model.RevenueByTime.Select(r => $"'{r.FormattedTimeLabel}'"))]
-            },
+        // Đợi DOM sẵn sàng
+        $(document).ready(function() {
+            // Khởi tạo charts sau khi DOM sẵn sàng
+            setTimeout(initRevenueCharts, 1000);
+        });
 
-            colors: ['#1f58c7', '#2eb85c']
-        };
-        var revenueTimeChart = new ApexCharts(document.querySelector("#revenue-time-chart"), revenueTimeOptions);
-        revenueTimeChart.render();
+        // Function để khởi tạo tất cả charts
+        function initRevenueCharts() {
+            try {
+                // Kiểm tra ApexCharts có sẵn không
+                if (typeof ApexCharts === 'undefined') {
+                    console.error('ApexCharts not loaded');
+                    document.querySelector("#revenue-time-chart").innerHTML = '<div class="text-center text-muted">ApexCharts không được load</div>';
+                    document.querySelector("#category-chart").innerHTML = '<div class="text-center text-muted">ApexCharts không được load</div>';
+                    return;
+                }
 
-        // Revenue by category chart
-        var categoryOptions = {
-            chart: {
-                type: 'pie',
-                height: 350
-            },
-            series: [@string.Join(",", Model.RevenueByCategory.Select(c => c.Revenue))],
-            labels: [@string.Join(",", Model.RevenueByCategory.Select(c => $"'{c.CategoryName}'"))],
-            colors: ['#1f58c7', '#f1c40f', '#2eb85c', '#f56e6e', '#9b59b6']
-        };
-        var categoryChart = new ApexCharts(document.querySelector("#category-chart"), categoryOptions);
-        categoryChart.render();
+                // Khởi tạo revenue by time chart
+                initRevenueTimeChart();
+                
+                // Khởi tạo category chart
+                initCategoryChart();
+                
+            } catch (error) {
+                console.error('Error initializing revenue charts:', error);
+            }
+        }
+
+        // Revenue by time chart function
+        function initRevenueTimeChart() {
+            try {
+                var revenueByTime = @Html.Raw(Json.Serialize(Model?.RevenueByTime ?? new List<RevenueByTimeViewModel>()));
+                
+                // Debug logging
+                console.log('Revenue By Time Data:', revenueByTime);
+                
+                if (revenueByTime.length === 0) {
+                    console.log('No revenue data - loading sample data');
+                    loadSampleRevenueData();
+                    return;
+                }
+
+                var revenueTimeOptions = {
+                    chart: {
+                        type: 'bar',
+                        height: 350,
+                        animations: {
+                            enabled: false // Tắt animation để tránh lỗi
+                        }
+                    },
+                    series: [{
+                        name: 'Doanh thu',
+                        data: revenueByTime.map(r => r.Revenue || 0)
+                    }, {
+                        name: 'Lợi nhuận',
+                        data: revenueByTime.map(r => r.Profit || 0)
+                    }],
+                    xaxis: {
+                        categories: revenueByTime.map(r => r.FormattedTimeLabel || 'N/A')
+                    },
+                    colors: ['#1f58c7', '#2eb85c'],
+                    noData: {
+                        text: 'Không có dữ liệu doanh thu',
+                        align: 'center',
+                        verticalAlign: 'middle',
+                        style: {
+                            color: '#999',
+                            fontSize: '14px'
+                        }
+                    }
+                };
+                
+                var chartElement = document.querySelector("#revenue-time-chart");
+                if (chartElement) {
+                    var revenueTimeChart = new ApexCharts(chartElement, revenueTimeOptions);
+                    revenueTimeChart.render().then(() => {
+                        console.log('Revenue time chart rendered successfully');
+                    }).catch(error => {
+                        console.error('Error rendering revenue time chart:', error);
+                        chartElement.innerHTML = '<div class="text-center text-muted">Lỗi khi vẽ biểu đồ doanh thu</div>';
+                    });
+                }
+            } catch (error) {
+                console.error('Error initializing revenue time chart:', error);
+                var chartElement = document.querySelector("#revenue-time-chart");
+                if (chartElement) {
+                    chartElement.innerHTML = '<div class="text-center text-muted">Lỗi khi khởi tạo biểu đồ doanh thu</div>';
+                }
+            }
+        }
+
+        // Revenue by category chart function
+        function initCategoryChart() {
+            try {
+               var revenueByCategory = @Html.Raw(Json.Serialize(Model?.RevenueByCategory ?? new List<RevenueByCategoryViewModel>()));
+                
+                // Debug logging
+                console.log('Revenue By Category Data:', revenueByCategory);
+                
+                if (revenueByCategory.length === 0) {
+                    console.log('No category data - loading sample data');
+                    loadSampleCategoryData();
+                    return;
+                }
+
+                var categoryOptions = {
+                    chart: {
+                        type: 'pie',
+                        height: 350,
+                        animations: {
+                            enabled: false // Tắt animation để tránh lỗi
+                        }
+                    },
+                    series: revenueByCategory.map(c => c.Revenue || 0),
+                    labels: revenueByCategory.map(c => c.CategoryName || 'N/A'),
+                    colors: ['#1f58c7', '#f1c40f', '#2eb85c', '#f56e6e', '#9b59b6'],
+                    noData: {
+                        text: 'Không có dữ liệu doanh thu theo danh mục',
+                        align: 'center',
+                        verticalAlign: 'middle',
+                        style: {
+                            color: '#999',
+                            fontSize: '14px'
+                        }
+                    }
+                };
+                
+                var chartElement = document.querySelector("#category-chart");
+                if (chartElement) {
+                    var categoryChart = new ApexCharts(chartElement, categoryOptions);
+                    categoryChart.render().then(() => {
+                        console.log('Category chart rendered successfully');
+                    }).catch(error => {
+                        console.error('Error rendering category chart:', error);
+                        chartElement.innerHTML = '<div class="text-center text-muted">Lỗi khi vẽ biểu đồ danh mục</div>';
+                    });
+                }
+            } catch (error) {
+                console.error('Error initializing category chart:', error);
+                var chartElement = document.querySelector("#category-chart");
+                if (chartElement) {
+                    chartElement.innerHTML = '<div class="text-center text-muted">Lỗi khi khởi tạo biểu đồ danh mục</div>';
+                }
+            }
+        }
+
+        // Global error handling
+        window.addEventListener('error', function(e) {
+            console.error('Global JavaScript Error:', e.error);
+            if (e.message.includes('ApexCharts')) {
+                console.warn('ApexCharts error - chart may not display');
+            }
+        });
+
+        // Unhandled promise rejection handling
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('Unhandled Promise Rejection:', e.reason);
+            e.preventDefault();
+        });
+
+        // Function to load sample revenue data
+        function loadSampleRevenueData() {
+            console.log('Loading sample revenue data...');
+            
+            var sampleRevenueData = [
+                { TimePeriod: "2024-01-01T00:00:00", Label: "01/2024", FormattedTimeLabel: "Tháng 1", Revenue: 15000000, Cost: 12000000, Profit: 3000000, OrderCount: 45 },
+                { TimePeriod: "2024-02-01T00:00:00", Label: "02/2024", FormattedTimeLabel: "Tháng 2", Revenue: 18000000, Cost: 14400000, Profit: 3600000, OrderCount: 52 },
+                { TimePeriod: "2024-03-01T00:00:00", Label: "03/2024", FormattedTimeLabel: "Tháng 3", Revenue: 22000000, Cost: 17600000, Profit: 4400000, OrderCount: 68 },
+                { TimePeriod: "2024-04-01T00:00:00", Label: "04/2024", FormattedTimeLabel: "Tháng 4", Revenue: 19500000, Cost: 15600000, Profit: 3900000, OrderCount: 58 },
+                { TimePeriod: "2024-05-01T00:00:00", Label: "05/2024", FormattedTimeLabel: "Tháng 5", Revenue: 25000000, Cost: 20000000, Profit: 5000000, OrderCount: 75 },
+                { TimePeriod: "2024-06-01T00:00:00", Label: "06/2024", FormattedTimeLabel: "Tháng 6", Revenue: 28000000, Cost: 22400000, Profit: 5600000, OrderCount: 82 }
+            ];
+
+            var revenueTimeOptions = {
+                chart: {
+                    type: 'bar',
+                    height: 350,
+                    animations: { enabled: false }
+                },
+                series: [{
+                    name: 'Doanh thu',
+                    data: sampleRevenueData.map(r => r.Revenue)
+                }, {
+                    name: 'Lợi nhuận',
+                    data: sampleRevenueData.map(r => r.Profit)
+                }],
+                xaxis: {
+                    categories: sampleRevenueData.map(r => r.FormattedTimeLabel)
+                },
+                colors: ['#1f58c7', '#2eb85c'],
+                title: {
+                    text: 'Dữ liệu mẫu - Doanh thu theo thời gian',
+                    style: { fontSize: '14px', color: '#666' }
+                }
+            };
+            
+            var chartElement = document.querySelector("#revenue-time-chart");
+            if (chartElement && typeof ApexCharts !== 'undefined') {
+                var revenueTimeChart = new ApexCharts(chartElement, revenueTimeOptions);
+                revenueTimeChart.render();
+                console.log('Sample revenue chart loaded');
+            }
+        }
+
+        // Function to load sample category data
+        function loadSampleCategoryData() {
+            console.log('Loading sample category data...');
+            
+            var sampleCategoryData = [
+                { CategoryId: 1, CategoryName: "Áo dài truyền thống", Revenue: 35000000, Percentage: 35.5 },
+                { CategoryId: 2, CategoryName: "Áo dài hiện đại", Revenue: 28000000, Percentage: 28.4 },
+                { CategoryId: 3, CategoryName: "Áo dài cưới", Revenue: 22000000, Percentage: 22.3 },
+                { CategoryId: 4, CategoryName: "Phụ kiện", Revenue: 8500000, Percentage: 8.6 },
+                { CategoryId: 5, CategoryName: "Khác", Revenue: 5500000, Percentage: 5.6 }
+            ];
+
+            var categoryOptions = {
+                chart: {
+                    type: 'pie',
+                    height: 350,
+                    animations: { enabled: false }
+                },
+                series: sampleCategoryData.map(c => c.Revenue),
+                labels: sampleCategoryData.map(c => c.CategoryName),
+                colors: ['#1f58c7', '#f1c40f', '#2eb85c', '#f56e6e', '#9b59b6'],
+                title: {
+                    text: 'Dữ liệu mẫu - Doanh thu theo danh mục',
+                    style: { fontSize: '14px', color: '#666' }
+                }
+            };
+            
+            var chartElement = document.querySelector("#category-chart");
+            if (chartElement && typeof ApexCharts !== 'undefined') {
+                var categoryChart = new ApexCharts(chartElement, categoryOptions);
+                categoryChart.render();
+                console.log('Sample category chart loaded');
+            }
+        }
     </script>
 }

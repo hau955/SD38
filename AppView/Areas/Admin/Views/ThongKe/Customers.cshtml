@@ -22,6 +22,27 @@
         </div>
     </div>
 
+    <!-- Error Message -->
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            @ViewBag.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Debug Information -->
+    @if (ViewBag.ShowDebugInfo == true)
+    {
+        <div class="alert alert-info">
+            <h6>Debug Information:</h6>
+            <p><strong>Customer Segments Count:</strong> @(Model?.CustomerSegments?.Count ?? 0)</p>
+            <p><strong>Customer Activities Count:</strong> @(Model?.CustomerActivities?.Count ?? 0)</p>
+            <p><strong>API Base URL:</strong> @ViewData["ApiBaseUrl"]</p>
+        </div>
+    }
+
     <!-- Filter Form -->
     <div class="row">
         <div class="col-12">
@@ -70,8 +91,10 @@
                     <h4 class="card-title mb-0">Top khách hàng có giá trị cao</h4>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-nowrap align-middle mb-0" id="customerTable">
+                    @if (Model?.CustomerSegments?.Any() == true)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-nowrap align-middle mb-0" id="customerTable">
                             <thead>
                                 <tr>
                                     <th scope="col">#</th>
@@ -86,29 +109,49 @@
                             <tbody>
                                 @{
                                     int customerIndex = 1;
+                                    var customerSegments = Model?.CustomerSegments ?? new List<CustomerValueViewModel>();
                                 }
-                                @foreach (var customer in Model.CustomerSegments)
+                                @if (customerSegments.Any())
                                 {
-                                    <tr>
-                                        <td>@customerIndex</td>
-                                        <td>
-                                            <div>
-                                                <h6 class="mb-0">@customer.CustomerName</h6>
-                                            </div>
-                                        </td>
-                                        <td>@customer.Email</td>
-                                        <td>
-                                            <span class="badge bg-primary">@customer.Tier</span>
-                                        </td>
-                                        <td class="text-success fw-medium">@customer.LifetimeValue.ToString("N0") VNĐ</td>
-                                        <td>@customer.OrderCount</td>
-                                        <td>@customer.LastOrderDate.ToString("dd/MM/yyyy")</td>
-                                    </tr>
-                                    customerIndex++;
+                                    @foreach (var customer in customerSegments)
+                                    {
+                                        <tr>
+                                            <td>@customerIndex</td>
+                                            <td>
+                                                <div>
+                                                    <h6 class="mb-0">@customer.CustomerName</h6>
+                                                </div>
+                                            </td>
+                                            <td>@customer.Email</td>
+                                            <td>
+                                                <span class="badge bg-primary">@customer.Tier</span>
+                                            </td>
+                                            <td class="text-success fw-medium">@customer.LifetimeValue.ToString("N0") VNĐ</td>
+                                            <td>@customer.OrderCount</td>
+                                            <td>@customer.LastOrderDate.ToString("dd/MM/yyyy")</td>
+                                        </tr>
+                                        customerIndex++;
+                                    }
                                 }
                             </tbody>
-                        </table>
-                    </div>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="fas fa-users fa-3x text-muted"></i>
+                            </div>
+                            <h5 class="text-muted">Không có dữ liệu khách hàng</h5>
+                            <p class="text-muted mb-0">Vui lòng kiểm tra kết nối API hoặc thêm dữ liệu mẫu.</p>
+                            <div class="mt-3">
+                                <button class="btn btn-primary" onclick="loadSampleData()">
+                                    <i class="fas fa-database me-2"></i>Thêm dữ liệu mẫu
+                                </button>
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -116,40 +159,360 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- Load DataTables CSS and JS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script>
+    
+    <!-- Load ApexCharts with fallback -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js" 
+            onerror="this.onerror=null; this.src='https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.44.0/apexcharts.min.js';"></script>
+    
     <script>
+        // Đợi tất cả script load xong
         $(document).ready(function() {
-            $('#customerTable').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json'
-                },
-                pageLength: 25,
-                order: [[4, 'desc']] // Sort by lifetime value
-            });
+            // Chỉ khởi tạo DataTable nếu có table
+            var customerTable = $('#customerTable');
+            if (customerTable.length > 0) {
+                // Khởi tạo DataTable với error handling
+                try {
+                    if (typeof $.fn.DataTable !== 'undefined') {
+                        customerTable.DataTable({
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json',
+                            emptyTable: "Không có dữ liệu khách hàng",
+                            zeroRecords: "Không tìm thấy dữ liệu phù hợp"
+                        },
+                        pageLength: 25,
+                        order: [[4, 'desc']], // Sort by lifetime value
+                        responsive: true,
+                        dom: 'Bfrtip',
+                        buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+                        columnDefs: [
+                            { targets: [0, 2, 3, 4, 5, 6], className: 'text-center' },
+                            { targets: [1], className: 'text-start' }
+                        ],
+                        drawCallback: function(settings) {
+                            // Kiểm tra nếu không có dữ liệu thực
+                            var api = this.api();
+                            var data = api.rows().data();
+                            if (data.length === 0) {
+                                console.log('No customer data available - using DataTables empty state');
+                            }
+                        },
+                        initComplete: function(settings, json) {
+                            // Log khi DataTable khởi tạo xong
+                            console.log('DataTable initialization completed');
+                        }
+                        });
+                        console.log('DataTable initialized successfully');
+                    } else {
+                        console.warn('DataTable plugin not loaded - using basic table');
+                        // Fallback: thêm class cho styling cơ bản
+                        customerTable.addClass('table table-striped table-hover');
+                    }
+                } catch (error) {
+                    console.error('Error initializing DataTable:', error);
+                    customerTable.addClass('table table-striped table-hover');
+                }
+            } else {
+                console.log('No customer table found - data may be empty');
+            }
+            
+            // Khởi tạo chart sau khi DOM sẵn sàng
+            setTimeout(initCustomerChart, 1000);
         });
 
-        // Customer activity chart
-        var activityOptions = {
-            chart: {
-                type: 'line',
-                height: 350
-            },
-            series: [{
-                name: 'Khách mới',
-                data: [@string.Join(",", Model.CustomerActivities.Select(a => a.NewCustomers))]
-            }, {
-                name: 'Khách quay lại',
-                data: [@string.Join(",", Model.CustomerActivities.Select(a => a.RepeatCustomers))]
-            }],
-            xaxis: {
-                categories: [@string.Join(",", Model.CustomerActivities.Select(a => $"'{a.Date:dd/MM}'"))]
-            },
-            stroke: {
-                curve: 'smooth'
-            },
-            colors: ['#1f58c7', '#2eb85c']
-        };
-        var activityChart = new ApexCharts(document.querySelector("#customer-activity-chart"), activityOptions);
-        activityChart.render();
+        // Customer activity chart function
+        function initCustomerChart() {
+            try {
+                // Kiểm tra ApexCharts có sẵn không
+                if (typeof ApexCharts === 'undefined') {
+                    console.error('ApexCharts not loaded');
+                    document.querySelector("#customer-activity-chart").innerHTML = '<div class="text-center text-muted">ApexCharts không được load</div>';
+                    return;
+                }
+
+                var customerActivities = @Html.Raw(Json.Serialize(Model?.CustomerActivities ?? new List<CustomerActivityViewModel>()));
+                
+                // Debug logging
+                console.log('Customer Activities Data:', customerActivities);
+                console.log('Customer Activities Length:', customerActivities.length);
+                
+                if (customerActivities.length === 0) {
+                    console.log('No customer activity data - loading sample data');
+                    loadSampleCustomerActivityData();
+                    return;
+                }
+                
+                var activityOptions = {
+                    chart: {
+                        type: 'line',
+                        height: 350,
+                        animations: {
+                            enabled: false // Tắt animation để tránh lỗi
+                        }
+                    },
+                    series: [{
+                        name: 'Khách mới',
+                        data: customerActivities.length > 0 ? customerActivities.map(a => a.NewCustomers || 0) : [0]
+                    }, {
+                        name: 'Khách quay lại',
+                        data: customerActivities.length > 0 ? customerActivities.map(a => a.RepeatCustomers || 0) : [0]
+                    }],
+                    xaxis: {
+                        categories: customerActivities.length > 0 ? customerActivities.map(a => a.Date ? a.Date.substring(0, 5) : 'N/A') : ['N/A']
+                    },
+                    stroke: {
+                        curve: 'smooth'
+                    },
+                    colors: ['#1f58c7', '#2eb85c'],
+                    noData: {
+                        text: 'Không có dữ liệu hoạt động khách hàng',
+                        align: 'center',
+                        verticalAlign: 'middle',
+                        style: {
+                            color: '#999',
+                            fontSize: '14px'
+                        }
+                    }
+                };
+                
+                var chartElement = document.querySelector("#customer-activity-chart");
+                if (chartElement) {
+                    var activityChart = new ApexCharts(chartElement, activityOptions);
+                    activityChart.render().then(() => {
+                        console.log('Customer chart rendered successfully');
+                    }).catch(error => {
+                        console.error('Error rendering chart:', error);
+                        chartElement.innerHTML = '<div class="text-center text-muted">Lỗi khi vẽ biểu đồ</div>';
+                    });
+                } else {
+                    console.error('Chart element not found');
+                }
+            } catch (error) {
+                console.error('Error initializing customer chart:', error);
+                var chartElement = document.querySelector("#customer-activity-chart");
+                if (chartElement) {
+                    chartElement.innerHTML = '<div class="text-center text-muted">Lỗi khi khởi tạo biểu đồ</div>';
+                }
+            }
+        }
+
+        // Global error handling
+        window.addEventListener('error', function(e) {
+            console.error('Global JavaScript Error:', e.error);
+            if (e.message.includes('DataTable')) {
+                console.warn('DataTable error - using fallback styling');
+            }
+            if (e.message.includes('ApexCharts')) {
+                console.warn('ApexCharts error - chart may not display');
+            }
+        });
+
+        // Unhandled promise rejection handling
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('Unhandled Promise Rejection:', e.reason);
+            e.preventDefault();
+        });
+
+        // Function to load sample data
+        function loadSampleData() {
+            console.log('Loading sample customer data...');
+            
+            // Tạo dữ liệu mẫu
+            var sampleData = [
+                {
+                    CustomerName: "Nguyễn Văn An",
+                    Email: "an.nguyen@email.com",
+                    Tier: "VIP",
+                    LifetimeValue: 2500000,
+                    OrderCount: 15,
+                    LastOrderDate: "2024-01-15"
+                },
+                {
+                    CustomerName: "Trần Thị Bình",
+                    Email: "binh.tran@email.com",
+                    Tier: "Gold",
+                    LifetimeValue: 1800000,
+                    OrderCount: 12,
+                    LastOrderDate: "2024-01-10"
+                },
+                {
+                    CustomerName: "Lê Văn Cường",
+                    Email: "cuong.le@email.com",
+                    Tier: "Silver",
+                    LifetimeValue: 1200000,
+                    OrderCount: 8,
+                    LastOrderDate: "2024-01-08"
+                },
+                {
+                    CustomerName: "Phạm Thị Dung",
+                    Email: "dung.pham@email.com",
+                    Tier: "Standard",
+                    LifetimeValue: 800000,
+                    OrderCount: 5,
+                    LastOrderDate: "2024-01-05"
+                },
+                {
+                    CustomerName: "Hoàng Văn Em",
+                    Email: "em.hoang@email.com",
+                    Tier: "Standard",
+                    LifetimeValue: 600000,
+                    OrderCount: 3,
+                    LastOrderDate: "2024-01-03"
+                }
+            ];
+
+            // Tạo HTML table với dữ liệu mẫu
+            var tableHtml = `
+                <div class="table-responsive">
+                    <table class="table table-striped table-nowrap align-middle mb-0" id="customerTable">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Khách hàng</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Hạng</th>
+                                <th scope="col">Giá trị LTV</th>
+                                <th scope="col">Số đơn</th>
+                                <th scope="col">Đơn cuối</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sampleData.map((customer, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>
+                                        <div>
+                                            <h6 class="mb-0">${customer.CustomerName}</h6>
+                                        </div>
+                                    </td>
+                                    <td>${customer.Email}</td>
+                                    <td>
+                                        <span class="badge bg-primary">${customer.Tier}</span>
+                                    </td>
+                                    <td class="text-success fw-medium">${customer.LifetimeValue.toLocaleString()} VNĐ</td>
+                                    <td>${customer.OrderCount}</td>
+                                    <td>${customer.LastOrderDate}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            // Thay thế nội dung
+            document.querySelector('.card-body').innerHTML = tableHtml;
+
+            // Tạo dữ liệu mẫu cho chart
+            var sampleChartData = [
+                { Date: "2024-01-01", NewCustomers: 5, RepeatCustomers: 3 },
+                { Date: "2024-01-02", NewCustomers: 8, RepeatCustomers: 4 },
+                { Date: "2024-01-03", NewCustomers: 3, RepeatCustomers: 6 },
+                { Date: "2024-01-04", NewCustomers: 7, RepeatCustomers: 5 },
+                { Date: "2024-01-05", NewCustomers: 4, RepeatCustomers: 7 },
+                { Date: "2024-01-06", NewCustomers: 6, RepeatCustomers: 4 },
+                { Date: "2024-01-07", NewCustomers: 9, RepeatCustomers: 8 }
+            ];
+
+            // Cập nhật chart với dữ liệu mẫu
+            if (typeof ApexCharts !== 'undefined') {
+                var chartElement = document.querySelector("#customer-activity-chart");
+                if (chartElement) {
+                    var activityOptions = {
+                        chart: {
+                            type: 'line',
+                            height: 350,
+                            animations: { enabled: false }
+                        },
+                        series: [{
+                            name: 'Khách mới',
+                            data: sampleChartData.map(a => a.NewCustomers)
+                        }, {
+                            name: 'Khách quay lại',
+                            data: sampleChartData.map(a => a.RepeatCustomers)
+                        }],
+                        xaxis: {
+                            categories: sampleChartData.map(a => a.Date ? a.Date.substring(5) : 'N/A')
+                        },
+                        stroke: { curve: 'smooth' },
+                        colors: ['#1f58c7', '#2eb85c']
+                    };
+                    
+                    var activityChart = new ApexCharts(chartElement, activityOptions);
+                    activityChart.render();
+                    console.log('Sample chart data loaded');
+                }
+            }
+
+            // Khởi tạo DataTable với dữ liệu mẫu
+            setTimeout(() => {
+                if (typeof $.fn.DataTable !== 'undefined') {
+                    $('#customerTable').DataTable({
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json',
+                            emptyTable: "Không có dữ liệu khách hàng",
+                            zeroRecords: "Không tìm thấy dữ liệu phù hợp"
+                        },
+                        pageLength: 25,
+                        order: [[4, 'desc']],
+                        responsive: true,
+                        dom: 'Bfrtip',
+                        buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+                        columnDefs: [
+                            { targets: [0, 2, 3, 4, 5, 6], className: 'text-center' },
+                            { targets: [1], className: 'text-start' }
+                        ]
+                    });
+                    console.log('Sample data loaded and DataTable initialized');
+                }
+            }, 100);
+        }
+
+        // Function to load sample customer activity data
+        function loadSampleCustomerActivityData() {
+            console.log('Loading sample customer activity data...');
+            
+            var sampleActivityData = [
+                { Date: "2024-01-01T00:00:00", NewCustomers: 15, RepeatCustomers: 8, ChurnedCustomers: 2 },
+                { Date: "2024-01-02T00:00:00", NewCustomers: 12, RepeatCustomers: 10, ChurnedCustomers: 1 },
+                { Date: "2024-01-03T00:00:00", NewCustomers: 18, RepeatCustomers: 6, ChurnedCustomers: 3 },
+                { Date: "2024-01-04T00:00:00", NewCustomers: 14, RepeatCustomers: 9, ChurnedCustomers: 2 },
+                { Date: "2024-01-05T00:00:00", NewCustomers: 20, RepeatCustomers: 12, ChurnedCustomers: 1 },
+                { Date: "2024-01-06T00:00:00", NewCustomers: 16, RepeatCustomers: 7, ChurnedCustomers: 4 },
+                { Date: "2024-01-07T00:00:00", NewCustomers: 22, RepeatCustomers: 11, ChurnedCustomers: 2 }
+            ];
+
+            var activityOptions = {
+                chart: {
+                    type: 'line',
+                    height: 350,
+                    animations: { enabled: false }
+                },
+                series: [{
+                    name: 'Khách mới',
+                    data: sampleActivityData.map(a => a.NewCustomers)
+                }, {
+                    name: 'Khách quay lại',
+                    data: sampleActivityData.map(a => a.RepeatCustomers)
+                }],
+                xaxis: {
+                    categories: sampleActivityData.map(a => a.Date.substring(5, 10)) // MM-DD format
+                },
+                stroke: { curve: 'smooth' },
+                colors: ['#1f58c7', '#2eb85c'],
+                title: {
+                    text: 'Dữ liệu mẫu - Hoạt động khách hàng',
+                    style: { fontSize: '14px', color: '#666' }
+                }
+            };
+            
+            var chartElement = document.querySelector("#customer-activity-chart");
+            if (chartElement && typeof ApexCharts !== 'undefined') {
+                var activityChart = new ApexCharts(chartElement, activityOptions);
+                activityChart.render();
+                console.log('Sample customer activity chart loaded');
+            }
+        }
     </script>
 }

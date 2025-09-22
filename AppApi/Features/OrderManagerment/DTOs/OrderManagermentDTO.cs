@@ -42,6 +42,9 @@ namespace AppApi.Features.OrderManagerment.DTOs
 
         // Chi tiết sản phẩm
         public List<OrderItemDto> ChiTietSanPhams { get; set; } = new List<OrderItemDto>();
+
+        // Lịch sử trạng thái
+        public List<OrderStatusHistoryDto> LichSuTrangThai { get; set; } = new List<OrderStatusHistoryDto>();
     }
 
     public class OrderItemDto
@@ -56,6 +59,13 @@ namespace AppApi.Features.OrderManagerment.DTOs
         public string? Size { get; set; }
         public string? ChatLieu { get; set; }
         public string? HinhAnh { get; set; }
+    }
+
+    public class OrderStatusHistoryDto
+    {
+        public string TrangThai { get; set; } = string.Empty;
+        public DateTime NgayCapNhat { get; set; }
+        public string? NguoiCapNhat { get; set; }
     }
 
     public class UpdateOrderStatusDto
@@ -115,5 +125,4 @@ namespace AppApi.Features.OrderManagerment.DTOs
         public string SortBy { get; set; } = "NgayTao";
         public string SortDirection { get; set; } = "desc";
     }
-
 }
