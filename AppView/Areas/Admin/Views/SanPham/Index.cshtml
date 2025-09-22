@@ -68,10 +68,19 @@
         </div>
     }
 
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-1"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle text-center">
             <thead class="table-light">
                 <tr>
+                    <th>ID</th>
                     <th>Tên sản phẩm</th>
                     <th>Mô tả</th>
                     <th>Trọng lượng</th>
@@ -87,12 +96,13 @@
                 @foreach (var item in Model)
                 {
                     <tr>
+                        <td class="text-muted small">@item.IDSanPham.ToString()</td>
                         <td class="fw-semibold text-start">@item.TenSanPham</td>
                         <td class="text-start">@item.MoTa</td>
-                        <td>@item.TrongLuong</td>
+                        <td>@(item.TrongLuong?.ToString() ?? "N/A")</td>
                          <td>
                             <span class="badge badge-custom bg-info text-dark">
-                                @(item.GioiTinh ? "Nam" : "Nữ")
+                                @(item.GioiTinh.HasValue ? (item.GioiTinh.Value ? "Nam" : "Nữ") : "N/A")
                             </span>
                         </td> 
                         <td>
@@ -122,12 +132,14 @@
                             </a>
                         </td>
                         <td>
-                            <a asp-area ="Admin" asp-controller="SanPham" asp-action="Update" asp-route-id="@item.IDSanPham" class="btn btn-sm btn-warning text-white">
+                            <a asp-area="Admin" asp-controller="SanPham" asp-action="Update" asp-route-idSanPham="@item.IDSanPham"
+                               class="btn btn-sm btn-warning text-white">
                                 <i class="fas fa-edit"></i>
                             </a>
                         </td>
                         <td>
-                            <a asp-area="Admin" asp-controller="SanPham" asp-action="Details" asp-route-id="@item.IDSanPham" class="btn btn-sm btn-info text-white">
+                            <a asp-area="Admin" asp-controller="SanPham" asp-action="Details" asp-route-idSanPham="@item.IDSanPham"
+                               class="btn btn-sm btn-info text-white">
                                 <i class="fas fa-eye"></i>
                             </a>
                         </td>

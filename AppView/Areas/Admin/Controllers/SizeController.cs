@@ -47,7 +47,7 @@ namespace AppView.Areas.Admin.Controllers
                 model.TrangThai = true;
 
                 await _sizeRepo.Create(model);
-                TempData["Message"] = "? T?o size thành công!";
+                TempData["Message"] = "? T?o size thï¿½nh cï¿½ng!";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -76,7 +76,7 @@ namespace AppView.Areas.Admin.Controllers
             await LoadSizeListAsync();
 
             if (id != model.IDSize)
-                return BadRequest("ID không kh?p.");
+                return BadRequest("ID khï¿½ng kh?p.");
 
             if (!ModelState.IsValid)
                 return View(model);
@@ -88,11 +88,11 @@ namespace AppView.Areas.Admin.Controllers
 
                 if (success == null)
                 {
-                    ModelState.AddModelError("", "Không tìm th?y size d? c?p nh?t.");
+                    ModelState.AddModelError("", "Khï¿½ng tï¿½m th?y size d? c?p nh?t.");
                     return View(model);
                 }
 
-                TempData["Message"] = "? C?p nh?t size thành công!";
+                TempData["Message"] = "? C?p nh?t size thï¿½nh cï¿½ng!";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -108,13 +108,13 @@ namespace AppView.Areas.Admin.Controllers
             try
             {
                 var deleteSize = await _sizeRepo.Delete(id);
-                if (!deleteSize) { TempData["Message"] = "Xoá size không thành công!"; return RedirectToAction(nameof(Index)); }
-                TempData["Message"] = "? Xoá size thành công!";
+                if (!deleteSize) { TempData["Message"] = "Xoï¿½ size khï¿½ng thï¿½nh cï¿½ng!"; return RedirectToAction(nameof(Index)); }
+                TempData["Message"] = "? Xoï¿½ size thï¿½nh cï¿½ng!";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "? L?i khi xoá size: " + ex.Message;
+                TempData["Error"] = "? L?i khi xoï¿½ size: " + ex.Message;
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -132,13 +132,13 @@ namespace AppView.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "? L?i khi d?i tr?ng thái: " + ex.Message;
+                TempData["Error"] = "? L?i khi d?i tr?ng thï¿½i: " + ex.Message;
             }
             return RedirectToAction(nameof(Index));
         }
 
         /// <summary>
-        /// Gán danh sách size vào ViewBag n?u c?n s? d?ng dropdown trong View.
+        /// Gï¿½n danh sï¿½ch size vï¿½o ViewBag n?u c?n s? d?ng dropdown trong View.
         /// </summary>
         private async Task LoadSizeListAsync()
         {

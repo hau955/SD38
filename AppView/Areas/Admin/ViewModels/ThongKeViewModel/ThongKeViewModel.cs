@@ -26,21 +26,20 @@
         public EmployeeSummaryViewModel Employees { get; set; } = new();
     }
 
-    public class RevenueSummaryViewModel
-    {
-        public decimal TotalRevenue { get; set; }
-        public decimal RevenueChangePercentage { get; set; }
-        public decimal AverageOrderValue { get; set; }
-        public string Currency { get; set; } = "VND";
-        public List<RevenueTrendViewModel> Trends { get; set; } = new();
-    }
+public class RevenueTrendViewModel
+{
+    public string Label { get; set; } = string.Empty;
+    public decimal Revenue { get; set; }
+}
 
-    public class RevenueTrendViewModel
-    {
-        public DateTime TimePeriod { get; set; }
-        public string Label { get; set; } = string.Empty;
-        public decimal Revenue { get; set; }
-    }
+public class RevenueSummaryViewModel
+{
+    public decimal TotalRevenue { get; set; }
+    public decimal RevenueChangePercentage { get; set; }
+    public decimal AverageOrderValue { get; set; }
+    public List<RevenueTrendViewModel> Trends { get; set; } = new();
+}
+
 
     public class OrderSummaryViewModel
     {
@@ -63,6 +62,17 @@
         public int ActiveProducts { get; set; }
         public int LowStockItems { get; set; }
         public int OutOfStockItems { get; set; }
+    }
+
+    public class EmployeeSummaryViewModel
+    {
+        public int TotalEmployees { get; set; }
+        public int ActiveEmployees { get; set; }
+        public int OnLeaveEmployees { get; set; }
+        public decimal TurnoverRate { get; set; }
+        public decimal AverageTenure { get; set; }
+        public Dictionary<string, int> EmployeesByDepartment { get; set; } = new();
+        public Dictionary<string, int> EmployeesByPosition { get; set; } = new();
     }
 
     public class RevenueReportViewModel
@@ -217,16 +227,5 @@
         public int OnLeaveEmployees { get; set; }
         public int NewHires { get; set; }
         public int Terminations { get; set; }
-    }
-
-    public class EmployeeSummaryViewModel
-    {
-        public int TotalEmployees { get; set; }
-        public int ActiveEmployees { get; set; }
-        public int OnLeaveEmployees { get; set; }
-        public decimal TurnoverRate { get; set; }
-        public decimal AverageTenure { get; set; }
-        public Dictionary<string, int> EmployeesByDepartment { get; set; } = new();
-        public Dictionary<string, int> EmployeesByPosition { get; set; } = new();
     }
 }

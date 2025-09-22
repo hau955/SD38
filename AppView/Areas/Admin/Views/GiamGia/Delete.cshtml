@@ -1,0 +1,62 @@
+﻿@model AppData.Models.GiamGia
+
+@{
+    ViewData["Title"] = "Xóa giảm giá";
+}
+
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-gradient bg-danger text-white">
+            <h4 class="mb-0">🗑️ Xóa chương trình giảm giá</h4>
+        </div>
+
+        <div class="card-body">
+            <h5 class="text-danger mb-3">Bạn có chắc chắn muốn xóa giảm giá này?</h5>
+
+            <dl class="row">
+                <dt class="col-sm-3 fw-bold">Tên giảm giá</dt>
+                <dd class="col-sm-9">@Model.TenGiamGia</dd>
+
+                <dt class="col-sm-3 fw-bold">Loại giảm giá</dt>
+                <dd class="col-sm-9">
+                    @if (Model.LoaiGiamGia == "PhanTram")
+                    {
+                        <span class="badge bg-info">Phần trăm</span>
+                    }
+                    else if (Model.LoaiGiamGia == "SoTien")
+                    {
+                        <span class="badge bg-success">Số tiền</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3 fw-bold">Giá trị</dt>
+                <dd class="col-sm-9">
+                    @if (Model.LoaiGiamGia == "PhanTram")
+                    {
+                        @($"{Model.GiaTri} %")
+                    }
+                    else
+                    {
+                        @($"{Model.GiaTri:N0} VNĐ")
+                    }
+                </dd>
+
+                <dt class="col-sm-3 fw-bold">Ngày bắt đầu</dt>
+                <dd class="col-sm-9">@Model.NgayBatDau.ToString("dd/MM/yyyy")</dd>
+
+                <dt class="col-sm-3 fw-bold">Ngày kết thúc</dt>
+                <dd class="col-sm-9">@Model.NgayKetThuc.ToString("dd/MM/yyyy")</dd>
+            </dl>
+
+            <form asp-area="Admin" asp-controller="GiamGia" asp-action="Delete" method="post" class="mt-4">
+                <input type="hidden" asp-for="IDGiamGia" />
+                <button type="submit" class="btn btn-danger px-4 me-2">
+                    <i class="bi bi-trash"></i> Xóa
+                </button>
+                <a asp-area="Admin" asp-controller="GiamGia" asp-action="Index" class="btn btn-secondary px-4">
+                    ⬅ Quay lại
+                </a>
+            </form>
+        </div>
+    </div>
+</div>

@@ -105,26 +105,46 @@ namespace AppView.Areas.Admin.Controllers
                 Text = dm.TenDanhMuc
             }).ToList() ?? new List<SelectListItem>();
         }
-
         [HttpGet]
-        public async Task<IActionResult> Update(Guid id)
+        public async Task<IActionResult> Update(Guid idSanPham)
         {
-            var model = await _repo.GetByIdAsync(id);
-            if (model == null)
-                return NotFound();
-
-            model.DanhMucList = await LoadDanhMucList();
-            return View(model);
+            try
+            {
+                var model = await _repo.GetByIdAsync(idSanPham);
+                if (model == null) 
+                {
+                    TempData["Error"] = "Không tìm thấy sản phẩm với ID: " + idSanPham;
+                    return RedirectToAction("Index");
+                }
+                model.DanhMucList = await LoadDanhMucList();
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Lỗi khi tải thông tin sản phẩm: " + ex.Message;
+                return RedirectToAction("Index");
+            }
         }
-        [HttpGet]
-        public async Task<IActionResult> Details(Guid id)
-        {
-            var model = await _repo.GetByIdAsync(id);
-            if (model == null)
-                return NotFound();
 
-            model.DanhMucList = await LoadDanhMucList();
-            return View(model);
+        [HttpGet]
+        public async Task<IActionResult> Details(Guid idSanPham)
+        {
+            try
+            {
+                var model = await _repo.GetByIdAsync(idSanPham);
+                if (model == null) 
+                {
+                    TempData["Error"] = "Không tìm thấy sản phẩm với ID: " + idSanPham;
+                    return RedirectToAction("Index");
+                }
+                model.DanhMucList = await LoadDanhMucList();
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Lỗi khi tải thông tin sản phẩm: " + ex.Message;
+                return RedirectToAction("Index");
+            }
         }
 
         [HttpPost]

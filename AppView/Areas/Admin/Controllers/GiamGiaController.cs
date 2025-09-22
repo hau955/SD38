@@ -120,5 +120,86 @@ namespace AppApi.Controllers
                 GiaBan = spct.GiaBan
             }).ToList();
         }
+        // ---------------- UPDATE (GET) ----------------
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var giamGia = await _repo.GetByIdAsync(id);
+            if (giamGia == null) return NotFound();
+
+            var vm = new GiamGiaCreateVM
+            {
+                GiamGia = giamGia
+            };
+
+            await LoadDropdowns(vm);
+            return View(vm);
+        }
+
+        // ---------------- UPDATE (POST) ----------------
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, GiamGiaCreateVM vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                await LoadDropdowns(vm);
+                return View(vm);
+            }
+
+            try
+            {
+                var updated = await _repo.UpdateAsync(id, vm.GiamGia);
+                if (!updated)
+                {
+                    ModelState.AddModelError("", "Không tìm thấy giảm giá để cập nhật");
+                    await LoadDropdowns(vm);
+                    return View(vm);
+                }
+
+                TempData["Success"] = "Cập nhật giảm giá thành công!";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Lỗi khi cập nhật giảm giá: {ex.Message}");
+                await LoadDropdowns(vm);
+                return View(vm);
+            }
+        }// ---------------- DELETE (GET) ----------------
+        [HttpGet]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var giamGia = await _repo.GetByIdAsync(id);
+            if (giamGia == null) return NotFound();
+
+            return View(giamGia); // View confirm delete
+        }
+
+        // ---------------- DELETE (POST) ----------------
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        {
+            try
+            {
+                var deleted = await _repo.DeleteAsync(id);
+                if (!deleted)
+                {
+                    TempData["Error"] = "Không tìm thấy giảm giá để xóa!";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                TempData["Success"] = "Xóa giảm giá thành công!";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Lỗi khi xóa giảm giá: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+
     }
 }

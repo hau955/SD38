@@ -1,17 +1,16 @@
 ﻿@model AppView.Areas.Admin.ViewModels.GiamGiaCreateVM
 
-<h2>Tạo giảm giá</h2>
-
-
+<h2>Sửa giảm giá</h2>
 
 <div class="container mt-4">
     <div class="card shadow border-0">
-        <div class="card-header bg-gradient bg-primary text-white">
-            <h4 class="mb-0">🎉 Tạo chương trình giảm giá</h4>
+        <div class="card-header bg-gradient bg-warning text-white">
+            <h4 class="mb-0">✏️ Cập nhật chương trình giảm giá</h4>
         </div>
 
         <div class="card-body">
-            <form asp-area="Admin" asp-controller="GiamGia" asp-action="Create" method="post">
+            <form asp-area="Admin" asp-controller="GiamGia" asp-action="Edit" method="post">
+                <input type="hidden" asp-for="GiamGia.IDGiamGia" />
                 <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
 
                 <div class="row">
@@ -27,9 +26,10 @@
                         <label asp-for="GiamGia.LoaiGiamGia" class="form-label fw-bold">Loại giảm giá</label>
                         <select asp-for="GiamGia.LoaiGiamGia" class="form-select" id="LoaiGiamGiaSelect">
                             <option value="">-- Chọn loại giảm giá --</option>
-                            <option value="PhanTram">Phần trăm</option>
-                            <option value="SoTien">Số tiền</option>
+                            <option value="PhanTram" selected="@(Model.GiamGia.LoaiGiamGia == "PhanTram")">Phần trăm</option>
+                            <option value="SoTien" selected="@(Model.GiamGia.LoaiGiamGia == "SoTien")">Số tiền</option>
                         </select>
+                        <span asp-validation-for="GiamGia.LoaiGiamGia" class="text-danger small"></span>
                     </div>
 
                     <!-- Giá trị giảm -->
@@ -67,56 +67,14 @@
                     </div>
                 </div>
 
-                <hr class="my-4" />
-
-                <!-- Phạm vi áp dụng -->
-                <div class="mb-3">
-                    <label class="fw-bold mb-2">Phạm vi áp dụng</label><br />
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="scope" value="dm" id="scopeDm">
-                        <label class="form-check-label" for="scopeDm">Danh mục</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="scope" value="sp" id="scopeSp" checked>
-                        <label class="form-check-label" for="scopeSp">Sản phẩm</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="scope" value="spct" id="scopeSpct">
-                        <label class="form-check-label" for="scopeSpct">Sản phẩm chi tiết</label>
-                    </div>
-                </div>
-
-                <!-- Danh mục -->
-                <div class="form-group scope-block mb-3" id="block-dm">
-                    <label class="fw-bold">Danh mục</label>
-                    <select asp-for="SelectedDanhMucs" class="form-select" multiple>
-                        @foreach (var dm in Model.DanhMucs)
-                        {
-                            <option value="@dm.DanhMucId">@dm.TenDanhMuc</option>
-                        }
-                    </select>
-                </div>
-
-                <!-- Sản phẩm -->
-                <div class="form-group scope-block mb-3" id="block-sp">
-                    <label class="fw-bold">Sản phẩm</label>
-                    <select asp-for="SelectedSanPhams" class="form-select" multiple id="SanPhamSelect">
-                        @foreach (var sp in Model.SanPhams)
-                        {
-                            <option value="@sp.IDSanPham">@sp.TenSanPham</option>
-                        }
-                    </select>
-                </div>
-
-                <!-- Sản phẩm chi tiết -->
-                <div class="form-group scope-block mb-3" id="block-spct">
-                    <label class="fw-bold">Sản phẩm chi tiết</label>
-                    <select asp-for="SelectedSPCTs" class="form-select" multiple id="SPCTSelect"></select>
+                <div class="form-check mb-3">
+                    <input asp-for="GiamGia.TrangThai" class="form-check-input" />
+                    <label asp-for="GiamGia.TrangThai" class="form-check-label fw-bold">Kích hoạt</label>
                 </div>
 
                 <div class="text-end mt-4">
                     <button type="submit" class="btn btn-success px-4">
-                        💾 Lưu
+                        💾 Lưu thay đổi
                     </button>
                     <a asp-area="Admin" asp-controller="GiamGia" asp-action="Index" class="btn btn-secondary px-4">
                         ⬅ Quay lại
@@ -127,79 +85,11 @@
     </div>
 </div>
 
-
 @section Scripts {
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
 
     <script>
         $(function () {
-            const $sp = $('#SanPhamSelect');
-            const $spct = $('#SPCTSelect');
-            const allSPCTs = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SPCTs));
-
-            // Init select2
-            $('select').select2({ width: '100%', allowClear: true });
-
-            // Fill SPCT theo SP
-            function fillSPCTBySP(spIds) {
-                $spct.empty();
-                allSPCTs
-                    .filter(x => spIds.includes(x.IDSanPham.toString()))
-                    .forEach(x => {
-                        $spct.append(new Option(
-                            `${x.TenSanPham} - Size: ${x.Size ?? ""} / Màu: ${x.MauSac ?? ""} (Giá: ${x.GiaBan})`,
-                            x.IDSanPhamCT
-                        ));
-                    });
-                $spct.trigger('change');
-            }
-
-            // Fill toàn bộ SPCT
-            function fillAllSPCT() {
-                $spct.empty();
-                allSPCTs.forEach(x => {
-                    $spct.append(new Option(
-                        `${x.TenSanPham} - Size: ${x.Size ?? ""} / Màu: ${x.MauSac ?? ""} (Giá: ${x.GiaBan})`,
-                        x.IDSanPhamCT
-                    ));
-                });
-                $spct.trigger('change');
-            }
-
-            // Chọn phạm vi
-            $('input[name="scope"]').on('change', function () {
-                const val = $(this).val();
-
-                $(".scope-block").hide();
-                $("#block-dm select").val(null).trigger('change');
-                $("#block-sp select").val(null).trigger('change');
-                $("#block-spct select").val(null).trigger('change');
-
-                if (val === 'dm') {
-                    $("#block-dm").show();
-                }
-                else if (val === 'sp') {
-                    $("#block-sp").show();
-                }
-                else if (val === 'spct') {
-                    $("#block-spct").show();
-                    fillAllSPCT();
-                }
-            });
-
-            // Khi chọn SP → load SPCT
-            $sp.on('change', function () {
-                if ($('input[name="scope"]:checked').val() === 'sp') {
-                    fillSPCTBySP($sp.val() || []);
-                }
-            });
-
-            // Mặc định = sản phẩm
-            $('input[name="scope"][value="sp"]').trigger('change');
-
-            // === Validate ===
             const $loai = $('#LoaiGiamGiaSelect');
             const $giaTri = $('#GiaTriInput');
             const $giaTriMax = $('#GiaTriMaxInput');

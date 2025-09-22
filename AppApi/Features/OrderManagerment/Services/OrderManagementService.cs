@@ -100,7 +100,7 @@ namespace AppApi.Features.OrderManagerment.Services
         }
 
         /// <summary>
-        /// Lấy chi tiết đơn hàng theo ID.
+        /// Lấy chi tiết đơn hàng theo ID bao gồm lịch sử trạng thái.
         /// </summary>
         public async Task<OrderDetailDto?> GetOrderDetailAsync(Guid orderId)
         {
@@ -123,11 +123,12 @@ namespace AppApi.Features.OrderManagerment.Services
                     .Include(h => h.HoaDonChiTiets)
                         .ThenInclude(ct => ct.SanPhamCT)
                             .ThenInclude(sp => sp.ChatLieu)
+                    .Include(h => h.HoaDonTrangThais.OrderBy(htt => htt.NgayCapNhat))
                     .FirstOrDefaultAsync(h => h.IDHoaDon == orderId);
 
                 if (order == null) return null;
 
-                return new OrderDetailDto
+                var orderDetail = new OrderDetailDto
                 {
                     IDHoaDon = order.IDHoaDon,
                     TenKhachHang = order.User?.HoTen ?? "Khách vãng lai",
@@ -157,8 +158,17 @@ namespace AppApi.Features.OrderManagerment.Services
                         Size = ct.SanPhamCT?.SizeAo?.SoSize ?? "",
                         ChatLieu = ct.SanPhamCT?.ChatLieu?.TenChatLieu ?? "",
                         HinhAnh = ct.SanPhamCT?.SanPham?.AnhSanPhams?.FirstOrDefault()?.DuongDanAnh ?? ""
+                    }).ToList(),
+                    // Thêm lịch sử trạng thái
+                    LichSuTrangThai = order.HoaDonTrangThais.Select(htt => new OrderStatusHistoryDto
+                    {
+                        TrangThai = htt.TrangThai,
+                        NgayCapNhat = htt.NgayCapNhat,
+                        NguoiCapNhat = htt.NguoiCapNhat
                     }).ToList()
                 };
+
+                return orderDetail;
             }
             catch (Exception ex)
             {
@@ -172,6 +182,7 @@ namespace AppApi.Features.OrderManagerment.Services
         /// </summary>
         public async Task<ApiResponse<bool>> ConfirmOrderAsync(Guid orderId, Guid userId)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 var order = await _context.HoaDons.FindAsync(orderId);
@@ -181,16 +192,33 @@ namespace AppApi.Features.OrderManagerment.Services
                 if (order.TrangThaiDonHang != OrderStatus.CHO_XAC_NHAN)
                     return ApiResponse<bool>.Fail("Chỉ có thể xác nhận đơn hàng ở trạng thái 'Chờ xác nhận'", 400);
 
+                var user = await _context.Users.FindAsync(userId);
+                var nguoiCapNhat = user?.HoTen ?? "Hệ thống";
+
+                // Cập nhật trạng thái đơn hàng
                 order.TrangThaiDonHang = OrderStatus.DA_XAC_NHAN;
                 order.IDNguoiTao = userId;
                 order.NgaySua = DateTime.UtcNow;
 
-                await _context.SaveChangesAsync();
+                // Thêm lịch sử trạng thái
+                var lichSuTrangThai = new HoaDonTrangThai
+                {
+                    IDHoaDon = orderId,
+                    TrangThai = OrderStatus.DA_XAC_NHAN,
+                    NgayCapNhat = DateTime.UtcNow,
+                    NguoiCapNhat = nguoiCapNhat
+                };
 
+                _context.HoaDonTrangThai.Add(lichSuTrangThai);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                _logger.LogInformation("✅ Đơn hàng {OrderId} đã được xác nhận bởi {User}", orderId, nguoiCapNhat);
                 return ApiResponse<bool>.Success(true, "Xác nhận đơn hàng thành công", 200);
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 _logger.LogError(ex, "❌ ERROR in ConfirmOrderAsync: {Message}", ex.Message);
                 return new ApiResponse<bool>
                 {
@@ -206,10 +234,11 @@ namespace AppApi.Features.OrderManagerment.Services
         }
 
         /// <summary>
-        /// Cập nhật trạng thái đơn hàng.
+        /// Cập nhật trạng thái đơn hàng với lưu lịch sử.
         /// </summary>
         public async Task<ApiResponse<bool>> UpdateOrderStatusAsync(UpdateOrderStatusDto dto)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 var order = await _context.HoaDons.FindAsync(dto.IDHoaDon);
@@ -223,6 +252,11 @@ namespace AppApi.Features.OrderManagerment.Services
                         $"Không thể chuyển từ trạng thái '{order.TrangThaiDonHang}' sang '{dto.TrangThaiMoi}'", 400);
                 }
 
+                var user = await _context.Users.FindAsync(dto.IDNguoiCapNhat);
+                var nguoiCapNhat = user?.HoTen ?? "Hệ thống";
+                var trangThaiCu = order.TrangThaiDonHang;
+
+                // Cập nhật trạng thái đơn hàng
                 order.TrangThaiDonHang = dto.TrangThaiMoi;
                 order.IDNguoiTao = dto.IDNguoiCapNhat;
                 order.NgaySua = DateTime.UtcNow;
@@ -234,12 +268,27 @@ namespace AppApi.Features.OrderManagerment.Services
                         : $"{order.GhiChu}\n[{DateTime.Now:dd/MM/yyyy HH:mm}] {dto.GhiChu}";
                 }
 
+                // Thêm lịch sử trạng thái
+                var lichSuTrangThai = new HoaDonTrangThai
+                {
+                    IDHoaDon = dto.IDHoaDon,
+                    TrangThai = dto.TrangThaiMoi,
+                    NgayCapNhat = DateTime.UtcNow,
+                    NguoiCapNhat = nguoiCapNhat
+                };
+
+                _context.HoaDonTrangThai.Add(lichSuTrangThai);
                 await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                _logger.LogInformation("✅ Đơn hàng {OrderId} đã chuyển từ '{OldStatus}' sang '{NewStatus}' bởi {User}",
+                    dto.IDHoaDon, trangThaiCu, dto.TrangThaiMoi, nguoiCapNhat);
 
                 return ApiResponse<bool>.Success(true, "Cập nhật trạng thái đơn hàng thành công", 200);
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 _logger.LogError(ex, "❌ ERROR in UpdateOrderStatusAsync: {Message}", ex.Message);
                 return new ApiResponse<bool>
                 {
@@ -259,6 +308,7 @@ namespace AppApi.Features.OrderManagerment.Services
         /// </summary>
         public async Task<ApiResponse<bool>> UpdatePaymentStatusAsync(UpdatePaymentStatusDto dto)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 var order = await _context.HoaDons.FindAsync(dto.IDHoaDon);
@@ -268,6 +318,11 @@ namespace AppApi.Features.OrderManagerment.Services
                 if (order.TrangThaiDonHang == OrderStatus.DA_HUY)
                     return ApiResponse<bool>.Fail("Không thể cập nhật thanh toán cho đơn hàng đã hủy", 400);
 
+                var user = await _context.Users.FindAsync(dto.IDNguoiCapNhat);
+                var nguoiCapNhat = user?.HoTen ?? "Hệ thống";
+                var trangThaiThanhToanCu = order.TrangThaiThanhToan;
+
+                // Cập nhật trạng thái thanh toán
                 order.TrangThaiThanhToan = dto.TrangThaiThanhToan;
                 order.IDNguoiTao = dto.IDNguoiCapNhat;
                 order.NgaySua = DateTime.UtcNow;
@@ -277,12 +332,27 @@ namespace AppApi.Features.OrderManagerment.Services
                     order.NgayThanhToan = dto.NgayThanhToan ?? DateTime.UtcNow;
                 }
 
+                // Thêm lịch sử trạng thái thanh toán
+                var lichSuTrangThai = new HoaDonTrangThai
+                {
+                    IDHoaDon = dto.IDHoaDon,
+                    TrangThai = $"Thanh toán: {dto.TrangThaiThanhToan}",
+                    NgayCapNhat = DateTime.UtcNow,
+                    NguoiCapNhat = nguoiCapNhat
+                };
+
+                _context.HoaDonTrangThai.Add(lichSuTrangThai);
                 await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                _logger.LogInformation("✅ Trạng thái thanh toán đơn hàng {OrderId} đã chuyển từ '{OldStatus}' sang '{NewStatus}' bởi {User}",
+                    dto.IDHoaDon, trangThaiThanhToanCu, dto.TrangThaiThanhToan, nguoiCapNhat);
 
                 return ApiResponse<bool>.Success(true, "Cập nhật trạng thái thanh toán thành công", 200);
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 _logger.LogError(ex, "❌ ERROR in UpdatePaymentStatusAsync: {Message}", ex.Message);
                 return new ApiResponse<bool>
                 {
@@ -298,10 +368,11 @@ namespace AppApi.Features.OrderManagerment.Services
         }
 
         /// <summary>
-        /// Hủy đơn hàng.
+        /// Hủy đơn hàng với lưu lịch sử.
         /// </summary>
         public async Task<ApiResponse<bool>> CancelOrderAsync(CancelOrderDto dto)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 var order = await _context.HoaDons.FindAsync(dto.IDHoaDon);
@@ -314,6 +385,11 @@ namespace AppApi.Features.OrderManagerment.Services
                 if (order.TrangThaiDonHang == OrderStatus.DA_HUY)
                     return ApiResponse<bool>.Fail("Đơn hàng đã được hủy trước đó", 400);
 
+                var user = await _context.Users.FindAsync(dto.IDNguoiHuy);
+                var nguoiHuy = user?.HoTen ?? "Hệ thống";
+                var trangThaiCu = order.TrangThaiDonHang;
+
+                // Cập nhật trạng thái đơn hàng
                 order.TrangThaiDonHang = OrderStatus.DA_HUY;
                 order.IDNguoiTao = dto.IDNguoiHuy;
                 order.NgaySua = DateTime.UtcNow;
@@ -323,12 +399,27 @@ namespace AppApi.Features.OrderManagerment.Services
                     ? cancelNote
                     : $"{order.GhiChu}\n{cancelNote}";
 
+                // Thêm lịch sử trạng thái hủy
+                var lichSuTrangThai = new HoaDonTrangThai
+                {
+                    IDHoaDon = dto.IDHoaDon,
+                    TrangThai = $"{OrderStatus.DA_HUY} - {dto.LyDoHuy}",
+                    NgayCapNhat = DateTime.UtcNow,
+                    NguoiCapNhat = nguoiHuy
+                };
+
+                _context.HoaDonTrangThai.Add(lichSuTrangThai);
                 await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                _logger.LogInformation("✅ Đơn hàng {OrderId} đã bị hủy từ trạng thái '{OldStatus}' bởi {User}. Lý do: {Reason}",
+                    dto.IDHoaDon, trangThaiCu, nguoiHuy, dto.LyDoHuy);
 
                 return ApiResponse<bool>.Success(true, "Hủy đơn hàng thành công", 200);
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 _logger.LogError(ex, "❌ ERROR in CancelOrderAsync: {Message}", ex.Message);
                 return new ApiResponse<bool>
                 {
@@ -340,6 +431,34 @@ namespace AppApi.Features.OrderManagerment.Services
                         { "Exception", new[] { ex.Message } }
                     }
                 };
+            }
+        }
+
+        /// <summary>
+        /// Lấy lịch sử trạng thái của đơn hàng.
+        /// </summary>
+        public async Task<List<OrderStatusHistoryDto>> GetOrderStatusHistoryAsync(Guid orderId)
+        {
+            try
+            {
+                var history = await _context.HoaDonTrangThai
+                    .AsNoTracking()
+                    .Where(htt => htt.IDHoaDon == orderId)
+                    .OrderBy(htt => htt.NgayCapNhat)
+                    .Select(htt => new OrderStatusHistoryDto
+                    {
+                        TrangThai = htt.TrangThai,
+                        NgayCapNhat = htt.NgayCapNhat,
+                        NguoiCapNhat = htt.NguoiCapNhat
+                    })
+                    .ToListAsync();
+
+                return history;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ ERROR in GetOrderStatusHistoryAsync: {Message}", ex.Message);
+                throw;
             }
         }
         #endregion

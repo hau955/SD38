@@ -879,7 +879,14 @@
                 @* Quản lý đơn hàng *@
                 <div class="menu-section">
                     <div class="menu-section-title">Quản Lý Đơn Hàng</div>
-                    @MenuItem("/Admin/DonHang/Index", "DonHang", "fas fa-shopping-cart", "Đơn Hàng")
+                    <div class="menu-item">
+                        <a href="javascript:void(0);"
+                           class="menu-link load-page"
+                           data-url="/Ordermanagerment/Ordermanagerment/Index">
+                            <div class="menu-icon"><i class="fas fa-shopping-cart"></i></div>
+                            <div class="menu-text">Đơn Hàng</div>
+                        </a>
+                    </div>
                     @MenuItem("/Admin/KhachHang/Index", "KhachHang", "fas fa-users", "Khách Hàng")
                 </div>
                 @* Báo cáo & Thống kê *@
@@ -980,9 +987,10 @@
                 </div>
             </nav>
             <div class="content-area fade-in-up">
-                <div class="content-card">
+                <main id="render-body">
                     @RenderBody()
-                </div>
+                </main>
+
             </div>
             <footer class="footer">
                 <div class="container-fluid">
@@ -1024,7 +1032,14 @@
                 console.log('Page visible - resuming operations');
             }
         });
+                $(document).on("click", ".load-page", function (e) {
+            e.preventDefault();
+            var url = $(this).data("url");
 
+            $.get(url, function (data) {
+                $("#render-body").html(data); // thay đổi nội dung RenderBody
+            });
+        });
         // ===== ERROR HANDLING =====
         window.addEventListener('error', function(e) {
             console.error('Global error:', e.error);

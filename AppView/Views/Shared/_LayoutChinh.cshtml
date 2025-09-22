@@ -120,9 +120,14 @@
         </div>
     </header>
     <li>
-        <a<a asp-controller="GioHangChiTiet" asp-action="Index" class="btn btn-primary">
-    🛒 Xem giỏ hàng
-</a>
+        <a href="@Url.Action("Index", "GioHangChiTiet")" class="btn btn-primary">
+            🛒 Xem giỏ hàng
+        </a>
+    </li>
+    <li>
+        <a href="@Url.Action("Index", "HoaDon")" class="btn btn-primary">
+            🛒 Xem Đơn Hàng
+        </a>
     </li>
     <div class="breadcrumb">TRANG CHỦ / ÁO DÀI</div>
 

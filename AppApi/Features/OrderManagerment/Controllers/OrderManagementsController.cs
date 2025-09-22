@@ -24,6 +24,7 @@ public class OrderManagementsController : ControllerBase
         var result = await _orderService.GetOrdersAsync(filter);
         return Ok(ApiResponse<PagedResult<OrderListDto>>.Success(result));
     }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetOrderDetail(Guid id)
     {
@@ -42,6 +43,22 @@ public class OrderManagementsController : ControllerBase
             return StatusCode(500, ApiResponse<OrderDetailDto>.Fail("Lỗi nội bộ", 500));
         }
     }
+
+    [HttpGet("{id}/status-history")]
+    public async Task<IActionResult> GetOrderStatusHistory(Guid id)
+    {
+        try
+        {
+            var history = await _orderService.GetOrderStatusHistoryAsync(id);
+            return Ok(ApiResponse<List<OrderStatusHistoryDto>>.Success(history));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ ERROR in GetOrderStatusHistory: {ex.Message}\n{ex.StackTrace}");
+            return StatusCode(500, ApiResponse<List<OrderStatusHistoryDto>>.Fail("Lỗi khi lấy lịch sử trạng thái", 500));
+        }
+    }
+
     [HttpPost("{id}/confirm")]
     public async Task<IActionResult> ConfirmOrder(Guid id, [FromQuery] Guid userId)
     {
@@ -69,6 +86,7 @@ public class OrderManagementsController : ControllerBase
         var result = await _orderService.UpdateOrderStatusAsync(dto);
         return StatusCode(result.StatusCode, result);
     }
+
     [HttpPut("{id}/payment")]
     public async Task<IActionResult> UpdatePaymentStatus(Guid id, [FromBody] UpdatePaymentStatusDto dto)
     {
@@ -106,7 +124,6 @@ public class OrderManagementsController : ControllerBase
         var result = await _orderService.CancelOrderAsync(dto);
         return StatusCode(result.StatusCode, result);
     }
-
 
     [HttpGet("statistics")]
     public async Task<IActionResult> GetOrderStatistics()

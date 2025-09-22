@@ -3,6 +3,7 @@ using AppData.Models;
 using AppApi.ViewModels.TrangThai;
 using Microsoft.EntityFrameworkCore;
 using AppApi.ViewModels.HoaDonDTOs;
+using AppApi.Constants;
 
 namespace AppApi.Service
 {
@@ -112,13 +113,13 @@ namespace AppApi.Service
             var hinhThuc = await _context.HinhThucTTs.FindAsync(idHinhThucTT);
             if (hinhThuc == null) throw new Exception("❌ Hình thức thanh toán không hợp lệ");
 
-            string trangThaiThanhToan = "ChuaThanhToan";
+            string trangThaiThanhToan = PaymentStatus.DA_THANH_TOAN;
             DateTime? ngayThanhToan = null;
 
             if (hinhThuc.TenHinhThucTT.ToLower().Contains("online"))
             {
-                trangThaiThanhToan = "DaThanhToan";
-                ngayThanhToan = DateTime.Now;
+                trangThaiThanhToan = PaymentStatus.CHUA_THANH_TOAN;
+                ngayThanhToan = DateTime.Now;  // ✅ Ghi nhận ngày thanh toán
             }
 
             // 7️⃣ Lấy địa chỉ nhận hàng
@@ -153,7 +154,7 @@ namespace AppApi.Service
                 TienGiam = tienGiam,                 // ✅ giảm từ sản phẩm
                 TienGiamHoaDon = tienGiamHoaDon,     // ✅ giảm từ voucher
                 GhiChu = ghiChu,
-                TrangThaiDonHang = TrangThaiDonHang.DangXuLy,
+                TrangThaiDonHang = OrderStatus.CHO_XAC_NHAN, // trạng thái mặc định
                 TrangThaiThanhToan = trangThaiThanhToan,
                 NgayThanhToan = ngayThanhToan,
                 NgayTao = DateTime.Now,
