@@ -20,9 +20,25 @@ namespace AppView.Areas.Admin.Controllers
         [Route("Dashboard")]
         public async Task<IActionResult> Dashboard()
         {
-            var overview = await _thongKeRepo.GetOverviewAsync();
-            ViewBag.Title = "Tổng quan thống kê";
-            return View(overview);
+            try
+            {
+                var overview = await _thongKeRepo.GetOverviewAsync();
+                ViewBag.Title = "Tổng quan thống kê";
+                
+                // Kiểm tra nếu không có dữ liệu
+                if (overview?.Revenue?.TotalRevenue == 0 && overview?.Orders?.TotalOrders == 0)
+                {
+                    ViewBag.ErrorMessage = "Không có dữ liệu thống kê. Vui lòng kiểm tra kết nối API hoặc thêm dữ liệu mẫu.";
+                    ViewBag.ShowDebugInfo = true; // Hiển thị thông tin debug
+                }
+                
+                return View(overview);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = $"Lỗi khi tải dữ liệu thống kê: {ex.Message}";
+                return View(new DashboardOverviewViewModel());
+            }
         }
 
         [HttpGet]
@@ -83,27 +99,61 @@ namespace AppView.Areas.Admin.Controllers
         [Route("Customers")]
         public async Task<IActionResult> Customers()
         {
-            var request = new TimeRangeRequestViewModel
+            try
             {
-                StartDate = DateTime.Now.AddDays(-30),
-                EndDate = DateTime.Now,
-                GroupType = TimeGroupTypeViewModel.Day
-            };
+                var request = new TimeRangeRequestViewModel
+                {
+                    StartDate = DateTime.Now.AddDays(-30),
+                    EndDate = DateTime.Now,
+                    GroupType = TimeGroupTypeViewModel.Day
+                };
 
-            var report = await _thongKeRepo.GetCustomerReportAsync(request);
-            ViewBag.Title = "Báo cáo khách hàng";
-            ViewBag.Request = request;
-            return View(report);
+                var report = await _thongKeRepo.GetCustomerReportAsync(request);
+                ViewBag.Title = "Báo cáo khách hàng";
+                ViewBag.Request = request;
+                
+                // Kiểm tra nếu không có dữ liệu
+                if (report?.CustomerSegments?.Count == 0 && report?.CustomerActivities?.Count == 0)
+                {
+                    ViewBag.ErrorMessage = "Không có dữ liệu khách hàng. Vui lòng kiểm tra kết nối API hoặc thêm dữ liệu mẫu.";
+                    ViewBag.ShowDebugInfo = true;
+                }
+                
+                return View(report);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = $"Lỗi khi tải dữ liệu khách hàng: {ex.Message}";
+                ViewBag.ShowDebugInfo = true;
+                return View(new CustomerReportViewModel());
+            }
         }
 
         [HttpPost]
         [Route("Customers")]
         public async Task<IActionResult> Customers(TimeRangeRequestViewModel request)
         {
-            var report = await _thongKeRepo.GetCustomerReportAsync(request);
-            ViewBag.Title = "Báo cáo khách hàng";
-            ViewBag.Request = request;
-            return View(report);
+            try
+            {
+                var report = await _thongKeRepo.GetCustomerReportAsync(request);
+                ViewBag.Title = "Báo cáo khách hàng";
+                ViewBag.Request = request;
+                
+                // Kiểm tra nếu không có dữ liệu
+                if (report?.CustomerSegments?.Count == 0 && report?.CustomerActivities?.Count == 0)
+                {
+                    ViewBag.ErrorMessage = "Không có dữ liệu khách hàng trong khoảng thời gian đã chọn.";
+                    ViewBag.ShowDebugInfo = true;
+                }
+                
+                return View(report);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = $"Lỗi khi tải dữ liệu khách hàng: {ex.Message}";
+                ViewBag.ShowDebugInfo = true;
+                return View(new CustomerReportViewModel());
+            }
         }
 
         [HttpGet]

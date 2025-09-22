@@ -145,15 +145,5 @@ namespace AppApi.Controllers
 
             return Ok();
         }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetSanPhamById(Guid id)
-        {
-            var result = await _sanPhamService.GetSanPhamDetailWithDiscountAsync(id);
-            if (result == null)
-                return NotFound(new { message = "Không tìm thấy sản phẩm" });
-
-            return Ok(result);
-        }
     }
 }

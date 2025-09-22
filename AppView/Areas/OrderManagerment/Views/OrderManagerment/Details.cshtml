@@ -497,6 +497,7 @@
     </div>
 
     <div class="container-fluid px-4">
+        @Html.AntiForgeryToken()
         <div class="row">
             <!-- Main Content -->
             <div class="col-lg-8">
@@ -809,69 +810,14 @@
                         <i class="fas fa-history me-2"></i>Lịch sử đơn hàng
                     </div>
                     <div class="p-4">
-                        <div class="timeline">
-                            <div class="timeline-item">
-                                <div class="timeline-marker bg-primary"></div>
-                                <div class="timeline-content">
-                                    <h6 class="mb-1 fw-bold">Đơn hàng được tạo</h6>
-                                    <small class="text-muted">@Model.NgayTao?.ToString("dd/MM/yyyy HH:mm")</small>
+                        <div id="orderTimeline" class="timeline">
+                            <!-- Loading indicator -->
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Đang tải...</span>
                                 </div>
+                                <p class="mt-2 text-muted">Đang tải lịch sử đơn hàng...</p>
                             </div>
-
-                            @if (Model.TrangThaiDonHang != "Chờ xác nhận")
-                            {
-                                <div class="timeline-item">
-                                    <div class="timeline-marker bg-success"></div>
-                                    <div class="timeline-content">
-                                        <h6 class="mb-1 fw-bold">Đã xác nhận</h6>
-                                        <small class="text-muted">Được xác nhận bởi @Model.TenNguoiTao</small>
-                                    </div>
-                                </div>
-                            }
-
-                            @if (Model.TrangThaiDonHang == "Đang giao hàng" || Model.TrangThaiDonHang == "Hoàn tất")
-                            {
-                                <div class="timeline-item">
-                                    <div class="timeline-marker bg-info"></div>
-                                    <div class="timeline-content">
-                                        <h6 class="mb-1 fw-bold">Đang giao hàng</h6>
-                                        <small class="text-muted">Đơn hàng đang được vận chuyển</small>
-                                    </div>
-                                </div>
-                            }
-
-                            @if (Model.TrangThaiDonHang == "Hoàn tất")
-                            {
-                                <div class="timeline-item">
-                                    <div class="timeline-marker bg-success"></div>
-                                    <div class="timeline-content">
-                                        <h6 class="mb-1 fw-bold">Hoàn tất</h6>
-                                        <small class="text-muted">Đơn hàng đã được giao thành công</small>
-                                    </div>
-                                </div>
-                            }
-
-                            @if (Model.TrangThaiDonHang == "Đã hủy")
-                            {
-                                <div class="timeline-item">
-                                    <div class="timeline-marker bg-danger"></div>
-                                    <div class="timeline-content">
-                                        <h6 class="mb-1 fw-bold">Đã hủy</h6>
-                                        <small class="text-muted">Đơn hàng đã bị hủy</small>
-                                    </div>
-                                </div>
-                            }
-
-                            @if (Model.NgayThanhToan.HasValue)
-                            {
-                                <div class="timeline-item">
-                                    <div class="timeline-marker bg-warning"></div>
-                                    <div class="timeline-content">
-                                        <h6 class="mb-1 fw-bold">Đã thanh toán</h6>
-                                        <small class="text-muted">@Model.NgayThanhToan?.ToString("dd/MM/yyyy HH:mm")</small>
-                                    </div>
-                                </div>
-                            }
                         </div>
                     </div>
                 </div>
@@ -1071,6 +1017,10 @@
 
                 document.body.appendChild(form);
                 form.submit();
+                // Reload history after form submission
+                setTimeout(() => {
+                    loadOrderHistory();
+                }, 1000);
             }
         }
 
@@ -1090,7 +1040,7 @@
             if (confirm(`Bạn có chắc chắn muốn chuyển đơn hàng sang trạng thái "${newStatus}"?`)) {
                 showLoading();
                 try {
-                    const response = await fetch('@Url.Action("QuickUpdateStatus")', {
+                    const response = await fetch('@Url.Action("UpdateStatus")', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1099,16 +1049,22 @@
                         body: JSON.stringify({
                             IDHoaDon: '@Model.IDHoaDon',
                             TrangThaiMoi: newStatus,
-                            GhiChu: `Cập nhật nhanh sang trạng thái: ${newStatus}`
+                            GhiChu: `Cập nhật nhanh sang trạng thái: ${newStatus}`,
+                            IDNguoiCapNhat: '@Guid.Empty' // Will be set by controller
                         })
                     });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
 
                     const result = await response.json();
 
                     if (result.success) {
-                        // Show success message and reload page
+                        // Show success message and reload history
                         alert(result.message);
-                        window.location.reload();
+                        loadOrderHistory(); // Reload timeline instead of full page reload
+                        hideLoading();
                     } else {
                         alert(result.message);
                         hideLoading();
@@ -1153,9 +1109,9 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    // Đóng modal và reload trang
+                    // Đóng modal và reload lịch sử
                     bootstrap.Modal.getInstance(document.getElementById('updatePaymentModal')).hide();
-                    window.location.reload();
+                    loadOrderHistory(); // Reload timeline instead of full page reload
                 } else {
                     alert(`Lỗi: ${result.message || 'Cập nhật không thành công'}`);
                 }
@@ -1173,8 +1129,113 @@
             });
         });
 
+        // Load order status history
+        async function loadOrderHistory() {
+            try {
+                const response = await fetch('@Url.Action("GetOrderStatusHistory", new { id = Model.IDHoaDon })');
+                const result = await response.json();
+                
+                console.log('API Response:', result); // Debug log
+                
+                const timelineContainer = document.getElementById('orderTimeline');
+                
+                if (result.isSuccess && result.data && result.data.length > 0) {
+                    console.log('Timeline data:', result.data); // Debug log
+                    
+                    // Clear loading indicator
+                    timelineContainer.innerHTML = '';
+                    
+                    // Render timeline items
+                    result.data.forEach((item, index) => {
+                        console.log(`Processing item ${index}:`, item); // Debug log
+                        const timelineItem = createTimelineItem(item, index);
+                        timelineContainer.appendChild(timelineItem);
+                    });
+                } else {
+                    console.log('No data or error:', result); // Debug log
+                    
+                    // Show error or empty state with more details
+                    let message = result.message || 'Không có lịch sử trạng thái';
+                    if (result.data && result.data.length === 0) {
+                        message = 'Chưa có lịch sử trạng thái cho đơn hàng này. Hãy thử cập nhật trạng thái để tạo lịch sử.';
+                    }
+                    
+                    timelineContainer.innerHTML = `
+                        <div class="text-center py-4">
+                            <i class="fas fa-history text-muted mb-3" style="font-size: 2rem;"></i>
+                            <p class="text-muted">${message}</p>
+                            <small class="text-info">API Response: ${JSON.stringify(result)}</small>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading order history:', error);
+                const timelineContainer = document.getElementById('orderTimeline');
+                timelineContainer.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle text-warning mb-3" style="font-size: 2rem;"></i>
+                        <p class="text-muted">Có lỗi khi tải lịch sử đơn hàng</p>
+                        <button class="btn btn-sm btn-outline-primary" onclick="loadOrderHistory()">
+                            <i class="fas fa-redo me-1"></i>Thử lại
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Create timeline item element
+        function createTimelineItem(item, index) {
+            const timelineItem = document.createElement('div');
+            timelineItem.className = 'timeline-item';
+            
+            console.log(`Creating timeline item ${index}:`, item); // Debug log
+            
+            // Check all possible field names (case insensitive)
+            const trangThai = item.TrangThai || item.trangThai || item.status || 'Không xác định';
+            const ngayCapNhat = item.NgayCapNhat || item.ngayCapNhat || item.date || new Date();
+            const nguoiCapNhat = item.NguoiCapNhat || item.nguoiCapNhat || item.user || 'Hệ thống';
+            
+            console.log(`Processed fields - TrangThai: "${trangThai}", NgayCapNhat: "${ngayCapNhat}", NguoiCapNhat: "${nguoiCapNhat}"`); // Debug log
+            
+            // Determine marker color based on status
+            let markerClass = 'bg-primary';
+            if (trangThai.includes('Đã xác nhận') || trangThai.includes('Hoàn tất')) {
+                markerClass = 'bg-success';
+            } else if (trangThai.includes('Đang giao hàng')) {
+                markerClass = 'bg-info';
+            } else if (trangThai.includes('Đã hủy')) {
+                markerClass = 'bg-danger';
+            } else if (trangThai.includes('Thanh toán')) {
+                markerClass = 'bg-warning';
+            }
+            
+            // Format date
+            const date = new Date(ngayCapNhat);
+            const formattedDate = date.toLocaleString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            timelineItem.innerHTML = `
+                <div class="timeline-marker ${markerClass}"></div>
+                <div class="timeline-content">
+                    <h6 class="mb-1 fw-bold">${trangThai}</h6>
+                    <small class="text-muted">${formattedDate}</small>
+                    ${nguoiCapNhat ? `<br><small class="text-info">Bởi: ${nguoiCapNhat}</small>` : ''}
+                </div>
+            `;
+            
+            return timelineItem;
+        }
+
         // Add smooth animations on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // Load order history first
+            loadOrderHistory();
+            
             // Animate cards on page load
             const cards = document.querySelectorAll('.modern-card');
             cards.forEach((card, index) => {

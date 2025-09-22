@@ -2,7 +2,6 @@
 {
     using System.ComponentModel.DataAnnotations;
 
-
     public class OrderListViewModel
     {
         public Guid IDHoaDon { get; set; }
@@ -39,6 +38,9 @@
         public string? TenNguoiNhan { get; set; }
         public string? SoDienThoaiNhan { get; set; }
         public List<OrderItemViewModel> ChiTietSanPhams { get; set; } = new List<OrderItemViewModel>();
+
+        // Thêm lịch sử trạng thái
+        public List<OrderStatusHistoryViewModel> LichSuTrangThai { get; set; } = new List<OrderStatusHistoryViewModel>();
     }
 
     public class OrderItemViewModel
@@ -53,6 +55,13 @@
         public string? Size { get; set; }
         public string? ChatLieu { get; set; }
         public string? HinhAnh { get; set; }
+    }
+
+    public class OrderStatusHistoryViewModel
+    {
+        public string TrangThai { get; set; } = string.Empty;
+        public DateTime NgayCapNhat { get; set; }
+        public string? NguoiCapNhat { get; set; }
     }
 
     public class UpdateOrderStatusViewModel
@@ -112,6 +121,7 @@
         public string SortBy { get; set; } = "NgayTao";
         public string SortDirection { get; set; } = "desc";
     }
+
     public class OrderStatusViewModel
     {
         public string Value { get; set; } = string.Empty;
@@ -132,4 +142,3 @@
         public List<PaymentStatusViewModel> PaymentStatuses { get; set; } = new List<PaymentStatusViewModel>();
     }
 }
-
