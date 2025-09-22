@@ -16,7 +16,8 @@ namespace AppView.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index(Guid id)
         {
-            var userIdStr = HttpContext.Session.GetString("UserId");
+            var userIdStr = HttpContext.Session.GetString("ID");
+
 
             if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out Guid userId))
                 return RedirectToAction("Login", "Auth", new { area = "Auth" });

@@ -92,6 +92,13 @@ namespace AppApi.Features.ShippingAddress.Service
             {
                 _logger.LogInformation("Creating new shipping address for user {UserId}", userId);
 
+                // Validate user exists to avoid FK violations in development
+                var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+                if (!userExists)
+                {
+                    throw new InvalidOperationException("User không tồn tại. Vui lòng đăng nhập trước khi tạo địa chỉ.");
+                }
+
                 // Kiểm tra số lượng địa chỉ tối đa (VD: 10 địa chỉ)
                 var addressCount = await _context.DiaChiNhanHangs
                     .CountAsync(x => x.IDUser == userId && x.TrangThai);

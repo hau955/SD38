@@ -6,6 +6,7 @@
     var roles = Context.Session.GetString("Roles") ?? "";
     var isAdmin = roles.Contains("Admin");
     var isLoggedIn = !string.IsNullOrEmpty(token);
+    var avatarUrl = Context.Session.GetString("AvatarUrl");
 }
 <head>
     <meta charset="UTF-8" />
@@ -71,13 +72,17 @@
                 @if (isLoggedIn)
                 {
                     <!-- User logged in -->
-                    <a href="#" class="position-relative text-dark">🛒 Giỏ hàng</a>
+                    <a  asp-controller="ShippingAddress" asp-action="Index" class="position-relative text-dark">
+    🛒 Giỏ hàng
+</a>
+
                     <div class="dropdown">
-                        <a href="#" class="text-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                            👤 @email
+                        <a href="#" class="text-dark dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="@(string.IsNullOrEmpty(avatarUrl) ? Url.Content("~/img/image.png") : avatarUrl)" alt="avatar" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" />
+                            <span>@email</span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Thông tin cá nhân</a></li>
+                            <li><a class="dropdown-item" href="/Profile"><i class="fas fa-user me-2"></i>Hồ sơ cá nhân</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fas fa-shopping-bag me-2"></i>Đơn hàng của tôi</a></li>
                             @if (isAdmin)
                             {

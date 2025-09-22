@@ -4,6 +4,7 @@
     var roles = Context.Session.GetString("Roles") ?? "";
     var isAdmin = roles.Contains("Admin");
     var isLoggedIn = !string.IsNullOrEmpty(token);
+    var avatarUrl = Context.Session.GetString("AvatarUrl");
 }
 
 <!doctype html>
@@ -29,7 +30,7 @@
     <header>
         <div class="header-container">
             <div class="logo">
-                <img src="images/image.png" alt="Ảnh logo" style="max-width: 100%;height: 90px;">
+                <img src="~/images/image.png" alt="Ảnh logo" style="max-width: 100%;height: 90px;" asp-append-version="true">
             </div>
             <nav>
                 <ul class="main-menu">
@@ -63,15 +64,16 @@
                 @if (isLoggedIn)
                 {
                     <div class="dropdown">
-                        <a href="#" class="position-relative text-dark">🛒 Giỏ hàng</a>
-                        <a href="#" class="text-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                            👤 @email
+                        <a asp-controller="GioHangChiTiet" asp-action="Index" class="position-relative text-dark">🛒 Giỏ hàng</a>
+                        <a href="#" class="text-dark dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="@(string.IsNullOrEmpty(avatarUrl) ? Url.Content("~/images/image.png") : avatarUrl)" alt="avatar" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" />
+                            <span>@email</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/Account/Profile"><i class="fas fa-user me-2"></i>Thông tin cá nhân</a></li>
-                            <li><a class="dropdown-item" href="/Account/Orders"><i class="fas fa-shopping-bag me-2"></i>Đơn hàng của tôi</a></li>
-                            <li><a class="dropdown-item" href="/Account/Address"><i class="fas fa-map-marker-alt me-2"></i>Sổ địa chỉ</a></li>
-                            <li><a class="dropdown-item" href="/Account/ChangePassword"><i class="fas fa-lock me-2"></i>Đổi mật khẩu</a></li>
+                            <li><a class="dropdown-item" asp-controller="Profile" asp-action="Index"><i class="fas fa-user me-2"></i>Hồ sơ cá nhân</a></li>
+                            <li><a class="dropdown-item" asp-controller="HoaDon" asp-action="Index"><i class="fas fa-shopping-bag me-2"></i>Đơn hàng của tôi</a></li>
+                            <li><a class="dropdown-item" asp-controller="ShippingAddress" asp-action="Index"><i class="fas fa-map-marker-alt me-2"></i>Sổ địa chỉ</a></li>
+                            <li><a class="dropdown-item" asp-controller="Profile" asp-action="ChangePassword"><i class="fas fa-lock me-2"></i>Đổi mật khẩu</a></li>
                             @if (isAdmin)
                             {
                                 <li><hr class="dropdown-divider"></li>
@@ -110,7 +112,7 @@
     <div class="banner">
         <div class="slideshow-container">
             <div class="slide">
-                <img src="images/banner.jpg" alt="Ảnh 1" style="max-width: 100%;height: 650px;">
+                <img src="~/images/banner.jpg" alt="Ảnh 1" style="max-width: 100%;height: 650px;" asp-append-version="true">
             </div>
         </div>
     </div>
