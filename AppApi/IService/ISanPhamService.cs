@@ -13,6 +13,7 @@ namespace AppApi.IService
         Task<List<SanPhamDetailWithDiscountView>> GetAllSanPhamsAsync();
         Task<SanPham> Create(SanPhamCreateRequest sanpham);
         Task<SanPham> Update(SanPhamCreateRequest sanpham);
+        Task<List<SanPhamDetailWithDiscountView>> SearchAndFilterAsync(SanPhamSearchRequest request);
 
     }
 }

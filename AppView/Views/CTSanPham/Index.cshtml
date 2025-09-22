@@ -1,56 +1,533 @@
-﻿@model List<AppApi.ViewModels.SanPham.SanPhamView>
-
-<h2 class="mb-4">Danh sách sản phẩm</h2>
+﻿@model List<AppApi.ViewModels.SanPham.SanPhamDetailWithDiscountView>
 @{
-    var baseUrl = "https://localhost:7221/"; // 👈 đổi thành URL API của bạn
+    var baseUrl = "https://localhost:7221/";
+    var searchResult = ViewBag.SearchResult as AppApi.ViewModels.SanPham.SanPhamSearchResponse;
 }
-<div class="row">
-    @foreach (var sp in Model)
-    {
-        var anh = sp.DanhSachAnh?.FirstOrDefault(a => a.AnhChinh == true)?.DuongDanAnh;
-        var chiTiet = sp.ChiTiets?.FirstOrDefault();
-        var giaGoc = chiTiet?.GiaBan ?? 0;
-        var giaSauGiam = chiTiet?.GiaSauGiam ?? giaGoc;
 
-        <div class="col-md-3 mb-4">
-            <div class="card h-100 shadow-sm border-0">
-
-                <!-- Ảnh sản phẩm căn giữa -->
-                <div class="d-flex align-items-center justify-content-center"
-                     style="height:230px; background:#f8f9fa;">
-                    <img src="@($"{baseUrl}{anh}")"
-                         alt="@sp.TenSanPham"
-                         style="max-height:100%; max-width:100%; object-fit:contain;" />
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Filter -->
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-filter me-2"></i>Bộ lọc tìm kiếm
+                    </h5>
                 </div>
+                <div class="card-body">
+                    <form asp-action="Index" method="get" id="filterForm">
+                        <!-- Tìm kiếm theo tên -->
+                        <div class="mb-3">
+                            <label for="ten" class="form-label">
+                                <i class="fas fa-search me-1"></i>Tên sản phẩm
+                            </label>
+                            <div class="position-relative">
+                                <input type="text"
+                                       id="ten"
+                                       name="ten"
+                                       value="@ViewBag.Ten"
+                                       class="form-control"
+                                       placeholder="Nhập tên sản phẩm..."
+                                       autocomplete="off" />
+                                <div id="searchSuggestions" class="position-absolute bg-white border shadow-sm w-100" style="z-index: 1000; display: none;"></div>
+                            </div>
+                        </div>
 
-                <!-- Nội dung -->
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title text-truncate" title="@sp.TenSanPham">@sp.TenSanPham</h5>
-                    <p class="text-muted mb-2">@sp.TenDanhMuc</p>
+                        <!-- Danh mục - FIXED VERSION -->
+                        <div class="mb-3">
+                            <label for="danhMucId" class="form-label">
+                                <i class="fas fa-tags me-1"></i>Danh mục
+                            </label>
+                            <select id="danhMucId" name="danhMucId" class="form-select">
+                                <option value="">Tất cả danh mục</option>
+                                @if (ViewBag.DanhMucs != null)
+                                {
+                                    @foreach (var dm in (IEnumerable<dynamic>)ViewBag.DanhMucs)
+                                    {
+                                        var isSelected = ViewBag.DanhMucId?.ToString() == dm.DanhMucId.ToString();
+                                        <option value="@dm.DanhMucId" selected="@isSelected">
+                                            @dm.TenDanhMuc
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
 
-                    @if (giaSauGiam < giaGoc)
-                    {
-                        <p class="mb-2">
-                            <span class="text-muted text-decoration-line-through">
-                                @giaGoc.ToString("N0") đ
-                            </span>
-                            <span class="text-danger fw-bold ms-2">
-                                @giaSauGiam.ToString("N0") đ
-                            </span>
-                        </p>
-                    }
-                    else
-                    {
-                        <p class="fw-bold mb-2">@giaGoc.ToString("N0") đ</p>
-                    }
+                        <!-- Khoảng giá -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-dollar-sign me-1"></i>Khoảng giá
+                            </label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="number"
+                                           id="giaMin"
+                                           name="giaMin"
+                                           value="@ViewBag.GiaMin"
+                                           class="form-control form-control-sm"
+                                           placeholder="Từ"
+                                           min="0" />
+                                </div>
+                                <div class="col-6">
+                                    <input type="number"
+                                           id="giaMax"
+                                           name="giaMax"
+                                           value="@ViewBag.GiaMax"
+                                           class="form-control form-control-sm"
+                                           placeholder="Đến"
+                                           min="0" />
+                                </div>
+                            </div>
+                            @if (ViewBag.GiaRange != null)
+                            {
+                                <small class="text-muted">
+                                    Giá từ @(((dynamic)ViewBag.GiaRange).GiaMin.ToString("N0")) - @(((dynamic)ViewBag.GiaRange).GiaMax.ToString("N0")) đ
+                                </small>
+                            }
+                        </div>
 
-                    <div class="mt-auto">
-                        <a asp-action="Details" asp-route-id="@sp.IDSanPham"
-                           class="btn btn-primary btn-sm w-100">Xem chi tiết</a>
-                    </div>
+                        <!-- Màu sắc - FIXED VERSION -->
+                        <div class="mb-3">
+                            <label for="mauSac" class="form-label">
+                                <i class="fas fa-palette me-1"></i>Màu sắc
+                            </label>
+                            <select id="mauSac" name="mauSac" class="form-select">
+                                <option value="">Tất cả màu</option>
+                                @if (ViewBag.MauSacs != null)
+                                {
+                                    @foreach (var ms in (IEnumerable<dynamic>)ViewBag.MauSacs)
+                                    {
+                                        var isSelected = ViewBag.MauSac?.ToString() == ms.TenMau?.ToString();
+                                        <option value="@ms.TenMau" selected="@isSelected">
+                                            @ms.TenMau
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Size - FIXED VERSION -->
+                        <div class="mb-3">
+                            <label for="size" class="form-label">
+                                <i class="fas fa-ruler me-1"></i>Kích cỡ
+                            </label>
+                            <select id="size" name="size" class="form-select">
+                                <option value="">Tất cả size</option>
+                                @if (ViewBag.Sizes != null)
+                                {
+                                    @foreach (var s in (IEnumerable<dynamic>)ViewBag.Sizes)
+                                    {
+                                        var isSelected = ViewBag.Size?.ToString() == s.SoSize?.ToString();
+                                        <option value="@s.SoSize" selected="@isSelected">
+                                            @s.SoSize
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Chất liệu - FIXED VERSION -->
+                        <div class="mb-3">
+                            <label for="chatLieu" class="form-label">
+                                <i class="fas fa-fabric me-1"></i>Chất liệu
+                            </label>
+                            <select id="chatLieu" name="chatLieu" class="form-select">
+                                <option value="">Tất cả chất liệu</option>
+                                @if (ViewBag.ChatLieus != null)
+                                {
+                                    @foreach (var cl in (IEnumerable<dynamic>)ViewBag.ChatLieus)
+                                    {
+                                        var isSelected = ViewBag.ChatLieu?.ToString() == cl.TenChatLieu?.ToString();
+                                        <option value="@cl.TenChatLieu" selected="@isSelected">
+                                            @cl.TenChatLieu
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Sắp xếp - FIXED VERSION -->
+                        <div class="mb-3">
+                            <label for="sapXep" class="form-label">
+                                <i class="fas fa-sort me-1"></i>Sắp xếp
+                            </label>
+                            <select id="sapXep" name="sapXep" class="form-select">
+                                @{
+                                    var sortOptions = new Dictionary<string, string>
+                                {
+                                {"ten_az", "Tên A-Z"},
+                                {"ten_za", "Tên Z-A"},
+                                {"gia_tang", "Giá tăng dần"},
+                                {"gia_giam", "Giá giảm dần"},
+                                {"moi_nhat", "Mới nhất"}
+                                };
+                                }
+                                @foreach (var option in sortOptions)
+                                {
+                                    var isSelected = ViewBag.SapXep?.ToString() == option.Key;
+                                    <option value="@option.Key" selected="@isSelected">@option.Value</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Tìm kiếm
+                            </button>
+                            <button type="button" id="clearFilter" class="btn btn-outline-secondary">
+                                <i class="fas fa-eraser me-2"></i>Xóa bộ lọc
+                            </button>
+                        </div>
+                    </form>
                 </div>
-
             </div>
         </div>
-    }
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Header với số kết quả -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="fas fa-tshirt me-2"></i>Danh sách sản phẩm
+                    @if (searchResult != null && searchResult.TotalCount > 0)
+                    {
+                        <span class="badge bg-primary ms-2">@searchResult.TotalCount sản phẩm</span>
+                    }
+                </h2>
+
+                @if (searchResult != null)
+                {
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted me-3">
+                            Hiển thị @(((searchResult.CurrentPage - 1) * searchResult.PageSize) + 1)
+                            - @Math.Min(searchResult.CurrentPage * searchResult.PageSize, searchResult.TotalCount)
+                            trong @searchResult.TotalCount kết quả
+                        </span>
+                    </div>
+                }
+            </div>
+
+            <!-- Thông báo lỗi -->
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Hiển thị sản phẩm -->
+            @if (Model != null && Model.Any())
+            {
+                <div class="row g-4">
+                    @foreach (var sp in Model)
+                    {
+                        var anh = sp.DanhSachAnh?.FirstOrDefault(a => a.AnhChinh == true)?.DuongDanAnh ??
+                        sp.DanhSachAnh?.FirstOrDefault()?.DuongDanAnh ?? "images/no-image.jpg";
+
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card h-100 shadow-sm border-0 product-card">
+                                <!-- Badge giảm giá -->
+                               @*  @if (sp.GiaTriGiam.HasValue && sp.GiaTriGiam.Value > 0)
+                                {
+                                    <div class="position-absolute top-0 start-0 m-2 z-index-1">
+                                        @if (sp.LoaiGiamGia == "PhanTram")
+                                        {
+                                            <span class="badge bg-danger">-@((sp.GiaTriGiam.Value / sp.GiaGoc * 100):F0)%</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">-@sp.GiaTriGiam.Value.ToString("N0")đ</span>
+                                        }
+                                    </div>
+                                } *@
+
+                                <!-- Hình ảnh -->
+                                <div class="card-img-container position-relative overflow-hidden" style="height: 250px;">
+                                    <img src="@($"{baseUrl}{anh}")"
+                                         alt="@sp.TenSanPham"
+                                         class="card-img-top h-100 w-100 object-fit-cover product-image"
+                                         style="transition: transform 0.3s ease;" />
+
+                                    <!-- Quick view overlay -->
+                                    <div class="product-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                                        <a asp-action="Details" asp-route-id="@sp.IDSanPham" class="btn btn-light btn-sm">
+                                            <i class="fas fa-eye me-1"></i>Xem chi tiết
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title text-truncate mb-2" title="@sp.TenSanPham">
+                                        @sp.TenSanPham
+                                    </h5>
+
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-tag me-1"></i>@sp.TenDanhMuc
+                                    </p>
+
+                                    <!-- Giá -->
+                                    <div class="mb-3">
+                                        @if (sp.GiaSauGiam < sp.GiaGoc)
+                                        {
+                                            <div class="d-flex align-items-center">
+                                                <span class="text-muted text-decoration-line-through me-2">
+                                                    @sp.GiaGoc.ToString("N0")đ
+                                                </span>
+                                                <span class="text-danger fw-bold fs-5">
+                                                    @sp.GiaSauGiam.ToString("N0")đ
+                                                </span>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(sp.TenGiamGia))
+                                            {
+                                                <small class="text-success">
+                                                    <i class="fas fa-gift me-1"></i>@sp.TenGiamGia
+                                                </small>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="fw-bold fs-5 text-primary">@sp.GiaGoc.ToString("N0")đ</span>
+                                        }
+                                    </div>
+
+                                    <!-- Thông tin thêm -->
+                                    <div class="mt-auto">
+                                        @if (sp.ChiTiets?.Any() == true)
+                                        {
+                                            <div class="mb-2">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-palette me-1"></i>
+                                                    @string.Join(", ", sp.ChiTiets.Select(ct => ct.MauSac).Where(m => !string.IsNullOrEmpty(m)).Distinct().Take(3))
+                                                </small>
+                                            </div>
+                                            <div class="mb-2">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-ruler me-1"></i>
+                                                    @string.Join(", ", sp.ChiTiets.Select(ct => ct.Size).Where(s => !string.IsNullOrEmpty(s)).Distinct().Take(5))
+                                                </small>
+                                            </div>
+                                        }
+
+                                        <a asp-action="Details" asp-route-id="@sp.IDSanPham" class="btn btn-primary w-100">
+                                            <i class="fas fa-shopping-cart me-2"></i>Xem chi tiết
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Phân trang -->
+                @if (searchResult != null && searchResult.TotalPages > 1)
+                {
+                    <nav aria-label="Phân trang sản phẩm" class="mt-5">
+                        <ul class="pagination justify-content-center">
+                            <!-- Previous -->
+                            @{
+                                var prevDisabled = !searchResult.HasPreviousPage ? "disabled" : "";
+                            }
+                            <li class="page-item @prevDisabled">
+                                <a class="page-link"
+                                   href="@Url.Action("Index", new {
+                                       ten = ViewBag.Ten,
+                                       danhMucId = ViewBag.DanhMucId,
+                                       giaMin = ViewBag.GiaMin,
+                                       giaMax = ViewBag.GiaMax,
+                                       mauSac = ViewBag.MauSac,
+                                       size = ViewBag.Size,
+                                       chatLieu = ViewBag.ChatLieu,
+                                       sapXep = ViewBag.SapXep,
+                                       page = searchResult.CurrentPage - 1
+                                   })">
+                                    <i class="fas fa-chevron-left"></i> Trước
+                                </a>
+                            </li>
+
+                            <!-- Page numbers -->
+                            @{
+                                var startPage = Math.Max(1, searchResult.CurrentPage - 2);
+                                var endPage = Math.Min(searchResult.TotalPages, searchResult.CurrentPage + 2);
+                            }
+
+                            @for (int i = startPage; i <= endPage; i++)
+                            {
+                                var pageActive = i == searchResult.CurrentPage ? "active" : "";
+                                <li class="page-item @pageActive">
+                                    <a class="page-link"
+                                       href="@Url.Action("Index", new {
+                                           ten = ViewBag.Ten,
+                                           danhMucId = ViewBag.DanhMucId,
+                                           giaMin = ViewBag.GiaMin,
+                                           giaMax = ViewBag.GiaMax,
+                                           mauSac = ViewBag.MauSac,
+                                           size = ViewBag.Size,
+                                           chatLieu = ViewBag.ChatLieu,
+                                           sapXep = ViewBag.SapXep,
+                                           page = i
+                                       })">@i</a>
+                                </li>
+                            }
+
+                            <!-- Next -->
+                            @{
+                                var nextDisabled = !searchResult.HasNextPage ? "disabled" : "";
+                            }
+                            <li class="page-item @nextDisabled">
+                                <a class="page-link"
+                                   href="@Url.Action("Index", new {
+                                       ten = ViewBag.Ten,
+                                       danhMucId = ViewBag.DanhMucId,
+                                       giaMin = ViewBag.GiaMin,
+                                       giaMax = ViewBag.GiaMax,
+                                       mauSac = ViewBag.MauSac,
+                                       size = ViewBag.Size,
+                                       chatLieu = ViewBag.ChatLieu,
+                                       sapXep = ViewBag.SapXep,
+                                       page = searchResult.CurrentPage + 1
+                                   })">
+                                    Sau <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <!-- Không có sản phẩm -->
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">Không tìm thấy sản phẩm nào</h4>
+                    <p class="text-muted">Vui lòng thử lại với từ khóa khác hoặc điều chỉnh bộ lọc</p>
+                    <button type="button" id="clearAllFilter" class="btn btn-primary">
+                        <i class="fas fa-refresh me-2"></i>Xem tất cả sản phẩm
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
 </div>
+
+<!-- CSS -->
+<style>
+    .product-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+    .product-image {
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.05);
+    }
+
+    .product-overlay {
+        background: rgba(0,0,0,0.7);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .product-card:hover .product-overlay {
+        opacity: 1;
+    }
+
+    .card-img-container {
+        overflow: hidden;
+    }
+
+    .z-index-1 {
+        z-index: 1;
+    }
+
+    #searchSuggestions {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+        #searchSuggestions .suggestion-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+
+            #searchSuggestions .suggestion-item:hover {
+                background-color: #f8f9fa;
+            }
+</style>
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-submit form khi thay đổi select
+        const selects = document.querySelectorAll('#filterForm select');
+        selects.forEach(select => {
+            select.addEventListener('change', function() {
+                document.getElementById('filterForm').submit();
+            });
+        });
+
+        // Clear filter
+        document.getElementById('clearFilter').addEventListener('click', function() {
+            window.location.href = '@Url.Action("Index")';
+        });
+
+        document.getElementById('clearAllFilter')?.addEventListener('click', function() {
+            window.location.href = '@Url.Action("Index")';
+        });
+
+        // Search suggestions
+        const searchInput = document.getElementById('ten');
+        const suggestionsDiv = document.getElementById('searchSuggestions');
+        let searchTimeout;
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+
+            clearTimeout(searchTimeout);
+
+            if (query.length < 2) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`@Url.Action("GetSearchSuggestions")?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            suggestionsDiv.innerHTML = data.map(item =>
+                                `<div class="suggestion-item" onclick="selectSuggestion('${item}')">${item}</div>`
+                            ).join('');
+                            suggestionsDiv.style.display = 'block';
+                        } else {
+                            suggestionsDiv.style.display = 'none';
+                        }
+                    })
+                    .catch(() => {
+                        suggestionsDiv.style.display = 'none';
+                    });
+            }, 300);
+        });
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                suggestionsDiv.style.display = 'none';
+            }
+        });
+    });
+
+    function selectSuggestion(value) {
+        document.getElementById('ten').value = value;
+        document.getElementById('searchSuggestions').style.display = 'none';
+        document.getElementById('filterForm').submit();
+    }
+</script>
