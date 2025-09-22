@@ -314,17 +314,20 @@ namespace AppApi.Features.ThongKe.Services
         }
         public async Task<CustomerReportDto> GetCustomerReportAsync(TimeRangeRequestDto request)
         {
+            // Lấy danh sách khách hàng với thông tin cơ bản
             var customerSegments = await _context.Users
+                .Where(u => u.HoTen != null && u.Email != null) // Chỉ lấy user có thông tin đầy đủ
                 .Select(u => new CustomerValueDto
                 {
                     CustomerId = (int)u.Id.GetHashCode(),
-                    CustomerName = u.HoTen,
-                    Email = u.Email,
+                    CustomerName = u.HoTen ?? "N/A",
+                    Email = u.Email ?? "N/A",
                     Tier = "Standard", // You might have a tier system
                     LifetimeValue = u.HoaDonsAsKhachHang.Where(h => h.TrangThaiThanhToan == "Đã thanh toán")
                                              .Sum(h => h.TongTienSauGiam),
                     OrderCount = u.HoaDonsAsKhachHang.Count(),
-                    LastOrderDate = u.HoaDonsAsKhachHang.OrderByDescending(h => h.NgayTao)
+                    LastOrderDate = u.HoaDonsAsKhachHang.Where(h => h.NgayTao.HasValue)
+                                            .OrderByDescending(h => h.NgayTao)
                                             .Select(h => h.NgayTao.Value)
                                             .FirstOrDefault()
                 })
@@ -332,14 +335,15 @@ namespace AppApi.Features.ThongKe.Services
                 .Take(50)
                 .ToListAsync();
 
+            // Lấy hoạt động khách hàng theo ngày
             var customerActivities = await _context.HoaDons
-                .Where(h => h.NgayTao >= request.StartDate && h.NgayTao <= request.EndDate)
+                .Where(h => h.NgayTao >= request.StartDate && h.NgayTao <= request.EndDate && h.NgayTao.HasValue)
                 .GroupBy(h => h.NgayTao.Value.Date)
                 .Select(g => new CustomerActivityDto
                 {
                     Date = g.Key,
                     NewCustomers = g.Select(h => h.IDUser).Distinct().Count(),
-                    RepeatCustomers = g.Where(h => h.HoaDonChiTiets.Count() > 1).Count(),
+                    RepeatCustomers = g.Count() - g.Select(h => h.IDUser).Distinct().Count(), // Khách quay lại = tổng hóa đơn - khách mới
                     ChurnedCustomers = 0 // This would require more complex logic
                 })
                 .OrderBy(c => c.Date)

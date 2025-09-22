@@ -63,42 +63,68 @@ namespace AppView.Areas.Admin.Repository
 
         public async Task<SanPhamCreateViewModel?> GetByIdAsync(Guid id)
         {
-            var response = await _httpClient.GetAsync($"api/SanPham/{id}");
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"API lỗi: {error}");
-            }
+                var response = await _httpClient.GetAsync($"api/SanPham/by-id/{id}");
+                var content = await response.Content.ReadAsStringAsync();
 
-            var content = await response.Content.ReadAsStringAsync();
-            var apiResult = JsonSerializer.Deserialize<ApiResult<SanPhamView>>(content, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-
-            var sanPham = apiResult?.Data;
-            if (sanPham == null) return null;
-
-            return new SanPhamCreateViewModel
-            {
-                IDSanPham = sanPham.IDSanPham,
-                TenSanPham = sanPham.TenSanPham,
-                MoTa = sanPham.MoTa,
-                TrongLuong = sanPham.TrongLuong ?? 0,
-                GioiTinh = sanPham.GioiTinh ,
-                TrangThai = sanPham.TrangThai,
-                DanhMucID = sanPham.DanhMucID,
-                DanhSachAnh = sanPham.DanhSachAnh?.Select(a => new AnhSanPhamViewModel
+                if (!response.IsSuccessStatusCode)
                 {
-                    IdAnh = a.IdAnh,
-                    IDSanPham = a.IDSanPham,
-                    DuongDanAnh = a.DuongDanAnh,
-                    AnhChinh = a.AnhChinh
-                }).ToList()
+                    if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        // Không tìm thấy sản phẩm -> return null thay vì throw
+                        return null;
+                    }
 
+                    // Parse error message from API response
+                    try
+                    {
+                        var errorResult = JsonSerializer.Deserialize<ApiResult<object>>(content,
+                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        var errorMessage = errorResult?.Message ?? "Lỗi không xác định từ API";
+                        throw new Exception($"API lỗi ({response.StatusCode}): {errorMessage}");
+                    }
+                    catch (JsonException)
+                    {
+                        // Nếu không parse được JSON, dùng raw content
+                        throw new Exception($"API lỗi ({response.StatusCode}): {content}");
+                    }
+                }
 
-            };
+                var apiResult = JsonSerializer.Deserialize<ApiResult<SanPhamView>>(content,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                var sanPham = apiResult?.Data;
+                if (sanPham == null) return null;
+
+                return new SanPhamCreateViewModel
+                {
+                    IDSanPham = sanPham.IDSanPham,
+                    TenSanPham = sanPham.TenSanPham,
+                    MoTa = sanPham.MoTa,
+                    TrongLuong = sanPham.TrongLuong ?? 0,
+                    GioiTinh = sanPham.GioiTinh ?? false,
+                    TrangThai = sanPham.TrangThai,
+                    DanhMucID = sanPham.DanhMucID ?? Guid.Empty,
+                    DanhSachAnh = sanPham.DanhSachAnh?.Select(a => new AnhSanPhamViewModel
+                    {
+                        IdAnh = a.IdAnh,
+                        IDSanPham = a.IDSanPham,
+                        DuongDanAnh = a.DuongDanAnh,
+                        AnhChinh = a.AnhChinh
+                    }).ToList()
+                };
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new Exception($"Không thể kết nối đến API: {ex.Message}", ex);
+            }
+            catch (TaskCanceledException ex)
+            {
+                throw new Exception("API không phản hồi trong thời gian cho phép", ex);
+            }
         }
+
 
         public async Task<bool> UpdateSanPhamAsync(SanPhamCreateViewModel model)
         {

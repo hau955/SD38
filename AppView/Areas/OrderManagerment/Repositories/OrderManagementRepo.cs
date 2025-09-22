@@ -10,6 +10,7 @@ namespace AppView.Areas.OrderManagerment.Repositories
     {
         private readonly HttpClient _httpClient;
         private const string BaseUrl = "api/OrderManagements";
+
         public OrderManagementRepo(HttpClient httpClient)
         {
             _httpClient = httpClient;
@@ -30,6 +31,7 @@ namespace AppView.Areas.OrderManagerment.Repositories
             var result = await response.Content.ReadFromJsonAsync<ApiResponse<PagedResult<OrderListViewModel>>>();
             return result!;
         }
+
         public async Task<ApiResponse<OrderDetailViewModel>> GetOrderDetailAsync(Guid id)
         {
             try
@@ -81,12 +83,35 @@ namespace AppView.Areas.OrderManagerment.Repositories
                 return ApiResponse<OrderDetailViewModel>.Fail($"Lỗi hệ thống: {ex.Message}", 500);
             }
         }
+
+        public async Task<ApiResponse<List<OrderStatusHistoryViewModel>>> GetOrderStatusHistoryAsync(Guid id)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{BaseUrl}/{id}/status-history");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"❌ Lỗi khi lấy lịch sử trạng thái: {response.StatusCode} - {errorContent}");
+                    return ApiResponse<List<OrderStatusHistoryViewModel>>.Fail("Không thể lấy lịch sử trạng thái", (int)response.StatusCode);
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<OrderStatusHistoryViewModel>>>();
+                return result ?? ApiResponse<List<OrderStatusHistoryViewModel>>.Fail("Dữ liệu không hợp lệ", 500);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Exception in GetOrderStatusHistoryAsync: {ex.Message}");
+                return ApiResponse<List<OrderStatusHistoryViewModel>>.Fail($"Lỗi: {ex.Message}", 500);
+            }
+        }
+
         public async Task<ApiResponse<bool>> ConfirmOrderAsync(Guid id, Guid userId)
         {
             var response = await _httpClient.PostAsync($"{BaseUrl}/{id}/confirm?userId={userId}", null);
             return await response.Content.ReadFromJsonAsync<ApiResponse<bool>>() ?? ApiResponse<bool>.Fail("Lỗi không xác định");
         }
-
 
         public async Task<ApiResponse<bool>> UpdateOrderStatusAsync(UpdateOrderStatusViewModel model)
         {
@@ -105,7 +130,6 @@ namespace AppView.Areas.OrderManagerment.Repositories
             var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/{model.IDHoaDon}/cancel", model);
             return await response.Content.ReadFromJsonAsync<ApiResponse<bool>>() ?? ApiResponse<bool>.Fail("Lỗi không xác định");
         }
-
 
         public async Task<ApiResponse<Dictionary<string, int>>> GetOrderStatisticsAsync()
         {

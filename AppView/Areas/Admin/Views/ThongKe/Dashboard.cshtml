@@ -3,6 +3,26 @@
 @{
     ViewData["Title"] = ViewBag.Title;
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+
+    // Đảm bảo Model không null
+    var safeModel = Model ?? new DashboardOverviewViewModel();
+    var safeRevenue = safeModel.Revenue ?? new RevenueSummaryViewModel();
+    var safeOrders = safeModel.Orders ?? new OrderSummaryViewModel();
+    var safeCustomers = safeModel.Customers ?? new CustomerSummaryViewModel();
+    var safeInventory = safeModel.Inventory ?? new InventorySummaryViewModel();
+    var safeEmployees = safeModel.Employees ?? new EmployeeSummaryViewModel();
+
+    // Đảm bảo có dữ liệu trends cho chart
+    var trends = safeRevenue.Trends?.Any() == true ? safeRevenue.Trends : new List<RevenueTrendViewModel>
+    {
+        new RevenueTrendViewModel { Label = DateTime.Now.AddDays(-6).ToString("dd/MM"), Revenue = 0 },
+        new RevenueTrendViewModel { Label = DateTime.Now.AddDays(-5).ToString("dd/MM"), Revenue = 0 },
+        new RevenueTrendViewModel { Label = DateTime.Now.AddDays(-4).ToString("dd/MM"), Revenue = 0 },
+        new RevenueTrendViewModel { Label = DateTime.Now.AddDays(-3).ToString("dd/MM"), Revenue = 0 },
+        new RevenueTrendViewModel { Label = DateTime.Now.AddDays(-2).ToString("dd/MM"), Revenue = 0 },
+        new RevenueTrendViewModel { Label = DateTime.Now.AddDays(-1).ToString("dd/MM"), Revenue = 0 },
+        new RevenueTrendViewModel { Label = DateTime.Now.ToString("dd/MM"), Revenue = 0 }
+    };
 }
 
 <!DOCTYPE html>
@@ -13,7 +33,8 @@
     <title>@ViewData["Title"]</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" 
+            onerror="this.onerror=null; this.src='https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js';"></script>
     <style>
         :root {
             --primary-color: #3b82f6;
@@ -248,6 +269,15 @@
             transition: width 0.3s ease;
         }
 
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
         @@media (max-width: 768px) {
             .container-fluid
 
@@ -286,6 +316,27 @@
             </div>
         </div>
 
+        <!-- Error Message -->
+        @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+        {
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                @ViewBag.ErrorMessage
+            </div>
+        }
+
+        <!-- Debug Information -->
+        @if (ViewBag.ShowDebugInfo == true)
+        {
+            <div class="alert alert-info">
+                <h6>Debug Information:</h6>
+                <p><strong>Revenue Total:</strong> @safeRevenue.TotalRevenue</p>
+                <p><strong>Orders Total:</strong> @safeOrders.TotalOrders</p>
+                <p><strong>Trends Count:</strong> @(safeRevenue.Trends?.Count ?? 0)</p>
+                <p><strong>API Base URL:</strong> @ViewData["ApiBaseUrl"]</p>
+            </div>
+        }
+
         <!-- Summary Cards -->
         <div class="row g-4">
             <div class="col-xl-3 col-md-6">
@@ -294,13 +345,13 @@
                         <i class="fas fa-dollar-sign"></i>
                     </div>
                     <div class="stats-label">Tổng doanh thu</div>
-                    <div class="stats-number" data-target="@Model.Revenue.TotalRevenue">@Model.Revenue.TotalRevenue.ToString("N0")</div>
-                    <div class="stats-change @(Model.Revenue.RevenueChangePercentage >= 0 ? "positive" : "negative")">
-                        <i class="fas fa-arrow-@(Model.Revenue.RevenueChangePercentage >= 0 ? "up" : "down") me-1"></i>
-                        @Model.Revenue.RevenueChangePercentage.ToString("F1")% so với tháng trước
+                    <div class="stats-number" data-target="@safeRevenue.TotalRevenue">@safeRevenue.TotalRevenue.ToString("N0") VNĐ</div>
+                    <div class="stats-change @(safeRevenue.RevenueChangePercentage >= 0 ? "positive" : "negative")">
+                        <i class="fas fa-arrow-@(safeRevenue.RevenueChangePercentage >= 0 ? "up" : "down") me-1"></i>
+                        @safeRevenue.RevenueChangePercentage.ToString("F1")% so với tháng trước
                     </div>
                     <div class="progress-custom">
-                        <div class="progress-bar-custom" style="width: @(Math.Min(100, (double)Model.Revenue.TotalRevenue / 10000000000 * 100))%"></div>
+                        <div class="progress-bar-custom" style="width: @(Math.Min(100, Math.Max(5, (double)safeRevenue.TotalRevenue / 10000000 * 100)))%"></div>
                     </div>
                 </div>
             </div>
@@ -311,14 +362,14 @@
                         <i class="fas fa-shopping-cart"></i>
                     </div>
                     <div class="stats-label">Tổng đơn hàng</div>
-                    <div class="stats-number" data-target="@Model.Orders.TotalOrders">@Model.Orders.TotalOrders.ToString("N0")</div>
+                    <div class="stats-number" data-target="@safeOrders.TotalOrders">@safeOrders.TotalOrders.ToString("N0")</div>
                     <div class="stats-change positive">
                         <i class="fas fa-chart-line me-1"></i>
-                        Tỷ lệ chuyển đổi: @Model.Orders.ConversionRate.ToString("F1")%
+                        Tỷ lệ chuyển đổi: @safeOrders.ConversionRate.ToString("F1")%
                     </div>
                     <div class="d-flex justify-content-between mt-3">
-                        <span class="text-success"><i class="fas fa-check-circle me-1"></i>@Model.Orders.CompletedOrders hoàn thành</span>
-                        <span class="text-warning"><i class="fas fa-clock me-1"></i>@Model.Orders.PendingOrders đang xử lý</span>
+                        <span class="text-success"><i class="fas fa-check-circle me-1"></i>@safeOrders.CompletedOrders hoàn thành</span>
+                        <span class="text-warning"><i class="fas fa-clock me-1"></i>@safeOrders.PendingOrders đang xử lý</span>
                     </div>
                 </div>
             </div>
@@ -329,14 +380,14 @@
                         <i class="fas fa-users"></i>
                     </div>
                     <div class="stats-label">Khách hàng</div>
-                    <div class="stats-number" data-target="@Model.Customers.NewCustomers">@Model.Customers.NewCustomers.ToString("N0")</div>
+                    <div class="stats-number" data-target="@safeCustomers.NewCustomers">@safeCustomers.NewCustomers.ToString("N0")</div>
                     <div class="stats-change positive">
                         <i class="fas fa-user-plus me-1"></i>
-                        Tỷ lệ giữ chân: @Model.Customers.RetentionRate.ToString("F1")%
+                        Tỷ lệ giữ chân: @safeCustomers.RetentionRate.ToString("F1")%
                     </div>
                     <div class="d-flex justify-content-between mt-3">
-                        <span class="text-info"><i class="fas fa-user-plus me-1"></i>@Model.Customers.NewCustomers mới</span>
-                        <span class="text-primary"><i class="fas fa-redo me-1"></i>@Model.Customers.ReturningCustomers quay lại</span>
+                        <span class="text-info"><i class="fas fa-user-plus me-1"></i>@safeCustomers.NewCustomers mới</span>
+                        <span class="text-primary"><i class="fas fa-redo me-1"></i>@safeCustomers.ReturningCustomers quay lại</span>
                     </div>
                 </div>
             </div>
@@ -347,14 +398,14 @@
                         <i class="fas fa-boxes"></i>
                     </div>
                     <div class="stats-label">Tồn kho</div>
-                    <div class="stats-number" data-target="@Model.Inventory.ActiveProducts">@Model.Inventory.ActiveProducts.ToString("N0")</div>
-                    <div class="stats-change @(Model.Inventory.OutOfStockItems > 0 || Model.Inventory.LowStockItems > 0 ? "negative" : "positive")">
-                        <i class="fas fa-@(Model.Inventory.OutOfStockItems > 0 || Model.Inventory.LowStockItems > 0 ? "exclamation-triangle" : "check-circle") me-1"></i>
-                        @(Model.Inventory.LowStockItems + Model.Inventory.OutOfStockItems) sản phẩm cần chú ý
+                    <div class="stats-number" data-target="@safeInventory.ActiveProducts">@safeInventory.ActiveProducts.ToString("N0")</div>
+                    <div class="stats-change @(safeInventory.OutOfStockItems > 0 || safeInventory.LowStockItems > 0 ? "negative" : "positive")">
+                        <i class="fas fa-@(safeInventory.OutOfStockItems > 0 || safeInventory.LowStockItems > 0 ? "exclamation-triangle" : "check-circle") me-1"></i>
+                        @(safeInventory.LowStockItems + safeInventory.OutOfStockItems) sản phẩm cần chú ý
                     </div>
                     <div class="d-flex justify-content-between mt-3">
-                        <span class="text-danger"><i class="fas fa-times-circle me-1"></i>@Model.Inventory.OutOfStockItems hết hàng</span>
-                        <span class="text-warning"><i class="fas fa-exclamation me-1"></i>@Model.Inventory.LowStockItems sắp hết</span>
+                        <span class="text-danger"><i class="fas fa-times-circle me-1"></i>@safeInventory.OutOfStockItems hết hàng</span>
+                        <span class="text-warning"><i class="fas fa-exclamation me-1"></i>@safeInventory.LowStockItems sắp hết</span>
                     </div>
                 </div>
             </div>
@@ -363,19 +414,19 @@
         <!-- Quick Metrics -->
         <div class="quick-metrics">
             <div class="metric-item">
-                <div class="metric-value">@Model.Revenue.AverageOrderValue.ToString("N0")</div>
+                <div class="metric-value">@safeRevenue.AverageOrderValue.ToString("N0")</div>
                 <div class="metric-label">Giá trị đơn trung bình (VNĐ)</div>
             </div>
             <div class="metric-item">
-                <div class="metric-value">@Model.Orders.ConversionRate.ToString("F1")%</div>
+                <div class="metric-value">@safeOrders.ConversionRate.ToString("F1")%</div>
                 <div class="metric-label">Tỷ lệ chuyển đổi</div>
             </div>
             <div class="metric-item">
-                <div class="metric-value">@(Model.Orders.TotalOrders > 0 ? (Model.Orders.TotalOrders / (decimal)Math.Max(1, Model.Customers.NewCustomers)).ToString("F1") : "0")</div>
+                <div class="metric-value">@(safeOrders.TotalOrders > 0 && safeCustomers.NewCustomers > 0 ? (safeOrders.TotalOrders / (decimal)Math.Max(1, safeCustomers.NewCustomers)).ToString("F1") : "0")</div>
                 <div class="metric-label">Đơn hàng/khách</div>
             </div>
             <div class="metric-item">
-                <div class="metric-value">@((Model.Orders.CompletedOrders * 100.0 / Math.Max(1, Model.Orders.TotalOrders)).ToString("F1"))%</div>
+                <div class="metric-value">@(safeOrders.TotalOrders > 0 ? (safeOrders.CompletedOrders * 100.0 / Math.Max(1, safeOrders.TotalOrders)).ToString("F1") : "0")%</div>
                 <div class="metric-label">Tỷ lệ hoàn thành</div>
             </div>
         </div>
@@ -412,19 +463,35 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Chart.js configuration
-        Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
-        Chart.defaults.color = '#64748b';
+        // Đợi Chart.js load xong
+        function initCharts() {
+            // Kiểm tra Chart object có sẵn không
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js không được load. Vui lòng kiểm tra kết nối mạng.');
+                document.getElementById('revenueChart').innerHTML = '<div class="text-center text-muted">Chart.js không được load</div>';
+                document.getElementById('orderStatusChart').innerHTML = '<div class="text-center text-muted">Chart.js không được load</div>';
+                return;
+            }
 
-        // Revenue Trend Chart - Sử dụng dữ liệu thực từ Model
+            // Chart.js configuration
+            Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+            Chart.defaults.color = '#64748b';
+            Chart.defaults.responsive = true;
+            Chart.defaults.maintainAspectRatio = false;
+
+            // Revenue data - với fallback nếu không có dữ liệu
+            const revenueLabels = [@Html.Raw(string.Join(",", trends.Select(t => $"'{t.Label}'")))];
+            const revenueData = [@string.Join(",", trends.Select(t => t.Revenue))];
+
+        // Revenue Trend Chart
         const revenueCtx = document.getElementById('revenueChart').getContext('2d');
         const revenueChart = new Chart(revenueCtx, {
             type: 'line',
             data: {
-                labels: [@Html.Raw(string.Join(",", Model.Revenue.Trends.Select(t => $"'{t.Label}'")))],
+                labels: revenueLabels.length > 0 ? revenueLabels : ['N/A'],
                 datasets: [{
                     label: 'Doanh thu (VNĐ)',
-                    data: [@string.Join(",", Model.Revenue.Trends.Select(t => t.Revenue))],
+                    data: revenueData.length > 0 ? revenueData : [0],
                     borderColor: '#3b82f6',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     borderWidth: 3,
@@ -446,7 +513,7 @@
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return 'Doanh thu: ' + context.parsed.y.toLocaleString('vi-VN') + ' VNĐ';
+                                return 'Doanh thu: ' + Number(context.parsed.y).toLocaleString('vi-VN') + ' VNĐ';
                             }
                         }
                     }
@@ -459,7 +526,12 @@
                         },
                         ticks: {
                             callback: function(value) {
-                                return (value / 1000000).toFixed(0) + 'M';
+                                if (value >= 1000000) {
+                                    return (value / 1000000).toFixed(0) + 'M';
+                                } else if (value >= 1000) {
+                                    return (value / 1000).toFixed(0) + 'K';
+                                }
+                                return value;
                             }
                         }
                     },
@@ -477,14 +549,17 @@
             }
         });
 
-        // Order Status Chart - Sử dụng dữ liệu thực từ Model
+        // Order Status Chart - với kiểm tra dữ liệu
         const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+        const orderData = [@safeOrders.CompletedOrders, @safeOrders.PendingOrders, @safeOrders.CancelledOrders];
+        const hasOrderData = orderData.some(val => val > 0);
+
         const orderStatusChart = new Chart(orderStatusCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Hoàn thành', 'Đang xử lý', 'Đã hủy'],
                 datasets: [{
-                    data: [@Model.Orders.CompletedOrders, @Model.Orders.PendingOrders, @Model.Orders.CancelledOrders],
+                    data: hasOrderData ? orderData : [1, 0, 0], // Hiển thị dữ liệu mặc định nếu không có data
                     backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
                     borderWidth: 0,
                     cutout: '70%'
@@ -505,10 +580,13 @@
                     tooltip: {
                         callbacks: {
                             label: function(context) {
+                                if (!hasOrderData) {
+                                    return 'Chưa có dữ liệu';
+                                }
                                 const label = context.label || '';
                                 const value = context.parsed;
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((value / total) * 100).toFixed(1);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
                                 return label + ': ' + value + ' (' + percentage + '%)';
                             }
                         }
@@ -517,11 +595,16 @@
             }
         });
 
+        }
+
         // Add number animation
         function animateNumbers() {
             const numbers = document.querySelectorAll('.stats-number[data-target]');
             numbers.forEach(number => {
-                const target = parseInt(number.getAttribute('data-target'));
+                const targetText = number.getAttribute('data-target');
+                const target = parseFloat(targetText.replace(/[^0-9.-]+/g, ""));
+                if (isNaN(target)) return;
+
                 let current = 0;
                 const increment = target / 100;
                 const timer = setInterval(() => {
@@ -530,14 +613,43 @@
                         current = target;
                         clearInterval(timer);
                     }
-                    number.textContent = Math.floor(current).toLocaleString('vi-VN');
+                    // Giữ nguyên format ban đầu
+                    const formatted = Math.floor(current).toLocaleString('vi-VN');
+                    if (targetText.includes('VNĐ')) {
+                        number.textContent = formatted + ' VNĐ';
+                    } else {
+                        number.textContent = formatted;
+                    }
                 }, 20);
             });
         }
 
-        // Initialize animations
+        // Initialize animations khi trang load xong
         document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(animateNumbers, 500);
+            // Kiểm tra các function có tồn tại trước khi gọi
+            if (typeof animateNumbers === 'function') {
+                setTimeout(animateNumbers, 500);
+            }
+            if (typeof initCharts === 'function') {
+                // Khởi tạo charts sau khi Chart.js load xong
+                setTimeout(initCharts, 100);
+            }
+        });
+
+        // Thêm thông báo nếu không có dữ liệu
+        @if (safeRevenue.TotalRevenue == 0 && safeOrders.TotalOrders == 0)
+        {
+                <text>
+                console.warn('Không có dữ liệu thống kê. Vui lòng kiểm tra kết nối API.');
+                </text>
+        }
+
+        // Error handling để tránh lỗi showToast
+        window.addEventListener('error', function(e) {
+            console.error('JavaScript Error:', e.error);
+            if (e.message.includes('showToast')) {
+                console.warn('showToast function not available - this is normal');
+            }
         });
     </script>
 </body>
