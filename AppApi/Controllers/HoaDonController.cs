@@ -1,4 +1,5 @@
 ﻿using AppApi.IService;
+using AppApi.Service;
 using AppData.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 
@@ -156,6 +157,23 @@ namespace AppApi.Controllers
                 return NotFound(new { message = "Chưa có địa chỉ nhận hàng nào cho user này" });
 
             return Ok(diaChiList);
+        }
+        [HttpGet("get-all")]
+        public async Task<IActionResult> GetAllVoucher()
+        {
+            var vouchers = await _hoaDonService.LayTatCaVoucherAsync();
+            return Ok(new
+            {
+                success = true,
+                message = "Danh sách voucher đang hoạt động",
+                data = vouchers
+            });
+        }
+        [HttpGet("get-hinhthucthanhtoan")]
+        public async Task<IActionResult> GetAll()
+        {
+            var data = await _hoaDonService.GetAllAsync();
+            return Ok(data);
         }
     }
 }

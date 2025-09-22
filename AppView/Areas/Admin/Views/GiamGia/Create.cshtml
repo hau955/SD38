@@ -1,50 +1,60 @@
 ﻿@model AppView.Areas.Admin.ViewModels.GiamGiaCreateVM
 
-@{
-    ViewData["Title"] = "Tạo giảm giá";
-}
-
 <h2>Tạo giảm giá</h2>
 
 <form asp-area="Admin" asp-controller="GiamGia" asp-action="Create" method="post">
     <div asp-validation-summary="All" class="text-danger"></div>
 
-    <!-- Tên giảm giá -->
+    <!-- Thông tin giảm giá -->
     <div class="form-group">
         <label asp-for="GiamGia.TenGiamGia"></label>
         <input asp-for="GiamGia.TenGiamGia" class="form-control" />
         <span asp-validation-for="GiamGia.TenGiamGia" class="text-danger"></span>
     </div>
 
-    <!-- Ngày bắt đầu -->
     <div class="form-group">
-        <label asp-for="GiamGia.NgayBatDau"></label>
-        <input asp-for="GiamGia.NgayBatDau" type="date" class="form-control" />
-        <span asp-validation-for="GiamGia.NgayBatDau" class="text-danger"></span>
+        <label asp-for="GiamGia.LoaiGiamGia">Loại giảm giá</label>
+        <select asp-for="GiamGia.LoaiGiamGia" class="form-control">
+            <option value="">-- Chọn loại giảm giá --</option>
+            <option value="PhanTram">Phần trăm</option>
+            <option value="SoTien">Số tiền</option>
+        </select>
     </div>
 
-    <!-- Ngày kết thúc -->
-    <div class="form-group">
-        <label asp-for="GiamGia.NgayKetThuc"></label>
-        <input asp-for="GiamGia.NgayKetThuc" type="date" class="form-control" />
-        <span asp-validation-for="GiamGia.NgayKetThuc" class="text-danger"></span>
-    </div>
-
-    <!-- Giá trị giảm -->
     <div class="form-group">
         <label asp-for="GiamGia.GiaTri"></label>
         <input asp-for="GiamGia.GiaTri" class="form-control" />
-        <span asp-validation-for="GiamGia.GiaTri" class="text-danger"></span>
     </div>
+
     <div class="form-group">
         <label asp-for="GiamGia.GiaTriGiamToiDa"></label>
         <input asp-for="GiamGia.GiaTriGiamToiDa" class="form-control" />
-        <span asp-validation-for="GiamGia.GiaTriGiamToiDa" class="text-danger"></span>
     </div>
-    <!-- Danh mục -->
+
     <div class="form-group">
-        <label>Chọn danh mục</label>
-        <select id="DanhMucId" name="SelectedDanhMucs" class="form-control select2" multiple>
+        <label asp-for="GiamGia.NgayBatDau"></label>
+        <input asp-for="GiamGia.NgayBatDau" type="date" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="GiamGia.NgayKetThuc"></label>
+        <input asp-for="GiamGia.NgayKetThuc" type="date" class="form-control" />
+    </div>
+
+    <hr />
+
+    <!-- Phạm vi áp dụng -->
+    <div class="form-group">
+        <label class="font-weight-bold">Phạm vi áp dụng</label><br />
+        <label><input type="radio" name="scope" value="dm"> Danh mục</label>
+        <label><input type="radio" name="scope" value="sp" checked> Sản phẩm</label>
+        <label><input type="radio" name="scope" value="spct"> Sản phẩm chi tiết</label>
+    </div>
+
+    <!-- Danh mục -->
+    <div class="form-group scope-block" id="block-dm">
+        <label>Danh mục</label>
+        <select asp-for="SelectedDanhMucs" class="form-control" multiple>
             @foreach (var dm in Model.DanhMucs)
             {
                 <option value="@dm.DanhMucId">@dm.TenDanhMuc</option>
@@ -53,9 +63,9 @@
     </div>
 
     <!-- Sản phẩm -->
-    <div class="form-group">
-        <label>Chọn sản phẩm</label>
-        <select id="SanPhamId" name="SelectedSanPhams" class="form-control select2" multiple>
+    <div class="form-group scope-block" id="block-sp">
+        <label>Sản phẩm</label>
+        <select asp-for="SelectedSanPhams" class="form-control" multiple id="SanPhamSelect">
             @foreach (var sp in Model.SanPhams)
             {
                 <option value="@sp.IDSanPham">@sp.TenSanPham</option>
@@ -63,61 +73,87 @@
         </select>
     </div>
 
-    <input type="submit" value="Lưu Test" />
+    <!-- SPCT -->
+    <div class="form-group scope-block" id="block-spct">
+        <label>Sản phẩm chi tiết</label>
+        <select asp-for="SelectedSPCTs" class="form-control" multiple id="SPCTSelect"></select>
+    </div>
+
+    <input type="submit" value="Lưu" class="btn btn-primary" />
 </form>
 
 @section Scripts {
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Select2 -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        $(document).ready(function () {
-            $('.select2').select2();
+        $(function () {
+            const $sp = $('#SanPhamSelect');
+            const $spct = $('#SPCTSelect');
+            const allSPCTs = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SPCTs));
 
-            const $giaTri = $("#GiaTriInput");
-            const $loai = $("#LoaiGiamGia");
+            // Init select2
+            $('select').select2({ width: '100%', allowClear: true });
 
-            // Validate loại giảm giá & giá trị
-            $loai.change(function () {
-                if ($(this).val() === "PhanTram") {
-                    $giaTri.attr({ min: 1, max: 100, placeholder: "Nhập % (1 - 100)" });
-                } else {
-                    $giaTri.attr({ min: 1000, max: 500000, placeholder: "Nhập số tiền (1000 - 500000)" });
-                }
-            }).trigger("change");
-
-            $giaTri.on("input", function () {
-                let val = parseInt($(this).val() || 0);
-                let min = parseInt($(this).attr("min"));
-                let max = parseInt($(this).attr("max"));
-                if (val < min) $(this).val(min);
-                if (val > max) $(this).val(max);
-            });
-                  $(document).ready(function () {
-            $('.select2').select2({
-                allowClear: true,  // Cho phép bỏ chọn
-                placeholder: "Chọn giá trị"
-            });
-
-            const $danhMuc = $("#DanhMucId");
-            const $sanPham = $("#SanPhamId");
-
-            function toggleSelects() {
-                if ($danhMuc.val() && $danhMuc.val().length > 0) {
-                    $sanPham.prop("disabled", true).val(null).trigger("change");
-                } else if ($sanPham.val() && $sanPham.val().length > 0) {
-                    $danhMuc.prop("disabled", true).val(null).trigger("change");
-                } else {
-                    $danhMuc.prop("disabled", false);
-                    $sanPham.prop("disabled", false);
-                }
+            // Fill SPCT theo SP
+            function fillSPCTBySP(spIds) {
+                $spct.empty();
+                allSPCTs
+                    .filter(x => spIds.includes(x.IDSanPham.toString()))
+                    .forEach(x => {
+                        $spct.append(new Option(
+                            `${x.TenSanPham} - Size: ${x.Size ?? ""} / Màu: ${x.MauSac ?? ""} (Giá: ${x.GiaBan})`,
+                            x.IDSanPhamCT
+                        ));
+                    });
+                $spct.trigger('change');
             }
 
-            $danhMuc.on("change", toggleSelects);
-            $sanPham.on("change", toggleSelects);
+            // Fill toàn bộ SPCT
+            function fillAllSPCT() {
+                $spct.empty();
+                allSPCTs.forEach(x => {
+                    $spct.append(new Option(
+                        `${x.TenSanPham} - Size: ${x.Size ?? ""} / Màu: ${x.MauSac ?? ""} (Giá: ${x.GiaBan})`,
+                        x.IDSanPhamCT
+                    ));
+                });
+                $spct.trigger('change');
+            }
+
+            // Chọn phạm vi
+            $('input[name="scope"]').on('change', function () {
+                const val = $(this).val();
+
+                // Ẩn tất cả
+                $(".scope-block").hide();
+                // Clear tất cả select
+                $("#block-dm select").val(null).trigger('change');
+                $("#block-sp select").val(null).trigger('change');
+                $("#block-spct select").val(null).trigger('change');
+
+                if (val === 'dm') {
+                    $("#block-dm").show();
+                }
+                else if (val === 'sp') {
+                    $("#block-sp").show();
+                }
+                else if (val === 'spct') {
+                    $("#block-spct").show();
+                    fillAllSPCT();
+                }
+            });
+
+            // Khi chọn SP → load SPCT (chỉ để hiển thị tham khảo, không gửi nếu scope=sp)
+            $sp.on('change', function () {
+                if ($('input[name="scope"]:checked').val() === 'sp') {
+                    fillSPCTBySP($sp.val() || []);
+                }
+            });
+
+            // Mặc định = sản phẩm
+            $('input[name="scope"][value="sp"]').trigger('change');
         });
     </script>
 }

@@ -60,6 +60,7 @@ builder.Services.AddScoped<IMauSacRepo, MauSacRepo>();
 builder.Services.AddScoped<ISizeRepo, SizeRepo>();
 builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
 builder.Services.AddScoped<IGioHangChiTietService, GioHangChiTietService>();
+builder.Services.AddScoped<IVoucherRepo, VoucherRepo>();
 
 builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
 builder.Services.AddScoped<IGiamGiaRepo, GiamGiaRepo>();

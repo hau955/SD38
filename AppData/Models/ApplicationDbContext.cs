@@ -56,11 +56,12 @@ namespace AppData.Models
                 .WithOne(u => u.GioHang)
                 .HasForeignKey<GioHang>(g => g.IDGioHang)
                 .OnDelete(DeleteBehavior.Cascade);
-            builder.Entity<Voucher>()
-               .HasOne(g => g.HoaDons)
-               .WithOne(u => u.Voucher)
-               .HasForeignKey<Voucher>(g => g.IdVoucher)
-               .OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<HoaDon>()
+               .HasOne(g => g.Vouchers)
+               .WithMany(u => u.HoaDons)
+               .HasForeignKey(hd => hd.IdVoucher);
+
+
 
             builder.Entity<HoaDonTrangThai>()
     .HasOne(x => x.HoaDon)

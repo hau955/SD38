@@ -131,6 +131,7 @@ builder.Services.AddScoped<IMauSacService, MauSacService>();
 builder.Services.AddScoped<ISizeService, SizeService>();
 builder.Services.AddScoped<IChatLieuService, ChatLieuService>();
 builder.Services.AddScoped<IBanHangService, BanHangService>();
+builder.Services.AddScoped<IVoucherService , VoucherService>();
 builder.Services.AddScoped<IGioHangService, GioHangService>();
 builder.Services.AddScoped<IGioHangCTService, GioHangCTService>();
 builder.Services.AddScoped<IHoaDonService, HoaDonService>();
