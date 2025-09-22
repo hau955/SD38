@@ -1,7 +1,21 @@
 ﻿@using Microsoft.AspNetCore.Html
 @{
-    var avatarPath = Context.Session.GetString("HinhAnh") ?? "/admin/assets/img/avatars/1.png";
+    var avatarPath = Context.Session.GetString("HinhAnh");
     var hoten = Context.Session.GetString("HoTen");
+    var defaultAvatar = Url.Content("~/admin/assets/img/avatars/1.png");
+    string displayAvatar;
+    if (string.IsNullOrWhiteSpace(avatarPath))
+    {
+        displayAvatar = defaultAvatar;
+    }
+    else if (avatarPath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+    {
+        displayAvatar = avatarPath;
+    }
+    else
+    {
+        displayAvatar = Url.Content(avatarPath.StartsWith("~/") || avatarPath.StartsWith("/") ? avatarPath : "~/" + avatarPath.TrimStart('/'));
+    }
 }
 <!DOCTYPE html>
 <html lang="vi" class="light-style" dir="ltr" data-theme="theme-default" data-assets-path="/admin/assets/" data-template="vertical-menu-template-free">
@@ -945,12 +959,12 @@
                             </ul>
                         </div>
                         <div class="dropdown user-dropdown">
-                            <img src="@avatarPath" alt="Avatar" class="user-avatar dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" role="button">
+                            <img src="@displayAvatar" alt="Avatar" class="user-avatar dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" role="button">
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li>
                                     <div class="dropdown-item-text">
                                         <div class="d-flex align-items-center">
-                                            <img src="@avatarPath" alt="Avatar" class="rounded-circle me-2" width="32" height="32">
+                                            <img src="@displayAvatar" alt="Avatar" class="rounded-circle me-2" width="32" height="32">
                                             <div>
                                                 <div class="fw-medium">@hoten</div>
                                                 <small class="text-muted">Quản trị viên</small>

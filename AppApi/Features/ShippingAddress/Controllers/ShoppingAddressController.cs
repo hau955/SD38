@@ -24,8 +24,8 @@ namespace AppApi.Features.ShippingAddress.Controllers
         {
             try
             {
-                //var userId = GetCurrentUserId();
-                Guid userId = Guid.Parse("D7636DAD-DA6F-402B-AF3D-08DDCD245669");
+                var userId = GetCurrentUserId();
+                //Guid userId = Guid.Parse("D7636DAD-DA6F-402B-AF3D-08DDCD245669");
 
                 var addresses = await _shippingAddressService.GetByUserIdAsync(userId);
 
@@ -53,8 +53,8 @@ namespace AppApi.Features.ShippingAddress.Controllers
         {
             try
             {
-                //var userId = GetCurrentUserId();
-                Guid userId = Guid.Parse("D7636DAD-DA6F-402B-AF3D-08DDCD245669");
+                var userId = GetCurrentUserId();
+                //Guid userId = Guid.Parse("D7636DAD-DA6F-402B-AF3D-08DDCD245669");
                 var address = await _shippingAddressService.GetByIdAsync(id);
 
                 if (address == null || address.IDUser != userId)
@@ -76,8 +76,8 @@ namespace AppApi.Features.ShippingAddress.Controllers
         {
             try
             {
-                //var userId = GetCurrentUserId();
-                Guid userId = Guid.Parse("D7636DAD-DA6F-402B-AF3D-08DDCD245669");
+                var userId = GetCurrentUserId();
+                //Guid userId = Guid.Parse("D7636DAD-DA6F-402B-AF3D-08DDCD245669");
 
                 var address = await _shippingAddressService.GetDefaultAddressAsync(userId);
 
@@ -105,12 +105,25 @@ namespace AppApi.Features.ShippingAddress.Controllers
                     return BadRequest(ModelState);
                 }
 
-                //var userId = GetCurrentUserId();
-                Guid userId = Guid.Parse("D7636DAD-DA6F-402B-AF3D-08DDCD245669");
+                var userId = GetCurrentUserId();
+                if (userId == Guid.Empty)
+                {
+                    if (dto.IDUser == Guid.Empty)
+                    {
+                        return BadRequest(new { message = "Thiếu userId. Hãy đăng nhập hoặc gửi IDUser trong body." });
+                    }
+                    userId = dto.IDUser;
+                }
+                //Guid userId = Guid.Parse("D7636DAD-DA6F-402B-AF3D-08DDCD245669");
 
-                var result = await _shippingAddressService.CreateAsync(dto.IDUser, dto);
+                // Use determined user id (claim or supplied DTO)
+                var result = await _shippingAddressService.CreateAsync(userId, dto);
 
                 return CreatedAtAction(nameof(GetAddress), new { id = result.Id }, result);
+            }
+            catch (InvalidOperationException invEx)
+            {
+                return BadRequest(new { message = invEx.Message });
             }
             catch (Exception ex)
             {
@@ -129,8 +142,8 @@ namespace AppApi.Features.ShippingAddress.Controllers
                     return BadRequest(ModelState);
                 }
 
-                //var userId = GetCurrentUserId();
-                Guid userId = Guid.Parse("D7636DAD-DA6F-402B-AF3D-08DDCD245669");
+                var userId = GetCurrentUserId();
+                //Guid userId = Guid.Parse("D7636DAD-DA6F-402B-AF3D-08DDCD245669");
 
                 var result = await _shippingAddressService.UpdateAsync(id, userId, dto);
 
@@ -153,8 +166,8 @@ namespace AppApi.Features.ShippingAddress.Controllers
         {
             try
             {
-                //var userId = GetCurrentUserId();
-                Guid userId = Guid.Parse("D7636DAD-DA6F-402B-AF3D-08DDCD245669");
+                var userId = GetCurrentUserId();
+                //Guid userId = Guid.Parse("D7636DAD-DA6F-402B-AF3D-08DDCD245669");
 
                 var result = await _shippingAddressService.DeleteAsync(id, userId);
 
@@ -177,8 +190,8 @@ namespace AppApi.Features.ShippingAddress.Controllers
         {
             try
             {
-                //var userId = GetCurrentUserId();
-                Guid userId = Guid.Parse("D7636DAD-DA6F-402B-AF3D-08DDCD245669");
+                var userId = GetCurrentUserId();
+                //Guid userId = Guid.Parse("D7636DAD-DA6F-402B-AF3D-08DDCD245669");
 
                 var result = await _shippingAddressService.SetDefaultAsync(id, userId);
 
@@ -197,12 +210,17 @@ namespace AppApi.Features.ShippingAddress.Controllers
 
         private Guid GetCurrentUserId()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var userIdFromClaim))
             {
-                throw new UnauthorizedAccessException("Không thể xác định user ID");
+                return userIdFromClaim;
             }
-            return userId;
+            // Try custom header X-User-Id sent from frontend server
+            if (Request.Headers.TryGetValue("X-User-Id", out var hdr) && Guid.TryParse(hdr.ToString(), out var headerGuid))
+            {
+                return headerGuid;
+            }
+            return Guid.Empty;
         }
     }
 }

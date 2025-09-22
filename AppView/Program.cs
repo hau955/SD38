@@ -29,6 +29,7 @@ var apiBaseUrl = isDev
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<UserHeaderHandler>();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 builder.Logging.ClearProviders();
@@ -60,6 +61,15 @@ builder.Services.AddScoped<IMauSacRepo, MauSacRepo>();
 builder.Services.AddScoped<ISizeRepo, SizeRepo>();
 builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
 builder.Services.AddScoped<IGioHangChiTietService, GioHangChiTietService>();
+builder.Services.AddHttpClient<IShippingAddressClient, ShippingAddressClient>(client =>
+{
+	client.BaseAddress = new Uri(apiBaseUrl);
+})
+.AddHttpMessageHandler<UserHeaderHandler>()
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+	ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+});
 
 builder.Services.AddScoped<ISanPhamCTRepo, SanPhamCTRepo>();
 builder.Services.AddScoped<IGiamGiaRepo, GiamGiaRepo>();

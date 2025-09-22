@@ -49,6 +49,15 @@ namespace AppApi.Service
             var result = await _userManager.UpdateAsync(user);
             return result.Succeeded;
         }
+
+        public async Task<bool> ChangePasswordAsync(Guid id, string oldPassword, string newPassword)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user == null) return false;
+
+            var result = await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+            return result.Succeeded;
+        }
        
         public async Task<string?> UploadAvatarAsync(Guid id, IFormFile file)
         {
