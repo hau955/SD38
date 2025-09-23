@@ -38,7 +38,7 @@ namespace AppData.Models
         // 1 sản phẩm có thể có nhiều chi tiết (ví dụ size, màu)
         [JsonIgnore]
         public virtual ICollection<SanPhamCT> SanPhamChiTiets { get; set; } = new List<SanPhamCT>();
-        [JsonIgnore]
+        
         public virtual ICollection<AnhSanPham> AnhSanPhams { get; set; } = new List<AnhSanPham>();
        
        

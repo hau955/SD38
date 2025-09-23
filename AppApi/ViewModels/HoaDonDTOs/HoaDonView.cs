@@ -22,7 +22,7 @@ namespace AppApi.ViewModels.HoaDonDTOs
 
         public decimal TongTienTruocGiam { get; set; }
         public decimal PhiVanChuyen { get; set; }
-
+        public decimal? tienGiamHoaDon { get; set; }
         public decimal TongTienSauGiam { get; set; }
         public decimal? TienGiam { get; set; }
 

@@ -1,0 +1,30 @@
+﻿@model AppView.Areas.Admin.ViewModels.VoucherVM
+
+@{
+    ViewData["Title"] = "Xóa Voucher";
+}
+
+<h2>Xóa Voucher</h2>
+<hr />
+<h4>Bạn có chắc chắn muốn xóa voucher này?</h4>
+
+<div class="card p-3 mb-3">
+    <dl class="row">
+        <dt class="col-sm-3">Mã Voucher</dt>
+        <dd class="col-sm-9">@Model.CodeVoucher</dd>
+
+        <dt class="col-sm-3">Mô tả</dt>
+        <dd class="col-sm-9">@Model.MoTa</dd>
+
+        <dt class="col-sm-3">Ngày bắt đầu</dt>
+        <dd class="col-sm-9">@Model.StartDate.ToShortDateString()</dd>
+
+        <dt class="col-sm-3">Ngày kết thúc</dt>
+        <dd class="col-sm-9">@Model.EndDate.ToShortDateString()</dd>
+    </dl>
+</div>
+
+<form asp-action="Delete" asp-route-id="@Model.IdVoucher" method="post">
+    <button type="submit" class="btn btn-danger">🗑 Xóa</button>
+    <a asp-action="Index" class="btn btn-secondary">⬅ Hủy</a>
+</form>

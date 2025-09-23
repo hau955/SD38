@@ -84,10 +84,16 @@ namespace AppApi.Service
             Console.WriteLine($"[DEBUG] idUser: {idUser}, gioHang.IDGioHang: {gioHang.IDGioHang}");
 
             var list = await _context.GioHangChiTiets
-                .Where(x => x.IDGioHang == gioHang.IDGioHang)
-                .Include(x => x.SanPhamCT)
-                    .ThenInclude(sp => sp.SanPham)
-                .ToListAsync();
+    .Where(x => x.IDGioHang == gioHang.IDGioHang)
+    .Include(x => x.SanPhamCT)
+        .ThenInclude(spct => spct.SanPham)
+            .ThenInclude(sp => sp.AnhSanPhams)   // cần dòng này
+    .Include(x => x.SanPhamCT.SizeAo)
+    .Include(x => x.SanPhamCT.MauSac)
+    .Include(x => x.SanPhamCT.ChatLieu)
+    .ToListAsync();
+
+
 
             Console.WriteLine($"[DEBUG] SoLuong chi tiet: {list.Count}");
             foreach (var item in list)

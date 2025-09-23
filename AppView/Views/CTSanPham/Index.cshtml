@@ -6,196 +6,19 @@
 
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar Filter -->
-        <div class="col-md-3">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-filter me-2"></i>Bộ lọc tìm kiếm
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <form asp-action="Index" method="get" id="filterForm">
-                        <!-- Tìm kiếm theo tên -->
-                        <div class="mb-3">
-                            <label for="ten" class="form-label">
-                                <i class="fas fa-search me-1"></i>Tên sản phẩm
-                            </label>
-                            <div class="position-relative">
-                                <input type="text"
-                                       id="ten"
-                                       name="ten"
-                                       value="@ViewBag.Ten"
-                                       class="form-control"
-                                       placeholder="Nhập tên sản phẩm..."
-                                       autocomplete="off" />
-                                <div id="searchSuggestions" class="position-absolute bg-white border shadow-sm w-100" style="z-index: 1000; display: none;"></div>
-                            </div>
-                        </div>
-
-                        <!-- Danh mục - FIXED VERSION -->
-                        <div class="mb-3">
-                            <label for="danhMucId" class="form-label">
-                                <i class="fas fa-tags me-1"></i>Danh mục
-                            </label>
-                            <select id="danhMucId" name="danhMucId" class="form-select">
-                                <option value="">Tất cả danh mục</option>
-                                @if (ViewBag.DanhMucs != null)
-                                {
-                                    @foreach (var dm in (IEnumerable<dynamic>)ViewBag.DanhMucs)
-                                    {
-                                        var isSelected = ViewBag.DanhMucId?.ToString() == dm.DanhMucId.ToString();
-                                        <option value="@dm.DanhMucId" selected="@isSelected">
-                                            @dm.TenDanhMuc
-                                        </option>
-                                    }
-                                }
-                            </select>
-                        </div>
-
-                        <!-- Khoảng giá -->
-                        <div class="mb-3">
-                            <label class="form-label">
-                                <i class="fas fa-dollar-sign me-1"></i>Khoảng giá
-                            </label>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <input type="number"
-                                           id="giaMin"
-                                           name="giaMin"
-                                           value="@ViewBag.GiaMin"
-                                           class="form-control form-control-sm"
-                                           placeholder="Từ"
-                                           min="0" />
-                                </div>
-                                <div class="col-6">
-                                    <input type="number"
-                                           id="giaMax"
-                                           name="giaMax"
-                                           value="@ViewBag.GiaMax"
-                                           class="form-control form-control-sm"
-                                           placeholder="Đến"
-                                           min="0" />
-                                </div>
-                            </div>
-                            @if (ViewBag.GiaRange != null)
-                            {
-                                <small class="text-muted">
-                                    Giá từ @(((dynamic)ViewBag.GiaRange).GiaMin.ToString("N0")) - @(((dynamic)ViewBag.GiaRange).GiaMax.ToString("N0")) đ
-                                </small>
-                            }
-                        </div>
-
-                        <!-- Màu sắc - FIXED VERSION -->
-                        <div class="mb-3">
-                            <label for="mauSac" class="form-label">
-                                <i class="fas fa-palette me-1"></i>Màu sắc
-                            </label>
-                            <select id="mauSac" name="mauSac" class="form-select">
-                                <option value="">Tất cả màu</option>
-                                @if (ViewBag.MauSacs != null)
-                                {
-                                    @foreach (var ms in (IEnumerable<dynamic>)ViewBag.MauSacs)
-                                    {
-                                        var isSelected = ViewBag.MauSac?.ToString() == ms.TenMau?.ToString();
-                                        <option value="@ms.TenMau" selected="@isSelected">
-                                            @ms.TenMau
-                                        </option>
-                                    }
-                                }
-                            </select>
-                        </div>
-
-                        <!-- Size - FIXED VERSION -->
-                        <div class="mb-3">
-                            <label for="size" class="form-label">
-                                <i class="fas fa-ruler me-1"></i>Kích cỡ
-                            </label>
-                            <select id="size" name="size" class="form-select">
-                                <option value="">Tất cả size</option>
-                                @if (ViewBag.Sizes != null)
-                                {
-                                    @foreach (var s in (IEnumerable<dynamic>)ViewBag.Sizes)
-                                    {
-                                        var isSelected = ViewBag.Size?.ToString() == s.SoSize?.ToString();
-                                        <option value="@s.SoSize" selected="@isSelected">
-                                            @s.SoSize
-                                        </option>
-                                    }
-                                }
-                            </select>
-                        </div>
-
-                        <!-- Chất liệu - FIXED VERSION -->
-                        <div class="mb-3">
-                            <label for="chatLieu" class="form-label">
-                                <i class="fas fa-fabric me-1"></i>Chất liệu
-                            </label>
-                            <select id="chatLieu" name="chatLieu" class="form-select">
-                                <option value="">Tất cả chất liệu</option>
-                                @if (ViewBag.ChatLieus != null)
-                                {
-                                    @foreach (var cl in (IEnumerable<dynamic>)ViewBag.ChatLieus)
-                                    {
-                                        var isSelected = ViewBag.ChatLieu?.ToString() == cl.TenChatLieu?.ToString();
-                                        <option value="@cl.TenChatLieu" selected="@isSelected">
-                                            @cl.TenChatLieu
-                                        </option>
-                                    }
-                                }
-                            </select>
-                        </div>
-
-                        <!-- Sắp xếp - FIXED VERSION -->
-                        <div class="mb-3">
-                            <label for="sapXep" class="form-label">
-                                <i class="fas fa-sort me-1"></i>Sắp xếp
-                            </label>
-                            <select id="sapXep" name="sapXep" class="form-select">
-                                @{
-                                    var sortOptions = new Dictionary<string, string>
-                                {
-                                {"ten_az", "Tên A-Z"},
-                                {"ten_za", "Tên Z-A"},
-                                {"gia_tang", "Giá tăng dần"},
-                                {"gia_giam", "Giá giảm dần"},
-                                {"moi_nhat", "Mới nhất"}
-                                };
-                                }
-                                @foreach (var option in sortOptions)
-                                {
-                                    var isSelected = ViewBag.SapXep?.ToString() == option.Key;
-                                    <option value="@option.Key" selected="@isSelected">@option.Value</option>
-                                }
-                            </select>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-search me-2"></i>Tìm kiếm
-                            </button>
-                            <button type="button" id="clearFilter" class="btn btn-outline-secondary">
-                                <i class="fas fa-eraser me-2"></i>Xóa bộ lọc
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
         <!-- Main Content -->
-        <div class="col-md-9">
+        <div class="col-12">
             <!-- Header với số kết quả -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2>
                     <i class="fas fa-tshirt me-2"></i>Danh sách sản phẩm
-                    @if (searchResult != null && searchResult.TotalCount > 0)
+                   @*  @if (searchResult != null && searchResult.TotalCount > 0)
                     {
                         <span class="badge bg-primary ms-2">@searchResult.TotalCount sản phẩm</span>
-                    }
+                    } *@
                 </h2>
 
-                @if (searchResult != null)
+                @* @if (searchResult != null)
                 {
                     <div class="d-flex align-items-center">
                         <span class="text-muted me-3">
@@ -204,7 +27,7 @@
                             trong @searchResult.TotalCount kết quả
                         </span>
                     </div>
-                }
+                } *@
             </div>
 
             <!-- Thông báo lỗi -->
@@ -227,21 +50,6 @@
 
                         <div class="col-lg-4 col-md-6">
                             <div class="card h-100 shadow-sm border-0 product-card">
-                                <!-- Badge giảm giá -->
-                               @*  @if (sp.GiaTriGiam.HasValue && sp.GiaTriGiam.Value > 0)
-                                {
-                                    <div class="position-absolute top-0 start-0 m-2 z-index-1">
-                                        @if (sp.LoaiGiamGia == "PhanTram")
-                                        {
-                                            <span class="badge bg-danger">-@((sp.GiaTriGiam.Value / sp.GiaGoc * 100):F0)%</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-danger">-@sp.GiaTriGiam.Value.ToString("N0")đ</span>
-                                        }
-                                    </div>
-                                } *@
-
                                 <!-- Hình ảnh -->
                                 <div class="card-img-container position-relative overflow-hidden" style="height: 250px;">
                                     <img src="@($"{baseUrl}{anh}")"
@@ -330,17 +138,7 @@
                             }
                             <li class="page-item @prevDisabled">
                                 <a class="page-link"
-                                   href="@Url.Action("Index", new {
-                                       ten = ViewBag.Ten,
-                                       danhMucId = ViewBag.DanhMucId,
-                                       giaMin = ViewBag.GiaMin,
-                                       giaMax = ViewBag.GiaMax,
-                                       mauSac = ViewBag.MauSac,
-                                       size = ViewBag.Size,
-                                       chatLieu = ViewBag.ChatLieu,
-                                       sapXep = ViewBag.SapXep,
-                                       page = searchResult.CurrentPage - 1
-                                   })">
+                                   href="@Url.Action("Index", new { page = searchResult.CurrentPage - 1 })">
                                     <i class="fas fa-chevron-left"></i> Trước
                                 </a>
                             </li>
@@ -356,17 +154,7 @@
                                 var pageActive = i == searchResult.CurrentPage ? "active" : "";
                                 <li class="page-item @pageActive">
                                     <a class="page-link"
-                                       href="@Url.Action("Index", new {
-                                           ten = ViewBag.Ten,
-                                           danhMucId = ViewBag.DanhMucId,
-                                           giaMin = ViewBag.GiaMin,
-                                           giaMax = ViewBag.GiaMax,
-                                           mauSac = ViewBag.MauSac,
-                                           size = ViewBag.Size,
-                                           chatLieu = ViewBag.ChatLieu,
-                                           sapXep = ViewBag.SapXep,
-                                           page = i
-                                       })">@i</a>
+                                       href="@Url.Action("Index", new { page = i })">@i</a>
                                 </li>
                             }
 
@@ -376,17 +164,7 @@
                             }
                             <li class="page-item @nextDisabled">
                                 <a class="page-link"
-                                   href="@Url.Action("Index", new {
-                                       ten = ViewBag.Ten,
-                                       danhMucId = ViewBag.DanhMucId,
-                                       giaMin = ViewBag.GiaMin,
-                                       giaMax = ViewBag.GiaMax,
-                                       mauSac = ViewBag.MauSac,
-                                       size = ViewBag.Size,
-                                       chatLieu = ViewBag.ChatLieu,
-                                       sapXep = ViewBag.SapXep,
-                                       page = searchResult.CurrentPage + 1
-                                   })">
+                                   href="@Url.Action("Index", new { page = searchResult.CurrentPage + 1 })">
                                     Sau <i class="fas fa-chevron-right"></i>
                                 </a>
                             </li>
@@ -400,15 +178,13 @@
                 <div class="text-center py-5">
                     <i class="fas fa-search fa-3x text-muted mb-3"></i>
                     <h4 class="text-muted">Không tìm thấy sản phẩm nào</h4>
-                    <p class="text-muted">Vui lòng thử lại với từ khóa khác hoặc điều chỉnh bộ lọc</p>
-                    <button type="button" id="clearAllFilter" class="btn btn-primary">
-                        <i class="fas fa-refresh me-2"></i>Xem tất cả sản phẩm
-                    </button>
+                    <p class="text-muted">Vui lòng thử lại sau</p>
                 </div>
             }
         </div>
     </div>
 </div>
+
 
 <!-- CSS -->
 <style>

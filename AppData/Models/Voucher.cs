@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace AppData.Models
 {
@@ -24,6 +25,8 @@ namespace AppData.Models
 
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public virtual HoaDon? HoaDons { get; set; }
+        [JsonIgnore]
+        
+        public virtual ICollection<HoaDon>? HoaDons { get; set; } = new List<HoaDon>();
     }
 }
