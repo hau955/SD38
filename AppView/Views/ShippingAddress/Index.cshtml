@@ -1,0 +1,176 @@
+@model List<AppView.Clients.ApiClients.ShippingAddressListVm>
+@{
+	ViewData["Title"] = "Địa chỉ giao hàng";
+}
+
+<div class="container my-4">
+	<div class="d-flex justify-content-between align-items-center mb-3">
+		<h4 class="mb-0">Địa chỉ giao hàng</h4>
+		<button class="btn btn-primary" id="btnAddAddress">Thêm địa chỉ</button>
+	</div>
+
+	<div id="addressList">
+		@foreach (var item in Model)
+		{
+			<div class="card mb-2" data-id="@item.Id">
+				<div class="card-body d-flex justify-content-between align-items-center">
+					<div>
+						<div class="fw-bold">@item.HoTenNguoiNhan - @item.SoDienThoai</div>
+						<div>@item.DiaChiChiTiet</div>
+						@if (item.IsDefault)
+						{
+							<span class="badge bg-success">Mặc định</span>
+						}
+					</div>
+					<div class="btn-group">
+						<button class="btn btn-outline-secondary btn-sm js-edit" data-id="@item.Id">Sửa</button>
+						<button class="btn btn-outline-danger btn-sm js-delete" data-id="@item.Id">Xóa</button>
+						@if (!item.IsDefault)
+						{
+							<button class="btn btn-outline-primary btn-sm js-set-default" data-id="@item.Id">Đặt mặc định</button>
+						}
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+</div>
+
+<div id="addressModalContainer"></div>
+<form id="afTokenHolder" style="display:none">@Html.AntiForgeryToken()</form>
+
+@section Scripts {
+<script>
+    const modalContainer = document.getElementById('addressModalContainer');
+
+    function renderForm(data) {
+        const isEdit = !!data;
+        const tokenInput = document.querySelector('input[name=__RequestVerificationToken]');
+        const tokenHtml = tokenInput ? tokenInput.outerHTML : '';
+        return `
+<div class="modal fade show" id="addressModal" tabindex="-1" style="display:block;background:rgba(0,0,0,.5)">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">${isEdit ? 'Sửa địa chỉ' : 'Thêm địa chỉ'}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeModal()"></button>
+      </div>
+      <form id="addressForm">
+      ${tokenHtml}
+      <div class="modal-body">
+        <div class="row g-2">
+          <div class="col-12">
+            <label class="form-label">Họ tên người nhận</label>
+            <input class="form-control" name="HoTenNguoiNhan" value="${data?.hoTenNguoiNhan||''}" required />
+          </div>
+          <div class="col-12">
+            <label class="form-label">Số điện thoại</label>
+            <input class="form-control" name="SoDienThoai" value="${data?.soDienThoai||''}" required />
+          </div>
+          <div class="col-12">
+            <label class="form-label">Số nhà</label>
+            <input class="form-control" name="SoNha" value="${data?.soNha||''}" required />
+          </div>
+          <div class="col-6">
+            <label class="form-label">Phường/Xã</label>
+            <input class="form-control" name="PhuongXa" value="${data?.phuongXa||''}" required />
+          </div>
+          <div class="col-6">
+            <label class="form-label">Quận/Huyện</label>
+            <input class="form-control" name="QuanHuyen" value="${data?.quanHuyen||''}" required />
+          </div>
+          <div class="col-12">
+            <label class="form-label">Tỉnh/Thành</label>
+            <input class="form-control" name="TinhThanh" value="${data?.tinhThanh||''}" required />
+          </div>
+          <div class="col-12">
+            <label class="form-label">Địa điểm gần (tuỳ chọn)</label>
+            <input class="form-control" name="DiaDiemGan" value="${data?.diaDiemGan||''}" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Đóng</button>
+        <button type="submit" class="btn btn-primary">Lưu</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>`;
+    }
+
+    function closeModal() {
+        modalContainer.innerHTML = '';
+    }
+
+    document.getElementById('btnAddAddress').addEventListener('click', () => {
+        modalContainer.innerHTML = renderForm(null);
+        bindForm(null);
+    });
+
+    function bindForm(id) {
+        const form = document.getElementById('addressForm');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            // If API lacks auth claim, provide IDUser from current page (if available)
+            const userIdMeta = document.querySelector('meta[name="current-user-id"]')?.getAttribute('content');
+            if (userIdMeta) {
+                formData.append('IDUser', userIdMeta);
+            }
+
+            const url = id ? `/ShippingAddress/Update/${id}` : '/ShippingAddress/Create';
+            const token = document.querySelector('input[name=__RequestVerificationToken]')?.value || '';
+            const res = await fetch(url, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'RequestVerificationToken': token
+                }
+            });
+            if (res.ok) {
+                location.reload();
+            } else {
+                const text = await res.text();
+                alert('Tạo địa chỉ thất bại: ' + text);
+            }
+        });
+    }
+
+    document.querySelectorAll('.js-edit').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const id = btn.dataset.id;
+            const res = await fetch(`/ShippingAddress/Get/${id}`);
+            if (!res.ok) return;
+            const data = await res.json();
+            modalContainer.innerHTML = renderForm(data);
+            bindForm(id);
+        });
+    });
+
+    document.querySelectorAll('.js-delete').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            if (!confirm('Xóa địa chỉ này?')) return;
+            const id = btn.dataset.id;
+            const formData = new FormData();
+            formData.append('__RequestVerificationToken', document.querySelector('input[name=__RequestVerificationToken]')?.value || '');
+            const res = await fetch(`/ShippingAddress/Delete/${id}`, { method: 'POST', body: formData });
+            if (res.ok) location.reload();
+        });
+    });
+
+    document.querySelectorAll('.js-set-default').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const id = btn.dataset.id;
+            const formData = new FormData();
+            formData.append('__RequestVerificationToken', document.querySelector('input[name=__RequestVerificationToken]')?.value || '');
+            const res = await fetch(`/ShippingAddress/SetDefault/${id}`, { method: 'POST', body: formData });
+            if (res.ok) location.reload();
+        });
+    });
+</script>
+}
+
+

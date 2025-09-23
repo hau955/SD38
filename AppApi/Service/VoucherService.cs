@@ -43,12 +43,13 @@ namespace AppApi.Service
             if (voucher.SoTienGiam.HasValue && voucher.SoTienGiam < 0)
                 return (false, "Số tiền giảm không hợp lệ", null);
 
-           
-
             // ✅ Validate số lượng và điều kiện
             if (voucher.SoLuong < 0) return (false, "Số lượng không hợp lệ", null);
-            if (voucher.SoLanSuDungToiDa < 0) return (false, "Số lần sử dụng không hợp lệ", null);
             if (voucher.DieuKienToiThieu < 0) return (false, "Điều kiện tối thiểu không hợp lệ", null);
+
+            // ✅ Gán mặc định nếu chưa set số lần sử dụng tối đa
+            if (voucher.SoLanSuDungToiDa <= 0)
+                voucher.SoLanSuDungToiDa = 1;
 
             // ✅ Tạo mới
             voucher.IdVoucher = Guid.NewGuid();
@@ -68,25 +69,29 @@ namespace AppApi.Service
             if (await _context.Vouchers.AnyAsync(x => x.CodeVoucher == voucher.CodeVoucher && x.IdVoucher != id))
                 return (false, "Mã voucher đã tồn tại", null);
 
+            // ✅ Validate ngày
             if (voucher.StartDate >= voucher.EndDate)
                 return (false, "Ngày bắt đầu phải nhỏ hơn ngày kết thúc", null);
 
             if (voucher.EndDate < DateTime.Now)
                 return (false, "Ngày kết thúc không được nhỏ hơn ngày hiện tại", null);
 
+            // ✅ Validate giảm giá
             if (voucher.PhanTram.HasValue && voucher.PhanTram > 100)
                 return (false, "Phần trăm giảm không được lớn hơn 100%", null);
 
             if (voucher.SoTienGiam.HasValue && voucher.SoTienGiam < 0)
                 return (false, "Số tiền giảm không hợp lệ", null);
 
-            
-
+            // ✅ Validate số lượng và điều kiện
             if (voucher.SoLuong < 0) return (false, "Số lượng không hợp lệ", null);
-            if (voucher.SoLanSuDungToiDa < 0) return (false, "Số lần sử dụng không hợp lệ", null);
             if (voucher.DieuKienToiThieu < 0) return (false, "Điều kiện tối thiểu không hợp lệ", null);
 
-            // Cập nhật
+            // ✅ Gán mặc định nếu chưa set số lần sử dụng tối đa
+            if (voucher.SoLanSuDungToiDa <= 0)
+                voucher.SoLanSuDungToiDa = 1;
+
+            // ✅ Cập nhật
             existing.CodeVoucher = voucher.CodeVoucher;
             existing.MoTa = voucher.MoTa;
             existing.PhanTram = voucher.PhanTram;

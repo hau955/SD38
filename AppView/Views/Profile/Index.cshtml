@@ -1,0 +1,52 @@
+@model AppApi.ViewModels.Profile.ProfileViewModel
+@{
+	ViewData["Title"] = "Hồ sơ cá nhân";
+}
+
+<div class="container my-4">
+	<h4>Hồ sơ cá nhân</h4>
+	<form asp-action="Update" method="post" enctype="multipart/form-data">
+		@Html.AntiForgeryToken()
+		<div class="row g-3">
+			<div class="col-md-3">
+				<img src="@Model.HinhAnh" alt="avatar" class="img-thumbnail mb-2" onerror="this.src='/images/default-avatar.png'" />
+				<input type="file" name="avatar" class="form-control" />
+			</div>
+			<div class="col-md-9">
+				<div class="row g-3">
+					<div class="col-md-6">
+						<label class="form-label">Họ tên</label>
+						<input class="form-control" name="HoTen" value="@Model.HoTen" />
+					</div>
+					<div class="col-md-6">
+						<label class="form-label">Số điện thoại</label>
+						<input class="form-control" name="PhoneNumber" value="@Model.PhoneNumber" />
+					</div>
+					<div class="col-md-6">
+						<label class="form-label">Ngày sinh</label>
+						<input type="date" class="form-control" name="NgaySinh" value="@Model.NgaySinh?.ToString("yyyy-MM-dd")" />
+					</div>
+					<div class="col-md-6">
+						<label class="form-label">Giới tính</label>
+						<select class="form-select" name="GioiTinh">
+							<option value="">-- Chọn --</option>
+							<option value="true" selected="@(Model.GioiTinh == true ? "selected" : null)">Nam</option>
+							<option value="false" selected="@(Model.GioiTinh == false ? "selected" : null)">Nữ</option>
+
+						</select>
+					</div>
+					<div class="col-12">
+						<label class="form-label">Địa chỉ</label>
+						<input class="form-control" name="DiaChi" value="@Model.DiaChi" />
+					</div>
+				</div>
+				<div class="mt-3 d-flex gap-2">
+					<button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+					<a class="btn btn-outline-secondary" asp-action="ChangePassword">Đổi mật khẩu</a>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>
+
+

@@ -46,5 +46,23 @@ namespace AppApi.Controllers
                 imageUrl = result
             });
         }
+
+        public class ChangePasswordDto
+        {
+            public string OldPassword { get; set; } = string.Empty;
+            public string NewPassword { get; set; } = string.Empty;
+        }
+
+        [HttpPost("{id}/change-password")]
+        public async Task<IActionResult> ChangePassword(Guid id, [FromBody] ChangePasswordDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.OldPassword) || string.IsNullOrWhiteSpace(dto.NewPassword))
+                return BadRequest("Mật khẩu không hợp lệ");
+
+            var success = await _profileService.ChangePasswordAsync(id, dto.OldPassword, dto.NewPassword);
+            if (!success) return BadRequest("Đổi mật khẩu thất bại");
+
+            return Ok("Đổi mật khẩu thành công");
+        }
     }
 }

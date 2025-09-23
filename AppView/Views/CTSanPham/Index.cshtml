@@ -1,56 +1,309 @@
-﻿@model List<AppApi.ViewModels.SanPham.SanPhamView>
-
-<h2 class="mb-4">Danh sách sản phẩm</h2>
+﻿@model List<AppApi.ViewModels.SanPham.SanPhamDetailWithDiscountView>
 @{
-    var baseUrl = "https://localhost:7221/"; // 👈 đổi thành URL API của bạn
+    var baseUrl = "https://localhost:7221/";
+    var searchResult = ViewBag.SearchResult as AppApi.ViewModels.SanPham.SanPhamSearchResponse;
 }
-<div class="row">
-    @foreach (var sp in Model)
-    {
-        var anh = sp.DanhSachAnh?.FirstOrDefault(a => a.AnhChinh == true)?.DuongDanAnh;
-        var chiTiet = sp.ChiTiets?.FirstOrDefault();
-        var giaGoc = chiTiet?.GiaBan ?? 0;
-        var giaSauGiam = chiTiet?.GiaSauGiam ?? giaGoc;
 
-        <div class="col-md-3 mb-4">
-            <div class="card h-100 shadow-sm border-0">
-
-                <!-- Ảnh sản phẩm căn giữa -->
-                <div class="d-flex align-items-center justify-content-center"
-                     style="height:230px; background:#f8f9fa;">
-                    <img src="@($"{baseUrl}{anh}")"
-                         alt="@sp.TenSanPham"
-                         style="max-height:100%; max-width:100%; object-fit:contain;" />
-                </div>
-
-                <!-- Nội dung -->
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title text-truncate" title="@sp.TenSanPham">@sp.TenSanPham</h5>
-                    <p class="text-muted mb-2">@sp.TenDanhMuc</p>
-
-                    @if (giaSauGiam < giaGoc)
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-12">
+            <!-- Header với số kết quả -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="fas fa-tshirt me-2"></i>Danh sách sản phẩm
+                   @*  @if (searchResult != null && searchResult.TotalCount > 0)
                     {
-                        <p class="mb-2">
-                            <span class="text-muted text-decoration-line-through">
-                                @giaGoc.ToString("N0") đ
-                            </span>
-                            <span class="text-danger fw-bold ms-2">
-                                @giaSauGiam.ToString("N0") đ
-                            </span>
-                        </p>
-                    }
-                    else
-                    {
-                        <p class="fw-bold mb-2">@giaGoc.ToString("N0") đ</p>
-                    }
+                        <span class="badge bg-primary ms-2">@searchResult.TotalCount sản phẩm</span>
+                    } *@
+                </h2>
 
-                    <div class="mt-auto">
-                        <a asp-action="Details" asp-route-id="@sp.IDSanPham"
-                           class="btn btn-primary btn-sm w-100">Xem chi tiết</a>
+                @* @if (searchResult != null)
+                {
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted me-3">
+                            Hiển thị @(((searchResult.CurrentPage - 1) * searchResult.PageSize) + 1)
+                            - @Math.Min(searchResult.CurrentPage * searchResult.PageSize, searchResult.TotalCount)
+                            trong @searchResult.TotalCount kết quả
+                        </span>
                     </div>
+                } *@
+            </div>
+
+            <!-- Thông báo lỗi -->
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Hiển thị sản phẩm -->
+            @if (Model != null && Model.Any())
+            {
+                <div class="row g-4">
+                    @foreach (var sp in Model)
+                    {
+                        var anh = sp.DanhSachAnh?.FirstOrDefault(a => a.AnhChinh == true)?.DuongDanAnh ??
+                        sp.DanhSachAnh?.FirstOrDefault()?.DuongDanAnh ?? "images/no-image.jpg";
+
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card h-100 shadow-sm border-0 product-card">
+                                <!-- Hình ảnh -->
+                                <div class="card-img-container position-relative overflow-hidden" style="height: 250px;">
+                                    <img src="@($"{baseUrl}{anh}")"
+                                         alt="@sp.TenSanPham"
+                                         class="card-img-top h-100 w-100 object-fit-cover product-image"
+                                         style="transition: transform 0.3s ease;" />
+
+                                    <!-- Quick view overlay -->
+                                    <div class="product-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                                        <a asp-action="Details" asp-route-id="@sp.IDSanPham" class="btn btn-light btn-sm">
+                                            <i class="fas fa-eye me-1"></i>Xem chi tiết
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title text-truncate mb-2" title="@sp.TenSanPham">
+                                        @sp.TenSanPham
+                                    </h5>
+
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-tag me-1"></i>@sp.TenDanhMuc
+                                    </p>
+
+                                    <!-- Giá -->
+                                    <div class="mb-3">
+                                        @if (sp.GiaSauGiam < sp.GiaGoc)
+                                        {
+                                            <div class="d-flex align-items-center">
+                                                <span class="text-muted text-decoration-line-through me-2">
+                                                    @sp.GiaGoc.ToString("N0")đ
+                                                </span>
+                                                <span class="text-danger fw-bold fs-5">
+                                                    @sp.GiaSauGiam.ToString("N0")đ
+                                                </span>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(sp.TenGiamGia))
+                                            {
+                                                <small class="text-success">
+                                                    <i class="fas fa-gift me-1"></i>@sp.TenGiamGia
+                                                </small>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="fw-bold fs-5 text-primary">@sp.GiaGoc.ToString("N0")đ</span>
+                                        }
+                                    </div>
+
+                                    <!-- Thông tin thêm -->
+                                    <div class="mt-auto">
+                                        @if (sp.ChiTiets?.Any() == true)
+                                        {
+                                            <div class="mb-2">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-palette me-1"></i>
+                                                    @string.Join(", ", sp.ChiTiets.Select(ct => ct.MauSac).Where(m => !string.IsNullOrEmpty(m)).Distinct().Take(3))
+                                                </small>
+                                            </div>
+                                            <div class="mb-2">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-ruler me-1"></i>
+                                                    @string.Join(", ", sp.ChiTiets.Select(ct => ct.Size).Where(s => !string.IsNullOrEmpty(s)).Distinct().Take(5))
+                                                </small>
+                                            </div>
+                                        }
+
+                                        <a asp-action="Details" asp-route-id="@sp.IDSanPham" class="btn btn-primary w-100">
+                                            <i class="fas fa-shopping-cart me-2"></i>Xem chi tiết
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 </div>
 
-            </div>
+                <!-- Phân trang -->
+                @if (searchResult != null && searchResult.TotalPages > 1)
+                {
+                    <nav aria-label="Phân trang sản phẩm" class="mt-5">
+                        <ul class="pagination justify-content-center">
+                            <!-- Previous -->
+                            @{
+                                var prevDisabled = !searchResult.HasPreviousPage ? "disabled" : "";
+                            }
+                            <li class="page-item @prevDisabled">
+                                <a class="page-link"
+                                   href="@Url.Action("Index", new { page = searchResult.CurrentPage - 1 })">
+                                    <i class="fas fa-chevron-left"></i> Trước
+                                </a>
+                            </li>
+
+                            <!-- Page numbers -->
+                            @{
+                                var startPage = Math.Max(1, searchResult.CurrentPage - 2);
+                                var endPage = Math.Min(searchResult.TotalPages, searchResult.CurrentPage + 2);
+                            }
+
+                            @for (int i = startPage; i <= endPage; i++)
+                            {
+                                var pageActive = i == searchResult.CurrentPage ? "active" : "";
+                                <li class="page-item @pageActive">
+                                    <a class="page-link"
+                                       href="@Url.Action("Index", new { page = i })">@i</a>
+                                </li>
+                            }
+
+                            <!-- Next -->
+                            @{
+                                var nextDisabled = !searchResult.HasNextPage ? "disabled" : "";
+                            }
+                            <li class="page-item @nextDisabled">
+                                <a class="page-link"
+                                   href="@Url.Action("Index", new { page = searchResult.CurrentPage + 1 })">
+                                    Sau <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <!-- Không có sản phẩm -->
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">Không tìm thấy sản phẩm nào</h4>
+                    <p class="text-muted">Vui lòng thử lại sau</p>
+                </div>
+            }
         </div>
-    }
+    </div>
 </div>
+
+
+<!-- CSS -->
+<style>
+    .product-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+    .product-image {
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.05);
+    }
+
+    .product-overlay {
+        background: rgba(0,0,0,0.7);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .product-card:hover .product-overlay {
+        opacity: 1;
+    }
+
+    .card-img-container {
+        overflow: hidden;
+    }
+
+    .z-index-1 {
+        z-index: 1;
+    }
+
+    #searchSuggestions {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+        #searchSuggestions .suggestion-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+
+            #searchSuggestions .suggestion-item:hover {
+                background-color: #f8f9fa;
+            }
+</style>
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-submit form khi thay đổi select
+        const selects = document.querySelectorAll('#filterForm select');
+        selects.forEach(select => {
+            select.addEventListener('change', function() {
+                document.getElementById('filterForm').submit();
+            });
+        });
+
+        // Clear filter
+        document.getElementById('clearFilter').addEventListener('click', function() {
+            window.location.href = '@Url.Action("Index")';
+        });
+
+        document.getElementById('clearAllFilter')?.addEventListener('click', function() {
+            window.location.href = '@Url.Action("Index")';
+        });
+
+        // Search suggestions
+        const searchInput = document.getElementById('ten');
+        const suggestionsDiv = document.getElementById('searchSuggestions');
+        let searchTimeout;
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+
+            clearTimeout(searchTimeout);
+
+            if (query.length < 2) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`@Url.Action("GetSearchSuggestions")?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            suggestionsDiv.innerHTML = data.map(item =>
+                                `<div class="suggestion-item" onclick="selectSuggestion('${item}')">${item}</div>`
+                            ).join('');
+                            suggestionsDiv.style.display = 'block';
+                        } else {
+                            suggestionsDiv.style.display = 'none';
+                        }
+                    })
+                    .catch(() => {
+                        suggestionsDiv.style.display = 'none';
+                    });
+            }, 300);
+        });
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                suggestionsDiv.style.display = 'none';
+            }
+        });
+    });
+
+    function selectSuggestion(value) {
+        document.getElementById('ten').value = value;
+        document.getElementById('searchSuggestions').style.display = 'none';
+        document.getElementById('filterForm').submit();
+    }
+</script>
