@@ -1,7 +1,7 @@
-﻿@model List<AppData.Models.ChatLieu>
+﻿@model PagedList.IPagedList<AppData.Models.ChatLieu>
 
 @{
-    ViewData["Title"] = "Quản lý Chat Lieu";
+    ViewData["Title"] = "Quản lý Chất Liệu";
 }
 
 <!-- Custom Style -->
@@ -62,6 +62,35 @@
     .alert {
         font-size: 0.95rem;
     }
+
+    .filter-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #dee2e6;
+    }
+
+    .pagination {
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+
+    .pagination .page-link {
+        color: #8B0000;
+        border-color: #d4af37;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #d4af37;
+        border-color: #d4af37;
+    }
+
+    .pagination .page-link:hover {
+        color: #8B0000;
+        background-color: #f8f9fa;
+        border-color: #d4af37;
+    }
 </style>
 
 <div class="container mt-4">
@@ -84,16 +113,81 @@
             </div>
         }
 
-        <a class="btn btn-success mb-3" asp-area="Admin" asp-controller="ChatLieu" asp-action="Create">
-            <i class="fas fa-plus"></i> Thêm mới
-        </a>
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <form asp-area="Admin" asp-controller="ChatLieu" asp-action="Index" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="searchTerm" class="form-label"><i class="fas fa-search"></i> Tìm kiếm</label>
+                    <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
+                           value="@ViewBag.CurrentFilter" placeholder="Nhập tên chất liệu...">
+                </div>
+                <div class="col-md-3">
+                    <label for="statusFilter" class="form-label">Trạng thái</label>
+                    <select class="form-select" id="statusFilter" name="statusFilter">
+                      <option value="">Tất cả</option>
+    <option value="active" selected="@(ViewBag.StatusFilter == "active")">Hoạt động</option>
+    <option value="inactive" selected="@(ViewBag.StatusFilter == "inactive")">Không hoạt động</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="pageSize" class="form-label">Hiển thị</label>
+                    <select class="form-select" id="pageSize" name="pageSize">
+                        <option value="5" selected="@(ViewBag.PageSize == 5)">5</option>
+    <option value="10" selected="@(ViewBag.PageSize == 10)">10</option>
+    <option value="20" selected="@(ViewBag.PageSize == 20)">20</option>
+    <option value="50" selected="@(ViewBag.PageSize == 50)">50</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <div class="btn-group w-100" role="group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter"></i> Lọc
+                        </button>
+                        <a href="@Url.Action("Index", "ChatLieu", new { area = "Admin" })" class="btn btn-outline-secondary">
+                            <i class="fas fa-undo"></i> Đặt lại
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Action Button -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a class="btn btn-success" asp-area="Admin" asp-controller="ChatLieu" asp-action="Create">
+                <i class="fas fa-plus"></i> Thêm mới
+            </a>
+            <small class="text-muted">
+                Hiển thị @((Model.PageNumber - 1) * Model.PageSize + 1) - @(Math.Min(Model.PageNumber * Model.PageSize, Model.TotalItemCount)) 
+                trong tổng số @Model.TotalItemCount chất liệu
+            </small>
+        </div>
 
         @if (Model != null && Model.Any())
         {
             <table class="table table-bordered table-hover align-middle">
                 <thead class="table-light text-center">
                     <tr>
-                        <th style="width: 45%;">TenChatLieu</th>
+                        <th style="width: 45%;">
+                            <a asp-action="Index" asp-route-sortOrder="@ViewBag.NameSortParm" 
+                               asp-route-currentFilter="@ViewBag.CurrentFilter"
+                               asp-route-statusFilter="@ViewBag.StatusFilter"
+                               asp-route-pageSize="@ViewBag.PageSize"
+                               class="text-decoration-none text-dark">
+                                TenChatLieu
+                                @if (ViewBag.SortOrder == "name")
+                                {
+                                    <i class="fas fa-sort-up"></i>
+                                }
+                                else if (ViewBag.SortOrder == "name_desc")
+                                {
+                                    <i class="fas fa-sort-down"></i>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-sort"></i>
+                                }
+                            </a>
+                        </th>
                         <th style="width: 20%;">Trạng thái</th>
                         <th style="width: 35%;">Thao tác</th>
                     </tr>
@@ -128,18 +222,78 @@
                                             <i class="fas fa-trash-alt"></i> Xoá
                                         </button>
                                     </form>
-
                                 </div>
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
+
+            <!-- Pagination -->
+            @if (Model.PageCount > 1)
+            {
+                <nav aria-label="Phân trang chất liệu">
+                    <ul class="pagination">
+                        @if (Model.HasPreviousPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" 
+                                   asp-action="Index" 
+                                   asp-route-page="@(Model.PageNumber - 1)"
+                                   asp-route-currentFilter="@ViewBag.CurrentFilter"
+                                   asp-route-statusFilter="@ViewBag.StatusFilter"
+                                   asp-route-sortOrder="@ViewBag.SortOrder"
+                                   asp-route-pageSize="@ViewBag.PageSize">
+                                    <i class="fas fa-chevron-left"></i> Trước
+                                </a>
+                            </li>
+                        }
+
+                        @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.PageCount, Model.PageNumber + 2); i++)
+                        {
+                            <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                                <a class="page-link" 
+                                   asp-action="Index" 
+                                   asp-route-page="@i"
+                                   asp-route-currentFilter="@ViewBag.CurrentFilter"
+                                   asp-route-statusFilter="@ViewBag.StatusFilter"
+                                   asp-route-sortOrder="@ViewBag.SortOrder"
+                                   asp-route-pageSize="@ViewBag.PageSize">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        @if (Model.HasNextPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" 
+                                   asp-action="Index" 
+                                   asp-route-page="@(Model.PageNumber + 1)"
+                                   asp-route-currentFilter="@ViewBag.CurrentFilter"
+                                   asp-route-statusFilter="@ViewBag.StatusFilter"
+                                   asp-route-sortOrder="@ViewBag.SortOrder"
+                                   asp-route-pageSize="@ViewBag.PageSize">
+                                    Sau <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
         }
         else
         {
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> Không có dữ liệu size nào.
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle"></i> 
+                @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter as string) || !string.IsNullOrEmpty(ViewBag.StatusFilter as string))
+                {
+                    <span>Không tìm thấy chất liệu nào với bộ lọc hiện tại.</span>
+                }
+                else
+                {
+                    <span>Không có dữ liệu chất liệu nào.</span>
+                }
             </div>
         }
     </div>

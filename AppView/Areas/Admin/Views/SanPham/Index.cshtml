@@ -4,158 +4,343 @@
     ViewData["Title"] = "Danh sách sản phẩm";
 }
 
-<style>
-    .table-wrapper {
-        background: #fffaf0;
-        border-radius: 1rem;
-        padding: 2rem 2.5rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        font-family: 'Segoe UI', sans-serif;
-    }
-
-    h2 {
-        color: #8B0000;
-        font-weight: 600;
-        border-bottom: 2px solid #d4af37;
-        padding-bottom: 0.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .btn-success {
-        background-color: #d4af37;
-        border: none;
-        font-weight: 500;
-        color: white;
-    }
-
-        .btn-success:hover {
-            background-color: #b8941f;
-        }
-
-    .btn-secondary {
-        background-color: #8B0000;
-        border: none;
-        color: white;
-        font-weight: 500;
-    }
-
-        .btn-secondary:hover {
-            background-color: #a52a2a;
-        }
-
-    .badge-custom {
-        font-size: 0.85rem;
-        padding: 0.4em 0.6em;
-        border-radius: 0.5rem;
-    }
-</style>
-
-<div class="container mt-4 table-wrapper">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>
-            <i class="fas fa-list me-2"></i>@ViewData["Title"]
-        </h2>
-        <a class="btn btn-success" asp-area="Admin" asp-controller="SanPham" asp-action="Create">
-            <i class="fas fa-plus me-1"></i> Thêm mới
-        </a>
+<div class="admin-card">
+    <div class="admin-card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="page-title">
+                <i class="fas fa-tshirt text-primary me-2"></i>
+                @ViewData["Title"]
+            </div>
+            <a class="btn btn-primary" asp-area="Admin" asp-controller="SanPham" asp-action="Create">
+                <i class="fas fa-plus me-1"></i>
+                Thêm sản phẩm mới
+            </a>
+        </div>
     </div>
 
-    @if (TempData["Message"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-1"></i> @TempData["Message"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
+    <div class="admin-card-body">
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                @TempData["Message"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+            </div>
+        }
 
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle me-1"></i> @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+            </div>
+        }
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle text-center">
-            <thead class="table-light">
-                <tr>
-                    <th>ID</th>
-                    <th>Tên sản phẩm</th>
-                    <th>Mô tả</th>
-                    <th>Trọng lượng</th>
-                    <th>Giới tính</th>
-                    <th>Trạng thái</th>
-                    <th>Danh mục</th>
-                    <th>Hình ảnh</th>
-                    <th>Ngày tạo</th>
-                    <th colspan="3">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
+        <div class="admin-table-wrapper">
+            <table class="admin-table table table-hover">
+                <thead>
                     <tr>
-                        <td class="text-muted small">@item.IDSanPham.ToString()</td>
-                        <td class="fw-semibold text-start">@item.TenSanPham</td>
-                        <td class="text-start">@item.MoTa</td>
-                        <td>@(item.TrongLuong?.ToString() ?? "N/A")</td>
-                         <td>
-                            <span class="badge badge-custom bg-info text-dark">
-                                @(item.GioiTinh.HasValue ? (item.GioiTinh.Value ? "Nam" : "Nữ") : "N/A")
-                            </span>
-                        </td> 
-                        <td>
-                            <span class="badge badge-custom @(item.TrangThai ? "bg-success" : "bg-secondary")">
-                                @(item.TrangThai ? "Còn hàng" : "Hết hàng")
-                            </span>
-                        </td>
-                        <td>@item.TenDanhMuc</td>
-                        @* <td>
-                            @if (!string.IsNullOrEmpty(item.HinhAnh))
-                            {
-                                <img src="@item.HinhAnh" class="rounded" width="70" height="70" style="object-fit:cover;" />
-                            }
-                            else
-                            {
-                                <span class="text-muted">Không có ảnh</span>
-                            }
-                        </td> *@
-                       @*  <td>@item.NgayTao.ToString("dd/MM/yyyy HH:mm")</td> *@
-                        <td>
-                            <a asp-area="Admin"
-                               asp-controller="SanPhamCT"
-                               asp-action="ThemChiTiet"
-                               asp-route-idSanPham="@item.IDSanPham"
-                               class="btn btn-sm btn-secondary">
-                                <i class="fas fa-plus"></i>
-                            </a>
-                        </td>
-                        <td>
-                            <a asp-area="Admin" asp-controller="SanPham" asp-action="Update" asp-route-idSanPham="@item.IDSanPham"
-                               class="btn btn-sm btn-warning text-white">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                        </td>
-                        <td>
-                            <a asp-area="Admin" asp-controller="SanPham" asp-action="Details" asp-route-idSanPham="@item.IDSanPham"
-                               class="btn btn-sm btn-info text-white">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                        </td>
+                        <th style="width: 25%;">
+                            <i class="fas fa-tag me-1"></i>
+                            Tên sản phẩm
+                        </th>
+                        <th style="width: 20%;">
+                            <i class="fas fa-align-left me-1"></i>
+                            Mô tả
+                        </th>
+                        <th style="width: 10%;">
+                            <i class="fas fa-weight me-1"></i>
+                            Trọng lượng
+                        </th>
+                        <th style="width: 8%;">
+                            <i class="fas fa-venus-mars me-1"></i>
+                            Giới tính
+                        </th>
+                        <th style="width: 10%;">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Trạng thái
+                        </th>
+                        <th style="width: 12%;">
+                            <i class="fas fa-folder me-1"></i>
+                            Danh mục
+                        </th>
+                        <th style="width: 15%;">
+                            <i class="fas fa-cogs me-1"></i>
+                            Thao tác
+                        </th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="product-info">
+                                            <div class="fw-semibold text-dark mb-1">
+                                                @item.TenSanPham
+                                            </div>
+                                            <small class="text-muted">
+                                                ID: @item.IDSanPham
+                                            </small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-truncate" style="max-width: 200px;" title="@item.MoTa">
+                                        @item.MoTa
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    @if (item.TrongLuong.HasValue)
+                                    {
+                                        <span class="fw-medium">@item.TrongLuong.Value kg</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa có</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (item.GioiTinh.HasValue)
+                                    {
+                                        @if (item.GioiTinh.Value)
+                                        {
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-mars me-1"></i>Nam
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-venus me-1"></i>Nữ
+                                            </span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-question me-1"></i>Chung
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (item.TrangThai)
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>Còn hàng
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>Hết hàng
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="text-dark fw-medium">
+                                        @(item.TenDanhMuc ?? "Chưa phân loại")
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group" aria-label="Thao tác sản phẩm">
+                                        <a asp-area="Admin"
+                                           asp-controller="SanPhamCT"
+                                           asp-action="ThemChiTiet"
+                                           asp-route-idSanPham="@item.IDSanPham"
+                                           class="btn btn-sm btn-success"
+                                           data-bs-toggle="tooltip"
+                                           title="Thêm chi tiết sản phẩm">
+                                            <i class="fas fa-plus"></i>
+                                        </a>
+
+                                        <a asp-area="Admin"
+                                           asp-controller="SanPham"
+                                           asp-action="Details"
+                                           asp-route-idSanPham="@item.IDSanPham"
+                                           class="btn btn-sm btn-info"
+                                           data-bs-toggle="tooltip"
+                                           title="Xem chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+
+                                        <a asp-area="Admin"
+                                           asp-controller="SanPham"
+                                           asp-action="Update"
+                                           asp-route-idSanPham="@item.IDSanPham"
+                                           class="btn btn-sm btn-warning"
+                                           data-bs-toggle="tooltip"
+                                           title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-box-open fa-3x mb-3 d-block"></i>
+                                    <h5>Chưa có sản phẩm nào</h5>
+                                    <p>Hãy thêm sản phẩm đầu tiên cho cửa hàng của bạn</p>
+                                    <a class="btn btn-primary" asp-area="Admin" asp-controller="SanPham" asp-action="Create">
+                                        <i class="fas fa-plus me-1"></i>
+                                        Thêm sản phẩm mới
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div class="text-muted small">
+                    Hiển thị @Model.Count sản phẩm
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+                        <i class="fas fa-print me-1"></i>
+                        In danh sách
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel me-1"></i>
+                        Xuất Excel
+                    </button>
+                </div>
+            </div>
+        }
     </div>
 </div>
 
 @section Scripts {
     <script>
-        // Tự động ẩn alert sau 5s
+        // Tự động ẩn alert sau 5 giây
         setTimeout(() => {
-            const alert = document.querySelector('.alert');
-            if (alert) alert.remove();
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
         }, 5000);
+
+        // Khởi tạo tooltips cho các nút thao tác
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        // Hàm xuất Excel (placeholder - cần implement backend)
+        function exportToExcel() {
+            // Thực hiện export Excel
+            window.location.href = '@Url.Action("ExportExcel", "SanPham", new { Area = "Admin" })';
+        }
+
+        // Confirm delete function (nếu có button delete)
+        function confirmDelete(id, name) {
+            if (window.AdminAPI && window.AdminAPI.confirm) {
+                window.AdminAPI.confirm(
+                    'Xác nhận xóa sản phẩm',
+                    `Bạn có chắc chắn muốn xóa sản phẩm "${name}"? Hành động này không thể hoàn tác.`,
+                    function() {
+                        window.location.href = `/Admin/SanPham/Delete/${id}`;
+                    }
+                );
+            } else {
+                if (confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}"?`)) {
+                    window.location.href = `/Admin/SanPham/Delete/${id}`;
+                }
+            }
+        }
+
+        // Enhance table with search functionality
+        function initTableSearch() {
+            const searchInput = document.getElementById('tableSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const filter = this.value.toLowerCase();
+                    const rows = document.querySelectorAll('tbody tr');
+
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(filter) ? '' : 'none';
+                    });
+                });
+            }
+        }
+
+        // Initialize search functionality
+        initTableSearch();
     </script>
 }
+
+<style>
+    .product-info {
+        min-width: 150px;
+    }
+
+    .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .btn-group .btn {
+        border-radius: 0;
+    }
+
+        .btn-group .btn:first-child {
+            border-top-left-radius: var(--radius-md);
+            border-bottom-left-radius: var(--radius-md);
+        }
+
+        .btn-group .btn:last-child {
+            border-top-right-radius: var(--radius-md);
+            border-bottom-right-radius: var(--radius-md);
+        }
+
+    @@media print {
+        .btn, .admin-card-header .btn
+
+    {
+        display: none !important;
+    }
+
+    .admin-card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+            padding: 50px !important;
+    }
+
+    }
+
+    @@media (max-width: 768px) {
+        .btn-group
+
+    {
+        flex-direction: column;
+    }
+
+    .btn-group .btn {
+        border-radius: var(--radius-md) !important;
+        margin-bottom: 2px;
+    }
+
+        .btn-group .btn:last-child {
+            margin-bottom: 0;
+        }
+
+    }
+</style>

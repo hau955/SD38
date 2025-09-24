@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ViewModels;
 using AppView.Areas.Admin.IRepo;
 using AppView.Areas.Admin.ViewModels;
+using PagedList;
 
 namespace AppApi.Controllers
 {
@@ -30,14 +31,40 @@ namespace AppApi.Controllers
             _dmRepo = dmRepo;
         }
 
-        // ---------------- INDEX ----------------
-        public async Task<IActionResult> Index()
+        // ---------------- API load sản phẩm chi tiết ----------------
+        [HttpGet("/Admin/GiamGia/GetSanPhamCTsBySanPhamId")]
+        public async Task<IActionResult> GetSanPhamCTsBySanPhamId([FromQuery] Guid id)
+        {
+            if (id == Guid.Empty)
+                return Json(new List<object>());
+
+            var spcts = await _spctRepo.GetBySanPhamIdAsync(id);
+
+            var result = spcts.Select(x => new
+            {
+                id = x.IDSanPhamCT,
+                text = $"{x.SanPham?.TenSanPham} - Size: {x.SizeAo} - Màu: {x.MauSac} - Chất liệu: {x.ChatLieu}"
+            });
+
+            return Json(result);
+        }
+        public async Task<IActionResult> Index(string searchTerm, string statusFilter, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 10)
         {
             var list = await _repo.GetAllAsync();
-            return View(list);
+
+            // Lọc dữ liệu (ví dụ)
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                list = list.Where(x => x.TenGiamGia.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            // Chuyển sang PagedList
+            var pagedList = list.ToPagedList(page, pageSize);
+
+            return View(pagedList);
         }
 
-        // ---------------- CREATE (GET) ----------------
+
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -47,13 +74,19 @@ namespace AppApi.Controllers
                 {
                     NgayBatDau = DateTime.Today,
                     NgayKetThuc = DateTime.Today.AddDays(7)
-                }
+                },
+                SanPhams = await _spRepo.GetAllSanPhamAsync(),
+                DanhMucs = await _dmRepo.GetAllDanhMucsAsync(),
+
             };
 
-            await LoadDropdowns(vm);
             return View(vm);
         }
 
+
+   
+        // ---------------- CREATE (GET) ----------------
+       
         // ---------------- CREATE (POST) ----------------
         [HttpPost]
         [ValidateAntiForgeryToken]

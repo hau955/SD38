@@ -1,7 +1,8 @@
 using AppData.Models;
+using AppData.Models;
 using AppView.Areas.Admin.IRepo;
 using Microsoft.AspNetCore.Mvc;
-using AppData.Models;
+using PagedList;
 
 namespace AppView.Areas.Admin.Controllers
 {
@@ -15,11 +16,37 @@ namespace AppView.Areas.Admin.Controllers
             _sizeRepo = sizeRepo;
         }
 
-        // GET: Size
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchTerm, string? statusFilter, int page = 1, int pageSize = 10)
         {
             var list = await _sizeRepo.GetAll();
-            return View(list);
+
+            // 🔎 Tìm kiếm
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                list = list
+                    .Where(x => x.SoSize.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            // ⚡ Lọc trạng thái
+            if (!string.IsNullOrWhiteSpace(statusFilter))
+            {
+                list = statusFilter switch
+                {
+                    "active" => list.Where(x => x.TrangThai).ToList(),
+                    "inactive" => list.Where(x => !x.TrangThai).ToList(),
+                    _ => list
+                };
+            }
+
+            // ⚙️ Giữ filter cho View
+            ViewBag.CurrentFilter = searchTerm;
+            ViewBag.StatusFilter = statusFilter;
+            ViewBag.PageSize = pageSize;
+
+            // 📄 Phân trang
+            var pagedList = list.ToPagedList(page, pageSize);
+            return View(pagedList);
         }
 
         // GET: Size/Create

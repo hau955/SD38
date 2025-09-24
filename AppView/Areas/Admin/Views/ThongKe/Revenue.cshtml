@@ -1,21 +1,39 @@
-﻿@using AppView.Areas.Admin.ViewModels.ThongKeViewModel
-@model AppView.Areas.Admin.ViewModels.ThongKeViewModel.RevenueReportViewModel
+﻿@using AppView.Areas.Admin.ViewModels
+@using AppView.Areas.Admin.ViewModels.ThongKeViewModel
+@model RevenueReportViewModel
 @{
     ViewData["Title"] = ViewBag.Title;
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
-    var request = ViewBag.Request as AppView.Areas.Admin.ViewModels.ThongKeViewModel.TimeRangeRequestViewModel;
+    var request = ViewBag.Request as TimeRangeRequestViewModel;
+    
+    // Tính toán tổng cộng
+    var totalRevenue = Model?.RevenueByTime?.Sum(r => r.Revenue) ?? 0;
+    var totalProfit = Model?.RevenueByTime?.Sum(r => r.Profit) ?? 0;
+    var totalOrders = Model?.RevenueByTime?.Sum(r => r.OrderCount) ?? 0;
+    var avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+    var profitMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
+    
+    // Phân trang
+    int pageSize = 20;
+    int currentPage = ViewBag.Page != null ? (int)ViewBag.Page : 1;
+    var pagedData = Model?.RevenueByTime?.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList() ?? new List<RevenueByTimeViewModel>();
+    int totalPages = Model?.RevenueByTime?.Count > 0 ? (int)Math.Ceiling((double)Model.RevenueByTime.Count / pageSize) : 1;
 }
 
 <div class="container-fluid">
+    <!-- Page Header -->
     <div class="row">
         <div class="col-12">
-            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                <h4 class="mb-sm-0">@ViewData["Title"]</h4>
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between bg-primary bg-gradient rounded-3 p-4 mb-4">
+                <div class="text-white">
+                    <h4 class="mb-sm-0 fw-bold">@ViewData["Title"]</h4>
+                    <p class="mb-0 opacity-75">Phân tích chi tiết doanh thu và xu hướng kinh doanh</p>
+                </div>
                 <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="/Admin">Trang chủ</a></li>
-                        <li class="breadcrumb-item"><a href="/Admin/ThongKe">Thống kê</a></li>
-                        <li class="breadcrumb-item active">Doanh thu</li>
+                    <ol class="breadcrumb m-0 bg-transparent">
+                        <li class="breadcrumb-item"><a href="/Admin" class="text-white-50">Trang chủ</a></li>
+                        <li class="breadcrumb-item"><a href="/Admin/ThongKe" class="text-white-50">Thống kê</a></li>
+                        <li class="breadcrumb-item active text-white">Doanh thu</li>
                     </ol>
                 </div>
             </div>
@@ -32,46 +50,43 @@
         </div>
     }
 
-    <!-- Debug Information -->
-    @if (ViewBag.ShowDebugInfo == true)
-    {
-        <div class="alert alert-info">
-            <h6>Debug Information:</h6>
-            <p><strong>Revenue By Time Count:</strong> @(Model?.RevenueByTime?.Count ?? 0)</p>
-            <p><strong>Revenue By Category Count:</strong> @(Model?.RevenueByCategory?.Count ?? 0)</p>
-            <p><strong>Revenue By Region Count:</strong> @(Model?.RevenueByRegion?.Count ?? 0)</p>
-            <p><strong>API Base URL:</strong> @ViewData["ApiBaseUrl"]</p>
-        </div>
-    }
-
     <!-- Filter Form -->
-    <div class="row">
+    <div class="row mb-4">
         <div class="col-12">
-            <div class="card">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-filter me-2 text-primary"></i>Bộ Lọc Dữ Liệu
+                    </h5>
+                </div>
                 <div class="card-body">
                     <form method="post" class="row g-3">
                         <div class="col-md-3">
-                            <label class="form-label">Từ ngày</label>
-                            <input type="date" class="form-control" name="StartDate" value="@request?.StartDate.ToString("yyyy-MM-dd")" />
+                            <label class="form-label fw-medium">Từ ngày <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" name="StartDate" 
+                                   value="@(request?.StartDate.ToString("yyyy-MM-dd") ?? DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd"))" 
+                                   required />
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Đến ngày</label>
-                            <input type="date" class="form-control" name="EndDate" value="@request?.EndDate.ToString("yyyy-MM-dd")" />
+                            <label class="form-label fw-medium">Đến ngày <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" name="EndDate" 
+                                   value="@(request?.EndDate.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))" 
+                                   required />
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Nhóm theo</label>
-                            <select class="form-control" name="GroupType">
-                                <option value="Day" selected="@(request?.GroupType == TimeGroupTypeViewModel.Day ? "selected" : null)">Ngày</option>
-                                <option value="Week" selected="@(request?.GroupType == TimeGroupTypeViewModel.Week ? "selected" : null)">Tuần</option>
-                                <option value="Month" selected="@(request?.GroupType == TimeGroupTypeViewModel.Month ? "selected" : null)">Tháng</option>
-                                <option value="Quarter" selected="@(request?.GroupType == TimeGroupTypeViewModel.Quarter ? "selected" : null)">Quý</option>
-                                <option value="Year" selected="@(request?.GroupType == TimeGroupTypeViewModel.Year ? "selected" : null)">Năm</option>
+                            <label class="form-label fw-medium">Nhóm theo</label>
+                            <select class="form-select" name="GroupType">
+                                <option value="Day" selected="@(request?.GroupType == TimeGroupTypeViewModel.Day)">Theo ngày</option>
+                                <option value="Week" selected="@(request?.GroupType == TimeGroupTypeViewModel.Week)">Theo tuần</option>
+                                <option value="Month" selected="@(request?.GroupType == TimeGroupTypeViewModel.Month)">Theo tháng</option>
+                                <option value="Quarter" selected="@(request?.GroupType == TimeGroupTypeViewModel.Quarter)">Theo quý</option>
+                                <option value="Year" selected="@(request?.GroupType == TimeGroupTypeViewModel.Year)">Theo năm</option>
                             </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">&nbsp;</label>
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="mdi mdi-magnify"></i> Lọc dữ liệu
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="fas fa-search me-2"></i>Lọc dữ liệu
                             </button>
                         </div>
                     </form>
@@ -80,374 +95,485 @@
         </div>
     </div>
 
-    <!-- Revenue by Time Chart -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title mb-0">Biểu đồ doanh thu theo thời gian</h4>
-                </div>
+    <!-- Quick Metrics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100 metric-card">
                 <div class="card-body">
-                    <div id="revenue-time-chart" class="apex-charts" dir="ltr"></div>
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="metric-icon bg-primary">
+                                <i class="fas fa-chart-line text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="text-muted fw-medium mb-1">Tổng Doanh Thu</p>
+                            <h4 class="mb-0 text-primary fw-bold">
+                                @totalRevenue.ToString("N0") VNĐ
+                            </h4>
+                            <small class="text-muted">
+                                Kỳ: @(request?.StartDate.ToString("dd/MM/yyyy") ?? "N/A") - @(request?.EndDate.ToString("dd/MM/yyyy") ?? "N/A")
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100 metric-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="metric-icon bg-success">
+                                <i class="fas fa-coins text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="text-muted fw-medium mb-1">Tổng Lợi Nhuận</p>
+                            <h4 class="mb-0 text-success fw-bold">
+                                @totalProfit.ToString("N0") VNĐ
+                            </h4>
+                            <small class="text-muted">
+                                Tỷ suất: @profitMargin.ToString("F1")%
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100 metric-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="metric-icon bg-warning">
+                                <i class="fas fa-shopping-cart text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="text-muted fw-medium mb-1">Tổng Đơn Hàng</p>
+                            <h4 class="mb-0 text-warning fw-bold">
+                                @totalOrders.ToString("N0")
+                            </h4>
+                            <small class="text-muted">
+                                Đơn hoàn thành
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100 metric-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="metric-icon bg-info">
+                                <i class="fas fa-calculator text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="text-muted fw-medium mb-1">Đơn Hàng TB</p>
+                            <h4 class="mb-0 text-info fw-bold">
+                                @avgOrderValue.ToString("N0") VNĐ
+                            </h4>
+                            <small class="text-muted">
+                                Giá trị trung bình
+                            </small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Revenue by Category and Region -->
-    <div class="row">
-        <div class="col-xl-6">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title mb-0">Doanh thu theo danh mục</h4>
+    <!-- Revenue Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2 text-primary"></i>Tổng Quan Doanh Thu
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <div id="category-chart" class="apex-charts" dir="ltr"></div>
+                    <div class="row text-center">
+                        <div class="col-md-2">
+                            <div class="border-end">
+                                <h3 class="text-primary mb-1">@(Model?.RevenueByTime?.Count ?? 0)</h3>
+                                <p class="text-muted mb-0 small">Kỳ báo cáo</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="border-end">
+                                <h3 class="text-success mb-1">@((totalRevenue / 1000000).ToString("F1"))M</h3>
+                                <p class="text-muted mb-0 small">Doanh thu (triệu)</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="border-end">
+                                <h3 class="text-info mb-1">@((totalProfit / 1000000).ToString("F1"))M</h3>
+                                <p class="text-muted mb-0 small">Lợi nhuận (triệu)</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="border-end">
+                                <h3 class="text-warning mb-1">@totalOrders</h3>
+                                <p class="text-muted mb-0 small">Tổng đơn hàng</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="border-end">
+                                <h3 class="text-secondary mb-1">@profitMargin.ToString("F1")%</h3>
+                                <p class="text-muted mb-0 small">Tỷ suất LN</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <h3 class="text-dark mb-1">@((avgOrderValue / 1000).ToString("F0"))K</h3>
+                            <p class="text-muted mb-0 small">Đơn TB (nghìn)</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="col-xl-6">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title mb-0">Doanh thu theo khu vực</h4>
+    <!-- Revenue Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light border-0 d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-table me-2 text-primary"></i>Chi Tiết Doanh Thu Theo Thời Gian
+                        @if (Model?.RevenueByTime?.Count > 0)
+                        {
+                            <span class="badge bg-primary ms-2">@Model.RevenueByTime.Count kỳ</span>
+                        }
+                    </h5>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-success" onclick="exportToExcel()">
+                            <i class="fas fa-file-excel me-1"></i>Xuất Excel
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+                            <i class="fas fa-print me-1"></i>In báo cáo
+                        </button>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-nowrap align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Khu vực</th>
-                                    <th scope="col">Doanh thu</th>
-                                    <th scope="col">Khách hàng</th>
-                                    <th scope="col">Tỷ lệ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model?.RevenueByRegion?.Any() == true)
-                                {
-                                    @foreach (var region in Model.RevenueByRegion.Take(10))
+                <div class="card-body p-0">
+                    @if (Model?.RevenueByTime?.Any() == true)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" id="revenue-table">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th class="border-0 ps-3" style="min-width: 120px;">Thời gian</th>
+                                        <th class="border-0 text-end" style="min-width: 130px;">Doanh thu</th>
+                                        <th class="border-0 text-end" style="min-width: 130px;">Lợi nhuận</th>
+                                        <th class="border-0 text-center" style="min-width: 100px;">Đơn hàng</th>
+                                        <th class="border-0 text-end" style="min-width: 120px;">Đơn TB</th>
+                                        <th class="border-0 text-center" style="min-width: 110px;">Tỷ suất LN</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in pagedData)
                                     {
-                                        <tr>
-                                            <td>@(region.Region ?? "N/A") - @(region.City ?? "N/A")</td>
-                                            <td>@(region.Revenue.ToString("N0")) VNĐ</td>
-                                            <td>@(region.CustomerCount)</td>
-                                            <td>
-                                                <div class="progress progress-sm">
-                                                    <div class="progress-bar bg-primary" role="progressbar" style="width: @(region.Percentage)%"></div>
+                                        var itemProfitMargin = item.Revenue > 0 ? (item.Profit / item.Revenue) * 100 : 0;
+                                        var itemAvgOrder = item.OrderCount > 0 ? item.Revenue / item.OrderCount : 0;
+                                        
+                                        <tr class="hover-row">
+                                            <td class="ps-3">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="time-icon bg-light rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                                        <i class="fas fa-calendar-day text-primary" style="font-size: 12px;"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-medium">@(item.FormattedTimeLabel ?? item.Label ?? "N/A")</div>
+                                                        <small class="text-muted">@item.TimePeriod.ToString("dd/MM/yyyy")</small>
+                                                    </div>
                                                 </div>
-                                                @(region.Percentage.ToString("F1"))%
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="fw-bold text-success">@item.Revenue.ToString("N0")</span>
+                                                <small class="d-block text-muted">VNĐ</small>
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="fw-bold text-primary">@item.Profit.ToString("N0")</span>
+                                                <small class="d-block text-muted">VNĐ</small>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-info rounded-pill fs-6">@item.OrderCount</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="fw-medium">@itemAvgOrder.ToString("N0")</span>
+                                                <small class="d-block text-muted">VNĐ</small>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge @(itemProfitMargin >= 20 ? "bg-success" : itemProfitMargin >= 10 ? "bg-warning text-dark" : "bg-danger") rounded-pill">
+                                                    @itemProfitMargin.ToString("F1")%
+                                                </span>
                                             </td>
                                         </tr>
                                     }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="4" class="text-center text-muted">Không có dữ liệu doanh thu theo khu vực</td>
+                                    
+                                    <!-- Summary Row -->
+                                    <tr class="table-light border-top border-2 fw-bold">
+                                        <td class="ps-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="time-icon bg-primary rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                                    <i class="fas fa-calculator text-white" style="font-size: 12px;"></i>
+                                                </div>
+                                                <span class="text-primary fw-bold">TỔNG CỘNG</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="fw-bold text-success fs-5">@totalRevenue.ToString("N0")</span>
+                                            <small class="d-block text-muted">VNĐ</small>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="fw-bold text-primary fs-5">@totalProfit.ToString("N0")</span>
+                                            <small class="d-block text-muted">VNĐ</small>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-dark rounded-pill fs-6">@totalOrders</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="fw-bold">@avgOrderValue.ToString("N0")</span>
+                                            <small class="d-block text-muted">VNĐ</small>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-primary rounded-pill fs-6">
+                                                @profitMargin.ToString("F1")%
+                                            </span>
+                                        </td>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                                </tbody>
+                            </table>
+                        </div>
 
-    <!-- Detailed Revenue Table -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title mb-0">Chi tiết doanh thu theo thời gian</h4>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-nowrap align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Thời gian</th>
-                                    <th scope="col">Doanh thu</th>
-                                    <th scope="col">Chi phí</th>
-                                    <th scope="col">Lợi nhuận</th>
-                                    <th scope="col">Số đơn</th>
-                                    <th scope="col">Đơn TB</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model?.RevenueByTime?.Any() == true)
-                                {
-                                    @foreach (var item in Model.RevenueByTime)
-                                    {
-                                        <tr>
-                                            <td>@(item.FormattedTimeLabel ?? "N/A")</td>
-                                            <td class="text-success fw-medium">@(item.Revenue.ToString("N0")) VNĐ</td>
-                                            <td>@(item.Cost.ToString("N0")) VNĐ</td>
-                                            <td class="text-primary fw-medium">@(item.Profit.ToString("N0")) VNĐ</td>
-                                            <td>@(item.OrderCount)</td>
-                                            <td>@((item.OrderCount > 0 ? item.Revenue / item.OrderCount : 0).ToString("N0")) VNĐ</td>
-                                        </tr>
-                                    }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted">Không có dữ liệu doanh thu theo thời gian</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                        <!-- Pagination -->
+                        @if (totalPages > 1)
+                        {
+                            <div class="card-footer bg-light">
+                                <nav aria-label="Revenue pagination">
+                                    <ul class="pagination justify-content-center mb-0">
+                                        @if (currentPage > 1)
+                                        {
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=@(currentPage - 1)">
+                                                    <i class="fas fa-chevron-left me-1"></i>Trước
+                                                </a>
+                                            </li>
+                                        }
+                                        
+                                        @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                                        {
+                                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                                <a class="page-link" href="?page=@i">@i</a>
+                                            </li>
+                                        }
+                                        
+                                        @if (currentPage < totalPages)
+                                        {
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=@(currentPage + 1)">
+                                                    Sau<i class="fas fa-chevron-right ms-1"></i>
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </nav>
+                                <div class="text-center mt-2">
+                                    <small class="text-muted">
+                                        Trang @currentPage/@totalPages - Hiển thị @pagedData.Count/@(Model.RevenueByTime.Count) bản ghi
+                                    </small>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center p-5">
+                            <div class="mb-3">
+                                <i class="fas fa-chart-line fa-4x text-muted opacity-25"></i>
+                            </div>
+                            <h5 class="text-muted">Không có dữ liệu doanh thu</h5>
+                            <p class="text-muted mb-3">
+                                Không tìm thấy dữ liệu doanh thu trong khoảng thời gian đã chọn.
+                                <br>Vui lòng điều chỉnh bộ lọc hoặc kiểm tra lại dữ liệu.
+                            </p>
+                            <a href="/Admin/ThongKe/Revenue" class="btn btn-outline-primary">
+                                <i class="fas fa-refresh me-2"></i>Làm mới
+                            </a>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-@section Scripts {
-    <!-- Load ApexCharts with fallback -->
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js" 
-            onerror="this.onerror=null; this.src='https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.44.0/apexcharts.min.js';"></script>
+<style>
+    .metric-card {
+        transition: transform 0.2s ease-in-out;
+        border-radius: 12px;
+    }
     
-    <script>
-        // Đợi DOM sẵn sàng
-        $(document).ready(function() {
-            // Khởi tạo charts sau khi DOM sẵn sàng
-            setTimeout(initRevenueCharts, 1000);
+    .metric-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.1);
+    }
+    
+    .metric-icon {
+        width: 3rem;
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content-center;
+        border-radius: 12px;
+    }
+    
+    .time-icon {
+        width: 2rem;
+        height: 2rem;
+    }
+    
+    .hover-row:hover {
+        background-color: rgba(13, 110, 253, 0.08);
+        transform: scale(1.005);
+        transition: all 0.2s ease;
+    }
+    
+    .table th {
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+    }
+    
+    .card {
+        border-radius: 12px;
+        border: none;
+    }
+    
+    .badge {
+        font-weight: 500;
+    }
+    
+    .page-link {
+        border-radius: 6px;
+        margin: 0 2px;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    @@media print {
+        .btn-group, .pagination, .card-header .btn-group {
+            display: none !important;
+        }
+        
+        .metric-card {
+            break-inside: avoid;
+        }
+    }
+    
+    @@media (max-width: 768px) {
+        .metric-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+        
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+        
+        .card-body .row.text-center > div {
+            border-bottom: 1px solid #dee2e6;
+            border-right: none !important;
+            padding: 1rem 0;
+        }
+        
+        .card-body .row.text-center > div:last-child {
+            border-bottom: none;
+        }
+    }
+</style>
+
+<script>
+    // Export to Excel functionality
+    function exportToExcel() {
+        const table = document.getElementById('revenue-table');
+        const wb = XLSX.utils.table_to_book(table, { sheet: "Báo cáo doanh thu" });
+        const filename = `BaoCaoDoanhThu_${new Date().toISOString().split('T')[0]}.xlsx`;
+        XLSX.writeFile(wb, filename);
+    }
+
+    // Auto-submit form on date change
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const dateInputs = form.querySelectorAll('input[type="date"]');
+        const selectInput = form.querySelector('select[name="GroupType"]');
+        
+        dateInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                // Optional: Auto submit on date change
+                // form.submit();
+            });
         });
-
-        // Function để khởi tạo tất cả charts
-        function initRevenueCharts() {
-            try {
-                // Kiểm tra ApexCharts có sẵn không
-                if (typeof ApexCharts === 'undefined') {
-                    console.error('ApexCharts not loaded');
-                    document.querySelector("#revenue-time-chart").innerHTML = '<div class="text-center text-muted">ApexCharts không được load</div>';
-                    document.querySelector("#category-chart").innerHTML = '<div class="text-center text-muted">ApexCharts không được load</div>';
-                    return;
-                }
-
-                // Khởi tạo revenue by time chart
-                initRevenueTimeChart();
-                
-                // Khởi tạo category chart
-                initCategoryChart();
-                
-            } catch (error) {
-                console.error('Error initializing revenue charts:', error);
+        
+        selectInput.addEventListener('change', function() {
+            // Optional: Auto submit on group type change
+            // form.submit();
+        });
+        
+        // Validate date range
+        form.addEventListener('submit', function(e) {
+            const startDate = new Date(form.StartDate.value);
+            const endDate = new Date(form.EndDate.value);
+            
+            if (startDate > endDate) {
+                e.preventDefault();
+                alert('Ngày bắt đầu không thể lớn hơn ngày kết thúc!');
             }
-        }
-
-        // Revenue by time chart function
-        function initRevenueTimeChart() {
-            try {
-                var revenueByTime = @Html.Raw(Json.Serialize(Model?.RevenueByTime ?? new List<RevenueByTimeViewModel>()));
-                
-                // Debug logging
-                console.log('Revenue By Time Data:', revenueByTime);
-                
-                if (revenueByTime.length === 0) {
-                    console.log('No revenue data - loading sample data');
-                    loadSampleRevenueData();
-                    return;
+            
+            const diffTime = Math.abs(endDate - startDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays > 365) {
+                if (!confirm('Khoảng thời gian lớn hơn 1 năm có thể làm chậm tải dữ liệu. Bạn có muốn tiếp tục?')) {
+                    e.preventDefault();
                 }
-
-                var revenueTimeOptions = {
-                    chart: {
-                        type: 'bar',
-                        height: 350,
-                        animations: {
-                            enabled: false // Tắt animation để tránh lỗi
-                        }
-                    },
-                    series: [{
-                        name: 'Doanh thu',
-                        data: revenueByTime.map(r => r.Revenue || 0)
-                    }, {
-                        name: 'Lợi nhuận',
-                        data: revenueByTime.map(r => r.Profit || 0)
-                    }],
-                    xaxis: {
-                        categories: revenueByTime.map(r => r.FormattedTimeLabel || 'N/A')
-                    },
-                    colors: ['#1f58c7', '#2eb85c'],
-                    noData: {
-                        text: 'Không có dữ liệu doanh thu',
-                        align: 'center',
-                        verticalAlign: 'middle',
-                        style: {
-                            color: '#999',
-                            fontSize: '14px'
-                        }
-                    }
-                };
-                
-                var chartElement = document.querySelector("#revenue-time-chart");
-                if (chartElement) {
-                    var revenueTimeChart = new ApexCharts(chartElement, revenueTimeOptions);
-                    revenueTimeChart.render().then(() => {
-                        console.log('Revenue time chart rendered successfully');
-                    }).catch(error => {
-                        console.error('Error rendering revenue time chart:', error);
-                        chartElement.innerHTML = '<div class="text-center text-muted">Lỗi khi vẽ biểu đồ doanh thu</div>';
-                    });
-                }
-            } catch (error) {
-                console.error('Error initializing revenue time chart:', error);
-                var chartElement = document.querySelector("#revenue-time-chart");
-                if (chartElement) {
-                    chartElement.innerHTML = '<div class="text-center text-muted">Lỗi khi khởi tạo biểu đồ doanh thu</div>';
-                }
-            }
-        }
-
-        // Revenue by category chart function
-        function initCategoryChart() {
-            try {
-               var revenueByCategory = @Html.Raw(Json.Serialize(Model?.RevenueByCategory ?? new List<RevenueByCategoryViewModel>()));
-                
-                // Debug logging
-                console.log('Revenue By Category Data:', revenueByCategory);
-                
-                if (revenueByCategory.length === 0) {
-                    console.log('No category data - loading sample data');
-                    loadSampleCategoryData();
-                    return;
-                }
-
-                var categoryOptions = {
-                    chart: {
-                        type: 'pie',
-                        height: 350,
-                        animations: {
-                            enabled: false // Tắt animation để tránh lỗi
-                        }
-                    },
-                    series: revenueByCategory.map(c => c.Revenue || 0),
-                    labels: revenueByCategory.map(c => c.CategoryName || 'N/A'),
-                    colors: ['#1f58c7', '#f1c40f', '#2eb85c', '#f56e6e', '#9b59b6'],
-                    noData: {
-                        text: 'Không có dữ liệu doanh thu theo danh mục',
-                        align: 'center',
-                        verticalAlign: 'middle',
-                        style: {
-                            color: '#999',
-                            fontSize: '14px'
-                        }
-                    }
-                };
-                
-                var chartElement = document.querySelector("#category-chart");
-                if (chartElement) {
-                    var categoryChart = new ApexCharts(chartElement, categoryOptions);
-                    categoryChart.render().then(() => {
-                        console.log('Category chart rendered successfully');
-                    }).catch(error => {
-                        console.error('Error rendering category chart:', error);
-                        chartElement.innerHTML = '<div class="text-center text-muted">Lỗi khi vẽ biểu đồ danh mục</div>';
-                    });
-                }
-            } catch (error) {
-                console.error('Error initializing category chart:', error);
-                var chartElement = document.querySelector("#category-chart");
-                if (chartElement) {
-                    chartElement.innerHTML = '<div class="text-center text-muted">Lỗi khi khởi tạo biểu đồ danh mục</div>';
-                }
-            }
-        }
-
-        // Global error handling
-        window.addEventListener('error', function(e) {
-            console.error('Global JavaScript Error:', e.error);
-            if (e.message.includes('ApexCharts')) {
-                console.warn('ApexCharts error - chart may not display');
             }
         });
+    });
 
-        // Unhandled promise rejection handling
-        window.addEventListener('unhandledrejection', function(e) {
-            console.error('Unhandled Promise Rejection:', e.reason);
-            e.preventDefault();
-        });
+    // Format numbers with thousand separator
+    function formatNumber(num) {
+        return new Intl.NumberFormat('vi-VN').format(num);
+    }
 
-        // Function to load sample revenue data
-        function loadSampleRevenueData() {
-            console.log('Loading sample revenue data...');
-            
-            var sampleRevenueData = [
-                { TimePeriod: "2024-01-01T00:00:00", Label: "01/2024", FormattedTimeLabel: "Tháng 1", Revenue: 15000000, Cost: 12000000, Profit: 3000000, OrderCount: 45 },
-                { TimePeriod: "2024-02-01T00:00:00", Label: "02/2024", FormattedTimeLabel: "Tháng 2", Revenue: 18000000, Cost: 14400000, Profit: 3600000, OrderCount: 52 },
-                { TimePeriod: "2024-03-01T00:00:00", Label: "03/2024", FormattedTimeLabel: "Tháng 3", Revenue: 22000000, Cost: 17600000, Profit: 4400000, OrderCount: 68 },
-                { TimePeriod: "2024-04-01T00:00:00", Label: "04/2024", FormattedTimeLabel: "Tháng 4", Revenue: 19500000, Cost: 15600000, Profit: 3900000, OrderCount: 58 },
-                { TimePeriod: "2024-05-01T00:00:00", Label: "05/2024", FormattedTimeLabel: "Tháng 5", Revenue: 25000000, Cost: 20000000, Profit: 5000000, OrderCount: 75 },
-                { TimePeriod: "2024-06-01T00:00:00", Label: "06/2024", FormattedTimeLabel: "Tháng 6", Revenue: 28000000, Cost: 22400000, Profit: 5600000, OrderCount: 82 }
-            ];
+    // Print functionality
+    function printReport() {
+        window.print();
+    }
+</script>
 
-            var revenueTimeOptions = {
-                chart: {
-                    type: 'bar',
-                    height: 350,
-                    animations: { enabled: false }
-                },
-                series: [{
-                    name: 'Doanh thu',
-                    data: sampleRevenueData.map(r => r.Revenue)
-                }, {
-                    name: 'Lợi nhuận',
-                    data: sampleRevenueData.map(r => r.Profit)
-                }],
-                xaxis: {
-                    categories: sampleRevenueData.map(r => r.FormattedTimeLabel)
-                },
-                colors: ['#1f58c7', '#2eb85c'],
-                title: {
-                    text: 'Dữ liệu mẫu - Doanh thu theo thời gian',
-                    style: { fontSize: '14px', color: '#666' }
-                }
-            };
-            
-            var chartElement = document.querySelector("#revenue-time-chart");
-            if (chartElement && typeof ApexCharts !== 'undefined') {
-                var revenueTimeChart = new ApexCharts(chartElement, revenueTimeOptions);
-                revenueTimeChart.render();
-                console.log('Sample revenue chart loaded');
-            }
-        }
-
-        // Function to load sample category data
-        function loadSampleCategoryData() {
-            console.log('Loading sample category data...');
-            
-            var sampleCategoryData = [
-                { CategoryId: 1, CategoryName: "Áo dài truyền thống", Revenue: 35000000, Percentage: 35.5 },
-                { CategoryId: 2, CategoryName: "Áo dài hiện đại", Revenue: 28000000, Percentage: 28.4 },
-                { CategoryId: 3, CategoryName: "Áo dài cưới", Revenue: 22000000, Percentage: 22.3 },
-                { CategoryId: 4, CategoryName: "Phụ kiện", Revenue: 8500000, Percentage: 8.6 },
-                { CategoryId: 5, CategoryName: "Khác", Revenue: 5500000, Percentage: 5.6 }
-            ];
-
-            var categoryOptions = {
-                chart: {
-                    type: 'pie',
-                    height: 350,
-                    animations: { enabled: false }
-                },
-                series: sampleCategoryData.map(c => c.Revenue),
-                labels: sampleCategoryData.map(c => c.CategoryName),
-                colors: ['#1f58c7', '#f1c40f', '#2eb85c', '#f56e6e', '#9b59b6'],
-                title: {
-                    text: 'Dữ liệu mẫu - Doanh thu theo danh mục',
-                    style: { fontSize: '14px', color: '#666' }
-                }
-            };
-            
-            var chartElement = document.querySelector("#category-chart");
-            if (chartElement && typeof ApexCharts !== 'undefined') {
-                var categoryChart = new ApexCharts(chartElement, categoryOptions);
-                categoryChart.render();
-                console.log('Sample category chart loaded');
-            }
-        }
-    </script>
+@if (ViewBag.ShowDebugInfo == true)
+{
+    <!-- Debug Information -->
+    <div class="alert alert-info mt-3">
+        <strong>Thông tin debug:</strong><br>
+        Request: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(request))<br>
+        Data count: @(Model?.RevenueByTime?.Count ?? 0)<br>
+        API Base URL: @(ViewBag.ApiBaseUrl ?? "Not configured")
+    </div>
 }
+
+<!-- Include XLSX library for Excel export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
