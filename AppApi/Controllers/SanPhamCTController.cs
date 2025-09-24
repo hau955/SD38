@@ -2,6 +2,7 @@
 using AppApi.IService;
 using Microsoft.EntityFrameworkCore;
 using AppData.Models;
+using ViewModels;
 
 namespace AppApi.Controllers
 {
@@ -74,16 +75,23 @@ namespace AppApi.Controllers
         [HttpGet("all")]
         public async Task<IActionResult> GetAll()
         {
-            try
+            var list = await _sanPhamCTService.GetAllAsync();
+
+            var result = list.Select(ct => new SanPhamCTViewModel
             {
-                var list = await _sanPhamCTService.GetAllAsync();
-                return Ok(list);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = ex.Message });
-            }
+                IDSanPhamCT = ct.IDSanPhamCT,
+                IDSanPham = ct.IDSanPham,
+                TenSanPham = ct.SanPham?.TenSanPham,
+                SoSize = ct.SizeAo?.SoSize,
+                TenMau = ct.MauSac?.TenMau,
+                TenChatLieu = ct.ChatLieu?.TenChatLieu,
+                GiaBan = ct.GiaBan,
+                SoLuongTonKho = ct.SoLuongTonKho
+            });
+
+            return Ok(result);
         }
+
     }
 
 

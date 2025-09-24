@@ -2,7 +2,6 @@
 using AppData.Models;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace AppApi.Service
 {
     public class GioHangCTService : IGioHangCTService
@@ -16,9 +15,11 @@ namespace AppApi.Service
             _gioHangService = gioHangService;
         }
 
-        // ✅ Thêm chi tiết giỏ hàng
+        // ✅ Thêm chi tiết giỏ hàng (giới hạn 10 loại, 10 cái/loại)
         public async Task<string> ThemChiTietAsync(Guid idUser, Guid idSanPhamCT, int soLuong)
         {
+            if (soLuong <= 0) return "❌ Số lượng không hợp lệ";
+
             var gioHang = await _gioHangService.TaoGioHangNeuChuaCoAsync(idUser);
 
             var spct = await _context.SanPhamChiTiets
@@ -30,12 +31,25 @@ namespace AppApi.Service
             var chiTiet = await _context.GioHangChiTiets
                 .FirstOrDefaultAsync(x => x.IDGioHang == gioHang.IDGioHang && x.IDSanPhamCT == idSanPhamCT);
 
+            // 🔎 Giới hạn số loại sản phẩm trong giỏ
+            var soLoaiSPTrongGio = await _context.GioHangChiTiets
+                .CountAsync(x => x.IDGioHang == gioHang.IDGioHang);
+            if (soLoaiSPTrongGio >= 10 && chiTiet == null)
+                return "❌ Giỏ hàng chỉ được chứa tối đa 10 loại sản phẩm.";
+
             if (chiTiet != null)
             {
+                // 🔎 Giới hạn 10 cái mỗi sản phẩm
+                if (chiTiet.SoLuong + soLuong > 10)
+                    return "❌ Mỗi sản phẩm chỉ được mua tối đa 10 cái.";
+
                 chiTiet.SoLuong += soLuong;
             }
             else
             {
+                if (soLuong > 10)
+                    return "❌ Mỗi sản phẩm chỉ được mua tối đa 10 cái.";
+
                 chiTiet = new GioHangCT
                 {
                     IDGioHangChiTiet = Guid.NewGuid(),
@@ -52,11 +66,14 @@ namespace AppApi.Service
             return "✅ Đã thêm chi tiết giỏ hàng";
         }
 
-        // ✅ Cập nhật số lượng
+        // ✅ Cập nhật số lượng (giới hạn 10 cái)
         public async Task<string> CapNhatSoLuongAsync(Guid idGioHangCT, int soLuongMoi)
         {
             var chiTiet = await _context.GioHangChiTiets.FindAsync(idGioHangCT);
             if (chiTiet == null) return "❌ Không tìm thấy chi tiết giỏ hàng";
+
+            if (soLuongMoi <= 0) return "❌ Số lượng không hợp lệ";
+            if (soLuongMoi > 10) return "❌ Mỗi sản phẩm chỉ được mua tối đa 10 cái.";
 
             chiTiet.SoLuong = soLuongMoi;
             await _context.SaveChangesAsync();
@@ -81,28 +98,17 @@ namespace AppApi.Service
         {
             var gioHang = await _gioHangService.TaoGioHangNeuChuaCoAsync(idUser);
 
-            Console.WriteLine($"[DEBUG] idUser: {idUser}, gioHang.IDGioHang: {gioHang.IDGioHang}");
-
             var list = await _context.GioHangChiTiets
-    .Where(x => x.IDGioHang == gioHang.IDGioHang)
-    .Include(x => x.SanPhamCT)
-        .ThenInclude(spct => spct.SanPham)
-            .ThenInclude(sp => sp.AnhSanPhams)   // cần dòng này
-    .Include(x => x.SanPhamCT.SizeAo)
-    .Include(x => x.SanPhamCT.MauSac)
-    .Include(x => x.SanPhamCT.ChatLieu)
-    .ToListAsync();
-
-
-
-            Console.WriteLine($"[DEBUG] SoLuong chi tiet: {list.Count}");
-            foreach (var item in list)
-            {
-                Console.WriteLine($" - CT: {item.IDGioHangChiTiet}, SPCT: {item.IDSanPhamCT}, SoLuong: {item.SoLuong}");
-            }
+                .Where(x => x.IDGioHang == gioHang.IDGioHang)
+                .Include(x => x.SanPhamCT)
+                    .ThenInclude(spct => spct.SanPham)
+                        .ThenInclude(sp => sp.AnhSanPhams)
+                .Include(x => x.SanPhamCT.SizeAo)
+                .Include(x => x.SanPhamCT.MauSac)
+                .Include(x => x.SanPhamCT.ChatLieu)
+                .ToListAsync();
 
             return list;
         }
-
     }
 }

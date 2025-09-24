@@ -14,6 +14,8 @@ namespace AppApi.IService
         Task<SanPham> Create(SanPhamCreateRequest sanpham);
         Task<SanPham> Update(SanPhamCreateRequest sanpham);
         Task<List<SanPhamDetailWithDiscountView>> SearchAndFilterAsync(SanPhamSearchRequest request);
+        Task<List<SanPhamDetailWithDiscountView>> QuickFilterAsync(SanPhamQuickFilterRequest request);
+        Task<SanPhamFilterDataResponse> GetFilterDataAsync();
 
     }
 }

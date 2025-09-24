@@ -114,12 +114,15 @@ namespace AppApi.Controllers
             {
                 IDSanPhamCT = spct.IDSanPhamCT,
                 IDSanPham = spct.IDSanPham,
-                TenSanPham = spct.SanPham?.TenSanPham,
-                Size = spct.SizeAo?.SoSize,
-                MauSac = spct.MauSac?.TenMau,
-                GiaBan = spct.GiaBan
+                TenSanPham = spct.TenSanPham,
+                SoSize = spct.SoSize,            // ✅ Size
+                TenMau = spct.TenMau,            // ✅ Màu
+                TenChatLieu = spct.TenChatLieu,// ✅ Chất liệu
+                GiaBan = spct.GiaBan,
+                SoLuongTonKho = spct.SoLuongTonKho
             }).ToList();
         }
+
         // ---------------- UPDATE (GET) ----------------
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)

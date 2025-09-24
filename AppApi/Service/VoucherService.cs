@@ -98,7 +98,7 @@ namespace AppApi.Service
             existing.SoTienGiam = voucher.SoTienGiam;
             existing.DieuKienToiThieu = voucher.DieuKienToiThieu;
             existing.SoLuong = voucher.SoLuong;
-            existing.SoLanSuDungToiDa = voucher.SoLanSuDungToiDa;
+            existing.SoLanSuDungToiDa = 1;
             existing.StartDate = voucher.StartDate;
             existing.EndDate = voucher.EndDate;
 

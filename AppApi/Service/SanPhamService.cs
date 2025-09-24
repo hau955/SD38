@@ -130,13 +130,17 @@ namespace AppApi.Service
                         TrangThai = ct.TrangThai,
                         GiaBan = ct.GiaBan,
                         SoLuongTonKho = ct.SoLuongTonKho,
+
                         IdMauSac = ct.IDMauSac,
-                        MauSac = ct.MauSac != null ? ct.MauSac.TenMau : null,
+                        TenMau = ct.MauSac != null ? ct.MauSac.TenMau : null,   // ✅ đúng
                         IdSize = ct.IDSize,
-                        Size = ct.SizeAo != null ? ct.SizeAo.SoSize : null,
+                        SoSize = ct.SizeAo != null ? ct.SizeAo.SoSize : null,   // ✅ đúng
                         IDChatLieu = ct.IdChatLieu,
+                        TenChatLieu = ct.ChatLieu != null ? ct.ChatLieu.TenChatLieu : null, // ✅ đúng
                         ChatLieu = ct.ChatLieu != null ? ct.ChatLieu.TenChatLieu : null
                     }).ToList()
+
+
                 })
                 .FirstOrDefaultAsync();
 
@@ -860,5 +864,150 @@ namespace AppApi.Service
 
             return result;
         }
+        public async Task<List<SanPhamDetailWithDiscountView>> QuickFilterAsync(SanPhamQuickFilterRequest request)
+        {
+            var query = _context.SanPhams
+                .Include(sp => sp.SanPhamChiTiets).ThenInclude(ct => ct.MauSac)
+                .Include(sp => sp.SanPhamChiTiets).ThenInclude(ct => ct.SizeAo)
+                .Include(sp => sp.SanPhamChiTiets).ThenInclude(ct => ct.ChatLieu)
+                .Include(sp => sp.AnhSanPhams)
+                .Include(sp => sp.DanhMuc)
+                .AsQueryable();
+
+            // lọc danh mục
+            if (request.DanhMucId != null && request.DanhMucId.Any())
+            {
+                query = query.Where(sp => request.DanhMucId.Contains(sp.DanhMucId));
+            }
+
+            // lọc màu sắc
+            if (request.IDMauSac != null && request.IDMauSac.Any())
+            {
+                query = query.Where(sp => sp.SanPhamChiTiets.Any(ct => request.IDMauSac.Contains(ct.IDMauSac)));
+            }
+
+            // lọc chất liệu
+            if (request.IDChatLieu != null && request.IDChatLieu.Any())
+            {
+                query = query.Where(sp => sp.SanPhamChiTiets.Any(ct => request.IDChatLieu.Contains(ct.IdChatLieu)));
+            }
+
+            // lọc size
+            if (request.IDSize != null && request.IDSize.Any())
+            {
+                query = query.Where(sp => sp.SanPhamChiTiets.Any(ct => request.IDSize.Contains(ct.IDSize)));
+            }
+
+            // lọc giá
+            if (request.GiaMin.HasValue || request.GiaMax.HasValue)
+            {
+                query = query.Where(sp => sp.SanPhamChiTiets.Any(ct =>
+                    (!request.GiaMin.HasValue || ct.GiaBan >= request.GiaMin.Value) &&
+                    (!request.GiaMax.HasValue || ct.GiaBan <= request.GiaMax.Value)));
+            }
+
+            var sanPhams = await query.ToListAsync();
+            var result = new List<SanPhamDetailWithDiscountView>();
+
+            foreach (var sp in sanPhams)
+            {
+                var giaGoc = sp.SanPhamChiTiets.Any() ? sp.SanPhamChiTiets.Min(ct => ct.GiaBan) : 0;
+
+                // lấy discount theo sp và danh mục (giống GetAllSanPhamsAsync)
+                var giamGiaSPs = await _context.GiamGiaSanPham
+                    .Include(x => x.GiamGia)
+                    .Where(x => x.IDSanPham == sp.IDSanPham &&
+                                x.GiamGia.NgayBatDau <= DateTime.Now &&
+                                x.GiamGia.NgayKetThuc >= DateTime.Now &&
+                                x.GiamGia.TrangThai)
+                    .Select(x => x.GiamGia)
+                    .ToListAsync();
+
+                var giamGiaDMs = await _context.GiamGiaDanhMuc
+                    .Include(x => x.GiamGia)
+                    .Where(x => x.DanhMucId == sp.DanhMucId &&
+                                x.GiamGia.NgayBatDau <= DateTime.Now &&
+                                x.GiamGia.NgayKetThuc >= DateTime.Now &&
+                                x.GiamGia.TrangThai)
+                    .Select(x => x.GiamGia)
+                    .ToListAsync();
+
+                var allDiscounts = giamGiaSPs.Any() ? giamGiaSPs : giamGiaDMs;
+
+                decimal giaSauGiam = giaGoc;
+                decimal? giaTriGiam = null;
+                foreach (var giamGia in allDiscounts)
+                {
+                    var tmp = giaGoc;
+                    var soTienGiam = 0m;
+
+                    if (giamGia.LoaiGiamGia == "PhanTram")
+                    {
+                        soTienGiam = giaGoc * (giamGia.GiaTri / 100);
+                        if (giamGia.GiaTriGiamToiDa.HasValue)
+                            soTienGiam = Math.Min(soTienGiam, giamGia.GiaTriGiamToiDa.Value);
+
+                        tmp = giaGoc - soTienGiam;
+                    }
+                    else if (giamGia.LoaiGiamGia == "SoTien")
+                    {
+                        soTienGiam = giamGia.GiaTri;
+                        tmp = Math.Max(0, giaGoc - soTienGiam);
+                    }
+
+                    if (tmp < giaSauGiam)
+                    {
+                        giaSauGiam = tmp;
+                        giaTriGiam = soTienGiam;
+                    }
+                }
+
+                result.Add(new SanPhamDetailWithDiscountView
+                {
+                    IDSanPham = sp.IDSanPham,
+                    TenSanPham = sp.TenSanPham,
+                    MoTa = sp.MoTa,
+                    TenDanhMuc = sp.DanhMuc?.TenDanhMuc,
+                    GiaGoc = giaGoc,
+                    GiaSauGiam = giaSauGiam,
+                    GiaTriGiam = giaTriGiam,
+                    DanhSachAnh = sp.AnhSanPhams.Select(a => new AnhSanPhamViewModel
+                    {
+                        IdAnh = a.IdAnh,
+                        IDSanPham = a.IDSanPham,
+                        DuongDanAnh = a.DuongDanAnh,
+                        AnhChinh = a.AnhChinh
+                    }).ToList(),
+                    ChiTiets = sp.SanPhamChiTiets.Select(ct => new SanPhamCTViewModel
+                    {
+                        IDSanPhamCT = ct.IDSanPhamCT,
+                        GiaBan = ct.GiaBan,
+                        SoLuongTonKho = ct.SoLuongTonKho,
+                        IdMauSac = ct.IDMauSac,
+                        MauSac = ct.MauSac?.TenMau,
+                        IdSize = ct.IDSize,
+                        Size = ct.SizeAo?.SoSize,
+                        IDChatLieu = ct.IdChatLieu,
+                        ChatLieu = ct.ChatLieu?.TenChatLieu
+                    }).ToList()
+                });
+            }
+
+            return result;
+        }
+        public async Task<SanPhamFilterDataResponse> GetFilterDataAsync()
+        {
+            var result = new SanPhamFilterDataResponse
+            {
+                DanhMucs = await _context.DanhMucs.ToListAsync(),
+                MauSacs = await _context.MauSacs.ToListAsync(),
+                ChatLieus = await _context.ChatLieus.ToListAsync(),
+                Sizes = await _context.Sizes.ToListAsync()
+            };
+
+            return result;
+        }
+
+
     }
 }

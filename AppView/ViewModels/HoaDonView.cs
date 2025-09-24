@@ -23,6 +23,8 @@ namespace AppView.ViewModels
         public decimal TongTienTruocGiam { get; set; }
         public decimal TongTienSauGiam { get; set; }
         public decimal? TienGiam { get; set; }
+        public decimal? TienGiamhoadon { get; set; }
+        public decimal? phiship { get; set; }
 
         public string TrangThaiDonHang { get; set; } = string.Empty;
         public string TrangThaiThanhToan { get; set; } = string.Empty;

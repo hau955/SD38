@@ -5,6 +5,9 @@
     var baseUrl = "https://localhost:7221/";
 }
 
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <style>
     body {
         font-family: 'Roboto', sans-serif;
@@ -12,14 +15,13 @@
         color: #333;
     }
 
-    /* Container */
     .cart-container {
         max-width: 1100px;
         margin: 40px auto;
         background: #fff;
         padding: 35px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
         border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     }
 
     h1 {
@@ -31,7 +33,6 @@
         padding-bottom: 15px;
     }
 
-    /* Cart table */
     .cart-header, .cart-item {
         display: grid;
         grid-template-columns: 3fr 1fr 2fr 1fr;
@@ -64,7 +65,6 @@
             height: 100px;
             border-radius: 10px;
             object-fit: cover;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
     .details h2 {
@@ -92,7 +92,6 @@
         font-size: 16px;
     }
 
-    /* Quantity */
     .item-quantity {
         display: flex;
         justify-content: center;
@@ -123,28 +122,22 @@
     }
 
     .update-btn {
-        display: inline-block;
         padding: 6px 14px;
         margin-left: 8px;
         font-size: 14px;
         font-weight: 600;
         color: #fff;
-        background: #4CAF50; /* xanh lá */
+        background: #4CAF50;
         border: none;
         border-radius: 6px;
         cursor: pointer;
-        transition: all 0.2s ease-in-out;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.1);
     }
 
-    /* Footer */
     .cart-footer {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-top: 25px;
-        flex-wrap: wrap;
-        gap: 15px;
     }
 
     .total-amount {
@@ -166,7 +159,6 @@
             background: #e85c2e;
         }
 
-    /* Modal */
     #checkoutModal {
         display: none;
         position: fixed;
@@ -195,8 +187,7 @@
             color: #34495e;
         }
 
-        #checkoutModal select,
-        #checkoutModal textarea {
+        #checkoutModal select, #checkoutModal textarea {
             width: 100%;
             padding: 10px;
             border-radius: 6px;
@@ -211,10 +202,6 @@
         font-size: 15px;
         margin: 15px 0;
     }
-
-        .checkout-summary p {
-            margin: 5px 0;
-        }
 
         .checkout-summary strong {
             font-size: 18px;
@@ -259,29 +246,32 @@
     {
         <div class="cart-item">
             <div class="item-info">
-                
-
-                <img src="@($"{baseUrl}{@item.SanPhamCT?.SanPham?.AnhSanPhams.FirstOrDefault(b=>b.AnhChinh==true)?.DuongDanAnh}")" alt="@item.SanPhamCT?.SanPham?.TenSanPham" />
+                <img src="@($"{baseUrl}{item.SanPhamCT?.SanPham?.AnhSanPhams.FirstOrDefault(b=>b.AnhChinh)?.DuongDanAnh}")"
+                     alt="@item.SanPhamCT?.SanPham?.TenSanPham" />
                 <div class="details">
                     <h2>@item.SanPhamCT?.SanPham?.TenSanPham</h2>
                     <p>Size: @item.SanPhamCT?.SizeAo?.SoSize / Màu: @item.SanPhamCT?.MauSac?.TenMau</p>
-                    <p>Thương hiệu: @item.SanPhamCT?.ChatLieu?.TenChatLieu</p>
+                    <p>Chất liệu: @item.SanPhamCT?.ChatLieu?.TenChatLieu</p>
                     <form asp-action="Delete" method="post" style="display:inline">
                         <input type="hidden" name="IdGioHangCT" value="@item.IDGioHangChiTiet" />
                         <button type="submit" class="remove">🗑 Xóa</button>
                     </form>
                 </div>
             </div>
+
             <div class="item-price">@item.DonGia.ToString("N0")₫</div>
+
             <div class="item-quantity">
                 <form asp-action="UpdateQty" method="post" class="qty-form">
                     <input type="hidden" name="IdGioHangCT" value="@item.IDGioHangChiTiet" />
                     <button type="button" class="qty-btn" onclick="changeQty(this,-1)">−</button>
-                    <input type="text" name="SoLuongMoi" value="@item.SoLuong" class="qty-input" readonly />
+                    <input type="text" name="SoLuongMoi" value="@item.SoLuong"
+                           class="qty-input" readonly data-max="@item.SanPhamCT?.SoLuongTonKho" />
                     <button type="button" class="qty-btn" onclick="changeQty(this,1)">+</button>
                     <button type="submit" class="update-btn">Cập nhật</button>
                 </form>
             </div>
+
             <div class="item-total">@((item.SoLuong * item.DonGia).ToString("N0"))₫</div>
         </div>
     }
@@ -299,28 +289,22 @@
 <!-- Modal Checkout -->
 <div id="checkoutModal">
     <h2>🛒 Thanh toán đơn hàng</h2>
-
     <h3>1. Địa chỉ nhận hàng</h3>
     <div id="diaChiList"></div>
-
     <h3>2. Hình thức thanh toán</h3>
     <select id="selectHinhThucTT"></select>
-
     <h3>3. Chọn voucher</h3>
     <select id="selectVoucher" onchange="applyVoucher()">
         <option value="">Không dùng voucher</option>
     </select>
-
     <h3>4. Ghi chú</h3>
     <textarea id="noteModal" placeholder="Nhập ghi chú..."></textarea>
-
     <div class="checkout-summary" id="checkoutSummary">
         <p>Tiền hàng: <span id="checkoutTienHang">0 ₫</span></p>
         <p>Phí ship: <span id="checkoutPhiShip">30,000 ₫</span></p>
         <p>Giảm giá: <span id="checkoutGiamGia">0 ₫</span></p>
         <p><strong>Tổng cộng: <span id="checkoutTotal">0 ₫</span></strong></p>
     </div>
-
     <div class="modal-actions">
         <button class="btn-confirm" onclick="confirmCheckout()">Xác nhận</button>
         <button class="btn-cancel" onclick="closeCheckoutModal()">Hủy</button>
@@ -333,15 +317,36 @@
         let phiShip = 30000;
         let danhSachVoucher = [];
 
+        // 👉 Tăng/giảm số lượng có validate tồn kho
         function changeQty(button, delta){
             const form = button.closest(".qty-form");
             const input = form.querySelector(".qty-input");
+            const max = parseInt(input.getAttribute("data-max"));
             let value = parseInt(input.value) || 0;
+
             value += delta;
-            if(value<1) value=1;
-            input.value=value;
+            if(value < 1) value = 1;
+            if(value > max){
+                Swal.fire("Lỗi", `⚠️ Chỉ còn ${max} sản phẩm trong kho`, "warning");
+                value = max;
+            }
+            input.value = value;
         }
 
+        // 👉 Validate khi cập nhật số lượng
+        document.querySelectorAll(".qty-form").forEach(form => {
+            form.addEventListener("submit", function(e){
+                const input = form.querySelector(".qty-input");
+                const max = parseInt(input.getAttribute("data-max"));
+                const value = parseInt(input.value);
+                if(value > max){
+                    e.preventDefault();
+                    Swal.fire("Lỗi", `⚠️ Không đủ hàng. Hiện chỉ còn ${max} sản phẩm.`, "error");
+                }
+            });
+        });
+
+        // 👉 Mở modal checkout
         async function openCheckoutModal(){
             document.getElementById("checkoutModal").style.display="block";
             await loadDiaChiUser();
@@ -351,7 +356,7 @@
             document.getElementById("checkoutModal").style.display="none";
         }
 
-        // Load địa chỉ
+        // 👉 Load địa chỉ người dùng
         async function loadDiaChiUser(){
             const idUser = "@Context.Session.GetString("ID")";
             const res = await fetch(`https://localhost:7221/api/HoaDon/diachi/${idUser}`);
@@ -375,9 +380,8 @@
             }
         }
 
-        // Load thanh toán + voucher
+        // 👉 Load hình thức thanh toán + voucher
         async function loadCheckoutOptions(){
-            // Hình thức thanh toán
             const resTT = await fetch('https://localhost:7221/api/HoaDon/get-hinhthucthanhtoan');
             if(resTT.ok){
                 const dataTT = await resTT.json();
@@ -391,14 +395,13 @@
                 });
             }
 
-            // Voucher
             const resVoucher = await fetch('https://localhost:7221/api/HoaDon/get-all');
             if(resVoucher.ok){
                 const dataVoucher = await resVoucher.json();
                 danhSachVoucher = dataVoucher.data;
                 const selectVoucher = document.getElementById("selectVoucher");
                 selectVoucher.innerHTML = '<option value="">Không dùng voucher</option>';
-                dataVoucher.data.forEach(v=>{
+                danhSachVoucher.forEach(v=>{
                     if(v.soLanSuDungToiDa && v.daSuDung >= v.soLanSuDungToiDa) return;
                     const option = document.createElement("option");
                     option.value=v.idVoucher;
@@ -406,10 +409,10 @@
                     selectVoucher.appendChild(option);
                 });
             }
-            // 👉 Tính tổng ngay khi load
             applyVoucher();
         }
 
+        // 👉 Áp dụng voucher
         function applyVoucher(){
             const selectVoucher = document.getElementById("selectVoucher");
             const idVoucher = selectVoucher.value;
@@ -436,31 +439,34 @@
             document.getElementById("checkoutTotal").innerText = tong.toLocaleString()+" ₫";
         }
 
+        // 👉 Xác nhận thanh toán
         async function confirmCheckout(){
             const idUser = "@Context.Session.GetString("ID")";
             const idHinhThucTT = document.getElementById("selectHinhThucTT").value;
-            const idVoucher = document.getElementById("selectVoucher").value || null;
+            const idVoucher = document.getElementById("selectVoucher").value;
             const note = document.getElementById("noteModal").value;
             const diaChiRadio = document.querySelector("input[name='idDiaChi']:checked");
-            if(!diaChiRadio){ alert("⚠️ Vui lòng chọn địa chỉ"); return; }
+            if(!diaChiRadio){ Swal.fire("Lỗi", "⚠️ Vui lòng chọn địa chỉ", "error"); return; }
             const idDiaChi = diaChiRadio.value;
 
+            let url = `https://localhost:7221/api/HoaDon/checkout?idUser=${idUser}&idHinhThucTT=${idHinhThucTT}&idDiaChi=${idDiaChi}&ghiChu=${encodeURIComponent(note)}`;
+            if(idVoucher){ url += `&idVoucher=${idVoucher}`; }
+
             try{
-                const res = await fetch(`https://localhost:7221/api/HoaDon/checkout?idUser=${idUser}&idHinhThucTT=${idHinhThucTT}&idVoucher=${idVoucher}&idDiaChi=${idDiaChi}&ghiChu=${encodeURIComponent(note)}`, {method:"POST"});
+                const res = await fetch(url, {method:"POST"});
                 const data = await res.json();
                 if(res.ok){
-                    alert("✅ Thanh toán thành công");
+                    Swal.fire("Thành công", "✅ Thanh toán thành công!", "success");
                     if(data.hoaDon && data.hoaDon.iDHoaDon){
                         window.location.href="/HoaDon/ChiTiet/"+data.hoaDon.iDHoaDon;
                     } else window.location.reload();
                 } else {
-                    alert("❌ Lỗi: "+(data.message || "Thanh toán thất bại"));
+                    Swal.fire("Lỗi", data.message || "Thanh toán thất bại", "error");
                 }
             }catch(err){
                 console.error(err);
-                alert("❌ Lỗi kết nối API");
+                Swal.fire("Lỗi", "❌ Lỗi kết nối API", "error");
             }
         }
     </script>
 }
- 
