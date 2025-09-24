@@ -21,5 +21,7 @@ namespace AppApi.IService
         Task<List<HoaDon>> LayHoaDonTheoUserAsync(Guid idUser);
         Task<HoaDonView?> XemChiTietHoaDonAsync(Guid idHoaDon);
         Task<List<DiaChiNhanHang>> GetDiaChiByUserAsync(Guid idUser);
+        Task<List<Voucher>> LayTatCaVoucherAsync();
+        Task<List<HinhThucTT>> GetAllAsync();
     }
 }

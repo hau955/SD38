@@ -11,7 +11,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NEM - Giáng Sơn</title>
+    <title>The Ao Dai</title>
 
     <!-- CSS chính -->
     <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
@@ -125,9 +125,14 @@
         </div>
     </header>
     <li>
-        <a<a asp-controller="GioHangChiTiet" asp-action="Index" class="btn btn-primary">
-    🛒 Xem giỏ hàng
-</a>
+        <a href="@Url.Action("Index", "GioHangChiTiet")" class="btn btn-primary">
+            🛒 Xem giỏ hàng
+        </a>
+    </li>
+    <li>
+        <a href="@Url.Action("Index", "HoaDon")" class="btn btn-primary">
+            🛒 Xem Đơn Hàng
+        </a>
     </li>
     <div class="breadcrumb">TRANG CHỦ / ÁO DÀI</div>
 
@@ -135,60 +140,7 @@
         <img src="~/img/anhbaner1.png" alt="Giáng Sơn Áo Dài" class="banner-img" asp-append-version="true" />
     </section>
 
-    <div class="container">
-        <aside class="sidebar">
-            <!-- Danh mục sản phẩm -->
-            <h3>Danh mục</h3>
-            <ul>
-                <li><strong>Tất cả sản phẩm</strong></li>
-                <li>
-                    <strong>Đầm</strong>
-                    <ul>
-                        <li>Đầm suông</li>
-                        <li>Đầm dáng A</li>
-                        <li>Đầm ôm</li>
-                        <li>Đầm maxi</li>
-                    </ul>
-                </li>
-                <li>
-                    <strong>Áo</strong>
-                    <ul>
-                        <li>Ngắn tay</li>
-                        <li>Tay lỡ</li>
-                        <li>Dài tay</li>
-                    </ul>
-                </li>
-                <li>
-                    <strong>Quần</strong>
-                    <ul>
-                        <li>Quần short</li>
-                        <li>Quần lửng</li>
-                        <li>Quần dài</li>
-                        <li>Quần jeans</li>
-                    </ul>
-                </li>
-                <li>
-                    <strong>Chân váy</strong>
-                    <ul>
-                        <li>Chân váy xếp li</li>
-                        <li>Chân váy bút chì</li>
-                        <li>Chân váy chữ A</li>
-                    </ul>
-                </li>
-                <li><strong>Set bộ</strong></li>
-                <li><strong>Jumpsuit</strong></li>
-                <li><strong>Áo dài</strong></li>
-                <li>
-                    <strong>Áo khoác</strong>
-                    <ul>
-                        <li>Măng tô</li>
-                        <li>Áo vest</li>
-                        <li>Áo phao</li>
-                    </ul>
-                </li>
-            </ul>
-        </aside>
-
+    <div class="container-fluid">
         <main class="product-section">
             @RenderBody()
         </main>
@@ -197,7 +149,7 @@
     <!-- Đăng ký nhận bản tin -->
     <section class="newsletter">
         <h2>ĐĂNG KÝ BẢN TIN</h2>
-        <p>Đăng ký nhận bản tin NEM để được cập nhật những mẫu thiết kế mới nhất</p>
+        <p>Đăng ký nhận bản tin The Ao Dai  để được cập nhật những mẫu thiết kế mới nhất</p>
         <form class="subscribe-form">
             <input type="email" placeholder="Vui lòng nhập email..." />
             <button type="submit">ĐĂNG KÝ</button>

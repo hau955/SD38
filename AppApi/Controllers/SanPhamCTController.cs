@@ -2,6 +2,7 @@
 using AppApi.IService;
 using Microsoft.EntityFrameworkCore;
 using AppData.Models;
+using ViewModels;
 
 namespace AppApi.Controllers
 {
@@ -71,6 +72,26 @@ namespace AppApi.Controllers
             var exists = await _sanPhamCTService.ExistsAsync(idSanPham, idMau, idSize, idchatlieu);
             return Ok(exists);
         }
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAll()
+        {
+            var list = await _sanPhamCTService.GetAllAsync();
+
+            var result = list.Select(ct => new SanPhamCTViewModel
+            {
+                IDSanPhamCT = ct.IDSanPhamCT,
+                IDSanPham = ct.IDSanPham,
+                TenSanPham = ct.SanPham?.TenSanPham,
+                SoSize = ct.SizeAo?.SoSize,
+                TenMau = ct.MauSac?.TenMau,
+                TenChatLieu = ct.ChatLieu?.TenChatLieu,
+                GiaBan = ct.GiaBan,
+                SoLuongTonKho = ct.SoLuongTonKho
+            });
+
+            return Ok(result);
+        }
+
     }
 
 

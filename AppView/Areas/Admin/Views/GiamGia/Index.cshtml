@@ -4,6 +4,7 @@
     ViewData["Title"] = "Quản lý Giảm Giá";
 }
 
+
 <!-- Custom Style -->
 <style>
     .table-wrapper {
@@ -389,3 +390,96 @@
         }
     </div>
 </div>
+
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-gradient bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">📋 Danh sách giảm giá</h4>
+            <a asp-area="Admin" asp-controller="GiamGia" asp-action="Create" class="btn btn-light fw-bold">
+                + Thêm giảm giá
+            </a>
+        </div>
+
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Tên chương trình</th>
+                        <th>Loại</th>
+                        <th>Giá trị</th>
+                        <th>Ngày bắt đầu</th>
+                        <th>Ngày kết thúc</th>
+                        <th>Trạng thái</th>
+                        <th class="text-center">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.TenGiamGia</td>
+
+                                <td>
+                                    @if (item.LoaiGiamGia == "PhanTram")
+                                    {
+                                        <span class="badge bg-info">Phần trăm</span>
+                                    }
+                                    else if (item.LoaiGiamGia == "SoTien")
+                                    {
+                                        <span class="badge bg-success">Số tiền</span>
+                                    }
+                                </td>
+
+                                <td>
+                                    @if (item.LoaiGiamGia == "PhanTram")
+                                    {
+                                        @($"{item.GiaTri} %")
+                                    }
+                                    else
+                                    {
+                                        @($"{item.GiaTri:N0} VNĐ")
+                                    }
+                                </td>
+
+                                <td>@item.NgayBatDau.ToString("dd/MM/yyyy")</td>
+                                <td>@item.NgayKetThuc.ToString("dd/MM/yyyy")</td>
+
+                                <td>
+                                    @if (item.TrangThai)
+                                    {
+                                        <span class="badge bg-primary">Đang hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Ngừng</span>
+                                    }
+                                </td>
+
+                                <td class="text-center">
+                                  
+                                    <a asp-area="Admin" asp-controller="GiamGia" asp-action="Edit" asp-route-id="@item.IDGiamGia" class="btn btn-sm btn-warning me-1">
+                                        <i class="bi bi-pencil-square"></i> Sửa
+                                    </a>
+                                    <a asp-area="Admin" asp-controller="GiamGia" asp-action="Delete" asp-route-id="@item.IDGiamGia"
+                                       class="btn btn-sm btn-danger"
+                                       onclick="return confirm('Bạn có chắc muốn xóa giảm giá này?')">
+                                        <i class="bi bi-trash"></i> Xóa
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">Không có chương trình giảm giá nào</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

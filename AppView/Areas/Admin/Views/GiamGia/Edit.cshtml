@@ -1,0 +1,165 @@
+﻿@model AppView.Areas.Admin.ViewModels.GiamGiaCreateVM
+
+<h2>Sửa giảm giá</h2>
+
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-gradient bg-warning text-white">
+            <h4 class="mb-0">✏️ Cập nhật chương trình giảm giá</h4>
+        </div>
+
+        <div class="card-body">
+            <form asp-area="Admin" asp-controller="GiamGia" asp-action="Edit" method="post">
+                <input type="hidden" asp-for="GiamGia.IDGiamGia" />
+                <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+
+                <div class="row">
+                    <!-- Tên giảm giá -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="GiamGia.TenGiamGia" class="form-label fw-bold"></label>
+                        <input asp-for="GiamGia.TenGiamGia" class="form-control" placeholder="Nhập tên chương trình" />
+                        <span asp-validation-for="GiamGia.TenGiamGia" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Loại giảm giá -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="GiamGia.LoaiGiamGia" class="form-label fw-bold">Loại giảm giá</label>
+                        <select asp-for="GiamGia.LoaiGiamGia" class="form-select" id="LoaiGiamGiaSelect">
+                            <option value="">-- Chọn loại giảm giá --</option>
+                            <option value="PhanTram" selected="@(Model.GiamGia.LoaiGiamGia == "PhanTram")">Phần trăm</option>
+                            <option value="SoTien" selected="@(Model.GiamGia.LoaiGiamGia == "SoTien")">Số tiền</option>
+                        </select>
+                        <span asp-validation-for="GiamGia.LoaiGiamGia" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Giá trị giảm -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="GiamGia.GiaTri" class="form-label fw-bold"></label>
+                        <div class="input-group">
+                            <input asp-for="GiamGia.GiaTri" class="form-control" id="GiaTriInput" />
+                            <span class="input-group-text bg-light fw-bold" id="GiaTriUnit">%</span>
+                        </div>
+                        <span asp-validation-for="GiamGia.GiaTri" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Giá trị giảm tối đa -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="GiamGia.GiaTriGiamToiDa" class="form-label fw-bold"></label>
+                        <div class="input-group">
+                            <input asp-for="GiamGia.GiaTriGiamToiDa" class="form-control" id="GiaTriMaxInput" />
+                            <span class="input-group-text bg-light fw-bold">VNĐ</span>
+                        </div>
+                        <span asp-validation-for="GiamGia.GiaTriGiamToiDa" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Ngày bắt đầu -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="GiamGia.NgayBatDau" class="form-label fw-bold"></label>
+                        <input asp-for="GiamGia.NgayBatDau" type="date" class="form-control" id="NgayBatDauInput" />
+                        <span asp-validation-for="GiamGia.NgayBatDau" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Ngày kết thúc -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="GiamGia.NgayKetThuc" class="form-label fw-bold"></label>
+                        <input asp-for="GiamGia.NgayKetThuc" type="date" class="form-control" id="NgayKetThucInput" />
+                        <span asp-validation-for="GiamGia.NgayKetThuc" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input asp-for="GiamGia.TrangThai" class="form-check-input" />
+                    <label asp-for="GiamGia.TrangThai" class="form-check-label fw-bold">Kích hoạt</label>
+                </div>
+
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-success px-4">
+                        💾 Lưu thay đổi
+                    </button>
+                    <a asp-area="Admin" asp-controller="GiamGia" asp-action="Index" class="btn btn-secondary px-4">
+                        ⬅ Quay lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(function () {
+            const $loai = $('#LoaiGiamGiaSelect');
+            const $giaTri = $('#GiaTriInput');
+            const $giaTriMax = $('#GiaTriMaxInput');
+            const $ngayBD = $('#NgayBatDauInput');
+            const $ngayKT = $('#NgayKetThucInput');
+            const $unit = $('#GiaTriUnit');
+
+            // đổi ký hiệu theo loại giảm giá
+            function updateUnit() {
+                if ($loai.val() === "PhanTram") {
+                    $unit.text("%");
+                } else if ($loai.val() === "SoTien") {
+                    $unit.text("VNĐ");
+                } else {
+                    $unit.text("");
+                }
+            }
+            $loai.on("change", updateUnit);
+            updateUnit();
+
+            $('form').on('submit', function (e) {
+                let isValid = true;
+                let message = "";
+
+                const loai = $loai.val();
+                const giaTri = parseFloat($giaTri.val());
+                const giaTriMax = parseFloat($giaTriMax.val());
+                const ngayBD = new Date($ngayBD.val());
+                const ngayKT = new Date($ngayKT.val());
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                // Validate Giá trị
+                if (loai === "PhanTram") {
+                    if (isNaN(giaTri) || giaTri < 1 || giaTri > 100) {
+                        isValid = false;
+                        message = "Nếu chọn phần trăm thì Giá trị phải từ 1 đến 100.";
+                    }
+                } else if (loai === "SoTien") {
+                    if (isNaN(giaTri) || giaTri < 10000 || giaTri > 500000) {
+                        isValid = false;
+                        message = "Nếu chọn số tiền thì Giá trị phải từ 10,000 đến 500,000 VNĐ.";
+                    }
+                }
+
+                // Validate Giá trị giảm tối đa
+                if (isValid && (!isNaN(giaTriMax) && giaTriMax > 500000)) {
+                    isValid = false;
+                    message = "Giá trị giảm tối đa không được vượt quá 500,000 VNĐ.";
+                }
+
+                // Validate ngày
+                if (isValid && $ngayBD.val()) {
+                    if (ngayBD < today) {
+                        isValid = false;
+                        message = "Ngày bắt đầu phải lớn hơn hoặc bằng hôm nay.";
+                    }
+                }
+                if (isValid && $ngayBD.val() && $ngayKT.val()) {
+                    if (ngayKT < ngayBD) {
+                        isValid = false;
+                        message = "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.";
+                    }
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    alert(message);
+                }
+            });
+        });
+    </script>
+}

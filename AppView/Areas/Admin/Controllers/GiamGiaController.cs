@@ -15,9 +15,9 @@ namespace AppApi.Controllers
     public class GiamGiaController : Controller
     {
         private readonly IGiamGiaRepo _repo;
-        private readonly ISanPhamRepo _spRepo;       // repo sản phẩm
-        private readonly ISanPhamCTRepo _spctRepo;   // repo spct
-        private readonly IDanhMucRePo _dmRepo;       // repo danh mục
+        private readonly ISanPhamRepo _spRepo;
+        private readonly ISanPhamCTRepo _spctRepo;
+        private readonly IDanhMucRePo _dmRepo;
 
         public GiamGiaController(
             IGiamGiaRepo repo,
@@ -48,6 +48,7 @@ namespace AppApi.Controllers
 
             return Json(result);
         }
+<<<<<<< HEAD
 
     public async Task<IActionResult> Index(string searchTerm, string statusFilter, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 10)
     {
@@ -55,18 +56,26 @@ namespace AppApi.Controllers
 
         // Lọc dữ liệu (ví dụ)
         if (!string.IsNullOrEmpty(searchTerm))
+=======
+        public async Task<IActionResult> Index(string searchTerm, string statusFilter, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 10)
+>>>>>>> ca3f861e75abbe9f4ed112a7df1b8bebc5ec2764
         {
-            list = list.Where(x => x.TenGiamGia.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            var list = await _repo.GetAllAsync();
+
+            // Lọc dữ liệu (ví dụ)
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                list = list.Where(x => x.TenGiamGia.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            // Chuyển sang PagedList
+            var pagedList = list.ToPagedList(page, pageSize);
+
+            return View(pagedList);
         }
 
-        // Chuyển sang PagedList
-        var pagedList = list.ToPagedList(page, pageSize);
 
-        return View(pagedList);
-    }
-
-
-    [HttpGet]
+        [HttpGet]
         public async Task<IActionResult> Create()
         {
             var vm = new GiamGiaCreateVM
@@ -78,48 +87,54 @@ namespace AppApi.Controllers
                 },
                 SanPhams = await _spRepo.GetAllSanPhamAsync(),
                 DanhMucs = await _dmRepo.GetAllDanhMucsAsync(),
-              
+
             };
 
             return View(vm);
         }
 
+
+   
+        // ---------------- CREATE (GET) ----------------
+       
+        // ---------------- CREATE (POST) ----------------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(GiamGiaCreateVM vm)
         {
             if (!ModelState.IsValid)
             {
-                // load lại dữ liệu nếu form lỗi
-                vm.DanhMucs = await _dmRepo.GetAllDanhMucsAsync();
-                vm.SanPhams = await _spRepo.GetAllSanPhamAsync();
-               // vm.SanPhamCTs = await _repo.GetSanPhamCTAsync();
+                await LoadDropdowns(vm);
                 return View(vm);
             }
 
             try
             {
-                // 1. Tạo Giảm Giá qua API (API sẽ tự sinh Guid)
+                // Tạo giảm giá
                 var created = await _repo.CreateAsync(vm.GiamGia);
 
-                // 2. Gắn sản phẩm
-                if (vm.SelectedSanPhams != null)
-                {
-                    foreach (var spId in vm.SelectedSanPhams)
-                    {
-                        await _repo.AddProductToDiscountAsync(created.IDGiamGia, spId);
-                    }
-                }
-
-                // 3. Gắn danh mục
-                if (vm.SelectedDanhMucs != null)
+                // Chỉ chọn 1 loại trong 3
+                if (vm.SelectedDanhMucs != null && vm.SelectedDanhMucs.Any())
                 {
                     foreach (var dmId in vm.SelectedDanhMucs)
                     {
                         await _repo.AddCategoryToDiscountAsync(created.IDGiamGia, dmId);
                     }
                 }
-
+                else if (vm.SelectedSanPhams != null && vm.SelectedSanPhams.Any())
+                {
+                    foreach (var spId in vm.SelectedSanPhams)
+                    {
+                        await _repo.AddProductToDiscountAsync(created.IDGiamGia, spId);
+                    }
+                }
+                else if (vm.SelectedSPCTs != null && vm.SelectedSPCTs.Any())
+                {
+                    foreach (var spctId in vm.SelectedSPCTs)
+                    {
+                        await _repo.AddSanPhamCTToDiscountAsync(created.IDGiamGia, spctId);
+                    }
+                }
 
                 TempData["Success"] = "Tạo giảm giá thành công!";
                 return RedirectToAction(nameof(Index));
@@ -127,11 +142,110 @@ namespace AppApi.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("", $"Lỗi khi tạo giảm giá: {ex.Message}");
-                vm.DanhMucs = await _dmRepo.GetAllDanhMucsAsync();
-                vm.SanPhams = await _spRepo.GetAllSanPhamAsync();
-             
+                await LoadDropdowns(vm);
                 return View(vm);
             }
         }
+
+        // ---------------- PRIVATE HELPER ----------------
+        private async Task LoadDropdowns(GiamGiaCreateVM vm)
+        {
+            vm.DanhMucs = await _dmRepo.GetAllDanhMucsAsync();
+            vm.SanPhams = await _spRepo.GetAllSanPhamAsync();
+
+            vm.SPCTs = (await _spctRepo.GetAllAsync()).Select(spct => new SanPhamCTViewModel
+            {
+                IDSanPhamCT = spct.IDSanPhamCT,
+                IDSanPham = spct.IDSanPham,
+                TenSanPham = spct.TenSanPham,
+                SoSize = spct.SoSize,            // ✅ Size
+                TenMau = spct.TenMau,            // ✅ Màu
+                TenChatLieu = spct.TenChatLieu,// ✅ Chất liệu
+                GiaBan = spct.GiaBan,
+                SoLuongTonKho = spct.SoLuongTonKho
+            }).ToList();
+        }
+
+        // ---------------- UPDATE (GET) ----------------
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var giamGia = await _repo.GetByIdAsync(id);
+            if (giamGia == null) return NotFound();
+
+            var vm = new GiamGiaCreateVM
+            {
+                GiamGia = giamGia
+            };
+
+            await LoadDropdowns(vm);
+            return View(vm);
+        }
+
+        // ---------------- UPDATE (POST) ----------------
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, GiamGiaCreateVM vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                await LoadDropdowns(vm);
+                return View(vm);
+            }
+
+            try
+            {
+                var updated = await _repo.UpdateAsync(id, vm.GiamGia);
+                if (!updated)
+                {
+                    ModelState.AddModelError("", "Không tìm thấy giảm giá để cập nhật");
+                    await LoadDropdowns(vm);
+                    return View(vm);
+                }
+
+                TempData["Success"] = "Cập nhật giảm giá thành công!";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Lỗi khi cập nhật giảm giá: {ex.Message}");
+                await LoadDropdowns(vm);
+                return View(vm);
+            }
+        }// ---------------- DELETE (GET) ----------------
+        [HttpGet]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var giamGia = await _repo.GetByIdAsync(id);
+            if (giamGia == null) return NotFound();
+
+            return View(giamGia); // View confirm delete
+        }
+
+        // ---------------- DELETE (POST) ----------------
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        {
+            try
+            {
+                var deleted = await _repo.DeleteAsync(id);
+                if (!deleted)
+                {
+                    TempData["Error"] = "Không tìm thấy giảm giá để xóa!";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                TempData["Success"] = "Xóa giảm giá thành công!";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Lỗi khi xóa giảm giá: {ex.Message}";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+
     }
 }

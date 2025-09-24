@@ -35,35 +35,50 @@ namespace AppApi.Service
         }
 
         // ✅ Lấy giá sau giảm (nếu có khuyến mãi)
-        private async Task<decimal> TinhGiaSauGiam(Guid idSanPham, decimal giaGoc)
+        // ✅ Tính giá sau giảm (ưu tiên SPCT > SP > Danh mục)
+        private async Task<decimal> TinhGiaSauGiam(Guid idSanPhamCT, decimal giaGoc)
         {
-            var sp = await _context.SanPhams
-                .Include(x => x.DanhMuc)
-                .FirstOrDefaultAsync(x => x.IDSanPham == idSanPham);
+            var spct = await _context.SanPhamChiTiets
+                .Include(x => x.SanPham)
+                .ThenInclude(x => x.DanhMuc)
+                .FirstOrDefaultAsync(x => x.IDSanPhamCT == idSanPhamCT);
 
-            if (sp == null) return giaGoc;
+            if (spct == null) return giaGoc;
 
-            // Lấy giảm giá theo sản phẩm
+            // 🔎 Giảm giá theo sản phẩm chi tiết
+            var giamGiaSPCTs = await _context.GiamGiaSPCT
+                .Include(x => x.GiamGia)
+                .Where(x => x.IDSanPhamCT == idSanPhamCT &&
+                            x.GiamGia.TrangThai &&
+                            x.GiamGia.NgayBatDau <= DateTime.Now &&
+                            x.GiamGia.NgayKetThuc >= DateTime.Now)
+                .Select(x => x.GiamGia)
+                .ToListAsync();
+
+            // 🔎 Giảm giá theo sản phẩm
             var giamGiaSPs = await _context.GiamGiaSanPham
                 .Include(x => x.GiamGia)
-                .Where(x => x.IDSanPham == idSanPham &&
+                .Where(x => x.IDSanPham == spct.IDSanPham &&
+                            x.GiamGia.TrangThai &&
                             x.GiamGia.NgayBatDau <= DateTime.Now &&
-                            x.GiamGia.NgayKetThuc >= DateTime.Now &&
-                            x.GiamGia.TrangThai)
+                            x.GiamGia.NgayKetThuc >= DateTime.Now)
                 .Select(x => x.GiamGia)
                 .ToListAsync();
 
-            // Lấy giảm giá theo danh mục
+            // 🔎 Giảm giá theo danh mục
             var giamGiaDMs = await _context.GiamGiaDanhMuc
                 .Include(x => x.GiamGia)
-                .Where(x => x.DanhMucId == sp.DanhMucId &&
+                .Where(x => x.DanhMucId == spct.SanPham.DanhMucId &&
+                            x.GiamGia.TrangThai &&
                             x.GiamGia.NgayBatDau <= DateTime.Now &&
-                            x.GiamGia.NgayKetThuc >= DateTime.Now &&
-                            x.GiamGia.TrangThai)
+                            x.GiamGia.NgayKetThuc >= DateTime.Now)
                 .Select(x => x.GiamGia)
                 .ToListAsync();
 
-            var allDiscounts = giamGiaSPs.Any() ? giamGiaSPs : giamGiaDMs;
+            // Ưu tiên: SPCT > SP > DM
+            var allDiscounts = giamGiaSPCTs.Any() ? giamGiaSPCTs
+                             : giamGiaSPs.Any() ? giamGiaSPs
+                             : giamGiaDMs;
 
             decimal giaSauGiam = giaGoc;
 
@@ -93,48 +108,62 @@ namespace AppApi.Service
             return giaSauGiam;
         }
 
+
         // ✅ Thêm sản phẩm vào giỏ (có giảm giá)
+        // ✅ Thêm sản phẩm vào giỏ (có giảm giá + giới hạn)
         public async Task<string> ThemSanPhamVaoGioAsync(Guid idUser, Guid idSanPhamCT, int soLuong)
         {
-            // B1: lấy hoặc tạo giỏ hàng cho user
+            if (soLuong <= 0) return "❌ Số lượng không hợp lệ";
+
             var gioHang = await TaoGioHangNeuChuaCoAsync(idUser);
 
-            // B2: kiểm tra sản phẩm chi tiết
             var sanPhamCT = await _context.SanPhamChiTiets
                 .Include(ct => ct.SanPham)
                 .FirstOrDefaultAsync(ct => ct.IDSanPhamCT == idSanPhamCT);
 
             if (sanPhamCT == null) return "❌ Sản phẩm không tồn tại";
 
-            // B3: tính giá sau giảm
-            var giaSauGiam = await TinhGiaSauGiam(sanPhamCT.IDSanPham, sanPhamCT.GiaBan);
-
-            // B4: tìm xem sản phẩm đã có trong giỏ chưa
+            // 🔎 Giới hạn số loại sản phẩm
+            var soLoaiSPTrongGio = await _context.GioHangChiTiets
+                .CountAsync(x => x.IDGioHang == gioHang.IDGioHang);
             var chiTiet = await _context.GioHangChiTiets
                 .FirstOrDefaultAsync(ct => ct.IDGioHang == gioHang.IDGioHang && ct.IDSanPhamCT == idSanPhamCT);
 
+            if (soLoaiSPTrongGio >= 10 && chiTiet == null)
+                return "❌ Giỏ hàng chỉ được chứa tối đa 10 loại sản phẩm.";
+
+            // 🔎 Giới hạn 10 cái mỗi sản phẩm
             if (chiTiet != null)
             {
+                if (chiTiet.SoLuong + soLuong > 10)
+                    return "❌ Mỗi sản phẩm chỉ được mua tối đa 10 cái.";
+
                 chiTiet.SoLuong += soLuong;
-                chiTiet.DonGia = giaSauGiam; // cập nhật lại giá theo KM mới
             }
             else
             {
+                if (soLuong > 10)
+                    return "❌ Mỗi sản phẩm chỉ được mua tối đa 10 cái.";
+
                 chiTiet = new GioHangCT
                 {
                     IDGioHangChiTiet = Guid.NewGuid(),
                     IDGioHang = gioHang.IDGioHang,
                     IDSanPhamCT = idSanPhamCT,
                     SoLuong = soLuong,
-                    DonGia = giaSauGiam,
+                    DonGia = sanPhamCT.GiaBan,
                     TrangThai = true
                 };
                 _context.GioHangChiTiets.Add(chiTiet);
             }
 
+            // ✅ tính giá sau giảm
+            chiTiet.DonGia = await TinhGiaSauGiam(sanPhamCT.IDSanPhamCT, sanPhamCT.GiaBan);
+
             await _context.SaveChangesAsync();
             return "✅ Đã thêm sản phẩm vào giỏ hàng";
         }
+
 
         // ✅ Lấy danh sách sản phẩm trong giỏ (có giảm giá)
         public async Task<IEnumerable<GioHangCT>> LayDanhSachSanPhamAsync(Guid idUser)
@@ -150,7 +179,7 @@ namespace AppApi.Service
             // cập nhật lại giá theo KM mới nhất
             foreach (var ct in chiTiets)
             {
-                var giaSauGiam = await TinhGiaSauGiam(ct.SanPhamCT.IDSanPham, ct.SanPhamCT.GiaBan);
+                var giaSauGiam = await TinhGiaSauGiam(ct.SanPhamCT.IDSanPhamCT, ct.SanPhamCT.GiaBan);
                 ct.DonGia = giaSauGiam;
             }
 

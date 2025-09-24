@@ -3,6 +3,7 @@ using AppApi.Features.Services;
 using AppApi.Features.ShippingAddress.Service;
 using AppApi.Features.ThongKe.Services;
 using AppApi.IService;
+using AppApi.Payments;
 using AppApi.Service;
 using AppData.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -131,6 +132,7 @@ builder.Services.AddScoped<IMauSacService, MauSacService>();
 builder.Services.AddScoped<ISizeService, SizeService>();
 builder.Services.AddScoped<IChatLieuService, ChatLieuService>();
 builder.Services.AddScoped<IBanHangService, BanHangService>();
+builder.Services.AddScoped<IVoucherService , VoucherService>();
 builder.Services.AddScoped<IGioHangService, GioHangService>();
 builder.Services.AddScoped<IGioHangCTService, GioHangCTService>();
 builder.Services.AddScoped<IHoaDonService, HoaDonService>();
@@ -141,6 +143,8 @@ builder.Services.AddScoped<IOrderManagementService, OrderManagementService>();
 builder.Services.AddScoped<IThongKeService, ThongKeService>();
 builder.Services.AddScoped<IEmployeeManagementService, EmployeeManagementService>();
 builder.Services.AddScoped<IShippingAddressService, ShippingAddressService>();
+builder.Services.Configure<VNPaySettings>(builder.Configuration.GetSection("VNPay"));
+builder.Services.AddScoped<IVNPayService, VNPayService>();
 // Configure CORS
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 if (allowedOrigins == null || allowedOrigins.Length == 0)

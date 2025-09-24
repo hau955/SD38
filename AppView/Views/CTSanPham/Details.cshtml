@@ -1,7 +1,9 @@
 ﻿@model AppApi.ViewModels.SanPham.SanPhamView
 @{
     var baseUrl = "https://localhost:7221/";
-    var id = Context.Session.GetString("ID"); // 👈 Lấy ID user từ session
+    var id = Context.Session.GetString("ID");
+    var roles = Context.Session.GetString("Roles") ?? "";
+
 }
 
 <!DOCTYPE html>
@@ -11,10 +13,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@Model.TenSanPham</title>
     <link rel="stylesheet" href="~/css/style.css" />
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        .image-gallery {
+            display: flex;
+            gap: 15px;
+        }
+        .thumbnails {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .thumbnails img {
+            width: 60px;
+            height: 80px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 5px;
+        }
+        .thumbnails img.active {
+            border-color: #007bff;
+        }
+        .main-image {
+            position: relative;
+            width: 400px;
+            height: 500px;
+            border: 1px solid #ddd;
+            overflow: hidden;
+        }
+        .main-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #magnifier {
+            position: absolute;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            cursor: none;
+            display: none;
+            pointer-events: none;
+            background-color: white;
+            opacity: 0.9;
+        }
+        .product-info {
+            margin-left: 30px;
+            max-width: 400px;
+        }
+        .size-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .popup-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 700px;
+        }
+        .close-btn {
+            float: right;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <div class="wrapper">
-        <div class="container">
+        <div class="container" style="display:flex;">
             <!-- Bộ sưu tập ảnh -->
             <div class="image-gallery">
                 <div class="thumbnails">
@@ -49,45 +126,79 @@
                 </div>
 
                 <a href="#" class="zalo-link">💬 Nhấn để được tư vấn và nhận ưu đãi</a><br />
-                <a href="#" class="size-guide">📏 HƯỚNG DẪN CHỌN SIZE</a>
-
-                <button class="store-btn">CHỈ CÒN TẠI CỬA HÀNG</button>
+                <a href="javascript:void(0)" class="size-guide" onclick="openSizePopup()">📏 HƯỚNG DẪN CHỌN SIZE</a>
 
                 <!-- Chọn thuộc tính sản phẩm -->
                 <div class="options" style="margin-top:15px;">
-                    <label for="sizeSelect"><strong>Chọn size:</strong></label>
+                    <!-- Size -->
+                    <label><strong>Chọn size:</strong></label>
                     <select id="sizeSelect" class="form-control">
-                        @foreach (var size in Model.ChiTiets.Select(c => c.Size).Distinct())
+                        @foreach (var g in Model.ChiTiets.GroupBy(c => c.Size))
                         {
-                            <option value="@size">@size</option>
+                            var tongTon = g.Sum(c => c.SoLuongTonKho);
+                            var disabled = tongTon <= 0 ? "disabled" : "";
+                            var label = tongTon <= 0 ? $"{g.Key} (Hết hàng)" : g.Key;
+
+                            <option value="@g.Key" disabled="@(tongTon <= 0 ? "disabled" : null)">
+                                @label
+                            </option>
+
                         }
                     </select>
 
-                    <label for="colorSelect" style="margin-top:10px;"><strong>Chọn màu sắc:</strong></label>
+                    <!-- Màu sắc -->
+                    <label style="margin-top:10px;"><strong>Chọn màu sắc:</strong></label>
                     <select id="colorSelect" class="form-control">
-                        @foreach (var color in Model.ChiTiets.Select(c => c.MauSac).Distinct())
+                        @foreach (var g in Model.ChiTiets.GroupBy(c => c.MauSac))
                         {
-                            <option value="@color">@color</option>
+                            var tongTon = g.Sum(c => c.SoLuongTonKho);
+                            var disabled = tongTon <= 0 ? "disabled" : "";
+                            var label = tongTon <= 0 ? $"{g.Key} (Hết hàng)" : g.Key;
+
+                            <option value="@g.Key" disabled="@(tongTon <= 0 ? "disabled" : null)">
+                                @label
+                            </option>
+
+
                         }
                     </select>
 
-                    <label for="materialSelect" style="margin-top:10px;"><strong>Chọn chất liệu:</strong></label>
+                    <!-- Chất liệu -->
+                    <label style="margin-top:10px;"><strong>Chọn chất liệu:</strong></label>
                     <select id="materialSelect" class="form-control">
-                        @foreach (var material in Model.ChiTiets.Select(c => c.ChatLieu).Distinct())
+                        @foreach (var g in Model.ChiTiets.GroupBy(c => c.ChatLieu))
                         {
-                            <option value="@material">@material</option>
+                            var tongTon = g.Sum(c => c.SoLuongTonKho);
+                            var disabled = tongTon <= 0 ? "disabled" : "";
+                            var label = tongTon <= 0 ? $"{g.Key} (Hết hàng)" : g.Key;
+
+                            <option value="@g.Key" disabled="@(tongTon <= 0 ? "disabled" : null)">
+                                @label
+                            </option>
+
                         }
                     </select>
 
                     <!-- Nhập số lượng -->
-                    <label for="quantityInput" style="margin-top:10px;"><strong>Số lượng:</strong></label>
+                    <label style="margin-top:10px;"><strong>Số lượng:</strong></label>
                     <input id="quantityInput" type="number" value="1" min="1" class="form-control" style="width:80px;" />
                 </div>
 
                 <!-- Nút thêm giỏ hàng -->
-                <button id="addToCartBtn" class="btn btn-success" style="margin-top:15px;">
-                    🛒 Thêm vào giỏ hàng
-                </button>
+                <!-- Nút thêm giỏ hàng -->
+                @if (roles.Contains("Customer"))
+                {
+                    <button id="addToCartBtn" class="btn btn-success" style="margin-top:15px;">
+                        🛒 Thêm vào giỏ hàng
+                    </button>
+                }
+                else
+                {
+                    <div class="alert alert-warning mt-3">
+                        ⚠️ Bạn phải <a href="#" class="text-primary fw-bold">đăng ký</a> mới có thể mua sản phẩm.
+                    </div>
+                }
+
 
                 <div class="description" style="margin-top:20px;">
                     <p><strong>Mô tả:</strong> @Model.MoTa</p>
@@ -101,7 +212,8 @@
         <div class="popup-content">
             <span class="close-btn" onclick="closeSizePopup()">&times;</span>
             <h2>HƯỚNG DẪN CHỌN SIZE</h2>
-            <table>
+            <!-- Bảng size như cũ -->
+            <table border="1" cellspacing="0" cellpadding="5">
                 <thead>
                     <tr>
                         <th>SIZE</th>
@@ -122,61 +234,103 @@
                     <tr><td>CHIỀU CAO (cm)</td><td>150-160</td><td>155-160</td><td>155-160</td><td>160-165</td><td>160-165</td><td>160-165</td></tr>
                 </tbody>
             </table>
-            <p style="margin-top: 10px;">
-                📞 Liên hệ bộ phận bán hàng:
-                <strong style="color: #007bff;">0246.2990998</strong>
-            </p>
         </div>
     </div>
 </body>
 </html>
 
 <script>
-    const userId = "@id"; // lấy từ session server đẩy sang client
+    const userId = "@id";
     const baseUrl = "https://localhost:7221/";
 
-    // Nút thêm giỏ hàng
-    document.getElementById('addToCartBtn').addEventListener('click', async function () {
+    // 👉 Đổi ảnh khi click thumbnail
+    const thumbs = document.querySelectorAll(".thumb");
+    const mainImage = document.getElementById("mainImage");
+    thumbs.forEach(thumb => {
+        thumb.addEventListener("click", function () {
+            mainImage.src = this.dataset.src;
+            thumbs.forEach(t => t.classList.remove("active"));
+            this.classList.add("active");
+        });
+    });
+
+    // 👉 Zoom (soi ảnh)
+    const magnifier = document.getElementById("magnifier");
+    const mainImageContainer = document.getElementById("mainImageContainer");
+    const magnifierSize = 150;
+    magnifier.style.width = magnifier.style.height = magnifierSize + "px";
+
+    mainImageContainer.addEventListener("mousemove", function (e) {
+        const rect = mainImage.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        let magX = x - magnifierSize / 2;
+        let magY = y - magnifierSize / 2;
+        if (magX < 0) magX = 0;
+        if (magY < 0) magY = 0;
+        if (magX > rect.width - magnifierSize) magX = rect.width - magnifierSize;
+        if (magY > rect.height - magnifierSize) magY = rect.height - magnifierSize;
+
+        magnifier.style.left = magX + "px";
+        magnifier.style.top = magY + "px";
+        magnifier.style.display = "block";
+        magnifier.style.backgroundImage = `url(${mainImage.src})`;
+        magnifier.style.backgroundRepeat = "no-repeat";
+        magnifier.style.backgroundSize = `${rect.width * 2}px ${rect.height * 2}px`;
+        magnifier.style.backgroundPosition = `-${x * 2 - magnifierSize / 2}px -${y * 2 - magnifierSize / 2}px`;
+    });
+    mainImageContainer.addEventListener("mouseleave", () => magnifier.style.display = "none");
+
+    // 👉 Thêm giỏ hàng với confirm
+       document.getElementById('addToCartBtn').addEventListener('click', async function () {
         const size = document.getElementById('sizeSelect').value;
         const color = document.getElementById('colorSelect').value;
         const material = document.getElementById('materialSelect').value;
         const quantity = parseInt(document.getElementById('quantityInput').value) || 1;
-
-        // 👉 tìm chi tiết sản phẩm tương ứng
         const chiTiets = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChiTiets));
-        const matched = chiTiets.find(ct =>
-            ct.Size === size &&
-            ct.MauSac === color &&
-            ct.ChatLieu === material
-        );
+        const matched = chiTiets.find(ct => ct.Size === size && ct.MauSac === color && ct.ChatLieu === material);
 
-        if (!matched) {
-            alert("❌ Không tìm thấy sản phẩm chi tiết với lựa chọn này!");
+        if (!matched || matched.SoLuongTonKho <= 0) {
+            Swal.fire("Lỗi", "❌ Sản phẩm này đã hết hàng!", "error");
             return;
         }
 
-        const request = {
-            idUser: userId,
-            idSanPhamCT: matched.IDSanPhamCT,
-            soLuong: quantity
-        };
-
-        try {
-            const response = await fetch(`${baseUrl}api/GioHang/them`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(request)
-            });
-
-            const result = await response.json();
-            alert(result.message ?? `✅ Đã thêm ${quantity} sản phẩm vào giỏ!`);
-        } catch (error) {
-            console.error(error);
-            alert("❌ Lỗi khi thêm vào giỏ hàng");
+        if (quantity > matched.SoLuongTonKho) {
+            Swal.fire("Lỗi", `❌ Chỉ còn ${matched.SoLuongTonKho} sản phẩm trong kho!`, "error");
+            return;
         }
+
+        Swal.fire({
+            title: "Xác nhận",
+            text: `Bạn có chắc chắn muốn thêm ${quantity} sản phẩm này vào giỏ hàng không?`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Có, thêm ngay",
+            cancelButtonText: "Hủy",
+            reverseButtons: true
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const request = { idUser: userId, idSanPhamCT: matched.IDSanPhamCT, soLuong: quantity };
+                try {
+                    const response = await fetch(`${baseUrl}api/GioHang/them`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(request)
+                    });
+                    const result = await response.json();
+                    Swal.fire("Thành công", result.message ?? `✅ Đã thêm ${quantity} sản phẩm vào giỏ!`, "success");
+                } catch (error) {
+                    console.error(error);
+                    Swal.fire("Lỗi", "❌ Có lỗi khi thêm vào giỏ hàng!", "error");
+                }
+            }
+        });
     });
 
-    // Popup chọn size
+    // 👉 Popup size
+    function openSizePopup() {
+        document.getElementById('sizeGuidePopup').style.display = 'flex';
+    }
     function closeSizePopup() {
         document.getElementById('sizeGuidePopup').style.display = 'none';
     }

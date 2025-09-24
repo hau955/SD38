@@ -1,123 +1,276 @@
 ﻿@model AppView.Areas.Admin.ViewModels.GiamGiaCreateVM
 
-@{
-    ViewData["Title"] = "Tạo giảm giá";
-}
-
 <h2>Tạo giảm giá</h2>
 
-<form asp-area="Admin" asp-controller="GiamGia" asp-action="Create" method="post">
-    <div asp-validation-summary="All" class="text-danger"></div>
 
-    <!-- Tên giảm giá -->
-    <div class="form-group">
-        <label asp-for="GiamGia.TenGiamGia"></label>
-        <input asp-for="GiamGia.TenGiamGia" class="form-control" />
-        <span asp-validation-for="GiamGia.TenGiamGia" class="text-danger"></span>
-    </div>
 
-    <!-- Ngày bắt đầu -->
-    <div class="form-group">
-        <label asp-for="GiamGia.NgayBatDau"></label>
-        <input asp-for="GiamGia.NgayBatDau" type="date" class="form-control" />
-        <span asp-validation-for="GiamGia.NgayBatDau" class="text-danger"></span>
-    </div>
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-gradient bg-primary text-white">
+            <h4 class="mb-0">🎉 Tạo chương trình giảm giá</h4>
+        </div>
 
-    <!-- Ngày kết thúc -->
-    <div class="form-group">
-        <label asp-for="GiamGia.NgayKetThuc"></label>
-        <input asp-for="GiamGia.NgayKetThuc" type="date" class="form-control" />
-        <span asp-validation-for="GiamGia.NgayKetThuc" class="text-danger"></span>
-    </div>
+        <div class="card-body">
+            <form asp-area="Admin" asp-controller="GiamGia" asp-action="Create" method="post">
+                <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
 
-    <!-- Giá trị giảm -->
-    <div class="form-group">
-        <label asp-for="GiamGia.GiaTri"></label>
-        <input asp-for="GiamGia.GiaTri" class="form-control" />
-        <span asp-validation-for="GiamGia.GiaTri" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="GiamGia.GiaTriGiamToiDa"></label>
-        <input asp-for="GiamGia.GiaTriGiamToiDa" class="form-control" />
-        <span asp-validation-for="GiamGia.GiaTriGiamToiDa" class="text-danger"></span>
-    </div>
-    <!-- Danh mục -->
-    <div class="form-group">
-        <label>Chọn danh mục</label>
-        <select id="DanhMucId" name="SelectedDanhMucs" class="form-control select2" multiple>
-            @foreach (var dm in Model.DanhMucs)
-            {
-                <option value="@dm.DanhMucId">@dm.TenDanhMuc</option>
-            }
-        </select>
-    </div>
+                <div class="row">
+                    <!-- Tên giảm giá -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="GiamGia.TenGiamGia" class="form-label fw-bold"></label>
+                        <input asp-for="GiamGia.TenGiamGia" class="form-control" placeholder="Nhập tên chương trình" />
+                        <span asp-validation-for="GiamGia.TenGiamGia" class="text-danger small"></span>
+                    </div>
 
-    <!-- Sản phẩm -->
-    <div class="form-group">
-        <label>Chọn sản phẩm</label>
-        <select id="SanPhamId" name="SelectedSanPhams" class="form-control select2" multiple>
-            @foreach (var sp in Model.SanPhams)
-            {
-                <option value="@sp.IDSanPham">@sp.TenSanPham</option>
-            }
-        </select>
-    </div>
+                    <!-- Loại giảm giá -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="GiamGia.LoaiGiamGia" class="form-label fw-bold">Loại giảm giá</label>
+                        <select asp-for="GiamGia.LoaiGiamGia" class="form-select" id="LoaiGiamGiaSelect">
+                            <option value="">-- Chọn loại giảm giá --</option>
+                            <option value="PhanTram">Phần trăm</option>
+                            <option value="SoTien">Số tiền</option>
+                        </select>
+                    </div>
 
-    <input type="submit" value="Lưu Test" />
-</form>
+                    <!-- Giá trị giảm -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="GiamGia.GiaTri" class="form-label fw-bold"></label>
+                        <div class="input-group">
+                            <input asp-for="GiamGia.GiaTri" class="form-control" id="GiaTriInput" />
+                            <span class="input-group-text bg-light fw-bold" id="GiaTriUnit">%</span>
+                        </div>
+                        <span asp-validation-for="GiamGia.GiaTri" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Giá trị giảm tối đa -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="GiamGia.GiaTriGiamToiDa" class="form-label fw-bold"></label>
+                        <div class="input-group">
+                            <input asp-for="GiamGia.GiaTriGiamToiDa" class="form-control" id="GiaTriMaxInput" />
+                            <span class="input-group-text bg-light fw-bold">VNĐ</span>
+                        </div>
+                        <span asp-validation-for="GiamGia.GiaTriGiamToiDa" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Ngày bắt đầu -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="GiamGia.NgayBatDau" class="form-label fw-bold"></label>
+                        <input asp-for="GiamGia.NgayBatDau" type="date" class="form-control" id="NgayBatDauInput" />
+                        <span asp-validation-for="GiamGia.NgayBatDau" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Ngày kết thúc -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="GiamGia.NgayKetThuc" class="form-label fw-bold"></label>
+                        <input asp-for="GiamGia.NgayKetThuc" type="date" class="form-control" id="NgayKetThucInput" />
+                        <span asp-validation-for="GiamGia.NgayKetThuc" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <!-- Phạm vi áp dụng -->
+                <div class="mb-3">
+                    <label class="fw-bold mb-2">Phạm vi áp dụng</label><br />
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="scope" value="dm" id="scopeDm">
+                        <label class="form-check-label" for="scopeDm">Danh mục</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="scope" value="sp" id="scopeSp" checked>
+                        <label class="form-check-label" for="scopeSp">Sản phẩm</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="scope" value="spct" id="scopeSpct">
+                        <label class="form-check-label" for="scopeSpct">Sản phẩm chi tiết</label>
+                    </div>
+                </div>
+
+                <!-- Danh mục -->
+                <div class="form-group scope-block mb-3" id="block-dm">
+                    <label class="fw-bold">Danh mục</label>
+                    <select asp-for="SelectedDanhMucs" class="form-select" multiple>
+                        @foreach (var dm in Model.DanhMucs)
+                        {
+                            <option value="@dm.DanhMucId">@dm.TenDanhMuc</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Sản phẩm -->
+                <div class="form-group scope-block mb-3" id="block-sp">
+                    <label class="fw-bold">Sản phẩm</label>
+                    <select asp-for="SelectedSanPhams" class="form-select" multiple id="SanPhamSelect">
+                        @foreach (var sp in Model.SanPhams)
+                        {
+                            <option value="@sp.IDSanPham">@sp.TenSanPham</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Sản phẩm chi tiết -->
+                <div class="form-group scope-block mb-3" id="block-spct">
+                    <label class="fw-bold">Sản phẩm chi tiết</label>
+                    <select asp-for="SelectedSPCTs" class="form-select" multiple id="SPCTSelect"></select>
+                </div>
+
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-success px-4">
+                        💾 Lưu
+                    </button>
+                    <a asp-area="Admin" asp-controller="GiamGia" asp-action="Index" class="btn btn-secondary px-4">
+                        ⬅ Quay lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 @section Scripts {
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Select2 -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        $(document).ready(function () {
-            $('.select2').select2();
+        $(function () {
+            const $sp = $('#SanPhamSelect');
+            const $spct = $('#SPCTSelect');
+            const allSPCTs = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SPCTs));
 
-            const $giaTri = $("#GiaTriInput");
-            const $loai = $("#LoaiGiamGia");
+            // Init select2
+            $('select').select2({ width: '100%', allowClear: true });
 
-            // Validate loại giảm giá & giá trị
-            $loai.change(function () {
-                if ($(this).val() === "PhanTram") {
-                    $giaTri.attr({ min: 1, max: 100, placeholder: "Nhập % (1 - 100)" });
-                } else {
-                    $giaTri.attr({ min: 1000, max: 500000, placeholder: "Nhập số tiền (1000 - 500000)" });
-                }
-            }).trigger("change");
+            // Fill SPCT theo SP
+                   function fillSPCTBySP(spIds) {
+            $spct.empty();
+            allSPCTs
+                .filter(x => spIds.includes(x.IDSanPham.toString()))
+                .forEach(x => {
+                    $spct.append(new Option(
+                        `${x.TenSanPham} - Size: ${x.SoSize ?? ""} / Màu: ${x.TenMau ?? ""} / Chất liệu: ${x.TenChatLieu ?? ""} (Giá: ${x.GiaBan})`,
+                        x.IDSanPhamCT
+                    ));
+                });
+            $spct.trigger('change');
+        }
 
-            $giaTri.on("input", function () {
-                let val = parseInt($(this).val() || 0);
-                let min = parseInt($(this).attr("min"));
-                let max = parseInt($(this).attr("max"));
-                if (val < min) $(this).val(min);
-                if (val > max) $(this).val(max);
-            });
-                  $(document).ready(function () {
-            $('.select2').select2({
-                allowClear: true,  // Cho phép bỏ chọn
-                placeholder: "Chọn giá trị"
-            });
 
-            const $danhMuc = $("#DanhMucId");
-            const $sanPham = $("#SanPhamId");
-
-            function toggleSelects() {
-                if ($danhMuc.val() && $danhMuc.val().length > 0) {
-                    $sanPham.prop("disabled", true).val(null).trigger("change");
-                } else if ($sanPham.val() && $sanPham.val().length > 0) {
-                    $danhMuc.prop("disabled", true).val(null).trigger("change");
-                } else {
-                    $danhMuc.prop("disabled", false);
-                    $sanPham.prop("disabled", false);
-                }
+            // Fill toàn bộ SPCT
+            function fillAllSPCT() {
+                $spct.empty();
+                allSPCTs.forEach(x => {
+                    $spct.append(new Option(
+                        `${x.TenSanPham} - Size: ${x.SoSize ?? ""} / Màu: ${x.TenMau ?? ""}/chất liệu:${x.TenChatLieu} (Giá: ${x.GiaBan})`,
+                        x.IDSanPhamCT
+                    ));
+                });
+                $spct.trigger('change');
             }
 
-            $danhMuc.on("change", toggleSelects);
-            $sanPham.on("change", toggleSelects);
+            // Chọn phạm vi
+            $('input[name="scope"]').on('change', function () {
+                const val = $(this).val();
+
+                $(".scope-block").hide();
+                $("#block-dm select").val(null).trigger('change');
+                $("#block-sp select").val(null).trigger('change');
+                $("#block-spct select").val(null).trigger('change');
+
+                if (val === 'dm') {
+                    $("#block-dm").show();
+                }
+                else if (val === 'sp') {
+                    $("#block-sp").show();
+                }
+                else if (val === 'spct') {
+                    $("#block-spct").show();
+                    fillAllSPCT();
+                }
+            });
+
+            // Khi chọn SP → load SPCT
+            $sp.on('change', function () {
+                if ($('input[name="scope"]:checked').val() === 'sp') {
+                    fillSPCTBySP($sp.val() || []);
+                }
+            });
+
+            // Mặc định = sản phẩm
+            $('input[name="scope"][value="sp"]').trigger('change');
+
+            // === Validate ===
+            const $loai = $('#LoaiGiamGiaSelect');
+            const $giaTri = $('#GiaTriInput');
+            const $giaTriMax = $('#GiaTriMaxInput');
+            const $ngayBD = $('#NgayBatDauInput');
+            const $ngayKT = $('#NgayKetThucInput');
+            const $unit = $('#GiaTriUnit');
+
+            // đổi ký hiệu theo loại giảm giá
+            function updateUnit() {
+                if ($loai.val() === "PhanTram") {
+                    $unit.text("%");
+                } else if ($loai.val() === "SoTien") {
+                    $unit.text("VNĐ");
+                } else {
+                    $unit.text("");
+                }
+            }
+            $loai.on("change", updateUnit);
+            updateUnit();
+
+            $('form').on('submit', function (e) {
+                let isValid = true;
+                let message = "";
+
+                const loai = $loai.val();
+                const giaTri = parseFloat($giaTri.val());
+                const giaTriMax = parseFloat($giaTriMax.val());
+                const ngayBD = new Date($ngayBD.val());
+                const ngayKT = new Date($ngayKT.val());
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                // Validate Giá trị
+                if (loai === "PhanTram") {
+                    if (isNaN(giaTri) || giaTri < 1 || giaTri > 100) {
+                        isValid = false;
+                        message = "Nếu chọn phần trăm thì Giá trị phải từ 1 đến 100.";
+                    }
+                } else if (loai === "SoTien") {
+                    if (isNaN(giaTri) || giaTri < 10000 || giaTri > 500000) {
+                        isValid = false;
+                        message = "Nếu chọn số tiền thì Giá trị phải từ 10,000 đến 500,000 VNĐ.";
+                    }
+                }
+
+                // Validate Giá trị giảm tối đa
+                if (isValid && (!isNaN(giaTriMax) && giaTriMax > 500000)) {
+                    isValid = false;
+                    message = "Giá trị giảm tối đa không được vượt quá 500,000 VNĐ.";
+                }
+
+                // Validate ngày
+                if (isValid && $ngayBD.val()) {
+                    if (ngayBD < today) {
+                        isValid = false;
+                        message = "Ngày bắt đầu phải lớn hơn hoặc bằng hôm nay.";
+                    }
+                }
+                if (isValid && $ngayBD.val() && $ngayKT.val()) {
+                    if (ngayKT < ngayBD) {
+                        isValid = false;
+                        message = "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.";
+                    }
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    alert(message);
+                }
+            });
         });
     </script>
 }

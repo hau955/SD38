@@ -1,5 +1,4 @@
 ﻿using AppApi.IService;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AppApi.Controllers
@@ -15,12 +14,12 @@ namespace AppApi.Controllers
             _gioHangCTService = gioHangCTService;
         }
 
-        //[HttpPost("them")]
-        //public async Task<IActionResult> Them([FromBody] ThemChiTietRequest request)
-        //{
-        //    var kq = await _gioHangCTService.ThemChiTietAsync(request.IdUser, request.IdSanPhamCT, request.SoLuong);
-        //    return Ok(new { message = kq });
-        //}
+        [HttpPost("them")]
+        public async Task<IActionResult> Them([FromBody] ThemChiTietRequest request)
+        {
+            var kq = await _gioHangCTService.ThemChiTietAsync(request.IdUser, request.IdSanPhamCT, request.SoLuong);
+            return Ok(new { message = kq });
+        }
 
         [HttpPut("cap-nhat")]
         public async Task<IActionResult> CapNhat([FromBody] CapNhatSoLuongRequest request)
@@ -45,12 +44,12 @@ namespace AppApi.Controllers
     }
 
     // DTOs
-    //public class ThemChiTietRequest
-    //{
-    //    public Guid IdUser { get; set; }
-    //    public Guid IdSanPhamCT { get; set; }
-    //    public int SoLuong { get; set; }
-    //}
+    public class ThemChiTietRequest
+    {
+        public Guid IdUser { get; set; }
+        public Guid IdSanPhamCT { get; set; }
+        public int SoLuong { get; set; }
+    }
 
     public class CapNhatSoLuongRequest
     {
@@ -58,4 +57,3 @@ namespace AppApi.Controllers
         public int SoLuongMoi { get; set; }
     }
 }
-

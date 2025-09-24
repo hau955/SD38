@@ -16,16 +16,16 @@ namespace AppData.Models
 
         [ForeignKey("MauSac")]
         public Guid IDMauSac { get; set; }
-        [JsonIgnore]
+       // [JsonIgnore]
         public virtual MauSac? MauSac { get; set; }
         [ForeignKey("ChatLieu")]
         public Guid IdChatLieu { get; set; }
-        [JsonIgnore]
+        //[JsonIgnore]
         public virtual ChatLieu? ChatLieu { get; set; }
 
         [ForeignKey("SizeAo")]
         public Guid IDSize { get; set; }
-        [JsonIgnore]
+        //[JsonIgnore]
         public virtual Size? SizeAo { get; set; }
 
         public int SoLuongTonKho { get; set; }

@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using AppData.Models;
+using ViewModels;
 
 namespace AppView.Areas.Admin.Repository
 {
@@ -97,5 +98,19 @@ namespace AppView.Areas.Admin.Repository
             var result = await res.Content.ReadFromJsonAsync<bool>();
             return result;
         }
+
+        public async Task<List<SanPhamCTViewModel>> GetAllAsync()
+        {
+            var client = _httpClientFactory.CreateClient();
+            var res = await client.GetAsync("https://localhost:7221/api/SanPhamCT/all");
+
+            if (!res.IsSuccessStatusCode)
+                return new();
+
+            var list = await res.Content.ReadFromJsonAsync<List<SanPhamCTViewModel>>();
+            return list ?? new();
+        }
+
+
     }
 }

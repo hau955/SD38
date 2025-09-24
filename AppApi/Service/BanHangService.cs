@@ -1,4 +1,5 @@
-﻿using AppApi.IService;
+﻿using AppApi.Constants;
+using AppApi.IService;
 using AppApi.ViewModels.BanHang;
 using AppData.Models;
 using Microsoft.EntityFrameworkCore;
@@ -40,7 +41,7 @@ namespace AppApi.Service
                     NgayTao = DateTime.Now,
                     IDUser = new Guid("07E1FC26-D86A-44F6-AC5A-F28452D4E22B"),
                     IDNguoiTao = request.IDNguoiTao,
-                    TrangThaiDonHang = request.IsHoaDonCho ? "Chờ thanh toán" : "Đã bán",
+                    TrangThaiDonHang = request.IsHoaDonCho ? "Chờ thanh toán" : OrderStatus.HOAN_TAT,
                     TrangThaiThanhToan = request.IsHoaDonCho ? "Chưa thanh toán" : "Đã thanh toán",
                     GhiChu = request.GhiChu
                 };
@@ -137,7 +138,7 @@ namespace AppApi.Service
             if (hoaDon.TrangThaiThanhToan == "Đã thanh toán")
                 return (false, "Hóa đơn này đã được thanh toán rồi");
 
-            hoaDon.TrangThaiDonHang = "Đã bán";
+            hoaDon.TrangThaiDonHang = OrderStatus.HOAN_TAT;
             hoaDon.TrangThaiThanhToan = "Đã thanh toán";
             hoaDon.NgayThanhToan = DateTime.Now;
             hoaDon.NgaySua = DateTime.Now;

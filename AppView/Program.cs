@@ -59,6 +59,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddAutoMapper(typeof(OrderMappingProfile).Assembly);
 builder.Services.AddScoped<IMauSacRepo, MauSacRepo>();
 builder.Services.AddScoped<ISizeRepo, SizeRepo>();
+builder.Services.AddScoped<IVoucherRepo, VoucherRepo>();
+
 builder.Services.AddScoped<ISanPhamRepo, SanPhamRepo>();
 builder.Services.AddScoped<IGioHangChiTietService, GioHangChiTietService>();
 builder.Services.AddHttpClient<IShippingAddressClient, ShippingAddressClient>(client =>
@@ -166,6 +168,6 @@ app.MapControllerRoute(
 
 app.MapControllerRoute(
      name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=CtSanPham}/{action=Index}/{id?}");
 
 app.Run();

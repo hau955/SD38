@@ -1,56 +1,346 @@
-﻿@model List<AppApi.ViewModels.SanPham.SanPhamView>
-
-<h2 class="mb-4">Danh sách sản phẩm</h2>
+﻿@model List<AppApi.ViewModels.SanPham.SanPhamDetailWithDiscountView>
 @{
-    var baseUrl = "https://localhost:7221/"; // 👈 đổi thành URL API của bạn
+    var baseUrl = "https://localhost:7221/";
+    var searchResult = ViewBag.SearchResult as AppApi.ViewModels.SanPham.SanPhamSearchResponse;
 }
-<div class="row">
-    @foreach (var sp in Model)
-    {
-        var anh = sp.DanhSachAnh?.FirstOrDefault(a => a.AnhChinh == true)?.DuongDanAnh;
-        var chiTiet = sp.ChiTiets?.FirstOrDefault();
-        var giaGoc = chiTiet?.GiaBan ?? 0;
-        var giaSauGiam = chiTiet?.GiaSauGiam ?? giaGoc;
 
-        <div class="col-md-3 mb-4">
-            <div class="card h-100 shadow-sm border-0">
-
-                <!-- Ảnh sản phẩm căn giữa -->
-                <div class="d-flex align-items-center justify-content-center"
-                     style="height:230px; background:#f8f9fa;">
-                    <img src="@($"{baseUrl}{anh}")"
-                         alt="@sp.TenSanPham"
-                         style="max-height:100%; max-width:100%; object-fit:contain;" />
+<div class="container-fluid mt-3 px-4">
+    <div class="row">
+        <!-- ============ SIDEBAR FILTER ============ -->
+        <aside class="col-lg-3 col-md-4 mb-4">
+            <div class="card shadow-sm border-0 filter-sticky">
+                <div class="card-header bg-gradient bg-primary text-white d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0"><i class="fas fa-filter me-2"></i>Bộ lọc</h6>
+                    <button class="btn btn-sm btn-light rounded-pill px-3" id="btnClearAll">
+                        <i class="fas fa-eraser me-1"></i> Xóa
+                    </button>
                 </div>
+                <div class="card-body p-3">
+                    <!-- Danh mục -->
+                    <div class="filter-section mb-4">
+                        <div class="filter-title"><i class="fas fa-list me-2 text-primary"></i>Danh mục</div>
+                        <hr class="mt-1 mb-2">
+                        <div id="danhMucContainer" class="filter-group filter-scroll"></div>
+                    </div>
 
-                <!-- Nội dung -->
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title text-truncate" title="@sp.TenSanPham">@sp.TenSanPham</h5>
-                    <p class="text-muted mb-2">@sp.TenDanhMuc</p>
+                    <!-- Màu sắc -->
+                    <div class="filter-section mb-4">
+                        <div class="filter-title"><i class="fas fa-palette me-2 text-danger"></i>Màu sắc</div>
+                        <hr class="mt-1 mb-2">
+                        <div id="mauSacContainer" class="filter-group filter-scroll"></div>
+                    </div>
 
-                    @if (giaSauGiam < giaGoc)
+                    <!-- Size -->
+                    <div class="filter-section mb-4">
+                        <div class="filter-title"><i class="fas fa-ruler me-2 text-success"></i>Size</div>
+                        <hr class="mt-1 mb-2">
+                        <div id="sizeContainer" class="filter-group filter-scroll"></div>
+                    </div>
+
+                    <!-- Chất liệu -->
+                    <div class="filter-section">
+                        <div class="filter-title"><i class="fas fa-cube me-2 text-warning"></i>Chất liệu</div>
+                        <hr class="mt-1 mb-2">
+                        <div id="chatLieuContainer" class="filter-group filter-scroll"></div>
+                    </div>
+
+                    <button class="btn btn-primary w-100 mt-4 py-2 rounded-pill shadow-sm" id="btnFilter">
+                        <i class="fas fa-search me-1"></i> Áp dụng bộ lọc
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ============ PRODUCT GRID ============ -->
+        <main class="col-lg-9 col-md-8">
+            @if (Model != null && Model.Any())
+            {
+                <div class="row g-4">
+                    @foreach (var sp in Model)
                     {
-                        <p class="mb-2">
-                            <span class="text-muted text-decoration-line-through">
-                                @giaGoc.ToString("N0") đ
-                            </span>
-                            <span class="text-danger fw-bold ms-2">
-                                @giaSauGiam.ToString("N0") đ
-                            </span>
-                        </p>
-                    }
-                    else
-                    {
-                        <p class="fw-bold mb-2">@giaGoc.ToString("N0") đ</p>
-                    }
+                        var anh = sp.DanhSachAnh?.FirstOrDefault(a => a.AnhChinh == true)?.DuongDanAnh ??
+                        sp.DanhSachAnh?.FirstOrDefault()?.DuongDanAnh ?? "images/no-image.jpg";
 
-                    <div class="mt-auto">
-                        <a asp-action="Details" asp-route-id="@sp.IDSanPham"
-                           class="btn btn-primary btn-sm w-100">Xem chi tiết</a>
+                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                            <div class="card h-100 shadow-sm border-0 product-card">
+                                <!-- Ảnh sản phẩm -->
+                                <div class="card-img-container position-relative overflow-hidden">
+                                    <img src="@($"{baseUrl}{anh}")"
+                                         alt="@sp.TenSanPham"
+                                         class="card-img-top product-image" />
+                                    <div class="product-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                                        <a asp-action="Details" asp-route-id="@sp.IDSanPham" class="btn btn-light btn-sm">
+                                            <i class="fas fa-eye me-1"></i>Xem chi tiết
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Nội dung -->
+                                <div class="card-body d-flex flex-column">
+                                    <h6 class="card-title text-truncate mb-2" title="@sp.TenSanPham">@sp.TenSanPham</h6>
+                                    <p class="text-muted mb-2"><i class="fas fa-tag me-1"></i>@sp.TenDanhMuc</p>
+
+                                    <!-- Giá -->
+                                    <div class="mb-3">
+                                        @if (sp.GiaSauGiam < sp.GiaGoc)
+                                        {
+                                            <div class="d-flex align-items-center">
+                                                <span class="text-muted text-decoration-line-through me-2">@sp.GiaGoc.ToString("N0")đ</span>
+                                                <span class="text-danger fw-bold fs-5">@sp.GiaSauGiam.ToString("N0")đ</span>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(sp.TenGiamGia))
+                                            {
+                                                <small class="text-success"><i class="fas fa-gift me-1"></i>@sp.TenGiamGia</small>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="fw-bold fs-5 text-primary">@sp.GiaGoc.ToString("N0")đ</span>
+                                        }
+                                    </div>
+
+                                    <!-- Màu sắc + Size -->
+                                    <div class="mt-auto">
+                                        @if (sp.ChiTiets?.Any() == true)
+                                        {
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="fas fa-palette me-1"></i>
+                                                @string.Join(", ", sp.ChiTiets.Select(ct => ct.MauSac).Where(m => !string.IsNullOrEmpty(m)).Distinct().Take(3))
+                                            </small>
+                                            <small class="text-muted d-block mb-2">
+                                                <i class="fas fa-ruler me-1"></i>
+                                                @string.Join(", ", sp.ChiTiets.Select(ct => ct.Size).Where(s => !string.IsNullOrEmpty(s)).Distinct().Take(5))
+                                            </small>
+                                        }
+@* 
+                                        <a asp-action="Details" asp-route-id="@sp.IDSanPham" class="btn btn-primary w-100">
+                                            <i class="fas fa-shopping-cart me-2"></i>Xem chi tiết
+                                        </a> *@
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">Không tìm thấy sản phẩm nào</h4>
+                    <p class="text-muted">Vui lòng thử lại sau</p>
+                </div>
+            }
+        </main>
+    </div>
+</div>
+
+<!-- ============ CSS ============ -->
+<style>
+    /* Sidebar */
+    .filter-sticky {
+        position: sticky;
+        top: 70px;
+        border-radius: 12px;
+        background: #fff;
+    }
+
+    .filter-title {
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        color: #333;
+    }
+
+    .filter-scroll {
+        max-height: 200px;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+
+    .filter-group .form-check {
+        margin-bottom: .5rem;
+    }
+
+    .filter-group .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    /* Product Card */
+    .product-card {
+        border-radius: 10px;
+        transition: transform .2s, box-shadow .2s;
+    }
+
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+    .card-img-container {
+        height: 240px;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform .3s;
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.05);
+    }
+
+    .product-overlay {
+        background: rgba(0,0,0,.6);
+        opacity: 0;
+        transition: opacity .3s;
+    }
+
+    .product-card:hover .product-overlay {
+        opacity: 1;
+    }
+</style>
+
+<!-- ============ JS ============ -->
+<script>
+    const baseUrl = "https://localhost:7221/api/SanPham/";
+
+    // Render list checkbox
+    function renderCheckboxList(container, items, idKey, textKey, cls) {
+        container.innerHTML = "";
+        items.forEach(it => {
+            const id = it[idKey];
+            const text = it[textKey];
+            container.insertAdjacentHTML("beforeend", `
+                <div class="form-check">
+                    <input class="form-check-input ${cls}" type="checkbox" value="${id}" id="${cls}_${id}">
+                    <label class="form-check-label" for="${cls}_${id}">${text}</label>
+                </div>
+            `);
+        });
+    }
+
+    // Load filter data
+    async function loadFilters() {
+        try {
+            const res = await fetch(baseUrl + "filter-data");
+            const json = await res.json();
+            const data = json?.data || {};
+            const danhMucs  = data.DanhMucs  || data.danhMucs  || [];
+            const mauSacs   = data.MauSacs   || data.mauSacs   || [];
+            const sizes     = data.Sizes     || data.sizes     || [];
+            const chatLieus = data.ChatLieus || data.chatLieus || [];
+
+            renderCheckboxList(document.getElementById("danhMucContainer"), danhMucs, "danhMucId", "tenDanhMuc", "danhMucFilter");
+            renderCheckboxList(document.getElementById("mauSacContainer"), mauSacs, "idMauSac", "tenMau", "mauSacFilter");
+            renderCheckboxList(document.getElementById("sizeContainer"), sizes, "idSize", "soSize", "sizeFilter");
+            renderCheckboxList(document.getElementById("chatLieuContainer"), chatLieus, "idChatLieu", "tenChatLieu", "chatLieuFilter");
+        } catch (e) { console.error("Load filter error:", e); }
+    }
+
+    // Thu thập các filter
+    const picked = (cls) => [...document.querySelectorAll("." + cls + ":checked")].map(x => x.value);
+
+    // Apply filter
+    async function applyFilter() {
+        const body = {
+            danhMucId: picked("danhMucFilter"),
+            idMauSac: picked("mauSacFilter"),
+            idSize: picked("sizeFilter"),
+            idChatLieu: picked("chatLieuFilter")
+        };
+        const res = await fetch(baseUrl + "quick-filter", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+        const json = await res.json();
+        if (json?.success) renderProducts(json.data || []);
+    }
+
+    // Render sản phẩm (giữ nguyên layout ban đầu)
+    function renderProducts(products) {
+        const container = document.querySelector(".col-md-8 .row.g-4, .col-lg-9 .row.g-4");
+        if (!container) return;
+        container.innerHTML = "";
+
+        if (!products.length) {
+            container.innerHTML = `<div class="col-12 text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">Không tìm thấy sản phẩm nào</h4>
+            </div>`;
+            return;
+        }
+
+        products.forEach(sp => {
+            const anh = (sp.danhSachAnh && sp.danhSachAnh.length)
+                ? (sp.danhSachAnh.find(a => a.anhChinh)?.duongDanAnh || sp.danhSachAnh[0].duongDanAnh)
+                : "images/no-image.jpg";
+
+            container.insertAdjacentHTML("beforeend", `
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                    <div class="card h-100 shadow-sm border-0 product-card">
+                        <!-- Ảnh -->
+                        <div class="card-img-container position-relative overflow-hidden">
+                            <img src="https://localhost:7221/${anh}"
+                                 alt="${sp.tenSanPham || ""}"
+                                 class="card-img-top product-image"/>
+                            <div class="product-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                                <a href="/CTSanPham/Details/${sp.idSanPham}" class="btn btn-light btn-sm">
+                                    <i class="fas fa-eye me-1"></i>Xem chi tiết
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Nội dung -->
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title text-truncate mb-2">${sp.tenSanPham || ""}</h6>
+                            <p class="text-muted mb-2"><i class="fas fa-tag me-1"></i>${sp.tenDanhMuc ?? ""}</p>
+
+                            <div class="mb-3">
+                                ${
+                                    sp.giaSauGiam < sp.giaGoc
+                                    ? `<div class="d-flex align-items-center">
+                                            <span class="text-muted text-decoration-line-through me-2">${sp.giaGoc.toLocaleString()}đ</span>
+                                            <span class="text-danger fw-bold fs-5">${sp.giaSauGiam.toLocaleString()}đ</span>
+                                       </div>
+                                       ${sp.tenGiamGia ? `<small class="text-success"><i class="fas fa-gift me-1"></i>${sp.tenGiamGia}</small>` : ""}`
+                                    : `<span class="fw-bold fs-5 text-primary">${sp.giaGoc.toLocaleString()}đ</span>`
+                                }
+                            </div>
+
+                            <div class="mt-auto">
+                                ${sp.chiTiets?.length
+                                    ? `<small class="text-muted d-block mb-1"><i class="fas fa-palette me-1"></i>
+                                        ${[...new Set(sp.chiTiets.map(ct => ct.mauSac).filter(Boolean))].slice(0,3).join(", ")}
+                                       </small>
+                                       <small class="text-muted d-block mb-2"><i class="fas fa-ruler me-1"></i>
+                                        ${[...new Set(sp.chiTiets.map(ct => ct.size).filter(Boolean))].slice(0,5).join(", ")}
+                                       </small>`
+                                    : ""
+                                }
+                                <a href="/CTSanPham/Details/${sp.idSanPham}" class="btn btn-primary w-100">
+                                    <i class="fas fa-shopping-cart me-2"></i>Xem chi tiết
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-            </div>
-        </div>
+            `);
+        });
     }
-</div>
+
+    // Reset filter
+    function clearAll() {
+        document.querySelectorAll(".filter-group input[type=checkbox]").forEach(i => i.checked = false);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadFilters();
+        document.getElementById("btnFilter").addEventListener("click", applyFilter);
+        document.getElementById("btnClearAll").addEventListener("click", () => { clearAll(); applyFilter(); });
+    });
+</script>

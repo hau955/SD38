@@ -2,6 +2,7 @@
 @model HoaDonChiTietViewModel
 @{
     Layout = null;
+    
 }
 <!DOCTYPE html>
 <html>
@@ -110,6 +111,8 @@
                 <th>Tên SP</th>
                 <th>SL</th>
                 <th>Đơn giá</th>
+                <th>Giảm giá</th>
+
                 <th>Thành tiền</th>
             </tr>
         </thead>
@@ -122,13 +125,18 @@
                     <td>@sp.TenSanPham</td>
                     <td>@sp.SoLuong</td>
                     <td>@sp.DonGia.ToString("N0")</td>
+                    <td>@sp.GiaDuocGiam.ToString("N0")</td>
                     <td>@sp.ThanhTien.ToString("N0")</td>
                 </tr>
             }
-
+            
             <tr class="total-row">
                 <td colspan="4">Tổng tiền trước giảm</td>
                 <td>@Model.TongTienTruocGiam.ToString("N0") đ</td>
+            </tr>
+            <tr class="total-row">
+                <td colspan="4">Tiền giảm</td>
+                <td>@Model.tien.ToString("N0") đ</td>
             </tr>
             <tr class="total-row">
                 <td colspan="4">Tổng tiền sau giảm</td>
