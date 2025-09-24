@@ -18,10 +18,6 @@
             <i class="fas fa-key"></i>
             Đổi Mật Khẩu
         </a>
-        <a href="@Url.Action("AssignRole", new { id = Model.Id })" class="btn btn-success me-2">
-            <i class="fas fa-user-tag"></i>
-            Phân Quyền
-        </a>
         <a href="@Url.Action("Index")" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i>
             Quay lại
@@ -256,16 +252,6 @@
                         <p class="text-muted">Reset mật khẩu đăng nhập</p>
                         <a href="@Url.Action("ResetPassword", new { id = Model.Id })" class="btn btn-info me-2">
                             Đổi Mật Khẩu
-                        </a>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="action-card text-center">
-                        <i class="fas fa-user-tag text-success"></i>
-                        <h6>Phân Quyền</h6>
-                        <p class="text-muted">Gán vai trở và quyền hạn</p>
-                        <a href="@Url.Action("AssignRole", new { id = Model.Id })" class="btn btn-success btn-sm">
-                            Phân Quyền
                         </a>
                     </div>
                 </div>

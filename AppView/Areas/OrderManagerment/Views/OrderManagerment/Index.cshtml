@@ -150,8 +150,8 @@
         }
 
             .modern-table thead th {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
+                background: #fff; /* hoặc background-color: white; */
+                color: #333; /* đổi chữ sang màu tối để dễ đọc */
                 border: none;
                 padding: 1rem;
                 font-weight: 600;
@@ -159,6 +159,7 @@
                 font-size: 0.85rem;
                 letter-spacing: 0.5px;
             }
+
 
             .modern-table tbody tr {
                 border: none;
@@ -373,9 +374,6 @@
                     <p class="mb-0 mt-2 opacity-75">Hệ thống quản lý đơn hàng thông minh</p>
                 </div>
                 <div>
-                    <button class="btn modern-btn btn-light me-2" onclick="exportToExcel()">
-                        <i class="fas fa-file-excel me-2"></i>Xuất Excel
-                    </button>
                     <button class="btn modern-btn btn-light" onclick="refreshData()">
                         <i class="fas fa-sync-alt me-2"></i>Làm mới
                     </button>

@@ -2,9 +2,14 @@
 @using AppView.Areas.Admin.ViewModels.ThongKeViewModel
 @model CustomerReportViewModel
 @{
-    ViewData["Title"] = ViewBag.Title;
+    ViewData["Title"] = ViewBag.Title ?? "Báo cáo khách hàng";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
-    var request = ViewBag.Request as TimeRangeRequestViewModel;
+    var request = ViewBag.Request as TimeRangeRequestViewModel ?? new TimeRangeRequestViewModel();
+
+    // Khởi tạo default values nếu Model null
+    var model = Model ?? new CustomerReportViewModel();
+    var customerSegments = model?.CustomerSegments ?? new List<CustomerValueViewModel>();
+    var customerActivities = model?.CustomerActivities ?? new List<CustomerActivityViewModel>();
 }
 
 <style>
@@ -66,8 +71,8 @@
         }
 
         .modern-card .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #fff; /* hoặc background-color: white; */
+            color: #333; /* đổi chữ sang màu tối để dễ đọc */
             border: none;
             padding: 20px 25px;
             font-weight: 600;
@@ -98,6 +103,7 @@
             padding: 12px 15px;
             background: rgba(255,255,255,0.9);
             transition: all 0.3s ease;
+            color: #333;
         }
 
             .filter-form .form-control:focus {
@@ -188,25 +194,9 @@
             opacity: 0.7;
         }
 
-    .breadcrumb-modern {
-        background: transparent;
-        padding: 0;
-        margin-bottom: 25px;
-    }
-
-        .breadcrumb-modern .breadcrumb-item {
-            font-weight: 500;
-        }
-
-            .breadcrumb-modern .breadcrumb-item + .breadcrumb-item::before {
-                content: "→";
-                color: #667eea;
-                font-weight: bold;
-            }
-
     .page-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        background: #fff; /* hoặc background-color: white; */
+        color: #333; /* đổi chữ sang màu tối để dễ đọc */
         padding: 30px 0;
         margin: -20px -15px 30px -15px;
         border-radius: 0 0 30px 30px;
@@ -219,8 +209,8 @@
     }
 
         .data-table-modern thead th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #fff; /* hoặc background-color: white; */
+            color: #333; /* đổi chữ sang màu tối để dễ đọc */
             border: none;
             padding: 18px 15px;
             font-weight: 600;
@@ -261,65 +251,10 @@
         animation: fadeInUp 0.6s ease forwards;
     }
 
-    .loading-placeholder {
-        background: linear-gradient(90deg, #f0f0f0 25%, rgba(255,255,255,0.8) 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: loading 1.5s infinite;
-    }
-
-    @@keyframes loading {
-        0%
-
-    {
-        background-position: 200% 0;
-    }
-
-    100% {
-        background-position: -200% 0;
-    }
-
-    }
-
     .metric-icon {
         font-size: 2.5rem;
         opacity: 0.8;
         margin-bottom: 10px;
-    }
-
-    .stats-table {
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        overflow: hidden;
-    }
-
-        .stats-table .table th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px;
-            font-weight: 600;
-        }
-
-        .stats-table .table td {
-            padding: 15px;
-            border: none;
-            vertical-align: middle;
-        }
-
-        .stats-table .table tr:hover {
-            background: rgba(102, 126, 234, 0.05);
-        }
-
-    .stat-value {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #667eea;
-    }
-
-    .stat-label {
-        color: #6c757d;
-        font-weight: 500;
     }
 
     /* Modal Styles */
@@ -331,8 +266,8 @@
     }
 
     .modal-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        background: #fff; /* hoặc background-color: white; */
+        color: #333; /* đổi chữ sang màu tối để dễ đọc */
         border: none;
         padding: 25px 30px;
     }
@@ -344,11 +279,6 @@
             width: 35px;
             height: 35px;
         }
-
-            .modal-header .btn-close:hover {
-                background: white;
-                transform: rotate(90deg);
-            }
 
     .modal-body {
         padding: 30px;
@@ -456,39 +386,6 @@
         border: 1px solid rgba(220, 53, 69, 0.3);
     }
 
-    .payment-partial {
-        background: rgba(255, 193, 7, 0.1);
-        color: #ffc107;
-        border: 1px solid rgba(255, 193, 7, 0.3);
-    }
-
-    .order-summary {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-        border-radius: 15px;
-        padding: 20px;
-        margin-bottom: 20px;
-    }
-
-    .summary-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 0;
-        border-bottom: 1px solid rgba(102, 126, 234, 0.1);
-    }
-
-        .summary-item:last-child {
-            border-bottom: none;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-    .modal-footer {
-        background: white;
-        border: none;
-        padding: 20px 30px;
-    }
-
     .order-empty-state {
         text-align: center;
         padding: 40px 20px;
@@ -500,39 +397,12 @@
             margin-bottom: 15px;
             opacity: 0.5;
         }
-
-    @@media (max-width: 768px) {
-        .modal-dialog
-
-    {
-        margin: 10px;
-        max-width: calc(100% - 20px);
-    }
-
-    .customer-detail-avatar {
-        width: 60px;
-        height: 60px;
-        font-size: 1.5rem;
-    }
-
-    .order-card {
-        padding: 15px;
-    }
-
-    }
 </style>
 
 <div class="page-header">
     <div class="container-fluid">
         <div class="row align-items-center">
             <div class="col-12">
-                <nav aria-label="breadcrumb" class="breadcrumb-modern">
-                    <ol class="breadcrumb mb-3">
-                        <li class="breadcrumb-item"><a href="/Admin" style="color: rgba(255,255,255,0.8);">Trang chủ</a></li>
-                        <li class="breadcrumb-item"><a href="/Admin/ThongKe" style="color: rgba(255,255,255,0.8);">Thống kê</a></li>
-                        <li class="breadcrumb-item active" style="color: white;">Khách hàng</li>
-                    </ol>
-                </nav>
                 <h2 class="mb-0">📊 @ViewData["Title"]</h2>
                 <p class="mb-0 mt-2" style="opacity: 0.9;">Phân tích chi tiết về khách hàng và hoạt động kinh doanh</p>
             </div>
@@ -542,7 +412,7 @@
 
 <div class="container-fluid">
     <!-- Error Message -->
-    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage?.ToString()))
     {
         <div class="alert alert-danger alert-dismissible fade show animate-card" role="alert" style="border-radius: 15px; border: none; box-shadow: 0 5px 20px rgba(220, 53, 69, 0.2);">
             <i class="fas fa-exclamation-triangle me-2"></i>
@@ -558,13 +428,13 @@
             <h6><i class="fas fa-info-circle me-2"></i>Thông tin Debug:</h6>
             <div class="row">
                 <div class="col-md-4">
-                    <small><strong>Customer Segments:</strong> @(Model?.CustomerSegments?.Count ?? 0)</small>
+                    <small><strong>Customer Segments:</strong> @customerSegments.Count</small>
                 </div>
                 <div class="col-md-4">
-                    <small><strong>Customer Activities:</strong> @(Model?.CustomerActivities?.Count ?? 0)</small>
+                    <small><strong>Customer Activities:</strong> @customerActivities.Count</small>
                 </div>
                 <div class="col-md-4">
-                    <small><strong>API Base URL:</strong> @ViewData["ApiBaseUrl"]</small>
+                    <small><strong>Model Status:</strong> @(Model != null ? "OK" : "NULL")</small>
                 </div>
             </div>
         </div>
@@ -579,11 +449,11 @@
         <form method="post" class="row g-3">
             <div class="col-md-5">
                 <label class="form-label fw-bold">📅 Từ ngày</label>
-                <input type="date" class="form-control" name="StartDate" value="@request?.StartDate.ToString("yyyy-MM-dd")" />
+                <input type="date" class="form-control" name="StartDate" value="@(request?.StartDate.ToString("yyyy-MM-dd") ?? DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd"))" />
             </div>
             <div class="col-md-5">
                 <label class="form-label fw-bold">📅 Đến ngày</label>
-                <input type="date" class="form-control" name="EndDate" value="@request?.EndDate.ToString("yyyy-MM-dd")" />
+                <input type="date" class="form-control" name="EndDate" value="@(request?.EndDate.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))" />
             </div>
             <div class="col-md-2">
                 <label class="form-label">&nbsp;</label>
@@ -602,7 +472,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="metric-icon">👥</div>
-                            <h3 class="mb-2">@(Model?.CustomerSegments?.Count ?? 0)</h3>
+                            <h3 class="mb-2">@customerSegments.Count</h3>
                             <p class="mb-0 opacity-75">Tổng khách hàng</p>
                         </div>
                         <div class="text-end">
@@ -618,7 +488,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="metric-icon">💰</div>
-                            <h3 class="mb-2">@(Model?.CustomerSegments?.Sum(c => c.LifetimeValue).ToString("N0") ?? "0") ₫</h3>
+                            <h3 class="mb-2">@(customerSegments.Sum(c => c.LifetimeValue).ToString("N0")) ₫</h3>
                             <p class="mb-0 opacity-75">Tổng giá trị LTV</p>
                         </div>
                         <div class="text-end">
@@ -634,7 +504,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="metric-icon">🛒</div>
-                            <h3 class="mb-2">@(Model?.CustomerSegments?.Sum(c => c.OrderCount) ?? 0)</h3>
+                            <h3 class="mb-2">@customerSegments.Sum(c => c.OrderCount)</h3>
                             <p class="mb-0 opacity-75">Tổng đơn hàng</p>
                         </div>
                         <div class="text-end">
@@ -650,7 +520,7 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="metric-icon">📈</div>
-                            <h3 class="mb-2">@(Model?.CustomerActivities?.Sum(a => a.NewCustomers) ?? 0)</h3>
+                            <h3 class="mb-2">@customerActivities.Sum(a => a.NewCustomers)</h3>
                             <p class="mb-0 opacity-75">Khách hàng mới</p>
                         </div>
                         <div class="text-end">
@@ -680,7 +550,7 @@
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    @if (Model?.CustomerSegments?.Any() == true)
+                    @if (customerSegments.Any())
                     {
                         <div class="table-responsive">
                             <table class="table data-table-modern mb-0" id="customerTable">
@@ -699,82 +569,79 @@
                                 <tbody>
                                     @{
                                         int customerIndex = 1;
-                                        var customerSegments = Model?.CustomerSegments ?? new List<CustomerValueViewModel>();
                                     }
-                                    @if (customerSegments.Any())
+                                    @foreach (var customer in customerSegments.Take(20))
                                     {
-                                        @foreach (var customer in customerSegments.Take(20))
-                                        {
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center justify-content-center">
-                                                        <span class="badge bg-primary rounded-pill">@customerIndex</span>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center justify-content-center">
+                                                    <span class="badge bg-primary rounded-pill">@customerIndex</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="customer-avatar">
+                                                        @(string.IsNullOrEmpty(customer.CustomerName) ? "N" : customer.CustomerName.Substring(0, 1).ToUpper())
                                                     </div>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="customer-avatar">
-                                                            @customer.CustomerName?.Substring(0, 1).ToUpper()
-                                                        </div>
-                                                        <div>
-                                                            <h6 class="mb-1 fw-bold">@customer.CustomerName</h6>
-                                                            <small class="text-muted">ID: @customer.CustomerId</small>
-                                                        </div>
+                                                    <div>
+                                                        <h6 class="mb-1 fw-bold">@(customer.CustomerName ?? "N/A")</h6>
+                                                        <small class="text-muted">ID: @customer.CustomerId</small>
                                                     </div>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="fas fa-envelope me-2 text-muted"></i>
-                                                        <span>@customer.Email</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    @{
-                                                        var tierClass = customer.Tier.ToLower() switch
-                                                        {
-                                                            "vip" => "tier-vip",
-                                                            "gold" => "tier-gold",
-                                                            "silver" => "tier-silver",
-                                                            _ => "tier-standard"
-                                                        };
-                                                    }
-                                                    <span class="tier-badge @tierClass">@customer.Tier</span>
-                                                </td>
-                                                <td>
-                                                    <div class="value-display">
-                                                        💎 @customer.LifetimeValue.ToString("N0") ₫
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="fas fa-shopping-bag me-2 text-primary"></i>
-                                                        <span class="fw-bold">@customer.OrderCount</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <i class="fas fa-calendar me-2 text-success"></i>
-                                                        <span>@customer.LastOrderDate.ToString("dd/MM/yyyy")</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex gap-2">
-                                                        <button class="btn btn-outline-primary btn-sm view-details-btn"
-                                                                data-customer-id="@customer.CustomerId"
-                                                                data-customer-name="@customer.CustomerName"
-                                                                data-customer-email="@customer.Email"
-                                                                data-customer-tier="@customer.Tier"
-                                                                data-customer-ltv="@customer.LifetimeValue.ToString("N0")"
-                                                                data-customer-orders="@customer.OrderCount"
-                                                                data-customer-last-order="@customer.LastOrderDate.ToString("dd/MM/yyyy")"
-                                                                title="Xem chi tiết đơn hàng">
-                                                            <i class="fas fa-eye"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            customerIndex++;
-                                        }
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-envelope me-2 text-muted"></i>
+                                                    <span>@(customer.Email ?? "N/A")</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var tier = customer.Tier ?? "Standard";
+                                                    var tierClass = tier.ToLower() switch
+                                                    {
+                                                        "vip" => "tier-vip",
+                                                        "gold" => "tier-gold",
+                                                        "silver" => "tier-silver",
+                                                        _ => "tier-standard"
+                                                    };
+                                                }
+                                                <span class="tier-badge @tierClass">@tier</span>
+                                            </td>
+                                            <td>
+                                                <div class="value-display">
+                                                    💎 @customer.LifetimeValue.ToString("N0") ₫
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-shopping-bag me-2 text-primary"></i>
+                                                    <span class="fw-bold">@customer.OrderCount</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-calendar me-2 text-success"></i>
+                                                    <span>@customer.LastOrderDate.ToString("dd/MM/yyyy")</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-outline-primary btn-sm view-details-btn"
+                                                            data-customer-id="@customer.CustomerId"
+                                                            data-customer-name="@(customer.CustomerName ?? "N/A")"
+                                                            data-customer-email="@(customer.Email ?? "")"
+                                                            data-customer-tier="@tier"
+                                                            data-customer-ltv="@customer.LifetimeValue.ToString("N0")"
+                                                            data-customer-orders="@customer.OrderCount"
+                                                            data-customer-last-order="@customer.LastOrderDate.ToString("dd/MM/yyyy")"
+                                                            title="Xem chi tiết đơn hàng">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        customerIndex++;
                                     }
                                 </tbody>
                             </table>
@@ -816,9 +683,7 @@
                 <div class="customer-info-card">
                     <div class="row align-items-center">
                         <div class="col-auto">
-                            <div class="customer-detail-avatar" id="modalCustomerAvatar">
-                                N
-                            </div>
+                            <div class="customer-detail-avatar" id="modalCustomerAvatar">N</div>
                         </div>
                         <div class="col">
                             <div class="row">
@@ -829,32 +694,40 @@
                                         <span id="modalCustomerEmail">email@example.com</span>
                                     </p>
                                 </div>
+                                <div class="col-md-6 text-end">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <span class="tier-badge tier-standard" id="modalCustomerTier">Standard</span>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">ID: <span id="modalCustomerId">0</span></small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Order Summary -->
-                <div class="order-summary">
-                    <h6 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Tổng quan</h6>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="summary-item">
-                                <span><i class="fas fa-shopping-cart me-2"></i>Tổng đơn hàng</span>
-                                <span class="fw-bold" id="modalTotalOrders">0</span>
-                            </div>
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="bg-white rounded-3 p-3 text-center">
+                            <i class="fas fa-shopping-cart fa-2x text-primary mb-2"></i>
+                            <h5 class="mb-1" id="modalTotalOrders">0</h5>
+                            <small class="text-muted">Tổng đơn hàng</small>
                         </div>
-                        <div class="col-md-4">
-                            <div class="summary-item">
-                                <span><i class="fas fa-coins me-2"></i>Giá trị LTV</span>
-                                <span class="fw-bold" id="modalLifetimeValue">0 ₫</span>
-                            </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="bg-white rounded-3 p-3 text-center">
+                            <i class="fas fa-coins fa-2x text-success mb-2"></i>
+                            <h5 class="mb-1" id="modalLifetimeValue">0 ₫</h5>
+                            <small class="text-muted">Giá trị LTV</small>
                         </div>
-                        <div class="col-md-4">
-                            <div class="summary-item">
-                                <span><i class="fas fa-calendar me-2"></i>Đơn cuối</span>
-                                <span class="fw-bold" id="modalLastOrder">--/--/----</span>
-                            </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="bg-white rounded-3 p-3 text-center">
+                            <i class="fas fa-calendar fa-2x text-warning mb-2"></i>
+                            <h5 class="mb-1" id="modalLastOrder">--/--/----</h5>
+                            <small class="text-muted">Đơn cuối</small>
                         </div>
                     </div>
                 </div>
@@ -875,9 +748,6 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times me-2"></i>Đóng
-                </button>
-                <button type="button" class="btn btn-modern" onclick="exportCustomerOrders()">
-                    <i class="fas fa-download me-2"></i>Xuất báo cáo
                 </button>
             </div>
         </div>
@@ -950,20 +820,26 @@
                 var customerOrders = $(this).data('customer-orders');
                 var customerLastOrder = $(this).data('customer-last-order');
 
+                // Validate email before making request
+                if (!customerEmail || customerEmail === 'N/A' || customerEmail.trim() === '') {
+                    showErrorNotification('Email khách hàng không hợp lệ');
+                    return;
+                }
+
                 // Update modal content
-                $('#modalCustomerName').text(customerName);
+                $('#modalCustomerName').text(customerName || 'N/A');
                 $('#modalCustomerEmail').text(customerEmail);
                 $('#modalCustomerId').text(customerId);
-                $('#modalCustomerAvatar').text(customerName.charAt(0).toUpperCase());
-                $('#modalTotalOrders').text(customerOrders);
-                $('#modalLifetimeValue').text(customerLtv + ' ₫');
-                $('#modalLastOrder').text(customerLastOrder);
+                $('#modalCustomerAvatar').text((customerName || 'N').charAt(0).toUpperCase());
+                $('#modalTotalOrders').text(customerOrders || '0');
+                $('#modalLifetimeValue').text((customerLtv || '0') + ' ₫');
+                $('#modalLastOrder').text(customerLastOrder || '--/--/----');
 
                 // Update customer tier badge
-                var tierClass = customerTier.toLowerCase() === 'vip' ? 'tier-vip' :
-                               customerTier.toLowerCase() === 'gold' ? 'tier-gold' :
-                               customerTier.toLowerCase() === 'silver' ? 'tier-silver' : 'tier-standard';
-                $('#modalCustomerTier').removeClass('tier-vip tier-gold tier-silver tier-standard').addClass(tierClass).text(customerTier);
+                var tierClass = (customerTier || 'standard').toLowerCase() === 'vip' ? 'tier-vip' :
+                               (customerTier || 'standard').toLowerCase() === 'gold' ? 'tier-gold' :
+                               (customerTier || 'standard').toLowerCase() === 'silver' ? 'tier-silver' : 'tier-standard';
+                $('#modalCustomerTier').removeClass('tier-vip tier-gold tier-silver tier-standard').addClass(tierClass).text(customerTier || 'Standard');
 
                 // Show modal
                 $('#customerOrdersModal').modal('show');
@@ -972,49 +848,37 @@
                 loadCustomerOrders(customerEmail);
             });
         });
-                async function loadCustomerOrders(email) {
-            console.log("loadCustomerOrders CALLED with email =", email); // debug
-            $('#ordersLoadingState').show();
-            $('#ordersList').hide();
 
-            try {
-                const response = await fetch(`/Admin/ThongKe/GetCustomerOrders?email=${encodeURIComponent(email)}`);
-                console.log("Response status =", response.status);
-
-                if (!response.ok) throw new Error("Không thể lấy dữ liệu đơn hàng");
-
-                const result = await response.json();
-                console.log("API result =", result); // debug
-
-                if (result.isSuccess) {
-                    displayCustomerOrders(result.data);
-                } else {
-                    showErrorNotification(result.message || "Lỗi khi lấy đơn hàng");
-                }
-            } catch (error) {
-                console.error("ERROR in loadCustomerOrders:", error);
-                showErrorNotification(error.message || "Lỗi không xác định");
-            } finally {
-                $('#ordersLoadingState').hide();
-                $('#ordersList').show();
+        function loadCustomerOrders(email) {
+            if (!email || email === 'N/A' || email.trim() === '') {
+                showErrorNotification('Email không hợp lệ');
+                return;
             }
-        }
-                function showErrorNotification(message) {
-            var toastHtml = `
-                <div class="toast align-items-center text-bg-danger border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            ${message}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                </div>`;
-            $('#toastContainer').append(toastHtml);
-        }
 
+            // Show loading state
+            $('#ordersLoadingState').show();
+            $('#ordersList').html('');
+
+            $.get(`/Admin/ThongKe/GetCustomerOrders?email=${encodeURIComponent(email)}`)
+                .done(function (result) {
+                    $('#ordersLoadingState').hide();
+                    if (result.isSuccess) {
+                        displayCustomerOrders(result.data || []);
+                    } else {
+                        showErrorNotification(result.message || 'Lỗi khi tải đơn hàng');
+                        displayCustomerOrders([]);
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    $('#ordersLoadingState').hide();
+                    console.error('AJAX Error:', error);
+                    showErrorNotification(`Lỗi kết nối: ${error}`);
+                    displayCustomerOrders([]);
+                });
+        }
 
         function displayCustomerOrders(orders) {
-            if (orders.length === 0) {
+            if (!orders || orders.length === 0) {
                 $('#ordersList').html(`
                     <div class="order-empty-state">
                         <i class="fas fa-shopping-cart"></i>
@@ -1025,33 +889,36 @@
                 return;
             }
 
-            var ordersHtml = `
+            let ordersHtml = `
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <h6 class="mb-0"><i class="fas fa-list me-2"></i>Danh sách đơn hàng (${orders.length})</h6>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-outline-primary btn-sm" onclick="sortOrders('date')">
-                            <i class="fas fa-sort-amount-down me-1"></i>Sắp xếp
-                        </button>
-                    </div>
                 </div>
                 <div class="row">
             `;
 
             orders.forEach(function(order, index) {
-                var statusClass = 'status-' + order.Status.toLowerCase();
-                var statusText = getStatusText(order.Status);
-                var paymentClass = 'payment-' + order.PaymentStatus.toLowerCase();
-                var paymentText = getPaymentStatusText(order.PaymentStatus);
+                let status = (order.status || 'pending').toLowerCase();
+                let statusClass = 'status-' + status;
+                let statusText = getStatusText(status);
+                let paymentStatus = (order.paymentStatus || 'unpaid').toLowerCase();
+                let paymentClass = 'payment-' + paymentStatus;
+                let paymentText = getPaymentStatusText(paymentStatus);
+
+                // parse ngày từ ISO string
+                let orderDate = new Date(order.orderDate || Date.now());
+
+                // đảm bảo TotalAmount là số
+                let totalAmount = Number(order.totalAmount) || 0;
 
                 ordersHtml += `
                     <div class="col-12 mb-3">
                         <div class="order-card ${statusClass}" style="animation: fadeInUp 0.6s ease ${index * 0.1}s both;">
                             <div class="row align-items-center">
-                                <div class="col-md-2">
-                                    <div class="fw-bold text-primary">#${order.OrderId}</div>
+                                <div class="col-md-3">
+                                    <div class="fw-bold text-primary">#${order.orderId || 'N/A'}</div>
                                     <small class="text-muted">
                                         <i class="fas fa-calendar-alt me-1"></i>
-                                        ${formatDate(order.OrderDate)}
+                                        ${formatDate(orderDate)}
                                     </small>
                                 </div>
                                 <div class="col-md-2">
@@ -1061,25 +928,20 @@
                                     <span class="payment-badge ${paymentClass}">${paymentText}</span>
                                 </div>
                                 <div class="col-md-3">
-                                    <div class="fw-bold">${order.TotalAmount.toLocaleString()} ₫</div>
+                                    <div class="fw-bold">${totalAmount.toLocaleString()} ₫</div>
                                     <small class="text-muted">
                                         <i class="fas fa-box me-1"></i>
-                                        ${order.ItemCount} sản phẩm
+                                        ${order.itemCount || 0} sản phẩm
                                     </small>
                                 </div>
-                                <div class="col-md-3 text-end">
-                                    <div class="d-flex gap-2 justify-content-end">
-                                        <button class="btn btn-outline-primary btn-sm" onclick="viewOrderDetails('${order.OrderId}')" title="Xem chi tiết">
+                                <div class="col-md-2 text-end">
+                                    <div class="d-flex gap-1 justify-content-end">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="viewOrderDetails('${order.orderId}')" title="Xem chi tiết">
                                             <i class="fas fa-eye"></i>
                                         </button>
-                                        <button class="btn btn-outline-success btn-sm" onclick="printInvoice('${order.OrderId}')" title="In hóa đơn">
+                                        <button class="btn btn-outline-success btn-sm" onclick="printInvoice('${order.orderId}')" title="In hóa đơn">
                                             <i class="fas fa-print"></i>
                                         </button>
-                                        ${order.Status === 'completed' ? `
-                                        <button class="btn btn-outline-warning btn-sm" onclick="processReturn('${order.OrderId}')" title="Trả hàng">
-                                            <i class="fas fa-undo"></i>
-                                        </button>
-                                        ` : ''}
                                     </div>
                                 </div>
                             </div>
@@ -1101,7 +963,7 @@
                 'shipped': 'Đã giao',
                 'delivered': 'Đã nhận'
             };
-            return statusMap[status.toLowerCase()] || status;
+            return statusMap[status] || status;
         }
 
         function getPaymentStatusText(paymentStatus) {
@@ -1111,222 +973,40 @@
                 'partial': 'Thanh toán một phần',
                 'refunded': 'Đã hoàn tiền'
             };
-            return paymentMap[paymentStatus.toLowerCase()] || paymentStatus;
+            return paymentMap[paymentStatus] || paymentStatus;
         }
 
-        function formatDate(dateString) {
-            return new Date(dateString).toLocaleDateString('vi-VN');
+        function formatDate(date) {
+            try {
+                return new Date(date).toLocaleDateString('vi-VN');
+            } catch(e) {
+                return '--/--/----';
+            }
         }
 
         function viewOrderDetails(orderId) {
             showSuccessNotification(`Xem chi tiết đơn hàng ${orderId}`);
-            // In real implementation, this would navigate to order details page or open another modal
         }
 
         function printInvoice(orderId) {
             showSuccessNotification(`Đang chuẩn bị in hóa đơn cho đơn hàng ${orderId}`);
-            // In real implementation, this would generate and print/download invoice
-        }
-
-        function processReturn(orderId) {
-            if (confirm(`Bạn có chắc muốn xử lý trả hàng cho đơn hàng ${orderId}?`)) {
-                showSuccessNotification(`Đã khởi tạo quy trình trả hàng cho đơn hàng ${orderId}`);
-            }
-        }
-
-        function sortOrders(type) {
-            showSuccessNotification('Đang sắp xếp danh sách đơn hàng...');
-            // In real implementation, this would sort the orders
         }
 
         function exportCustomerOrders() {
             var customerName = $('#modalCustomerName').text();
             showSuccessNotification(`Đang xuất báo cáo đơn hàng cho khách hàng: ${customerName}`);
-            // In real implementation, this would export customer order report
         }
 
-               async function loadCustomerData() {
-            showLoadingState();
-
-            try {
-                const response = await fetch('/Admin/ThongKe/GetCustomerReport', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        startDate: '2024-01-01',
-                        endDate: '2024-12-31',
-                        groupType: 'Month'
-                    })
-                });
-
-                if (!response.ok) throw new Error("Không thể lấy dữ liệu khách hàng");
-
-                const result = await response.json();
-
-                if (result.isSuccess) {
-                    const customers = result.data.customerSegments;
-                    updateStatsCards(customers);
-                    updateCustomerTable(customers);
-                    updateStatsTable(customers);
-                    showSuccessNotification('Đã tải dữ liệu thành công!');
-                } else {
-                    showErrorNotification(result.message || 'Lỗi khi lấy dữ liệu khách hàng');
-                }
-            } catch (error) {
-                console.error(error);
-                showErrorNotification(error.message);
-            } finally {
-                hideLoadingState();
+        function exportToExcel() {
+            if ($.fn.DataTable.isDataTable('#customerTable')) {
+                $('#customerTable').DataTable().button('.buttons-excel').trigger();
+            } else {
+                showSuccessNotification('Đang chuẩn bị file Excel...');
             }
         }
 
-
-        function updateStatsCards(customers) {
-            // Update stats
-            $('.stats-card.customers h3').text(customers.length);
-            $('.stats-card.revenue h3').text(customers.reduce((sum, c) => sum + c.LifetimeValue, 0).toLocaleString() + ' ₫');
-            $('.stats-card.orders h3').text(customers.reduce((sum, c) => sum + c.OrderCount, 0));
-            $('.stats-card.activity h3').text(customers.length);
-        }
-
-        function updateStatsTable(customers) {
-            // Update statistics table values
-            var vipCount = customers.filter(c => c.Tier === 'VIP').length;
-            var frequentCount = customers.filter(c => c.OrderCount >= 5).length;
-            var avgValue = customers.reduce((sum, c) => sum + c.LifetimeValue, 0) / customers.length;
-            var avgOrders = customers.reduce((sum, c) => sum + c.OrderCount, 0) / customers.length;
-            var recentCount = customers.filter(c => new Date(c.LastOrderDate) >= new Date(Date.now() - 30*24*60*60*1000)).length;
-
-            $('.stats-table tbody tr').each(function(index) {
-                var valueCell = $(this).find('.stat-value');
-                switch(index) {
-                    case 0: valueCell.text(customers.length); break;
-                    case 1: valueCell.text(vipCount); break;
-                    case 2: valueCell.text(frequentCount); break;
-                    case 3: valueCell.text(Math.round(avgValue).toLocaleString() + ' ₫'); break;
-                    case 4: valueCell.text(avgOrders.toFixed(1)); break;
-                    case 5: valueCell.text(recentCount); break;
-                }
-            });
-        }
-
-        function updateCustomerTable(customers) {
-            var tableHtml = `
-                <div class="table-responsive">
-                    <table class="table data-table-modern mb-0" id="customerTable">
-                        <thead>
-                            <tr>
-                                <th scope="col" style="width: 60px;">#</th>
-                                <th scope="col">Khách hàng</th>
-                                <th scope="col">Email</th>
-                                <th scope="col">Hạng</th>
-                                <th scope="col">Giá trị LTV</th>
-                                <th scope="col">Số đơn</th>
-                                <th scope="col">Đơn cuối</th>
-                                <th scope="col">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${customers.map((customer, index) => {
-                                var tierClass = customer.Tier.toLowerCase() === 'vip' ? 'tier-vip' :
-                                               customer.Tier.toLowerCase() === 'gold' ? 'tier-gold' :
-                                               customer.Tier.toLowerCase() === 'silver' ? 'tier-silver' : 'tier-standard';
-
-                                return `
-                                    <tr style="animation: fadeInUp 0.6s ease ${index * 0.1}s both;">
-                                        <td>
-                                            <div class="d-flex align-items-center justify-content-center">
-                                                <span class="badge bg-primary rounded-pill">${index + 1}</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="customer-avatar">
-                                                    ${customer.CustomerName.charAt(0).toUpperCase()}
-                                                </div>
-                                                <div>
-                                                    <h6 class="mb-1 fw-bold">${customer.CustomerName}</h6>
-                                                    <small class="text-muted">ID: ${customer.CustomerId}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <i class="fas fa-envelope me-2 text-muted"></i>
-                                                <span>${customer.Email}</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="tier-badge ${tierClass}">${customer.Tier}</span>
-                                        </td>
-                                        <td>
-                                            <div class="value-display">
-                                                💎 ${customer.LifetimeValue.toLocaleString()} ₫
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <i class="fas fa-shopping-bag me-2 text-primary"></i>
-                                                <span class="fw-bold">${customer.OrderCount}</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <i class="fas fa-calendar me-2 text-success"></i>
-                                                <span>${customer.LastOrderDate}</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex gap-2">
-                                                <button class="btn btn-outline-primary btn-sm view-details-btn"
-                                                        data-customer-id="${customer.CustomerId}"
-                                                        data-customer-name="${customer.CustomerName}"
-                                                        data-customer-email="${customer.Email}"
-                                                        data-customer-tier="${customer.Tier}"
-                                                        data-customer-ltv="${customer.LifetimeValue.toLocaleString()}"
-                                                        data-customer-orders="${customer.OrderCount}"
-                                                        data-customer-last-order="${customer.LastOrderDate}"
-                                                        title="Xem chi tiết đơn hàng">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-
-            $('.modern-card .card-body').last().html(tableHtml);
-
-            // Reinitialize DataTable
-            setTimeout(() => {
-                $('#customerTable').DataTable({
-                    language: {
-                        url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/Vietnamese.json'
-                    },
-                    pageLength: 10,
-                    order: [[4, 'desc']],
-                    responsive: true,
-                    dom: 'Bfrtip',
-                    buttons: ['copy', 'excel', 'pdf'],
-                    columnDefs: [
-                        { targets: [0, 3, 4, 5, 6, 7], className: 'text-center' },
-                        { targets: [1, 2], className: 'text-start' }
-                    ]
-                });
-            }, 100);
-        }
-
-        function showLoadingState() {
-            $('.stats-card').addClass('loading-placeholder');
-            $('.modern-card .card-body').last().html('<div class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><br><br>Đang tải dữ liệu mẫu...</div>');
-        }
-
-        function hideLoadingState() {
-            $('.stats-card').removeClass('loading-placeholder');
+        function loadSampleData() {
+            showSuccessNotification('Chức năng tải dữ liệu mẫu sẽ được triển khai trong phiên bản tiếp theo');
         }
 
         function showSuccessNotification(message) {
@@ -1347,28 +1027,22 @@
             }, 3000);
         }
 
-        function exportToExcel() {
-            if ($.fn.DataTable.isDataTable('#customerTable')) {
-                $('#customerTable').DataTable().button('.buttons-excel').trigger();
-            } else {
-                showSuccessNotification('Đang chuẩn bị file Excel...');
-            }
+        function showErrorNotification(message) {
+            var notification = `
+                <div class="alert alert-danger alert-dismissible fade show position-fixed"
+                     style="top: 20px; right: 20px; z-index: 9999; min-width: 300px; border-radius: 15px; box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);"
+                     role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+
+            $('body').append(notification);
+
+            setTimeout(() => {
+                $('.alert-danger').fadeOut();
+            }, 5000);
         }
-
-        // Global error handling
-        window.addEventListener('error', function(e) {
-            console.error('Global error:', e.error);
-        });
-
-        // Smooth scrolling for internal links
-        $('a[href^="#"]').on('click', function(event) {
-            var target = $(this.getAttribute('href'));
-            if (target.length) {
-                event.preventDefault();
-                $('html, body').stop().animate({
-                    scrollTop: target.offset().top - 100
-                }, 1000);
-            }
-        });
     </script>
 }

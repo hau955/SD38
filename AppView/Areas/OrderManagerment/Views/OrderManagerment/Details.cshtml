@@ -467,7 +467,7 @@
             <div>
                 <nav aria-label="breadcrumb" class="mb-3">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a asp-action="Index">Quản lý đơn hàng</a></li>
+                        <li href="/Ordermanagerment/Ordermanagerment/Index" class="breadcrumb-item"><a asp-action="Index">Quản lý đơn hàng</a></li>
                         <li class="breadcrumb-item active">Chi tiết đơn hàng</li>
                     </ol>
                 </nav>
@@ -484,12 +484,10 @@
                         <p class="mb-0 mt-2 opacity-75">Chi tiết thông tin đơn hàng</p>
                     </div>
                     <div>
-                        <a asp-action="Index" class="btn modern-btn btn-light me-2">
+                        <a href="javascript:void(0);"
+                           data-url="/Ordermanagerment/Ordermanagerment/Index" class="btn modern-btn btn-light me-2">
                             <i class="fas fa-arrow-left me-2"></i>Quay lại
                         </a>
-                        <button class="btn modern-btn btn-light" onclick="window.print()">
-                            <i class="fas fa-print me-2"></i>In đơn hàng
-                        </button>
                     </div>
                 </div>
             </div>
@@ -943,7 +941,8 @@
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form asp-action="CancelOrder" method="post">
+                <form id="cancelOrderForm" method="post">
+                    @Html.AntiForgeryToken()
                     <div class="modal-body p-4">
                         <input type="hidden" name="IDHoaDon" value="@Model.IDHoaDon" />
                         <div class="alert alert-warning border-0 mb-4">
@@ -976,17 +975,36 @@
     <script>
         // Add loading overlay functionality
         function showLoading() {
-            document.body.insertAdjacentHTML('beforeend', `
-                <div class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
-                     style="background: rgba(0,0,0,0.5); z-index: 9999;" id="loadingOverlay">
-                    <div class="text-center text-white">
-                        <div class="spinner-border mb-3" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p>Đang xử lý...</p>
+            const overlay = document.createElement('div');
+            overlay.id = 'loadingOverlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 9999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                backdrop-filter: blur(3px);
+            `;
+
+            overlay.innerHTML = `
+                <div style="background: white; padding: 2rem; border-radius: 15px; text-align: center;">
+                    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h5 class="text-primary">Đang xử lý yêu cầu...</h5>
+                    <p class="text-muted mt-2">Vui lòng chờ trong giây lát</p>
+                    <div class="progress mt-3" style="height: 6px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
                     </div>
                 </div>
-            `);
+            `;
+
+            document.body.appendChild(overlay);
         }
 
         function hideLoading() {
@@ -1032,8 +1050,99 @@
             new bootstrap.Modal(document.getElementById('updatePaymentModal')).show();
         }
 
+        // Sửa lại function showCancelModal để hoạt động giống như trong index
         function showCancelModal() {
-            new bootstrap.Modal(document.getElementById('cancelOrderModal')).show();
+            // Đảm bảo modal tồn tại
+            const modalElement = document.getElementById('cancelOrderModal');
+            if (!modalElement) {
+                console.error('Không tìm thấy modal hủy đơn hàng');
+                return;
+            }
+
+            // Xóa sự kiện submit cũ nếu có
+            const form = document.getElementById('cancelOrderForm');
+            form.onsubmit = async function(e) {
+                e.preventDefault();
+
+                const reason = form.querySelector('[name="LyDoHuy"]').value.trim();
+                if (!reason) {
+                    alert('Vui lòng nhập lý do hủy đơn hàng');
+                    return;
+                }
+
+                if (confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
+                    await submitCancelOrder(form);
+                }
+            };
+
+            // Hiển thị modal
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        }
+
+        // Function xử lý submit hủy đơn hàng
+        async function submitCancelOrder(form) {
+            showLoading();
+
+            try {
+                const formData = {
+                    IDHoaDon: '@Model.IDHoaDon',
+                    LyDoHuy: form.querySelector('[name="LyDoHuy"]').value,
+                    __RequestVerificationToken: document.querySelector('input[name="__RequestVerificationToken"]').value
+                };
+
+                const response = await fetch('@Url.Action("CancelOrder", "OrderManagerment")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': formData.__RequestVerificationToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                // Kiểm tra nếu response không phải JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    throw new Error(`Server trả về không phải JSON: ${text.substring(0, 100)}...`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Đóng modal
+                    bootstrap.Modal.getInstance(document.getElementById('cancelOrderModal')).hide();
+
+                    if (result.redirectUrl) {
+                        window.location.href = result.redirectUrl;
+                    } else {
+                        // Reload timeline và cập nhật trạng thái
+                        loadOrderHistory();
+                        window.location.reload();
+                    }
+                } else {
+                    alert(`Lỗi: ${result.message || 'Không thể hủy đơn hàng'}`);
+                }
+            } catch (error) {
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    response: error.response ? await error.response.text() : null
+                });
+
+                let errorMessage = error.message;
+
+                if (error.message.includes('401')) {
+                    errorMessage = 'Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.';
+                }
+                else if (error.message.includes('500')) {
+                    errorMessage = 'Lỗi hệ thống. Vui lòng thử lại sau.';
+                }
+                alert(`Lỗi: ${errorMessage}`);
+            } finally {
+                hideLoading();
+            }
         }
 
         async function quickUpdateStatus(newStatus) {
@@ -1076,7 +1185,8 @@
                 }
             }
         }
-                // Xử lý form cập nhật trạng thái thanh toán
+
+        // Xử lý form cập nhật trạng thái thanh toán
         document.getElementById('updatePaymentModal').querySelector('form').addEventListener('submit', async function(e) {
             e.preventDefault();
             showLoading();
@@ -1122,6 +1232,7 @@
                 hideLoading();
             }
         });
+
         // Form submission handling
         document.querySelectorAll('form').forEach(form => {
             form.addEventListener('submit', function(e) {
@@ -1134,17 +1245,17 @@
             try {
                 const response = await fetch('@Url.Action("GetOrderStatusHistory", new { id = Model.IDHoaDon })');
                 const result = await response.json();
-                
+
                 console.log('API Response:', result); // Debug log
-                
+
                 const timelineContainer = document.getElementById('orderTimeline');
-                
+
                 if (result.isSuccess && result.data && result.data.length > 0) {
                     console.log('Timeline data:', result.data); // Debug log
-                    
+
                     // Clear loading indicator
                     timelineContainer.innerHTML = '';
-                    
+
                     // Render timeline items
                     result.data.forEach((item, index) => {
                         console.log(`Processing item ${index}:`, item); // Debug log
@@ -1153,13 +1264,13 @@
                     });
                 } else {
                     console.log('No data or error:', result); // Debug log
-                    
+
                     // Show error or empty state with more details
                     let message = result.message || 'Không có lịch sử trạng thái';
                     if (result.data && result.data.length === 0) {
                         message = 'Chưa có lịch sử trạng thái cho đơn hàng này. Hãy thử cập nhật trạng thái để tạo lịch sử.';
                     }
-                    
+
                     timelineContainer.innerHTML = `
                         <div class="text-center py-4">
                             <i class="fas fa-history text-muted mb-3" style="font-size: 2rem;"></i>
@@ -1183,20 +1294,20 @@
             }
         }
 
-        // Create timeline item element
+        // Create timeline item element - SỬA LẠI HIỂN THỊ THỜI GIAN
         function createTimelineItem(item, index) {
             const timelineItem = document.createElement('div');
             timelineItem.className = 'timeline-item';
-            
+
             console.log(`Creating timeline item ${index}:`, item); // Debug log
-            
+
             // Check all possible field names (case insensitive)
             const trangThai = item.TrangThai || item.trangThai || item.status || 'Không xác định';
             const ngayCapNhat = item.NgayCapNhat || item.ngayCapNhat || item.date || new Date();
             const nguoiCapNhat = item.NguoiCapNhat || item.nguoiCapNhat || item.user || 'Hệ thống';
-            
+
             console.log(`Processed fields - TrangThai: "${trangThai}", NgayCapNhat: "${ngayCapNhat}", NguoiCapNhat: "${nguoiCapNhat}"`); // Debug log
-            
+
             // Determine marker color based on status
             let markerClass = 'bg-primary';
             if (trangThai.includes('Đã xác nhận') || trangThai.includes('Hoàn tất')) {
@@ -1208,26 +1319,61 @@
             } else if (trangThai.includes('Thanh toán')) {
                 markerClass = 'bg-warning';
             }
-            
-            // Format date
-            const date = new Date(ngayCapNhat);
-            const formattedDate = date.toLocaleString('vi-VN', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            
+
+            // SỬA LẠI CÁCH FORMAT DATE - XỬ LÝ TIMEZONE VÀ UTC
+            let formattedDate = '';
+            try {
+                let date;
+                if (ngayCapNhat) {
+                    // Nếu là string, parse nó
+                    if (typeof ngayCapNhat === 'string') {
+                        // Xử lý các format khác nhau của date string
+                        if (ngayCapNhat.includes('T')) {
+                            // ISO format: "2024-01-15T10:30:00.000Z" hoặc "2024-01-15T10:30:00"
+                            date = new Date(ngayCapNhat);
+                        } else {
+                            // Format khác: "15/01/2024 10:30:00"
+                            date = new Date(ngayCapNhat);
+                        }
+                    } else {
+                        date = new Date(ngayCapNhat);
+                    }
+
+                    // Kiểm tra date có hợp lệ không
+                    if (isNaN(date.getTime())) {
+                        console.warn('Invalid date:', ngayCapNhat);
+                        date = new Date(); // Fallback to current date
+                    }
+
+                    // Format theo múi giờ Việt Nam (UTC+7)
+                    formattedDate = date.toLocaleString('vi-VN', {
+                        timeZone: 'Asia/Ho_Chi_Minh', // Múi giờ Việt Nam
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+                } else {
+                    formattedDate = 'Không xác định';
+                }
+            } catch (error) {
+                console.error('Error formatting date:', error, ngayCapNhat);
+                formattedDate = 'Lỗi hiển thị thời gian';
+            }
+
             timelineItem.innerHTML = `
                 <div class="timeline-marker ${markerClass}"></div>
                 <div class="timeline-content">
                     <h6 class="mb-1 fw-bold">${trangThai}</h6>
-                    <small class="text-muted">${formattedDate}</small>
-                    ${nguoiCapNhat ? `<br><small class="text-info">Bởi: ${nguoiCapNhat}</small>` : ''}
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-1"></i>${formattedDate}
+                    </small>
+                    ${nguoiCapNhat ? `<br><small class="text-info"><i class="fas fa-user me-1"></i>Bởi: ${nguoiCapNhat}</small>` : ''}
                 </div>
             `;
-            
+
             return timelineItem;
         }
 
@@ -1235,7 +1381,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Load order history first
             loadOrderHistory();
-            
+
             // Animate cards on page load
             const cards = document.querySelectorAll('.modern-card');
             cards.forEach((card, index) => {
