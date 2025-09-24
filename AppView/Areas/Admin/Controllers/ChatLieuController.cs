@@ -1,6 +1,7 @@
 using AppData.Models;
 using AppView.Areas.Admin.IRepo;
 using Microsoft.AspNetCore.Mvc;
+using PagedList;
 
 namespace AppView.Areas.Admin.Controllers
 {
@@ -15,10 +16,34 @@ namespace AppView.Areas.Admin.Controllers
         }
 
         // GET: ChatLieu
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchTerm, string statusFilter, int page = 1, int pageSize = 10)
         {
             var list = await _ChatLieuRepo.GetAll();
-            return View(list);
+
+            // Tìm kiếm
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                list = list.Where(x => x.TenChatLieu.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            // Lọc trạng thái
+            if (!string.IsNullOrEmpty(statusFilter))
+            {
+                if (statusFilter == "active")
+                    list = list.Where(x => x.TrangThai).ToList();
+                else if (statusFilter == "inactive")
+                    list = list.Where(x => !x.TrangThai).ToList();
+            }
+
+            // Gửi filter ra ViewBag để giữ giá trị đã chọn
+            ViewBag.CurrentFilter = searchTerm;
+            ViewBag.StatusFilter = statusFilter;
+            ViewBag.PageSize = pageSize;
+
+            // Convert sang PagedList
+            var pagedList = list.ToPagedList(page, pageSize);
+
+            return View(pagedList);
         }
 
         // GET: ChatLieu/Create

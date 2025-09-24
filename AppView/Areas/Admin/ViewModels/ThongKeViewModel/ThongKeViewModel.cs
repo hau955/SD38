@@ -1,10 +1,21 @@
-﻿namespace AppView.Areas.Admin.ViewModels.ThongKeViewModel
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace AppView.Areas.Admin.ViewModels.ThongKeViewModel
 {
     public class TimeRangeRequestViewModel
     {
+        [Required(ErrorMessage = "Ngày bắt đầu là bắt buộc")]
+        [DataType(DataType.Date)]
         public DateTime StartDate { get; set; } = DateTime.Now.AddDays(-30);
+
+        [Required(ErrorMessage = "Ngày kết thúc là bắt buộc")]
+        [DataType(DataType.Date)]
         public DateTime EndDate { get; set; } = DateTime.Now;
+
+        [Display(Name = "Nhóm theo")]
         public TimeGroupTypeViewModel GroupType { get; set; } = TimeGroupTypeViewModel.Day;
+
+        public bool IsValidDateRange => StartDate <= EndDate;
     }
 
     public enum TimeGroupTypeViewModel
@@ -24,22 +35,56 @@
         public CustomerSummaryViewModel Customers { get; set; } = new();
         public InventorySummaryViewModel Inventory { get; set; } = new();
         public EmployeeSummaryViewModel Employees { get; set; } = new();
+        public List<CategoryOrderCountViewModel> AoDaiStats { get; set; } = new();
+        public List<TopSellingAoDaiViewModel> TopSellingAoDai { get; set; } = new();
+        public List<CustomerListViewModel> TopCustomers { get; set; } = new();
     }
 
-public class RevenueTrendViewModel
-{
-    public string Label { get; set; } = string.Empty;
-    public decimal Revenue { get; set; }
-}
+    public class CategoryOrderCountViewModel
+    {
+        public string CategoryName { get; set; } = string.Empty;
+        public int OrderCount { get; set; }
+    }
+    public class TopSellingAoDaiViewModel
+    {
+        public int ProductId { get; set; }
+        public string ProductName { get; set; } = string.Empty;
+        public string ProductCode { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public string Color { get; set; } = string.Empty;
+        public string Size { get; set; } = string.Empty;
+        public int QuantitySold { get; set; }
+        public decimal Revenue { get; set; }
+        public decimal Price { get; set; }
+        public int Rank { get; set; }
+    }
 
-public class RevenueSummaryViewModel
-{
-    public decimal TotalRevenue { get; set; }
-    public decimal RevenueChangePercentage { get; set; }
-    public decimal AverageOrderValue { get; set; }
-    public List<RevenueTrendViewModel> Trends { get; set; } = new();
-}
+    public class CustomerListViewModel
+    {
+        public int CustomerId { get; set; }
+        public string CustomerName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public string CustomerType { get; set; } = string.Empty; // VIP, Cưới, Học sinh, Doanh nghiệp
+        public decimal TotalSpent { get; set; }
+        public int OrderCount { get; set; }
+        public DateTime LastOrderDate { get; set; }
+        public string Status { get; set; } = string.Empty; // Active, Inactive
+    }
 
+    public class RevenueTrendViewModel
+    {
+        public string Label { get; set; } = string.Empty;
+        public decimal Revenue { get; set; }
+    }
+
+    public class RevenueSummaryViewModel
+    {
+        public decimal TotalRevenue { get; set; }
+        public decimal RevenueChangePercentage { get; set; }
+        public decimal AverageOrderValue { get; set; }
+        public List<RevenueTrendViewModel> Trends { get; set; } = new();
+    }
 
     public class OrderSummaryViewModel
     {
@@ -197,6 +242,7 @@ public class RevenueSummaryViewModel
         public string Unit { get; set; } = "VND";
         public decimal? CompareToPreviousPeriod { get; set; }
     }
+
     public class EmployeeReportViewModel
     {
         public List<EmployeePerformanceViewModel> TopPerformers { get; set; } = new();
@@ -219,7 +265,15 @@ public class RevenueSummaryViewModel
         public double PerformanceRating { get; set; } // 1-5 sao
         public DateTime HireDate { get; set; }
     }
-
+    public class CustomerOrderViewModel
+    {
+        public Guid OrderId { get; set; }
+        public DateTime OrderDate { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public string PaymentStatus { get; set; } = string.Empty;
+        public decimal TotalAmount { get; set; }
+        public int ItemCount { get; set; }
+    }
     public class EmployeeActivityViewModel
     {
         public DateTime Date { get; set; }

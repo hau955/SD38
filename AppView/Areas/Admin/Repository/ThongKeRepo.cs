@@ -1,4 +1,5 @@
-﻿using AppView.Areas.Admin.IRepo;
+﻿using AppApi.Features.ThongKe.DTOs;
+using AppView.Areas.Admin.IRepo;
 using AppView.Areas.Admin.ViewModels.ThongKeViewModel;
 using Newtonsoft.Json;
 using System.Text;
@@ -164,5 +165,54 @@ namespace AppView.Areas.Admin.Repository
                 return new List<QuickMetricViewModel>();
             }
         }
+
+        public async Task<List<CategoryOrderCountViewModel>> GetCategoryStatsAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{_baseApiUrl}/thongke/categories");
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var apiResponse = JsonConvert.DeserializeObject<ApiResponse<List<CategoryOrderCountViewModel>>>(content);
+                    return apiResponse?.Data ?? new List<CategoryOrderCountViewModel>();
+                }
+                return new List<CategoryOrderCountViewModel>();
+            }
+            catch
+            {
+                return new List<CategoryOrderCountViewModel>();
+            }
+        }
+        public async Task<List<CustomerOrderViewModel>> GetCustomerOrdersByEmailAsync(string email)
+        {
+            var response = await _httpClient.GetAsync($"{_baseApiUrl}/ThongKe/customer-orders-by-email?email={email}");
+            if (!response.IsSuccessStatusCode) return new List<CustomerOrderViewModel>();
+
+            var json = await response.Content.ReadAsStringAsync();
+            var apiResponse = JsonConvert.DeserializeObject<ApiResponse<List<CustomerOrderViewModel>>>(json);
+            return apiResponse?.Data ?? new List<CustomerOrderViewModel>();
+        }
+
+
+        public async Task<List<TopSellingAoDaiViewModel>> GetTopSellingAoDaiAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{_baseApiUrl}/thongke/top-ao-dai");
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var apiResponse = JsonConvert.DeserializeObject<ApiResponse<List<TopSellingAoDaiViewModel>>>(content);
+                    return apiResponse?.Data ?? new List<TopSellingAoDaiViewModel>();
+                }
+                return new List<TopSellingAoDaiViewModel>();
+            }
+            catch
+            {
+                return new List<TopSellingAoDaiViewModel>();
+            }
+        }
+
     }
 }

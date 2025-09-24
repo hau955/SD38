@@ -1,4 +1,5 @@
-﻿using AppView.Areas.Admin.IRepo;
+﻿using AppApi.Features.ThongKe.DTOs;
+using AppView.Areas.Admin.IRepo;
 using AppView.Areas.Admin.ViewModels.ThongKeViewModel;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,7 +44,7 @@ namespace AppView.Areas.Admin.Controllers
 
         [HttpGet]
         [Route("Revenue")]
-        public async Task<IActionResult> Revenue()
+        public async Task<IActionResult> Revenue(int page = 1)
         {
             var request = new TimeRangeRequestViewModel
             {
@@ -55,17 +56,38 @@ namespace AppView.Areas.Admin.Controllers
             var report = await _thongKeRepo.GetRevenueReportAsync(request);
             ViewBag.Title = "Báo cáo doanh thu";
             ViewBag.Request = request;
+            ViewBag.Page = page;
             return View(report);
         }
 
         [HttpPost]
         [Route("Revenue")]
-        public async Task<IActionResult> Revenue(TimeRangeRequestViewModel request)
+        public async Task<IActionResult> Revenue(TimeRangeRequestViewModel request, int page = 1)
         {
-            var report = await _thongKeRepo.GetRevenueReportAsync(request);
-            ViewBag.Title = "Báo cáo doanh thu";
-            ViewBag.Request = request;
-            return View(report);
+            if (!ModelState.IsValid)
+            {
+                ViewBag.ErrorMessage = "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.";
+            }
+
+            try
+            {
+                var report = await _thongKeRepo.GetRevenueReportAsync(request);
+                ViewBag.Title = "Báo cáo doanh thu";
+                ViewBag.Request = request;
+                ViewBag.Page = page;
+
+                if (report?.RevenueByTime?.Count == 0)
+                {
+                    ViewBag.ErrorMessage = "Không có dữ liệu trong khoảng thời gian đã chọn.";
+                }
+
+                return View(report);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = $"Lỗi khi tải dữ liệu: {ex.Message}";
+                return View(new RevenueReportViewModel());
+            }
         }
 
         [HttpGet]
@@ -208,6 +230,81 @@ namespace AppView.Areas.Admin.Controllers
             ViewBag.Request = request;
             return View(report);
         }
+
+        [HttpGet]
+        [Route("Categories")]
+        public async Task<IActionResult> Categories()
+        {
+            try
+            {
+                var stats = await _thongKeRepo.GetCategoryStatsAsync();
+                ViewBag.Title = "Thống kê danh mục";
+
+                if (stats == null || stats.Count == 0)
+                {
+                    ViewBag.ErrorMessage = "Không có dữ liệu thống kê danh mục.";
+                    ViewBag.ShowDebugInfo = true;
+                }
+
+                return View(stats);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = $"Lỗi khi tải dữ liệu thống kê danh mục: {ex.Message}";
+                ViewBag.ShowDebugInfo = true;
+                return View(new List<CategoryOrderCountViewModel>());
+            }
+        }
+        [HttpGet("GetCustomerOrders")]
+        public async Task<IActionResult> GetCustomerOrders(string email)
+        {
+            try
+            {
+                var orders = await _thongKeRepo.GetCustomerOrdersByEmailAsync(email);
+                return Json(new
+                {
+                    isSuccess = true,
+                    data = orders,
+                    message = "Lấy đơn hàng thành công"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    data = new List<CustomerOrderViewModel>(),
+                    message = $"Lỗi khi lấy đơn hàng: {ex.Message}"
+                });
+            }
+        }
+
+
+        [HttpGet]
+        [Route("TopAoDai")]
+        public async Task<IActionResult> TopAoDai()
+        {
+            try
+            {
+                var topSelling = await _thongKeRepo.GetTopSellingAoDaiAsync();
+                ViewBag.Title = "Top áo dài bán chạy";
+
+                if (topSelling == null || topSelling.Count == 0)
+                {
+                    ViewBag.ErrorMessage = "Không có dữ liệu top áo dài bán chạy.";
+                    ViewBag.ShowDebugInfo = true;
+                }
+
+                return View(topSelling);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = $"Lỗi khi tải dữ liệu top áo dài bán chạy: {ex.Message}";
+                ViewBag.ShowDebugInfo = true;
+                return View(new List<TopSellingAoDaiViewModel>());
+            }
+        }
+
         [HttpPost]
         [Route("QuickMetrics")]
         public async Task<IActionResult> GetQuickMetrics([FromBody] TimeRangeRequestViewModel request)

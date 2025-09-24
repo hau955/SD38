@@ -1,7 +1,9 @@
 ﻿using AppApi.IService;
 using AppView.Areas.Admin.IRepo;
+using AppView.Areas.Admin.Repository;
 using AppView.Areas.Admin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using PagedList;
 
 namespace AppView.Areas.Admin.Controllers
 {
@@ -15,12 +17,28 @@ namespace AppView.Areas.Admin.Controllers
             _service = danhMucService;
         }
 
-        public async Task<IActionResult> Index()
+
+public async Task<IActionResult> Index(string searchTerm, int page = 1, int pageSize = 10)
+    {
+        var list = await _service.GetAllDanhMucsAsync();
+
+        // Lọc theo từ khóa
+        if (!string.IsNullOrEmpty(searchTerm))
         {
-            var danhMucs = await _service.GetAllDanhMucsAsync();
-            return View(danhMucs);
+            list = list.Where(x => x.TenDanhMuc.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
         }
-        public IActionResult Create()
+
+        // Gửi filter về ViewBag để giữ lại giá trị form
+        ViewBag.CurrentFilter = searchTerm;
+        ViewBag.PageSize = pageSize;
+
+        // Convert sang PagedList
+        var pagedList = list.ToPagedList(page, pageSize);
+
+        return View(pagedList);
+    }
+
+    public IActionResult Create()
         {
             return View();
         }
