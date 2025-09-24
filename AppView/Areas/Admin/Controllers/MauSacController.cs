@@ -1,7 +1,7 @@
 ﻿using AppData.Models;
 using AppView.Areas.Admin.IRepo;
 using Microsoft.AspNetCore.Mvc;
-using AppData.Models;
+using PagedList;
 
 namespace AppView.Areas.Admin.Controllers
 {
@@ -15,11 +15,49 @@ namespace AppView.Areas.Admin.Controllers
             _mauSacRepo = mauSacRepo;
         }
 
-        // GET: MauSac
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchTerm, string? statusFilter, string? sortOrder, int page = 1, int pageSize = 10)
         {
             var list = await _mauSacRepo.GetAll();
-            return View(list);
+
+            // 🔎 Tìm kiếm
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                list = list
+                    .Where(x => x.TenMau.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            // ⚡ Lọc theo trạng thái
+            if (!string.IsNullOrWhiteSpace(statusFilter))
+            {
+                list = statusFilter switch
+                {
+                    "active" => list.Where(x => x.TrangThai).ToList(),
+                    "inactive" => list.Where(x => !x.TrangThai).ToList(),
+                    _ => list
+                };
+            }
+
+            // ↕️ Sắp xếp
+            ViewBag.SortOrder = sortOrder;
+            ViewBag.NameSortParm = sortOrder == "name" ? "name_desc" : "name";
+
+            list = sortOrder switch
+            {
+                "name" => list.OrderBy(x => x.TenMau).ToList(),
+                "name_desc" => list.OrderByDescending(x => x.TenMau).ToList(),
+                _ => list
+            };
+
+            // ⚙️ Giữ filter cho View
+            ViewBag.CurrentFilter = searchTerm;
+            ViewBag.StatusFilter = statusFilter;
+            ViewBag.PageSize = pageSize;
+
+            // 📄 Phân trang
+            var pagedList = list.ToPagedList(page, pageSize);
+
+            return View(pagedList);
         }
 
         // GET: MauSac/Create

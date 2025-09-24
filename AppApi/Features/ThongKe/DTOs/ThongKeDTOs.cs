@@ -1,10 +1,21 @@
-﻿namespace AppApi.Features.ThongKe.DTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace AppApi.Features.ThongKe.DTOs
 {
     public class TimeRangeRequestDto
     {
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        [Required(ErrorMessage = "Ngày bắt đầu là bắt buộc")]
+        [DataType(DataType.Date)]
+        public DateTime StartDate { get; set; } = DateTime.Now.AddDays(-30);
+
+        [Required(ErrorMessage = "Ngày kết thúc là bắt buộc")]
+        [DataType(DataType.Date)]
+        public DateTime EndDate { get; set; } = DateTime.Now;
+
+        [Display(Name = "Nhóm theo")]
         public TimeGroupType GroupType { get; set; } = TimeGroupType.Day;
+
+        public bool IsValidDateRange => StartDate <= EndDate;
     }
 
     public enum TimeGroupType
@@ -24,6 +35,52 @@
         public CustomerSummaryDto Customers { get; set; } = new();
         public InventorySummaryDto Inventory { get; set; } = new();
         public EmployeeSummaryDto Employees { get; set; } = new();
+        public List<CategoryOrderCountDto> AoDaiStats { get; set; } = new();
+        public List<TopSellingAoDaiDto> TopSellingAoDai { get; set; } = new();
+        public List<CustomerListDto> TopCustomers { get; set; } = new();
+    }
+
+    public class CategoryOrderCountDto
+    {
+        public string CategoryName { get; set; } = string.Empty;
+        public int OrderCount { get; set; }
+    }
+
+
+    public class TopSellingAoDaiDto
+    {
+        public int ProductId { get; set; }
+        public string ProductName { get; set; } = string.Empty;
+        public string ProductCode { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public string Color { get; set; } = string.Empty;
+        public string Size { get; set; } = string.Empty;
+        public int QuantitySold { get; set; }
+        public decimal Revenue { get; set; }
+        public decimal Price { get; set; }
+        public int Rank { get; set; }
+    }
+
+    public class CustomerListDto
+    {
+        public int CustomerId { get; set; }
+        public string CustomerName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public string CustomerType { get; set; } = string.Empty;
+        public decimal TotalSpent { get; set; }
+        public int OrderCount { get; set; }
+        public DateTime LastOrderDate { get; set; }
+        public string Status { get; set; } = string.Empty;
+    }
+    public class CustomerOrderDto
+    {
+        public Guid OrderId { get; set; }
+        public DateTime OrderDate { get; set; }
+        public string Status { get; set; } = string.Empty;
+        public string PaymentStatus { get; set; } = string.Empty;
+        public decimal TotalAmount { get; set; }
+        public int ItemCount { get; set; }
     }
 
     public class RevenueSummaryDto
@@ -81,6 +138,11 @@
         public decimal Cost { get; set; }
         public decimal Profit { get; set; }
         public int OrderCount { get; set; }
+
+        // Thêm các metric tính sẵn
+        public decimal ProfitMargin { get; set; }
+        public decimal AverageOrderValue { get; set; }
+        public decimal GrowthRate { get; set; }
     }
 
     public class RevenueByCategoryDto
@@ -89,6 +151,9 @@
         public string CategoryName { get; set; } = string.Empty;
         public decimal Revenue { get; set; }
         public decimal Percentage { get; set; }
+        public int OrderCount { get; set; }
+        public decimal AverageOrderValue { get; set; }
+        public decimal GrowthRate { get; set; }
     }
 
     public class RevenueByRegionDto
@@ -98,6 +163,9 @@
         public decimal Revenue { get; set; }
         public int CustomerCount { get; set; }
         public decimal Percentage { get; set; }
+        public int OrderCount { get; set; }
+        public decimal AverageOrderValue { get; set; }
+        public decimal GrowthRate { get; set; }
     }
 
     public class ProductReportDto

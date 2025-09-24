@@ -29,6 +29,33 @@ namespace AppApi.Features.ThongKe.Controllers
                 return BadRequest(ApiResponse<DashboardOverviewDto>.Fail($"Lỗi: {ex.Message}", 500));
             }
         }
+        [HttpGet("categories")]
+        public async Task<IActionResult> GetCategoryStats()
+        {
+            try
+            {
+                var result = await _thongKeService.GetCategoryStatsAsync();
+                return Ok(ApiResponse<List<CategoryOrderCountDto>>.Success(result, "Lấy thống kê danh mục thành công"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<List<CategoryOrderCountDto>>.Fail($"Lỗi: {ex.Message}", 500));
+            }
+        }
+
+        [HttpGet("top-ao-dai")]
+        public async Task<IActionResult> GetTopSellingAoDai()
+        {
+            try
+            {
+                var result = await _thongKeService.GetTopSellingAoDaiAsync();
+                return Ok(ApiResponse<List<TopSellingAoDaiDto>>.Success(result, "Lấy top áo dài bán chạy thành công"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<List<TopSellingAoDaiDto>>.Fail($"Lỗi: {ex.Message}", 500));
+            }
+        }
 
         [HttpPost("revenue")]
         public async Task<IActionResult> GetRevenueReport([FromBody] TimeRangeRequestDto request)
@@ -69,6 +96,19 @@ namespace AppApi.Features.ThongKe.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ApiResponse<CustomerReportDto>.Fail($"Lỗi: {ex.Message}", 500));
+            }
+        }
+        [HttpGet("customer-orders-by-email")]
+        public async Task<IActionResult> GetCustomerOrdersByEmail(string email)
+        {
+            try
+            {
+                var result = await _thongKeService.GetCustomerOrdersByEmailAsync(email);
+                return Ok(ApiResponse<List<CustomerOrderDto>>.Success(result, "Lấy danh sách đơn hàng khách hàng thành công"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<List<CustomerOrderDto>>.Fail($"Lỗi: {ex.Message}", 500));
             }
         }
 

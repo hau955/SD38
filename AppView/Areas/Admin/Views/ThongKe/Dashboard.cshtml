@@ -11,6 +11,8 @@
     var safeCustomers = safeModel.Customers ?? new CustomerSummaryViewModel();
     var safeInventory = safeModel.Inventory ?? new InventorySummaryViewModel();
     var safeEmployees = safeModel.Employees ?? new EmployeeSummaryViewModel();
+    var safeAoDaiStats = safeModel.AoDaiStats ?? new List<CategoryOrderCountViewModel>();
+    var safeTopCustomers = safeModel.TopCustomers ?? new List<CustomerListViewModel>();
 
     // Đảm bảo có dữ liệu trends cho chart
     var trends = safeRevenue.Trends?.Any() == true ? safeRevenue.Trends : new List<RevenueTrendViewModel>
@@ -33,26 +35,29 @@
     <title>@ViewData["Title"]</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"
             onerror="this.onerror=null; this.src='https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js';"></script>
     <style>
         :root {
-            --primary-color: #3b82f6;
-            --secondary-color: #8b5cf6;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --info-color: #06b6d4;
-            --dark-color: #1f2937;
-            --light-color: #f8fafc;
-            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --gradient-warning: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --gradient-info: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --primary-color: #8B0000;
+            --secondary-color: #CD853F;
+            --success-color: #2ECC71;
+            --warning-color: #F39C12;
+            --danger-color: #E74C3C;
+            --info-color: #3498DB;
+            --dark-color: #2C3E50;
+            --light-color: #ECF0F1;
+            --gold-color: #FFD700;
+            --traditional-red: #CC0000;
+            --gradient-primary: linear-gradient(135deg, #8B0000 0%, #CD853F 100%);
+            --gradient-success: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+            --gradient-warning: linear-gradient(135deg, #F39C12 0%, #E67E22 100%);
+            --gradient-info: linear-gradient(135deg, #3498DB 0%, #2980B9 100%);
+            --gradient-gold: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
         }
 
         body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, #f8f4e6 0%, #e8dcc6 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
         }
@@ -62,18 +67,32 @@
         }
 
         .page-title-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gradient-primary);
             color: white;
-            padding: 2rem;
-            border-radius: 15px;
+            padding: 2.5rem;
+            border-radius: 20px;
             margin-bottom: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 40px rgba(139, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
         }
+
+            .page-title-box::before {
+                content: '';
+                position: absolute;
+                top: -50px;
+                right: -50px;
+                width: 150px;
+                height: 150px;
+                background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="rgba(255,215,0,0.2)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>') no-repeat center;
+                background-size: contain;
+            }
 
             .page-title-box h4 {
                 font-weight: 700;
-                font-size: 2rem;
+                font-size: 2.2rem;
                 margin: 0;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             }
 
         .breadcrumb {
@@ -82,22 +101,28 @@
         }
 
         .breadcrumb-item a {
-            color: rgba(255,255,255,0.8);
+            color: rgba(255,255,255,0.9);
             text-decoration: none;
+            transition: color 0.3s;
         }
+
+            .breadcrumb-item a:hover {
+                color: var(--gold-color);
+            }
 
         .breadcrumb-item.active {
             color: white;
+            font-weight: 600;
         }
 
         .stats-card {
             background: white;
-            border-radius: 20px;
-            padding: 2rem;
+            border-radius: 25px;
+            padding: 2.5rem;
             margin-bottom: 2rem;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
             border: none;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
             height: 100%;
@@ -109,14 +134,19 @@
                 top: 0;
                 left: 0;
                 right: 0;
-                height: 4px;
+                height: 5px;
                 background: var(--gradient-primary);
+                transition: height 0.3s ease;
             }
 
             .stats-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+                transform: translateY(-8px);
+                box-shadow: 0 30px 60px rgba(0,0,0,0.15);
             }
+
+                .stats-card:hover::before {
+                    height: 8px;
+                }
 
             .stats-card.revenue::before {
                 background: var(--gradient-primary);
@@ -134,148 +164,350 @@
                 background: var(--gradient-info);
             }
 
+            .stats-card.special::before {
+                background: var(--gradient-gold);
+            }
+
         .stats-icon {
-            width: 70px;
-            height: 70px;
-            border-radius: 20px;
+            width: 80px;
+            height: 80px;
+            border-radius: 25px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: 2.2rem;
             color: white;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
         }
 
-            .stats-icon.revenue {
-                background: var(--gradient-primary);
-            }
+        .stats-card:hover .stats-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
 
-            .stats-icon.orders {
-                background: var(--gradient-success);
-            }
+        .stats-icon.revenue {
+            background: var(--gradient-primary);
+        }
 
-            .stats-icon.customers {
-                background: var(--gradient-warning);
-            }
+        .stats-icon.orders {
+            background: var(--gradient-success);
+        }
 
-            .stats-icon.inventory {
-                background: var(--gradient-info);
-            }
+        .stats-icon.customers {
+            background: var(--gradient-warning);
+        }
+
+        .stats-icon.inventory {
+            background: var(--gradient-info);
+        }
+
+        .stats-icon.special {
+            background: var(--gradient-gold);
+        }
 
         .stats-number {
-            font-size: 2.5rem;
-            font-weight: 700;
+            font-size: 2.8rem;
+            font-weight: 800;
             color: var(--dark-color);
-            margin: 0.5rem 0;
+            margin: 1rem 0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
         .stats-label {
-            color: #64748b;
-            font-size: 1rem;
-            font-weight: 500;
-            margin-bottom: 1rem;
+            color: #5A6C7D;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .stats-change {
             display: inline-flex;
             align-items: center;
-            padding: 0.5rem 1rem;
+            padding: 0.7rem 1.2rem;
             border-radius: 50px;
-            font-size: 0.875rem;
-            font-weight: 600;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
         }
 
             .stats-change.positive {
-                background: rgba(16, 185, 129, 0.1);
+                background: linear-gradient(135deg, rgba(46, 204, 113, 0.15), rgba(39, 174, 96, 0.15));
                 color: var(--success-color);
+                border: 2px solid rgba(46, 204, 113, 0.3);
             }
 
             .stats-change.negative {
-                background: rgba(239, 68, 68, 0.1);
+                background: linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(192, 57, 43, 0.15));
                 color: var(--danger-color);
+                border: 2px solid rgba(231, 76, 60, 0.3);
             }
 
         .chart-container {
             background: white;
-            border-radius: 20px;
-            padding: 2rem;
+            border-radius: 25px;
+            padding: 3rem;
             margin-bottom: 2rem;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
         }
 
+            .chart-container::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 6px;
+                background: var(--gradient-primary);
+            }
+
         .chart-title {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: 700;
             color: var(--dark-color);
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
             display: flex;
             align-items: center;
+            position: relative;
         }
 
             .chart-title i {
-                margin-right: 0.5rem;
+                margin-right: 1rem;
                 color: var(--primary-color);
+                font-size: 1.4rem;
             }
 
         .canvas-container {
             position: relative;
-            height: 400px;
-            margin: 1rem 0;
+            height: 450px;
+            margin: 2rem 0;
         }
 
         .quick-metrics {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
         }
 
         .metric-item {
             background: white;
-            padding: 1.5rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
             text-align: center;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
+            .metric-item::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 4px;
+                background: var(--gradient-gold);
+            }
+
             .metric-item:hover {
-                transform: translateY(-3px);
+                transform: translateY(-5px);
+                box-shadow: 0 25px 50px rgba(0,0,0,0.15);
             }
 
         .metric-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary-color);
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .metric-label {
-            color: #64748b;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
+            color: #5A6C7D;
+            font-size: 1rem;
+            margin-top: 0.8rem;
+            font-weight: 600;
+        }
+
+        .ao-dai-showcase {
+            background: linear-gradient(135deg, rgba(139, 0, 0, 0.05), rgba(205, 133, 63, 0.05));
+            border-radius: 25px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            border: 2px solid rgba(139, 0, 0, 0.1);
+        }
+
+        .showcase-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+            .showcase-title::after {
+                content: '';
+                position: absolute;
+                bottom: -10px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 80px;
+                height: 3px;
+                background: var(--gradient-gold);
+                border-radius: 2px;
+            }
+
+        .showcase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .showcase-item {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+
+            .showcase-item:hover {
+                transform: scale(1.05);
+            }
+
+        .showcase-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
         }
 
         .progress-custom {
-            height: 8px;
+            height: 12px;
             border-radius: 10px;
-            background: #e2e8f0;
-            margin: 1rem 0;
+            background: linear-gradient(90deg, #e2e8f0, #cbd5e0);
+            margin: 1.5rem 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .progress-bar-custom {
             height: 100%;
             border-radius: 10px;
             background: var(--gradient-primary);
-            transition: width 0.3s ease;
+            transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+
+            .progress-bar-custom::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+                background: linear-gradient( 90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100% );
+                animation: shimmer 2s infinite;
+            }
+
+        @@keyframes shimmer {
+            0%
+
+        {
+            transform: translateX(-100%);
+        }
+
+        100% {
+            transform: translateX(100%);
+        }
+
         }
 
         .error-message {
-            background: #fee2e2;
-            border: 1px solid #fecaca;
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border: 2px solid #f87171;
             color: #dc2626;
-            padding: 1rem;
-            border-radius: 10px;
+            padding: 1.5rem;
+            border-radius: 15px;
             margin-bottom: 2rem;
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.1);
+        }
+
+        .top-products-list, .top-customers-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+            .top-products-list::-webkit-scrollbar,
+            .top-customers-list::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .top-products-list::-webkit-scrollbar-track,
+            .top-customers-list::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
+
+            .top-products-list::-webkit-scrollbar-thumb,
+            .top-customers-list::-webkit-scrollbar-thumb {
+                background: var(--gradient-primary);
+                border-radius: 10px;
+            }
+
+        .product-item, .customer-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+            .product-item:hover, .customer-item:hover {
+                background: #e9ecef;
+                transform: translateX(5px);
+            }
+
+        .product-rank, .customer-rank {
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-right: 1rem;
+            min-width: 30px;
+        }
+
+        .product-info, .customer-info {
+            flex: 1;
+        }
+
+            .product-info h6, .customer-info h6 {
+                margin: 0;
+                font-weight: 600;
+                color: var(--dark-color);
+            }
+
+            .product-info small, .customer-info small {
+                color: #6c757d;
+            }
+
+        .product-sales, .customer-stats {
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .sales-number, .customer-value {
+            font-weight: 700;
+            color: var(--success-color);
         }
 
         @@media (max-width: 768px) {
@@ -286,11 +518,36 @@
         }
 
         .stats-number {
-            font-size: 2rem;
+            font-size: 2.2rem;
         }
 
         .canvas-container {
-            height: 300px;
+            height: 350px;
+        }
+
+        .page-title-box {
+            padding: 2rem;
+        }
+
+        .stats-card {
+            padding: 2rem;
+        }
+
+        .chart-container {
+            padding: 2rem;
+        }
+
+        }
+
+        @@media (max-width: 576px) {
+            .quick-metrics
+
+        {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        .showcase-grid {
+            grid-template-columns: 1fr;
         }
 
         }
@@ -302,16 +559,19 @@
         <div class="page-title-box">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
-                    <h4>@ViewData["Title"]</h4>
+                    <h4><i class="fas fa-tachometer-alt me-3"></i>@ViewData["Title"]</h4>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="/Admin"><i class="fas fa-home me-1"></i>Trang chủ</a></li>
-                            <li class="breadcrumb-item active">Thống kê</li>
+                            <li class="breadcrumb-item active">Dashboard</li>
                         </ol>
                     </nav>
                 </div>
                 <div class="d-flex align-items-center">
-                    <i class="fas fa-chart-line fa-2x opacity-50"></i>
+                    <div class="text-end">
+                        <div class="text-white-50">Cập nhật lúc</div>
+                        <div class="fw-bold">@DateTime.Now.ToString("HH:mm - dd/MM/yyyy")</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -325,33 +585,47 @@
             </div>
         }
 
-        <!-- Debug Information -->
-        @if (ViewBag.ShowDebugInfo == true)
-        {
-            <div class="alert alert-info">
-                <h6>Debug Information:</h6>
-                <p><strong>Revenue Total:</strong> @safeRevenue.TotalRevenue</p>
-                <p><strong>Orders Total:</strong> @safeOrders.TotalOrders</p>
-                <p><strong>Trends Count:</strong> @(safeRevenue.Trends?.Count ?? 0)</p>
-                <p><strong>API Base URL:</strong> @ViewData["ApiBaseUrl"]</p>
+        <!-- Thống Kê Kinh Doanh Áo Dài Truyền Thống - Sử dụng dữ liệu thực từ DB -->
+        <div class="ao-dai-showcase">
+            <h3 class="showcase-title">Thống Kê Kinh Doanh Áo Dài Theo Danh Mục</h3>
+            <div class="showcase-grid">
+                @if (safeAoDaiStats != null && safeAoDaiStats.Any())
+                {
+                    @foreach (var category in safeAoDaiStats.Take(4))
+                    {
+                        <div class="showcase-item">
+                            <i class="fas fa-@(category.CategoryName) showcase-icon"></i>
+                            <h6>@category.CategoryName</h6>
+                            <p class="text-muted mb-0">@category.OrderCount đơn hàng</p>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="showcase-item">
+                        <i class="fas fa-info-circle showcase-icon"></i>
+                        <h6>Chưa có dữ liệu</h6>
+                        <p class="text-muted mb-0">Không có thống kê danh mục</p>
+                    </div>
+                }
             </div>
-        }
+        </div>
 
         <!-- Summary Cards -->
         <div class="row g-4">
             <div class="col-xl-3 col-md-6">
                 <div class="stats-card revenue">
                     <div class="stats-icon revenue">
-                        <i class="fas fa-dollar-sign"></i>
+                        <i class="fas fa-coins"></i>
                     </div>
-                    <div class="stats-label">Tổng doanh thu</div>
+                    <div class="stats-label">Doanh Thu Tháng</div>
                     <div class="stats-number" data-target="@safeRevenue.TotalRevenue">@safeRevenue.TotalRevenue.ToString("N0") VNĐ</div>
                     <div class="stats-change @(safeRevenue.RevenueChangePercentage >= 0 ? "positive" : "negative")">
-                        <i class="fas fa-arrow-@(safeRevenue.RevenueChangePercentage >= 0 ? "up" : "down") me-1"></i>
+                        <i class="fas fa-arrow-@(safeRevenue.RevenueChangePercentage >= 0 ? "up" : "down") me-2"></i>
                         @safeRevenue.RevenueChangePercentage.ToString("F1")% so với tháng trước
                     </div>
                     <div class="progress-custom">
-                        <div class="progress-bar-custom" style="width: @(Math.Min(100, Math.Max(5, (double)safeRevenue.TotalRevenue / 10000000 * 100)))%"></div>
+                        <div class="progress-bar-custom" style="width: @(Math.Min(100, Math.Max(5, (double)safeRevenue.TotalRevenue / 100000000 * 100)))%"></div>
                     </div>
                 </div>
             </div>
@@ -359,17 +633,17 @@
             <div class="col-xl-3 col-md-6">
                 <div class="stats-card orders">
                     <div class="stats-icon orders">
-                        <i class="fas fa-shopping-cart"></i>
+                        <i class="fas fa-shopping-bag"></i>
                     </div>
-                    <div class="stats-label">Tổng đơn hàng</div>
+                    <div class="stats-label">Đơn Hàng Áo Dài</div>
                     <div class="stats-number" data-target="@safeOrders.TotalOrders">@safeOrders.TotalOrders.ToString("N0")</div>
                     <div class="stats-change positive">
-                        <i class="fas fa-chart-line me-1"></i>
-                        Tỷ lệ chuyển đổi: @safeOrders.ConversionRate.ToString("F1")%
+                        <i class="fas fa-percentage me-2"></i>
+                        Tỷ lệ thành công: @safeOrders.ConversionRate.ToString("F1")%
                     </div>
                     <div class="d-flex justify-content-between mt-3">
-                        <span class="text-success"><i class="fas fa-check-circle me-1"></i>@safeOrders.CompletedOrders hoàn thành</span>
-                        <span class="text-warning"><i class="fas fa-clock me-1"></i>@safeOrders.PendingOrders đang xử lý</span>
+                        <span class="badge bg-success"><i class="fas fa-check me-1"></i>@safeOrders.CompletedOrders hoàn thành</span>
+                        <span class="badge bg-warning"><i class="fas fa-clock me-1"></i>@safeOrders.PendingOrders chờ xử lý</span>
                     </div>
                 </div>
             </div>
@@ -379,15 +653,15 @@
                     <div class="stats-icon customers">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="stats-label">Khách hàng</div>
+                    <div class="stats-label">Khách Hàng</div>
                     <div class="stats-number" data-target="@safeCustomers.NewCustomers">@safeCustomers.NewCustomers.ToString("N0")</div>
                     <div class="stats-change positive">
-                        <i class="fas fa-user-plus me-1"></i>
-                        Tỷ lệ giữ chân: @safeCustomers.RetentionRate.ToString("F1")%
+                        <i class="fas fa-user-check me-2"></i>
+                        Giữ chân: @safeCustomers.RetentionRate.ToString("F1")%
                     </div>
                     <div class="d-flex justify-content-between mt-3">
-                        <span class="text-info"><i class="fas fa-user-plus me-1"></i>@safeCustomers.NewCustomers mới</span>
-                        <span class="text-primary"><i class="fas fa-redo me-1"></i>@safeCustomers.ReturningCustomers quay lại</span>
+                        <span class="badge bg-info"><i class="fas fa-user-plus me-1"></i>@safeCustomers.NewCustomers mới</span>
+                        <span class="badge bg-primary"><i class="fas fa-redo me-1"></i>@safeCustomers.ReturningCustomers quay lại</span>
                     </div>
                 </div>
             </div>
@@ -395,17 +669,17 @@
             <div class="col-xl-3 col-md-6">
                 <div class="stats-card inventory">
                     <div class="stats-icon inventory">
-                        <i class="fas fa-boxes"></i>
+                        <i class="fas fa-warehouse"></i>
                     </div>
-                    <div class="stats-label">Tồn kho</div>
+                    <div class="stats-label">Kho Áo Dài</div>
                     <div class="stats-number" data-target="@safeInventory.ActiveProducts">@safeInventory.ActiveProducts.ToString("N0")</div>
                     <div class="stats-change @(safeInventory.OutOfStockItems > 0 || safeInventory.LowStockItems > 0 ? "negative" : "positive")">
-                        <i class="fas fa-@(safeInventory.OutOfStockItems > 0 || safeInventory.LowStockItems > 0 ? "exclamation-triangle" : "check-circle") me-1"></i>
-                        @(safeInventory.LowStockItems + safeInventory.OutOfStockItems) sản phẩm cần chú ý
+                        <i class="fas fa-@(safeInventory.OutOfStockItems > 0 || safeInventory.LowStockItems > 0 ? "exclamation-triangle" : "check-circle") me-2"></i>
+                        @(safeInventory.LowStockItems + safeInventory.OutOfStockItems) cần nhập thêm
                     </div>
                     <div class="d-flex justify-content-between mt-3">
-                        <span class="text-danger"><i class="fas fa-times-circle me-1"></i>@safeInventory.OutOfStockItems hết hàng</span>
-                        <span class="text-warning"><i class="fas fa-exclamation me-1"></i>@safeInventory.LowStockItems sắp hết</span>
+                        <span class="badge bg-danger"><i class="fas fa-times me-1"></i>@safeInventory.OutOfStockItems hết hàng</span>
+                        <span class="badge bg-warning"><i class="fas fa-exclamation me-1"></i>@safeInventory.LowStockItems sắp hết</span>
                     </div>
                 </div>
             </div>
@@ -415,7 +689,7 @@
         <div class="quick-metrics">
             <div class="metric-item">
                 <div class="metric-value">@safeRevenue.AverageOrderValue.ToString("N0")</div>
-                <div class="metric-label">Giá trị đơn trung bình (VNĐ)</div>
+                <div class="metric-label">Giá trị đơn TB (VNĐ)</div>
             </div>
             <div class="metric-item">
                 <div class="metric-value">@safeOrders.ConversionRate.ToString("F1")%</div>
@@ -438,7 +712,7 @@
                 <div class="chart-container">
                     <div class="chart-title">
                         <i class="fas fa-chart-line"></i>
-                        Xu hướng doanh thu (7 ngày qua)
+                        Xu Hướng Doanh Thu Áo Dài (7 Ngày Qua)
                     </div>
                     <div class="canvas-container">
                         <canvas id="revenueChart"></canvas>
@@ -451,10 +725,93 @@
                 <div class="chart-container">
                     <div class="chart-title">
                         <i class="fas fa-chart-pie"></i>
-                        Trạng thái đơn hàng
+                        Trạng Thái Đơn Hàng
                     </div>
                     <div class="canvas-container">
                         <canvas id="orderStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Products & Top Customers Section -->
+        <div class="row g-4">
+            <!-- Top Selling Ao Dai - Sử dụng dữ liệu thực từ DB -->
+            <div class="col-xl-6">
+                <div class="chart-container">
+                    <div class="chart-title">
+                        <i class="fas fa-medal"></i>
+                        Top Áo Dài Bán Chạy
+                    </div>
+                    <div class="top-products-list">
+                        @if (safeModel.TopSellingAoDai != null && safeModel.TopSellingAoDai.Any())
+                        {
+                            @foreach (var product in safeModel.TopSellingAoDai.Take(10))
+                            {
+                                <div class="product-item">
+                                    <div class="product-rank">@product.Rank</div>
+                                    <div class="product-info">
+                                        <h6>@product.ProductName</h6>
+                                        <small class="text-muted">@product.Category - @product.Color - Size @product.Size</small>
+                                    </div>
+                                    <div class="product-sales">
+                                        <div class="sales-number">@product.QuantitySold đã bán</div>
+                                        <small class="text-muted">@product.Revenue.ToString("N0") VNĐ</small>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted p-4">
+                                <i class="fas fa-info-circle fa-2x mb-2"></i>
+                                <p>Chưa có dữ liệu sản phẩm bán chạy</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Customers - Thay thế phần Customer Insights -->
+            <div class="col-xl-6">
+                <div class="chart-container">
+                    <div class="chart-title">
+                        <i class="fas fa-star"></i>
+                        Top Khách Hàng Thân Thiết
+                    </div>
+                    <div class="top-customers-list">
+                        @if (safeTopCustomers != null && safeTopCustomers.Any())
+                        {
+                            @for (int i = 0; i < safeTopCustomers.Take(10).Count(); i++)
+                            {
+                                var customer = safeTopCustomers.ElementAt(i);
+                                <div class="customer-item">
+                                    <div class="customer-rank">@(i + 1)</div>
+                                    <div class="customer-info">
+                                        <h6>@customer.CustomerName</h6>
+                                        <small class="text-muted">
+                                            @customer.CustomerType - @customer.OrderCount đơn hàng
+                                        </small>
+                                        <div class="mt-1">
+                                            <small class="text-info">@customer.Email</small>
+                                        </div>
+                                    </div>
+                                    <div class="customer-stats">
+                                        <div class="customer-value">@customer.TotalSpent.ToString("N0") VNĐ</div>
+                                        <small class="text-muted">
+                                            @(customer.LastOrderDate != default(DateTime) ? customer.LastOrderDate.ToString("dd/MM/yyyy") : "Chưa có")
+                                        </small>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted p-4">
+                                <i class="fas fa-user-friends fa-2x mb-2"></i>
+                                <p>Chưa có dữ liệu khách hàng</p>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -463,19 +820,39 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Helper function để lấy icon cho danh mục
+        function getCategoryIcon(categoryName) {
+            const icons = {
+                'áo dài cao cấp': 'crown',
+                'áo dài cưới': 'heart',
+                'áo dài học sinh': 'graduation-cap',
+                'áo dài lễ hội': 'calendar-day',
+                'áo dài truyền thống': 'star',
+                'default': 'tshirt'
+            };
+
+            const lowerName = categoryName.toLowerCase();
+            for (const [key, icon] of Object.entries(icons)) {
+                if (lowerName.includes(key) || key === 'default') {
+                    return icon;
+                }
+            }
+            return icons.default;
+        }
+
         // Đợi Chart.js load xong
         function initCharts() {
             // Kiểm tra Chart object có sẵn không
             if (typeof Chart === 'undefined') {
                 console.error('Chart.js không được load. Vui lòng kiểm tra kết nối mạng.');
-                document.getElementById('revenueChart').innerHTML = '<div class="text-center text-muted">Chart.js không được load</div>';
-                document.getElementById('orderStatusChart').innerHTML = '<div class="text-center text-muted">Chart.js không được load</div>';
+                document.getElementById('revenueChart').innerHTML = '<div class="text-center text-muted p-4">Chart.js không được load</div>';
+                document.getElementById('orderStatusChart').innerHTML = '<div class="text-center text-muted p-4">Chart.js không được load</div>';
                 return;
             }
 
-            // Chart.js configuration
+            // Chart.js configuration với theme áo dài
             Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
-            Chart.defaults.color = '#64748b';
+            Chart.defaults.color = '#5A6C7D';
             Chart.defaults.responsive = true;
             Chart.defaults.maintainAspectRatio = false;
 
@@ -483,121 +860,167 @@
             const revenueLabels = [@Html.Raw(string.Join(",", trends.Select(t => $"'{t.Label}'")))];
             const revenueData = [@string.Join(",", trends.Select(t => t.Revenue))];
 
-        // Revenue Trend Chart
-        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-        const revenueChart = new Chart(revenueCtx, {
-            type: 'line',
-            data: {
-                labels: revenueLabels.length > 0 ? revenueLabels : ['N/A'],
-                datasets: [{
-                    label: 'Doanh thu (VNĐ)',
-                    data: revenueData.length > 0 ? revenueData : [0],
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 6,
-                    pointBackgroundColor: '#3b82f6',
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return 'Doanh thu: ' + Number(context.parsed.y).toLocaleString('vi-VN') + ' VNĐ';
-                            }
-                        }
-                    }
+            // Revenue Trend Chart với theme áo dài truyền thống
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            const gradient = revenueCtx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(139, 0, 0, 0.3)');
+            gradient.addColorStop(1, 'rgba(205, 133, 63, 0.1)');
+
+            const revenueChart = new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: revenueLabels.length > 0 ? revenueLabels : ['N/A'],
+                    datasets: [{
+                        label: 'Doanh thu Áo Dài (VNĐ)',
+                        data: revenueData.length > 0 ? revenueData : [0],
+                        borderColor: '#8B0000',
+                        backgroundColor: gradient,
+                        borderWidth: 4,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 8,
+                        pointBackgroundColor: '#FFD700',
+                        pointBorderColor: '#8B0000',
+                        pointBorderWidth: 3,
+                        pointHoverRadius: 12,
+                        pointHoverBackgroundColor: '#FFD700',
+                        pointHoverBorderColor: '#8B0000',
+                        pointHoverBorderWidth: 4
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: '#e2e8f0'
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                if (value >= 1000000) {
-                                    return (value / 1000000).toFixed(0) + 'M';
-                                } else if (value >= 1000) {
-                                    return (value / 1000).toFixed(0) + 'K';
-                                }
-                                return value;
-                            }
-                        }
-                    },
-                    x: {
-                        grid: {
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
                             display: false
-                        }
-                    }
-                },
-                elements: {
-                    point: {
-                        hoverRadius: 8
-                    }
-                }
-            }
-        });
-
-        // Order Status Chart - với kiểm tra dữ liệu
-        const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
-        const orderData = [@safeOrders.CompletedOrders, @safeOrders.PendingOrders, @safeOrders.CancelledOrders];
-        const hasOrderData = orderData.some(val => val > 0);
-
-        const orderStatusChart = new Chart(orderStatusCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Hoàn thành', 'Đang xử lý', 'Đã hủy'],
-                datasets: [{
-                    data: hasOrderData ? orderData : [1, 0, 0], // Hiển thị dữ liệu mặc định nếu không có data
-                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                    borderWidth: 0,
-                    cutout: '70%'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 20,
-                            usePointStyle: true,
-                            pointStyle: 'circle'
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(139, 0, 0, 0.95)',
+                            titleColor: '#FFD700',
+                            bodyColor: '#FFFFFF',
+                            borderColor: '#FFD700',
+                            borderWidth: 2,
+                            cornerRadius: 12,
+                            padding: 15,
+                            callbacks: {
+                                title: function(context) {
+                                    return `Ngày ${context[0].label}`;
+                                },
+                                label: function(context) {
+                                    return `Doanh thu: ${Number(context.parsed.y).toLocaleString('vi-VN')} VNĐ`;
+                                }
+                            }
                         }
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                if (!hasOrderData) {
-                                    return 'Chưa có dữ liệu';
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(139, 0, 0, 0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#5A6C7D',
+                                font: {
+                                    weight: '600'
+                                },
+                                callback: function(value) {
+                                    if (value >= 1000000) {
+                                        return (value / 1000000).toFixed(1) + 'M VNĐ';
+                                    } else if (value >= 1000) {
+                                        return (value / 1000).toFixed(0) + 'K VNĐ';
+                                    }
+                                    return value + ' VNĐ';
                                 }
-                                const label = context.label || '';
-                                const value = context.parsed;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
-                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#5A6C7D',
+                                font: {
+                                    weight: '600'
+                                }
+                            }
+                        }
+                    },
+                    elements: {
+                        point: {
+                            hoverRadius: 10
+                        }
+                    }
+                }
+            });
+
+            // Order Status Chart với màu sắc truyền thống Việt Nam
+            const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+            const orderData = [@safeOrders.CompletedOrders, @safeOrders.PendingOrders, @safeOrders.CancelledOrders];
+            const hasOrderData = orderData.some(val => val > 0);
+
+            const orderStatusChart = new Chart(orderStatusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Đã Hoàn Thành', 'Đang Xử Lý', 'Đã Hủy'],
+                    datasets: [{
+                        data: hasOrderData ? orderData : [1, 0, 0],
+                        backgroundColor: [
+                            '#2ECC71', // Xanh lá - hoàn thành
+                            '#F39C12', // Cam - đang xử lý
+                            '#E74C3C'  // Đỏ - đã hủy
+                        ],
+                        borderWidth: 0,
+                        cutout: '65%',
+                        borderRadius: 8,
+                        spacing: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 25,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: {
+                                    size: 13,
+                                    weight: '600'
+                                },
+                                color: '#5A6C7D'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(44, 62, 80, 0.95)',
+                            titleColor: '#FFD700',
+                            bodyColor: '#FFFFFF',
+                            borderColor: '#FFD700',
+                            borderWidth: 2,
+                            cornerRadius: 12,
+                            padding: 15,
+                            callbacks: {
+                                label: function(context) {
+                                    if (!hasOrderData) {
+                                        return 'Chưa có dữ liệu đơn hàng';
+                                    }
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
+                                    return `${label}: ${value} đơn (${percentage}%)`;
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
-
+            });
         }
 
-        // Add number animation
+        // Add number animation với hiệu ứng mượt mà
         function animateNumbers() {
             const numbers = document.querySelectorAll('.stats-number[data-target]');
             numbers.forEach(number => {
@@ -606,7 +1029,7 @@
                 if (isNaN(target)) return;
 
                 let current = 0;
-                const increment = target / 100;
+                const increment = target / 120; // Tăng số bước để animation mượt hơn
                 const timer = setInterval(() => {
                     current += increment;
                     if (current >= target) {
@@ -620,37 +1043,96 @@
                     } else {
                         number.textContent = formatted;
                     }
-                }, 20);
+                }, 15); // Giảm thời gian để animation mượt hơn
+            });
+
+            // Animation cho metric values
+            const metricValues = document.querySelectorAll('.metric-value');
+            metricValues.forEach((value, index) => {
+                setTimeout(() => {
+                    value.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        value.style.transform = 'scale(1)';
+                    }, 200);
+                }, index * 100);
             });
         }
 
-        // Initialize animations khi trang load xong
+        // Initialize animations và effects khi trang load xong
         document.addEventListener('DOMContentLoaded', function() {
-            // Kiểm tra các function có tồn tại trước khi gọi
+            // Thêm loading animation
+            const statsCards = document.querySelectorAll('.stats-card');
+            statsCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(50px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
+
+            // Animate numbers
             if (typeof animateNumbers === 'function') {
-                setTimeout(animateNumbers, 500);
+                setTimeout(animateNumbers, 800);
             }
+
+            // Initialize charts
             if (typeof initCharts === 'function') {
-                // Khởi tạo charts sau khi Chart.js load xong
-                setTimeout(initCharts, 100);
+                setTimeout(initCharts, 400);
             }
+
+            // Progress bars animation
+            const progressBars = document.querySelectorAll('.progress-bar-custom');
+            progressBars.forEach((bar, index) => {
+                setTimeout(() => {
+                    const width = bar.style.width;
+                    bar.style.width = '0%';
+                    setTimeout(() => {
+                        bar.style.width = width;
+                    }, 100);
+                }, index * 200 + 1000);
+            });
+
+            // Thêm hover effects cho product items và customer items
+            const items = document.querySelectorAll('.product-item, .customer-item');
+            items.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.boxShadow = '0 10px 25px rgba(139, 0, 0, 0.15)';
+                });
+                item.addEventListener('mouseleave', function() {
+                    this.style.boxShadow = 'none';
+                });
+            });
         });
 
         // Thêm thông báo nếu không có dữ liệu
         @if (safeRevenue.TotalRevenue == 0 && safeOrders.TotalOrders == 0)
         {
-                <text>
-                console.warn('Không có dữ liệu thống kê. Vui lòng kiểm tra kết nối API.');
-                </text>
+                    <text>
+                    console.warn('Không có dữ liệu thống kê. Vui lòng kiểm tra kết nối API hoặc thêm dữ liệu mẫu.');
+                    </text>
         }
 
-        // Error handling để tránh lỗi showToast
+        // Error handling để tránh lỗi
         window.addEventListener('error', function(e) {
             console.error('JavaScript Error:', e.error);
             if (e.message.includes('showToast')) {
                 console.warn('showToast function not available - this is normal');
             }
         });
+
+        // Auto refresh data every 5 minutes
+        setInterval(function() {
+            const now = new Date();
+            const timeElement = document.querySelector('.page-title-box .fw-bold');
+            if (timeElement) {
+                timeElement.textContent = now.toLocaleTimeString('vi-VN', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) + ' - ' + now.toLocaleDateString('vi-VN');
+            }
+        }, 60000);
     </script>
 </body>
 </html>

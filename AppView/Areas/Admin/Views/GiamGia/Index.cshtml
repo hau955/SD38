@@ -1,40 +1,391 @@
-﻿@model IEnumerable<AppData.Models.GiamGia>
+﻿@model PagedList.IPagedList<AppData.Models.GiamGia>
 
 @{
-    ViewData["Title"] = "Danh sách giảm giá";
+    ViewData["Title"] = "Quản lý Giảm Giá";
 }
 
-<h2>Danh sách giảm giá</h2>
+<!-- Custom Style -->
+<style>
+    .table-wrapper {
+        background: #fffaf0;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        font-family: 'Segoe UI', sans-serif;
+    }
 
-<p>
-    <a asp-area="Admin" asp-controller="GiamGia" asp-action="Create" class="btn btn-primary">+ Thêm giảm giá</a>
-</p>
+    h2 {
+        color: #8B0000;
+        font-weight: 600;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Tên giảm giá</th>
-            <th>Phần trăm</th>
-            <th>Ngày bắt đầu</th>
-            <th>Ngày kết thúc</th>
-            <th>Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
+    .btn-success {
+        background-color: #d4af37;
+        border: none;
+        font-weight: 500;
+    }
+
+    .btn-success:hover {
+        background-color: #b8941f;
+    }
+
+    .btn-danger {
+        background-color: #8B0000;
+        border: none;
+    }
+
+    .btn-danger:hover {
+        background-color: #a52a2a;
+    }
+
+    .btn-warning {
+        background-color: #ff9800;
+        border: none;
+    }
+
+    .btn-primary {
+        background-color: #4682B4;
+        border: none;
+    }
+
+    .btn-info {
+        background-color: #17a2b8;
+        border: none;
+    }
+
+    .alert {
+        font-size: 0.95rem;
+    }
+
+    .filter-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #dee2e6;
+    }
+
+    .pagination {
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+
+    .pagination .page-link {
+        color: #8B0000;
+        border-color: #d4af37;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #d4af37;
+        border-color: #d4af37;
+    }
+
+    .pagination .page-link:hover {
+        color: #8B0000;
+        background-color: #f8f9fa;
+        border-color: #d4af37;
+    }
+
+    .badge.bg-success {
+        background-color: #28a745 !important;
+    }
+
+    .badge.bg-danger {
+        background-color: #dc3545 !important;
+    }
+
+    .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+
+    .discount-percentage {
+        font-weight: bold;
+        color: #dc3545;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="table-wrapper">
+        <h2><i class="fas fa-percentage me-2"></i> @ViewData["Title"]</h2>
+
+        @if (TempData["Message"] != null)
         {
-            <tr>
-                <td>@item.TenGiamGia</td>
-                <td>@item.LoaiGiamGia %</td>
-                <td>@item.NgayBatDau.ToShortDateString()</td>
-                <td>@item.NgayKetThuc.ToShortDateString()</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@item.IDGiamGia" class="btn btn-info btn-sm">Chi tiết</a>
-                    <a asp-action="Edit" asp-route-id="@item.IDGiamGia" class="btn btn-warning btn-sm">Sửa</a>
-                    <a asp-action="Delete" asp-route-id="@item.IDGiamGia" class="btn btn-danger btn-sm"
-                       onclick="return confirm('Xóa giảm giá này?')">Xóa</a>
-                </td>
-            </tr>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle"></i> @TempData["Message"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
         }
-    </tbody>
-</table>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <form asp-area="Admin" asp-controller="GiamGia" asp-action="Index" method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="searchTerm" class="form-label"><i class="fas fa-search"></i> Tìm kiếm</label>
+                    <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
+                           value="@ViewBag.CurrentFilter" placeholder="Nhập tên giảm giá...">
+                </div>
+                <div class="col-md-2">
+    <label for="statusFilter" class="form-label">Trạng thái</label>
+    <select class="form-select" id="statusFilter" name="statusFilter">
+        <option value="">Tất cả</option>
+        <option value="active" selected="@(ViewBag.StatusFilter == "active")">Đang hoạt động</option>
+        <option value="expired" selected="@(ViewBag.StatusFilter == "expired")">Đã hết hạn</option>
+        <option value="upcoming" selected="@(ViewBag.StatusFilter == "upcoming")">Sắp diễn ra</option>
+    </select>
+</div>
+
+<div class="col-md-2">
+    <label for="fromDate" class="form-label">Từ ngày</label>
+    <input type="date" class="form-control" id="fromDate" name="fromDate" 
+           value="@ViewBag.FromDate">
+</div>
+
+<div class="col-md-2">
+    <label for="toDate" class="form-label">Đến ngày</label>
+    <input type="date" class="form-control" id="toDate" name="toDate" 
+           value="@ViewBag.ToDate">
+</div>
+
+<div class="col-md-1">
+    <label for="pageSize" class="form-label">Hiển thị</label>
+    <select class="form-select" id="pageSize" name="pageSize">
+        <option value="5" selected="@(ViewBag.PageSize == 5)">5</option>
+        <option value="10" selected="@(ViewBag.PageSize == 10)">10</option>
+        <option value="20" selected="@(ViewBag.PageSize == 20)">20</option>
+        <option value="50" selected="@(ViewBag.PageSize == 50)">50</option>
+    </select>
+</div>
+
+                <div class="col-md-2 d-flex align-items-end">
+                    <div class="btn-group w-100" role="group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter"></i> Lọc
+                        </button>
+                        <a href="@Url.Action("Index", "GiamGia", new { area = "Admin" })" class="btn btn-outline-secondary">
+                            <i class="fas fa-undo"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Action Button -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a class="btn btn-success" asp-area="Admin" asp-controller="GiamGia" asp-action="Create">
+                <i class="fas fa-plus"></i> Thêm giảm giá
+            </a>
+            <small class="text-muted">
+                Hiển thị @((Model.PageNumber - 1) * Model.PageSize + 1) - @(Math.Min(Model.PageNumber * Model.PageSize, Model.TotalItemCount)) 
+                trong tổng số @Model.TotalItemCount giảm giá
+            </small>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 20%;">
+                                <a asp-action="Index" asp-route-sortOrder="@ViewBag.NameSortParm" 
+                                   asp-route-currentFilter="@ViewBag.CurrentFilter"
+                                   asp-route-statusFilter="@ViewBag.StatusFilter"
+                                   asp-route-fromDate="@ViewBag.FromDate"
+                                   asp-route-toDate="@ViewBag.ToDate"
+                                   asp-route-pageSize="@ViewBag.PageSize"
+                                   class="text-decoration-none text-dark">
+                                    Tên giảm giá
+                                    @if (ViewBag.SortOrder == "name")
+                                    {
+                                        <i class="fas fa-sort-up"></i>
+                                    }
+                                    else if (ViewBag.SortOrder == "name_desc")
+                                    {
+                                        <i class="fas fa-sort-down"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-sort"></i>
+                                    }
+                                </a>
+                            </th>
+                            <th style="width: 10%;" class="text-center">Phần trăm</th>
+                            <th style="width: 15%;" class="text-center">
+                                <a asp-action="Index" asp-route-sortOrder="@ViewBag.DateSortParm" 
+                                   asp-route-currentFilter="@ViewBag.CurrentFilter"
+                                   asp-route-statusFilter="@ViewBag.StatusFilter"
+                                   asp-route-fromDate="@ViewBag.FromDate"
+                                   asp-route-toDate="@ViewBag.ToDate"
+                                   asp-route-pageSize="@ViewBag.PageSize"
+                                   class="text-decoration-none text-dark">
+                                    Ngày bắt đầu
+                                    @if (ViewBag.SortOrder == "date")
+                                    {
+                                        <i class="fas fa-sort-up"></i>
+                                    }
+                                    else if (ViewBag.SortOrder == "date_desc")
+                                    {
+                                        <i class="fas fa-sort-down"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-sort"></i>
+                                    }
+                                </a>
+                            </th>
+                            <th style="width: 15%;" class="text-center">Ngày kết thúc</th>
+                            <th style="width: 12%;" class="text-center">Trạng thái</th>
+                            <th style="width: 28%;" class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            var now = DateTime.Now;
+                            var status = "";
+                            var statusClass = "";
+                            
+                            if (now < item.NgayBatDau)
+                            {
+                                status = "Sắp diễn ra";
+                                statusClass = "bg-warning";
+                            }
+                            else if (now > item.NgayKetThuc)
+                            {
+                                status = "Đã hết hạn";
+                                statusClass = "bg-danger";
+                            }
+                            else
+                            {
+                                status = "Đang hoạt động";
+                                statusClass = "bg-success";
+                            }
+                            
+                            <tr>
+                                <td class="fw-medium">@item.TenGiamGia</td>
+                                <td class="text-center">
+                                    <span class="discount-percentage">@item.LoaiGiamGia%</span>
+                                </td>
+                                <td class="text-center">
+                                    <small>@item.NgayBatDau.ToString("dd/MM/yyyy")</small>
+                                </td>
+                                <td class="text-center">
+                                    <small>@item.NgayKetThuc.ToString("dd/MM/yyyy")</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill @statusClass">@status</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1 justify-content-center flex-wrap">
+                                        <a asp-action="Details" asp-route-id="@item.IDGiamGia" 
+                                           class="btn btn-sm btn-info" title="Chi tiết">
+                                            <i class="fas fa-eye"></i> Chi tiết
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.IDGiamGia" 
+                                           class="btn btn-sm btn-primary" title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i> Sửa
+                                        </a>
+                                        <form asp-area="Admin" asp-controller="GiamGia" asp-action="Delete" 
+                                              asp-route-id="@item.IDGiamGia" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-danger" 
+                                                    onclick="return confirm('Bạn có chắc chắn muốn xoá giảm giá này không?');"
+                                                    title="Xóa">
+                                                <i class="fas fa-trash-alt"></i> Xoá
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.PageCount > 1)
+            {
+                <nav aria-label="Phân trang giảm giá">
+                    <ul class="pagination">
+                        @if (Model.HasPreviousPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" 
+                                   asp-action="Index" 
+                                   asp-route-page="@(Model.PageNumber - 1)"
+                                   asp-route-currentFilter="@ViewBag.CurrentFilter"
+                                   asp-route-statusFilter="@ViewBag.StatusFilter"
+                                   asp-route-fromDate="@ViewBag.FromDate"
+                                   asp-route-toDate="@ViewBag.ToDate"
+                                   asp-route-sortOrder="@ViewBag.SortOrder"
+                                   asp-route-pageSize="@ViewBag.PageSize">
+                                    <i class="fas fa-chevron-left"></i> Trước
+                                </a>
+                            </li>
+                        }
+
+                        @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.PageCount, Model.PageNumber + 2); i++)
+                        {
+                            <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                                <a class="page-link" 
+                                   asp-action="Index" 
+                                   asp-route-page="@i"
+                                   asp-route-currentFilter="@ViewBag.CurrentFilter"
+                                   asp-route-statusFilter="@ViewBag.StatusFilter"
+                                   asp-route-fromDate="@ViewBag.FromDate"
+                                   asp-route-toDate="@ViewBag.ToDate"
+                                   asp-route-sortOrder="@ViewBag.SortOrder"
+                                   asp-route-pageSize="@ViewBag.PageSize">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        @if (Model.HasNextPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" 
+                                   asp-action="Index" 
+                                   asp-route-page="@(Model.PageNumber + 1)"
+                                   asp-route-currentFilter="@ViewBag.CurrentFilter"
+                                   asp-route-statusFilter="@ViewBag.StatusFilter"
+                                   asp-route-fromDate="@ViewBag.FromDate"
+                                   asp-route-toDate="@ViewBag.ToDate"
+                                   asp-route-sortOrder="@ViewBag.SortOrder"
+                                   asp-route-pageSize="@ViewBag.PageSize">
+                                    Sau <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        }
+        else
+        {
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle"></i> 
+                @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter as string) || !string.IsNullOrEmpty(ViewBag.StatusFilter as string))
+                {
+                    <span>Không tìm thấy giảm giá nào với bộ lọc hiện tại.</span>
+                }
+                else
+                {
+                    <span>Chưa có giảm giá nào được tạo.</span>
+                }
+            </div>
+        }
+    </div>
+</div>

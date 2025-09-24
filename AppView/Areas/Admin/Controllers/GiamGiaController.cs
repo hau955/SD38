@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ViewModels;
 using AppView.Areas.Admin.IRepo;
 using AppView.Areas.Admin.ViewModels;
+using PagedList;
 
 namespace AppApi.Controllers
 {
@@ -48,14 +49,24 @@ namespace AppApi.Controllers
             return Json(result);
         }
 
-        // ---------------- CRUD GIẢM GIÁ ----------------
-        public async Task<IActionResult> Index()
+public async Task<IActionResult> Index(string searchTerm, string statusFilter, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 10)
+    {
+        var list = await _repo.GetAllAsync();
+
+        // Lọc dữ liệu (ví dụ)
+        if (!string.IsNullOrEmpty(searchTerm))
         {
-            var list = await _repo.GetAllAsync();
-            return View(list);
+            list = list.Where(x => x.TenGiamGia.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
         }
 
-        [HttpGet]
+        // Chuyển sang PagedList
+        var pagedList = list.ToPagedList(page, pageSize);
+
+        return View(pagedList);
+    }
+
+
+    [HttpGet]
         public async Task<IActionResult> Create()
         {
             var vm = new GiamGiaCreateVM
