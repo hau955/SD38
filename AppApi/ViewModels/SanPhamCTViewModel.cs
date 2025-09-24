@@ -26,6 +26,9 @@ namespace ViewModels
 
         public Guid IdMauSac { get; set; }
         public string? MauSac { get; set; }
+        public string? TenChatLieu { get; set; }
+        public string? TenMau { get; set; }
+        public string? SoSize{ get; set; }
 
         public Guid IdSize { get; set; }
         public string? Size { get; set; }

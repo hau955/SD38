@@ -8,6 +8,7 @@ namespace AppView.ViewModels
         public int SoLuong { get; set; }              // Số lượng sản phẩm
         public decimal DonGia { get; set; }           // Giá gốc sản phẩm
         public decimal GiaSauGiam { get; set; }       // Giá sau giảm (nếu có)
+        public decimal giagiam => DonGia - GiaSauGiam;   // Giá sau giảm (nếu có)
 
         public string TenSanPham { get; set; } = string.Empty;
         public string? MauSac { get; set; }          // Màu sắc nếu có
@@ -23,6 +24,8 @@ namespace AppView.ViewModels
         public decimal TongTienTruocGiam { get; set; }
         public decimal TongTienSauGiam { get; set; }
         public decimal? TienGiam { get; set; }
+        public decimal? TienGiamhoadon { get; set; }
+        public decimal? phiship { get; set; }
 
         public string TrangThaiDonHang { get; set; } = string.Empty;
         public string TrangThaiThanhToan { get; set; } = string.Empty;

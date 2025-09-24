@@ -2,6 +2,8 @@
 @{
     var baseUrl = "https://localhost:7221/";
     var id = Context.Session.GetString("ID");
+    var roles = Context.Session.GetString("Roles") ?? "";
+
 }
 
 <!DOCTYPE html>
@@ -183,9 +185,20 @@
                 </div>
 
                 <!-- Nút thêm giỏ hàng -->
-                <button id="addToCartBtn" class="btn btn-success" style="margin-top:15px;">
-                    🛒 Thêm vào giỏ hàng
-                </button>
+                <!-- Nút thêm giỏ hàng -->
+                @if (roles.Contains("Customer"))
+                {
+                    <button id="addToCartBtn" class="btn btn-success" style="margin-top:15px;">
+                        🛒 Thêm vào giỏ hàng
+                    </button>
+                }
+                else
+                {
+                    <div class="alert alert-warning mt-3">
+                        ⚠️ Bạn phải <a href="#" class="text-primary fw-bold">đăng ký</a> mới có thể mua sản phẩm.
+                    </div>
+                }
+
 
                 <div class="description" style="margin-top:20px;">
                     <p><strong>Mô tả:</strong> @Model.MoTa</p>

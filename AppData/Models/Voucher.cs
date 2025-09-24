@@ -21,7 +21,7 @@ namespace AppData.Models
         public decimal? DieuKienToiThieu { get; set; } // Giá trị đơn hàng tối thiểu
 
         public int? SoLuong { get; set; } // Số lượng voucher
-        public int? SoLanSuDungToiDa { get; set; } // Mỗi KH được dùng tối đa X lần
+        public int? SoLanSuDungToiDa { get; set; }// Mỗi KH được dùng tối đa X lần
 
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }

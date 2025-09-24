@@ -48,31 +48,24 @@ namespace AppApi.Controllers
 
             return Json(result);
         }
-
-public async Task<IActionResult> Index(string searchTerm, string statusFilter, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 10)
-    {
-        var list = await _repo.GetAllAsync();
-
-        // Lọc dữ liệu (ví dụ)
-        if (!string.IsNullOrEmpty(searchTerm))
-        // ---------------- INDEX ----------------
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchTerm, string statusFilter, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 10)
         {
-            list = list.Where(x => x.TenGiamGia.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            var list = await _repo.GetAllAsync();
+
+            // Lọc dữ liệu (ví dụ)
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                list = list.Where(x => x.TenGiamGia.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            // Chuyển sang PagedList
+            var pagedList = list.ToPagedList(page, pageSize);
+
+            return View(pagedList);
         }
 
 
-        // Chuyển sang PagedList
-        var pagedList = list.ToPagedList(page, pageSize);
-
-        return View(pagedList);
-    }
-
-
-    [HttpGet]
-        // ---------------- CREATE (GET) ----------------
         [HttpGet]
-
         public async Task<IActionResult> Create()
         {
             var vm = new GiamGiaCreateVM
@@ -81,13 +74,19 @@ public async Task<IActionResult> Index(string searchTerm, string statusFilter, D
                 {
                     NgayBatDau = DateTime.Today,
                     NgayKetThuc = DateTime.Today.AddDays(7)
-                }
+                },
+                SanPhams = await _spRepo.GetAllSanPhamAsync(),
+                DanhMucs = await _dmRepo.GetAllDanhMucsAsync(),
+
             };
 
-            await LoadDropdowns(vm);
             return View(vm);
         }
 
+
+   
+        // ---------------- CREATE (GET) ----------------
+       
         // ---------------- CREATE (POST) ----------------
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -148,12 +147,15 @@ public async Task<IActionResult> Index(string searchTerm, string statusFilter, D
             {
                 IDSanPhamCT = spct.IDSanPhamCT,
                 IDSanPham = spct.IDSanPham,
-                TenSanPham = spct.SanPham?.TenSanPham,
-                Size = spct.SizeAo?.SoSize,
-                MauSac = spct.MauSac?.TenMau,
-                GiaBan = spct.GiaBan
+                TenSanPham = spct.TenSanPham,
+                SoSize = spct.SoSize,            // ✅ Size
+                TenMau = spct.TenMau,            // ✅ Màu
+                TenChatLieu = spct.TenChatLieu,// ✅ Chất liệu
+                GiaBan = spct.GiaBan,
+                SoLuongTonKho = spct.SoLuongTonKho
             }).ToList();
         }
+
         // ---------------- UPDATE (GET) ----------------
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)

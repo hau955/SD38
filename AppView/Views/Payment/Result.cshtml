@@ -1,0 +1,16 @@
+﻿@{
+    ViewData["Title"] = "Kết quả giao dịch";
+    var ok = (bool)ViewBag.IsSuccess;
+}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-body">
+            <h3>@ViewData["Title"]</h3>
+            <p><b>Mã đơn hàng:</b> @ViewBag.OrderCode</p>
+            <p><b>Số tiền:</b> @String.Format("{0:N0} VND", ViewBag.Amount)</p>
+            <p><b>Mã giao dịch (VNPAY):</b> @ViewBag.TransactionNo</p>
+            <div class="alert @(ok ? "alert-success" : "alert-danger")">@ViewBag.Msg</div>
+            <a href="/" class="btn btn-primary">Về trang chủ</a>
+        </div>
+    </div>
+</div>

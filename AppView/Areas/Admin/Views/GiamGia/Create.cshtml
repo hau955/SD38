@@ -143,25 +143,26 @@
             $('select').select2({ width: '100%', allowClear: true });
 
             // Fill SPCT theo SP
-            function fillSPCTBySP(spIds) {
-                $spct.empty();
-                allSPCTs
-                    .filter(x => spIds.includes(x.IDSanPham.toString()))
-                    .forEach(x => {
-                        $spct.append(new Option(
-                            `${x.TenSanPham} - Size: ${x.Size ?? ""} / Màu: ${x.MauSac ?? ""} (Giá: ${x.GiaBan})`,
-                            x.IDSanPhamCT
-                        ));
-                    });
-                $spct.trigger('change');
-            }
+                   function fillSPCTBySP(spIds) {
+            $spct.empty();
+            allSPCTs
+                .filter(x => spIds.includes(x.IDSanPham.toString()))
+                .forEach(x => {
+                    $spct.append(new Option(
+                        `${x.TenSanPham} - Size: ${x.SoSize ?? ""} / Màu: ${x.TenMau ?? ""} / Chất liệu: ${x.TenChatLieu ?? ""} (Giá: ${x.GiaBan})`,
+                        x.IDSanPhamCT
+                    ));
+                });
+            $spct.trigger('change');
+        }
+
 
             // Fill toàn bộ SPCT
             function fillAllSPCT() {
                 $spct.empty();
                 allSPCTs.forEach(x => {
                     $spct.append(new Option(
-                        `${x.TenSanPham} - Size: ${x.Size ?? ""} / Màu: ${x.MauSac ?? ""} (Giá: ${x.GiaBan})`,
+                        `${x.TenSanPham} - Size: ${x.SoSize ?? ""} / Màu: ${x.TenMau ?? ""}/chất liệu:${x.TenChatLieu} (Giá: ${x.GiaBan})`,
                         x.IDSanPhamCT
                     ));
                 });

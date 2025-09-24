@@ -106,6 +106,7 @@ namespace AppView.Controllers
                 await LoadFilterDataAsync(); // Vẫn cần load data cho filter
                 return View(new List<SanPhamDetailWithDiscountView>());
             }
+
         }
         // Hiển thị chi tiết sản phẩm
         public async Task<IActionResult> Details(Guid id)

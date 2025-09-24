@@ -3,6 +3,7 @@ using AppApi.Features.Services;
 using AppApi.Features.ShippingAddress.Service;
 using AppApi.Features.ThongKe.Services;
 using AppApi.IService;
+using AppApi.Payments;
 using AppApi.Service;
 using AppData.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -142,6 +143,8 @@ builder.Services.AddScoped<IOrderManagementService, OrderManagementService>();
 builder.Services.AddScoped<IThongKeService, ThongKeService>();
 builder.Services.AddScoped<IEmployeeManagementService, EmployeeManagementService>();
 builder.Services.AddScoped<IShippingAddressService, ShippingAddressService>();
+builder.Services.Configure<VNPaySettings>(builder.Configuration.GetSection("VNPay"));
+builder.Services.AddScoped<IVNPayService, VNPayService>();
 // Configure CORS
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 if (allowedOrigins == null || allowedOrigins.Length == 0)

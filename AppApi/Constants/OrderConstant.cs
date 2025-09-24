@@ -35,6 +35,7 @@
         public const string CHUA_THANH_TOAN = "Chưa thanh toán";
         public const string DA_THANH_TOAN = "Đã thanh toán";
         public const string THANH_TOAN_KHI_NHAN = "Thanh toán khi nhận";
+        public const string CHO_THANH_TOAN_ONLINE = "Thanh toán online";
 
         public static readonly List<string> AllStatuses = new List<string>
         {
