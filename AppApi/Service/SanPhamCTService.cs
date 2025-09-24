@@ -70,7 +70,15 @@ namespace AppApi.Service
             await _db.SanPhamChiTiets.AddRangeAsync(models);
             await _db.SaveChangesAsync();
         }
-
+        public async Task<List<SanPhamCT>> GetAllAsync()
+        {
+            return await _db.SanPhamChiTiets
+                .Include(x => x.MauSac)
+                .Include(x => x.SizeAo)
+                .Include(x => x.ChatLieu)
+                .Include(x => x.SanPham) // nếu muốn lấy luôn thông tin sản phẩm cha
+                .ToListAsync();
+        }
 
 
         public async Task<bool> ExistsAsync(Guid idSanPham, Guid idMauSac, Guid idSize, Guid idChatlieu)

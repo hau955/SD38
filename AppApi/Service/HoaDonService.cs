@@ -21,11 +21,14 @@ namespace AppApi.Service
         /// <summary>
         /// Tạo hóa đơn từ giỏ hàng (COD hoặc Online)
         /// </summary>
+        /// <summary>
+        /// Tạo hóa đơn từ giỏ hàng (COD hoặc Online)
+        /// </summary>
         public async Task<HoaDon> TaoHoaDonTuGioHangAsync(
             Guid idUser,
             Guid idHinhThucTT,
             Guid? idVoucher = null,
-           Guid? idDiaChi=null,
+            Guid? idDiaChi = null,
             string? ghiChu = null)
         {
             // 1️⃣ Lấy giỏ hàng chi tiết
@@ -40,15 +43,73 @@ namespace AppApi.Service
             if (!chiTiets.Any())
                 throw new Exception("❌ Giỏ hàng đang trống, không thể tạo hóa đơn");
 
-            // 2️⃣ Tính tiền trước giảm
+            // 2️⃣ Tính tiền trước giảm (theo giá gốc SP)
             decimal tongTienTruocGiam = chiTiets.Sum(ct => ct.SanPhamCT.GiaBan * ct.SoLuong);
 
-            // 3️⃣ Tính tiền sau giảm (theo giá đã set trong giỏ hàng)
-            decimal tongTienSauGiam = chiTiets.Sum(ct => ct.DonGia * ct.SoLuong);
+            // 3️⃣ Tính tiền sau giảm từ giỏ hàng (sau khi SP có khuyến mãi)
+            decimal tongTienSauGiamSanPham = chiTiets.Sum(ct => ct.DonGia * ct.SoLuong);
 
-            decimal tienGiam = tongTienTruocGiam - tongTienSauGiam;
+            // Giảm từ sản phẩm
+            decimal tienGiam = tongTienTruocGiam - tongTienSauGiamSanPham;
 
-            // 4️⃣ Xác định trạng thái thanh toán dựa theo hình thức
+            // 4️⃣ Xử lý voucherif (voucher.SoLanSuDungToiDa.HasValue && voucher.SoLanSuDungToiDa.Value > 0)
+            
+
+
+            decimal tienGiamHoaDon = 0;
+            if (idVoucher.HasValue)
+            {
+                var voucher = await _context.Vouchers.FirstOrDefaultAsync(v => v.IdVoucher == idVoucher);
+
+                if (voucher == null || !voucher.StartDate.HasValue || !voucher.EndDate.HasValue
+                    || DateTime.Now < voucher.StartDate.Value || DateTime.Now > voucher.EndDate.Value)
+                {
+                    throw new Exception("❌ Voucher không hợp lệ hoặc đã hết hạn");
+                }
+
+                if (voucher.DieuKienToiThieu.HasValue && tongTienSauGiamSanPham < voucher.DieuKienToiThieu.Value)
+                {
+                    throw new Exception("❌ Hóa đơn không đạt điều kiện tối thiểu để áp dụng voucher");
+                }
+
+                if (voucher.PhanTram.HasValue)
+                {
+                    tienGiamHoaDon = tongTienSauGiamSanPham * (decimal)(voucher.PhanTram.Value / 100);
+                }
+                else if (voucher.SoTienGiam.HasValue)
+                {
+                    tienGiamHoaDon = voucher.SoTienGiam.Value;
+                }
+
+                if (tienGiamHoaDon > tongTienSauGiamSanPham)
+                    tienGiamHoaDon = tongTienSauGiamSanPham;
+
+                if (voucher.SoLuong.HasValue && voucher.SoLuong > 0)
+                {
+                    voucher.SoLuong -= 1;
+                }
+                else
+                {
+                    throw new Exception("❌ Voucher đã hết lượt sử dụng");
+                }
+                if (voucher.SoLanSuDungToiDa.HasValue && voucher.SoLanSuDungToiDa.Value > 0)
+                {
+                    // Lấy số lần user này đã dùng voucher
+                    int daSuDung = await _context.HoaDons
+                        .CountAsync(hd => hd.IDUser == idUser && hd.IdVoucher == idVoucher);
+
+                    if (daSuDung >= voucher.SoLanSuDungToiDa.Value)
+                        throw new Exception("❌ Bạn đã đạt giới hạn số lần sử dụng voucher này");
+                }
+            }
+
+            // 5️⃣ Cộng phí vận chuyển
+            decimal phiVanChuyen = 30000;
+
+            // ✅ Tổng tiền cuối cùng
+            decimal tongTienSauGiam = tongTienSauGiamSanPham - tienGiamHoaDon + phiVanChuyen;
+
+            // 6️⃣ Xác định trạng thái thanh toán
             var hinhThuc = await _context.HinhThucTTs.FindAsync(idHinhThucTT);
             if (hinhThuc == null) throw new Exception("❌ Hình thức thanh toán không hợp lệ");
 
@@ -60,8 +121,9 @@ namespace AppApi.Service
                 trangThaiThanhToan = PaymentStatus.CHUA_THANH_TOAN;
                 ngayThanhToan = DateTime.Now;  // ✅ Ghi nhận ngày thanh toán
             }
-            DiaChiNhanHang? diaChi;
 
+            // 7️⃣ Lấy địa chỉ nhận hàng
+            DiaChiNhanHang? diaChi;
             if (idDiaChi.HasValue)
             {
                 diaChi = await _context.DiaChiNhanHangs
@@ -78,18 +140,19 @@ namespace AppApi.Service
             if (diaChi == null)
                 throw new Exception("❌ Chưa có địa chỉ nhận hàng hợp lệ cho user này");
 
-            // 5️⃣ Tạo hóa đơn
+            // 8️⃣ Tạo hóa đơn
             var hoaDon = new HoaDon
             {
                 IDHoaDon = Guid.NewGuid(),
                 IDUser = idUser,
                 IDHinhThucTT = idHinhThucTT,
-                IDDiaChiNhanHang=idDiaChi,
+                IDDiaChiNhanHang = idDiaChi,
                 IdVoucher = idVoucher,
                 TongTienTruocGiam = tongTienTruocGiam,
-                PhiVanChuyen=30000,
+                PhiVanChuyen = phiVanChuyen,
                 TongTienSauGiam = tongTienSauGiam,
-                TienGiam = tienGiam,
+                TienGiam = tienGiam,                 // ✅ giảm từ sản phẩm
+                TienGiamHoaDon = tienGiamHoaDon,     // ✅ giảm từ voucher
                 GhiChu = ghiChu,
                 TrangThaiDonHang = OrderStatus.CHO_XAC_NHAN, // trạng thái mặc định
                 TrangThaiThanhToan = trangThaiThanhToan,
@@ -98,7 +161,7 @@ namespace AppApi.Service
                 HoaDonChiTiets = new List<HoaDonCT>()
             };
 
-            // 6️⃣ Thêm chi tiết hóa đơn
+            // 9️⃣ Thêm chi tiết hóa đơn
             foreach (var ct in chiTiets)
             {
                 hoaDon.HoaDonChiTiets.Add(new HoaDonCT
@@ -118,20 +181,20 @@ namespace AppApi.Service
                 ct.SanPhamCT.SoLuongTonKho -= ct.SoLuong;
             }
 
-            // 7️⃣ Xóa giỏ hàng sau khi checkout
+            // 🔟 Xóa giỏ hàng sau khi checkout
             _context.GioHangChiTiets.RemoveRange(chiTiets);
 
-            // 8️⃣ Lưu hóa đơn vào DB
+            // 1️⃣1️⃣ Lưu hóa đơn
             _context.HoaDons.Add(hoaDon);
-            await _context.SaveChangesAsync(); // Lúc này EF đã insert HoaDon vào DB
+            await _context.SaveChangesAsync();
 
-            // 9️⃣ Sau đó mới lưu trạng thái đầu tiên vào lịch sử
+            // 1️⃣2️⃣ Lưu lịch sử trạng thái
             _context.HoaDonTrangThai.Add(new HoaDonTrangThai
             {
                 IDHoaDon = hoaDon.IDHoaDon,
                 TrangThai = hoaDon.TrangThaiDonHang,
                 NgayCapNhat = DateTime.Now,
-                NguoiCapNhat = "Hệ thống" // có thể set là tên user hoặc admin
+                NguoiCapNhat = "Hệ thống"
             });
             await _context.SaveChangesAsync();
 
@@ -216,7 +279,7 @@ namespace AppApi.Service
             var hoaDons = await _context.HoaDons
                 .Include(hd => hd.HoaDonChiTiets)        // kèm chi tiết hóa đơn
                 .Include(hd => hd.HinhThucTT)            // kèm thông tin hình thức thanh toán
-                .Include(hd => hd.Voucher)               // kèm thông tin voucher (nếu có)
+                //.Include(hd => hd.Voucher)               // kèm thông tin voucher (nếu có)
                 .Where(hd => hd.IDUser == idUser)
                 .OrderByDescending(hd => hd.NgayTao)
                 .ToListAsync();
@@ -240,7 +303,7 @@ namespace AppApi.Service
                     .ThenInclude(ct => ct.SanPhamCT.ChatLieu)
                     
                 .Include(hd => hd.HinhThucTT)
-                .Include(hd => hd.Voucher)
+               // .Include(hd => hd.Voucher)
                 .FirstOrDefaultAsync(hd => hd.IDHoaDon == idHoaDon);
 
             if (hoaDon == null)
@@ -257,7 +320,7 @@ namespace AppApi.Service
                 TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
                 HinhThucTT = hoaDon.HinhThucTT,
                 NgayTao=hoaDon.NgayTao,
-                Voucher = hoaDon.Voucher,
+              //  Voucher = hoaDon.Voucher,
                 ChiTietSanPhams = hoaDon.HoaDonChiTiets.Select(ct => new HoaDonChiTietView
                 {
                     IdHoaDonChiTiet = ct.IDHoaDonChiTiet,
@@ -282,6 +345,24 @@ namespace AppApi.Service
                 .Where(dc => dc.IDUser == idUser && dc.TrangThai)
                 .OrderByDescending(dc => dc.IsDefault)
                 .ToListAsync();
+        }
+        public async Task<List<Voucher>> LayTatCaVoucherAsync()
+        {
+            var now = DateTime.Now;
+
+            return await _context.Vouchers
+                .Where(v => v.StartDate <= now && v.EndDate >= now) // chỉ lấy voucher trong thời gian hiệu lực
+                .Where(v => v.SoLuong == null || v.SoLuong > 0)    // còn số lượng
+                .OrderByDescending(v => v.StartDate)               // sắp xếp mới nhất trước
+                .ToListAsync();
+        }
+
+
+        public async Task<List<HinhThucTT>> GetAllAsync()
+        {
+            return await _context.HinhThucTTs
+                                 .AsNoTracking()  // Không tracking để tối ưu khi chỉ đọc
+                                 .ToListAsync();
         }
     }
 }

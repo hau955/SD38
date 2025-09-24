@@ -14,7 +14,7 @@
         public decimal TienGiam { get; set; }
         public decimal TongTienSauGiam { get; set; }
         public string? GhiChu { get; set; }
-
+        public decimal tien => TongTienTruocGiam - TongTienSauGiam;
         public List<ChiTietSanPhamViewModel> DanhSachSanPham { get; set; } = new();
     }
 

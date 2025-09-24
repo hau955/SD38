@@ -11,7 +11,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NEM - Giáng Sơn</title>
+    <title>The Ao Dai</title>
 
     <!-- CSS chính -->
     <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
@@ -125,9 +125,14 @@
         </div>
     </header>
     <li>
-        <a<a asp-controller="GioHangChiTiet" asp-action="Index" class="btn btn-primary">
-    🛒 Xem giỏ hàng
-</a>
+        <a href="@Url.Action("Index", "GioHangChiTiet")" class="btn btn-primary">
+            🛒 Xem giỏ hàng
+        </a>
+    </li>
+    <li>
+        <a href="@Url.Action("Index", "HoaDon")" class="btn btn-primary">
+            🛒 Xem Đơn Hàng
+        </a>
     </li>
     <div class="breadcrumb">TRANG CHỦ / ÁO DÀI</div>
 
@@ -136,7 +141,7 @@
     </section>
 
     <div class="container">
-        <aside class="sidebar">
+        @* <aside class="sidebar">
             <!-- Danh mục sản phẩm -->
             <h3>Danh mục</h3>
             <ul>
@@ -187,7 +192,7 @@
                     </ul>
                 </li>
             </ul>
-        </aside>
+        </aside> *@
 
         <main class="product-section">
             @RenderBody()
@@ -197,7 +202,7 @@
     <!-- Đăng ký nhận bản tin -->
     <section class="newsletter">
         <h2>ĐĂNG KÝ BẢN TIN</h2>
-        <p>Đăng ký nhận bản tin NEM để được cập nhật những mẫu thiết kế mới nhất</p>
+        <p>Đăng ký nhận bản tin The Ao Dai  để được cập nhật những mẫu thiết kế mới nhất</p>
         <form class="subscribe-form">
             <input type="email" placeholder="Vui lòng nhập email..." />
             <button type="submit">ĐĂNG KÝ</button>

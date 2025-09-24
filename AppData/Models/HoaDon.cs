@@ -63,10 +63,10 @@ public class HoaDon
     public DateTime? NgayTao { get; set; }
 
     public DateTime? NgaySua { get; set; }
-    [ForeignKey("Voucher")]
+    [ForeignKey("Vouchers")]
     [MaxLength(50)]
     public Guid? IdVoucher { get; set; }
-    public virtual Voucher? Voucher { get; set; }
+    public virtual Voucher? Vouchers { get; set; }
     [JsonIgnore]
     public virtual ICollection<HoaDonCT> HoaDonChiTiets { get; set; } = new List<HoaDonCT>();
     [JsonIgnore]

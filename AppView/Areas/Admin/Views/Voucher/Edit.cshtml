@@ -1,0 +1,76 @@
+﻿@model AppView.Areas.Admin.ViewModels.VoucherVM
+
+@{
+    ViewData["Title"] = "Cập nhật Voucher";
+}
+
+<h2>Cập nhật Voucher</h2>
+<hr />
+
+@if (ViewBag.ErrorMessage != null)
+{
+        <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+}
+
+<form asp-action="Edit" asp-route-id="@Model.IdVoucher" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="form-group mb-3">
+        <label asp-for="CodeVoucher" class="form-label"></label>
+        <input asp-for="CodeVoucher" class="form-control" />
+        <span asp-validation-for="CodeVoucher" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="MoTa" class="form-label"></label>
+        <textarea asp-for="MoTa" class="form-control"></textarea>
+        <span asp-validation-for="MoTa" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="PhanTram" class="form-label"></label>
+            <input asp-for="PhanTram" class="form-control" type="number" />
+            <span asp-validation-for="PhanTram" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="SoTienGiam" class="form-label"></label>
+            <input asp-for="SoTienGiam" class="form-control" type="number" />
+            <span asp-validation-for="SoTienGiam" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="DieuKienToiThieu" class="form-label"></label>
+            <input asp-for="DieuKienToiThieu" class="form-control" type="number" />
+            <span asp-validation-for="DieuKienToiThieu" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="SoLuong" class="form-label"></label>
+            <input asp-for="SoLuong" class="form-control" type="number" />
+            <span asp-validation-for="SoLuong" class="text-danger"></span>
+        </div>
+        @* <div class="col-md-4 mb-3">
+            <label asp-for="SoLanSuDungToiDa" class="form-label"></label>
+            <input asp-for="SoLanSuDungToiDa" class="form-control" type="number" />
+            <span asp-validation-for="SoLanSuDungToiDa" class="text-danger"></span>
+        </div> *@
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="StartDate" class="form-label"></label>
+            <input asp-for="StartDate" class="form-control" type="date" />
+            <span asp-validation-for="StartDate" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="EndDate" class="form-label"></label>
+            <input asp-for="EndDate" class="form-control" type="date" />
+            <span asp-validation-for="EndDate" class="text-danger"></span>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">💾 Lưu thay đổi</button>
+    <a asp-action="Index" class="btn btn-secondary">⬅ Quay lại</a>
+</form>

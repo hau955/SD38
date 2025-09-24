@@ -71,6 +71,19 @@ namespace AppApi.Controllers
             var exists = await _sanPhamCTService.ExistsAsync(idSanPham, idMau, idSize, idchatlieu);
             return Ok(exists);
         }
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAll()
+        {
+            try
+            {
+                var list = await _sanPhamCTService.GetAllAsync();
+                return Ok(list);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
     }
 
 
