@@ -79,7 +79,7 @@ namespace AppView.Areas.OrderManagerment.Controllers
                 ViewBag.StatusColors = OrderStatusColors.StatusColors;
                 ViewBag.PaymentColors = OrderStatusColors.PaymentColors;
 
-                return View(response.Data);
+                return PartialView(response.Data);
             }
             catch (Exception ex)
             {

@@ -901,7 +901,6 @@
                             <div class="menu-text">Đơn Hàng</div>
                         </a>
                     </div>
-                    @MenuItem("/Admin/KhachHang/Index", "KhachHang", "fas fa-users", "Khách Hàng")
                 </div>
                 @* Báo cáo & Thống kê *@
                 <div class="menu-section">
@@ -909,14 +908,14 @@
                     @MenuItem("/Admin/ThongKe/Customers", "ThongKe", "fas fa-users", "Khách hàng", "Customers")
                     @MenuItem("/Admin/ThongKe/Revenue", "ThongKe", "fas fa-coins", "Doanh Thu", "Revenue")
                     @MenuItem("/Admin/ThongKe/Products", "ThongKe", "fas fa-warehouse", "Tồn Kho", "Products")
-                    @MenuItem("/Admin/ThongKe/Employees", "ThongKe", "fas fa-warehouse", "Nhân Viên", "Products")
+                    @*@MenuItem("/Admin/ThongKe/Employees", "ThongKe", "fas fa-warehouse", "Nhân Viên", "Products")*@
                     @MenuItem("/Admin/ThongKe/Promotions", "ThongKe", "fas fa-tags", "Giảm giá", "Promotions")
                 </div>
                 @* Hệ thống *@
                 <div class="menu-section">
                     <div class="menu-section-title">Hệ Thống</div>
-                    @MenuItem("/Admin/CaiDat/Index", "CaiDat", "fas fa-cog", "Cài Đặt")
                     @MenuItem("/Admin/EmployeeManagement", "EmployeeManagement", "fas fa-user-tie", "Quản Lý Nhân Viên")
+                    @MenuItem("/Admin/CaiDat/Index", "CaiDat", "fas fa-cog", "Cài Đặt")
                 </div>
             </nav>
         </aside>

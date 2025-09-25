@@ -958,6 +958,7 @@
             // Order Status Chart với màu sắc truyền thống Việt Nam
             const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
             const orderData = [@safeOrders.CompletedOrders, @safeOrders.PendingOrders, @safeOrders.CancelledOrders];
+            console.log(`Data ${@safeOrders.CompletedOrders}, ${@safeOrders.PendingOrders} , , ${@safeOrders.CancelledOrders}`);
             const hasOrderData = orderData.some(val => val > 0);
 
             const orderStatusChart = new Chart(orderStatusCtx, {

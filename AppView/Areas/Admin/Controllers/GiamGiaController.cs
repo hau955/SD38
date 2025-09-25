@@ -48,7 +48,17 @@ namespace AppApi.Controllers
 
             return Json(result);
         }
+<<<<<<< HEAD
+
+    public async Task<IActionResult> Index(string searchTerm, string statusFilter, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 10)
+    {
+        var list = await _repo.GetAllAsync();
+
+        // Lọc dữ liệu (ví dụ)
+        if (!string.IsNullOrEmpty(searchTerm))
+=======
         public async Task<IActionResult> Index(string searchTerm, string statusFilter, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 10)
+>>>>>>> ca3f861e75abbe9f4ed112a7df1b8bebc5ec2764
         {
             var list = await _repo.GetAllAsync();
 
