@@ -91,6 +91,14 @@ namespace AppApi.Controllers
         {
             return Ok(await _service.GetSanPhamCTByDiscountAsync(idGiamGia));
         }
-       
+        [HttpGet("{id}/chi-tiet")]
+        public async Task<IActionResult> GetDiscountDetail(Guid id)
+        {
+            var result = await _service.GetDiscountDetailAsync(id);
+            if (result == null) return NotFound("Không tìm thấy giảm giá");
+
+            return Ok(result);
+        }
+
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AppApi.IService;
+using AppApi.ViewModels;
 using AppData.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -211,7 +212,47 @@ namespace AppApi.Service
 
             return (giaGoc, giaSauGiam, soTienGiam);
         }
-       
+        public async Task<GiamGiaChiTietDto?> GetDiscountDetailAsync(Guid idGiamGia)
+        {
+            var giamGia = await _context.GiamGias
+                .FirstOrDefaultAsync(x => x.IDGiamGia == idGiamGia);
+
+            if (giamGia == null) return null;
+
+            var dto = new GiamGiaChiTietDto
+            {
+                IdGiamGia = giamGia.IDGiamGia,
+                TenGiamGia = giamGia.TenGiamGia,
+                LoaiGiamGia = giamGia.LoaiGiamGia,
+                GiaTri = giamGia.GiaTri,
+                NgayBatDau = giamGia.NgayBatDau,
+                NgayKetThuc = giamGia.NgayKetThuc
+            };
+
+            // Lấy sản phẩm chi tiết
+            dto.SanPhamChiTiet = await _context.GiamGiaSPCT
+                .Include(x => x.SanPhamCT)
+                .Where(x => x.IDGiamGia == idGiamGia)
+                .Select(x => x.SanPhamCT.SanPham.TenSanPham) // giả sử có cột TenSPCT
+                .ToListAsync();
+
+            // Lấy sản phẩm
+            dto.SanPham = await _context.GiamGiaSanPham
+                .Include(x => x.SanPham)
+                .Where(x => x.IDGiamGia == idGiamGia)
+                .Select(x => x.SanPham.TenSanPham)
+                .ToListAsync();
+
+            // Lấy danh mục
+            dto.DanhMuc = await _context.GiamGiaDanhMuc
+                .Include(x => x.DanhMuc)
+                .Where(x => x.IDGiamGia == idGiamGia)
+                .Select(x => x.DanhMuc.TenDanhMuc)
+                .ToListAsync();
+
+            return dto;
+        }
+
     }
 }
 

@@ -1,4 +1,5 @@
-﻿using AppData.Models;
+﻿using AppApi.ViewModels;
+using AppData.Models;
 
 namespace AppApi.IService
 {
@@ -18,5 +19,6 @@ namespace AppApi.IService
         Task<List<GiamGiaSanPham>> GetProductsByDiscountAsync(Guid giamGiaId);
         Task<List<GiamGiaSPCT>> GetSanPhamCTByDiscountAsync(Guid giamGiaId);
         Task<GiamGiaSPCT?> AddSanPhamCTToDiscountAsync(Guid giamGiaId, Guid sanPhamCTId);
+        Task<GiamGiaChiTietDto?> GetDiscountDetailAsync(Guid idGiamGia);
     }
 }

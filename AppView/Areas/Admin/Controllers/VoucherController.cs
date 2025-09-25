@@ -36,15 +36,19 @@ namespace AppView.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(VoucherVM voucher)
         {
+            // ép set mặc định nếu user không nhập
+            if (voucher.SoLanSuDungToiDa <= 0)
+                voucher.SoLanSuDungToiDa = 1;
+
             if (!ModelState.IsValid) return View(voucher);
 
             var result = await _voucherService.CreateAsync(voucher);
             if (result.IsSuccess) return RedirectToAction(nameof(Index));
 
-            // nếu fail thì báo lỗi
             ViewBag.ErrorMessage = result.Message;
             return View(voucher);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)

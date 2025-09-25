@@ -55,18 +55,20 @@
                 </div>
             </div>
 
+            <!-- Ngày bắt đầu và kết thúc -->
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label asp-for="StartDate" class="form-label"></label>
-                    <input asp-for="StartDate" class="form-control" type="date" required />
+                    <label asp-for="StartDate" class="form-label">Ngày giờ bắt đầu <span class="text-danger">*</span></label>
+                    <input asp-for="StartDate" type="datetime-local" class="form-control" required />
                     <span asp-validation-for="StartDate" class="text-danger"></span>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label asp-for="EndDate" class="form-label"></label>
-                    <input asp-for="EndDate" class="form-control" type="date" required />
+                    <label asp-for="EndDate" class="form-label">Ngày giờ kết thúc <span class="text-danger">*</span></label>
+                    <input asp-for="EndDate" type="datetime-local" class="form-control" required />
                     <span asp-validation-for="EndDate" class="text-danger"></span>
                 </div>
             </div>
+
 
             <div class="d-flex justify-content-end">
                 <a asp-action="Index" class="btn btn-secondary me-2">

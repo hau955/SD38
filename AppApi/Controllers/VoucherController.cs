@@ -33,6 +33,9 @@ namespace AppApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Voucher voucher)
         {
+            if (!voucher.SoLanSuDungToiDa.HasValue || voucher.SoLanSuDungToiDa <= 0)
+                voucher.SoLanSuDungToiDa = 1;  // ép mặc định
+
             var result = await _voucherService.CreateAsync(voucher);
             if (!result.IsSuccess)
                 return BadRequest(new { success = false, message = result.Message });
@@ -43,12 +46,16 @@ namespace AppApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] Voucher voucher)
         {
+            if (!voucher.SoLanSuDungToiDa.HasValue || voucher.SoLanSuDungToiDa <= 0)
+                voucher.SoLanSuDungToiDa = 1;  // ép mặc định
+
             var result = await _voucherService.UpdateAsync(id, voucher);
             if (!result.IsSuccess)
                 return BadRequest(new { success = false, message = result.Message });
 
             return Ok(new { success = true, message = result.Message, data = result.Data });
         }
+
 
 
         [HttpDelete("{id}")]

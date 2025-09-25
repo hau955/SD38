@@ -416,22 +416,25 @@
         function applyVoucher(){
             const selectVoucher = document.getElementById("selectVoucher");
             const idVoucher = selectVoucher.value;
-            let tong = tongTienHang + phiShip;
+            let tongHang = tongTienHang; // chỉ tiền hàng
             let giam = 0;
 
             if(idVoucher){
                 const voucher = danhSachVoucher.find(v => v.idVoucher === idVoucher);
                 if(voucher){
                     if(voucher.phanTram){
-                        giam = Math.round(tong * voucher.phanTram / 100);
-                        tong -= giam;
+                        giam = Math.round(tongHang * voucher.phanTram / 100);
+                        tongHang -= giam;
                     } else if(voucher.soTienGiam){
                         giam = voucher.soTienGiam;
-                        tong -= giam;
+                        tongHang -= giam;
                     }
                 }
             }
-            if(tong < 0) tong = 0;
+            if(tongHang < 0) tongHang = 0;
+
+            // tổng cộng = tiền hàng sau giảm + phí ship
+            let tong = tongHang + phiShip;
 
             document.getElementById("checkoutTienHang").innerText = tongTienHang.toLocaleString()+" ₫";
             document.getElementById("checkoutPhiShip").innerText = phiShip.toLocaleString()+" ₫";

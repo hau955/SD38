@@ -30,5 +30,9 @@ namespace AppView.Areas.Admin.ViewModels
 
         [Required(ErrorMessage = "Vui lòng chọn ngày kết thúc")]
         public DateTime EndDate { get; set; }
+
+        // ✅ Bổ sung để View có thể binding và mặc định luôn = 1
+        [Range(1, int.MaxValue, ErrorMessage = "Số lần sử dụng tối đa phải >= 1")]
+        public int? SoLanSuDungToiDa { get; set; } = 1;
     }
 }
