@@ -109,7 +109,7 @@
     }
 </style>
 
-<div class="container mt-4">
+@* <div class="container mt-4">
     <div class="table-wrapper">
         <h2><i class="fas fa-percentage me-2"></i> @ViewData["Title"]</h2>
 
@@ -181,6 +181,8 @@
                 </div>
             </form>
         </div>
+@* 
+
 
         <!-- Action Button -->
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -389,7 +391,7 @@
             </div>
         }
     </div>
-</div>
+</div> *@
 
 <div class="container mt-4">
     <div class="card shadow border-0">
@@ -458,7 +460,11 @@
                                 </td>
 
                                 <td class="text-center">
-                                  
+                                    <button type="button" class="btn btn-sm btn-info btn-detail"
+                                            data-id="@item.IDGiamGia">
+                                        <i class="fas fa-eye"></i> Chi tiết
+                                    </button>
+
                                     <a asp-area="Admin" asp-controller="GiamGia" asp-action="Edit" asp-route-id="@item.IDGiamGia" class="btn btn-sm btn-warning me-1">
                                         <i class="bi bi-pencil-square"></i> Sửa
                                     </a>
@@ -483,3 +489,75 @@
     </div>
 </div>
 
+<div class="modal fade" id="discountDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Chi tiết giảm giá</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="discountDetailContent">
+                <div class="text-center text-muted">Đang tải...</div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".btn-detail").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const id = this.dataset.id;
+                const modalContent = document.getElementById("discountDetailContent");
+                modalContent.innerHTML = `<div class="text-center text-muted">Đang tải...</div>`;
+
+                // ✅ Gọi API bằng HTTPS để tránh mixed content
+                fetch(`https://localhost:7221/api/Giamgia/${id}/chi-tiet`)
+                    .then(res => {
+                        if (!res.ok) throw new Error("Không lấy được dữ liệu");
+                        return res.json();
+                    })
+                    .then(data => {
+                        // Format ngày
+                        const formatDate = dateStr => new Date(dateStr).toLocaleDateString("vi-VN");
+
+                        // Badge loại giảm giá
+                        let loaiBadge = "";
+                        if (data.loaiGiamGia === "PhanTram") {
+                            loaiBadge = `<span class="badge bg-info">Phần trăm</span>`;
+                        } else if (data.loaiGiamGia === "SoTien") {
+                            loaiBadge = `<span class="badge bg-success">Số tiền</span>`;
+                        }
+
+                        // Giá trị hiển thị
+                        let giaTriText = data.loaiGiamGia === "PhanTram"
+                            ? `${data.giaTri} %`
+                            : `${data.giaTri.toLocaleString()} VNĐ`;
+
+                        let html = `
+                            <p><strong>Tên:</strong> ${data.tenGiamGia}</p>
+                            <p><strong>Loại:</strong> ${loaiBadge}</p>
+                            <p><strong>Giá trị:</strong> ${giaTriText}</p>
+                            <p><strong>Thời gian:</strong> ${formatDate(data.ngayBatDau)} - ${formatDate(data.ngayKetThuc)}</p>
+
+                            <h6>Sản phẩm chi tiết:</h6>
+                            <ul>${data.sanPhamChiTiet.length > 0 ? data.sanPhamChiTiet.map(x => `<li>${x}</li>`).join("") : "<li>Không có</li>"}</ul>
+
+                            <h6>Sản phẩm:</h6>
+                            <ul>${data.sanPham.length > 0 ? data.sanPham.map(x => `<li>${x}</li>`).join("") : "<li>Không có</li>"}</ul>
+
+                            <h6>Danh mục:</h6>
+                            <ul>${data.danhMuc.length > 0 ? data.danhMuc.map(x => `<li>${x}</li>`).join("") : "<li>Không có</li>"}</ul>
+                        `;
+                        modalContent.innerHTML = html;
+                    })
+                    .catch(err => {
+                        modalContent.innerHTML = `<div class="text-danger">❌ Lỗi: ${err.message}</div>`;
+                    });
+
+                // Show modal
+                const myModal = new bootstrap.Modal(document.getElementById('discountDetailModal'));
+                myModal.show();
+            });
+        });
+    });
+</script>
