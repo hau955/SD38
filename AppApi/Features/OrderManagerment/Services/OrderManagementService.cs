@@ -370,12 +370,20 @@ namespace AppApi.Features.OrderManagerment.Services
         /// <summary>
         /// Hủy đơn hàng với lưu lịch sử.
         /// </summary>
+        /// <summary>
+        /// Hủy đơn hàng với lưu lịch sử và trả lại số lượng sản phẩm.
+        /// </summary>
         public async Task<ApiResponse<bool>> CancelOrderAsync(CancelOrderDto dto)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var order = await _context.HoaDons.FindAsync(dto.IDHoaDon);
+                // Lấy đơn hàng + chi tiết + sản phẩm chi tiết
+                var order = await _context.HoaDons
+                    .Include(h => h.HoaDonChiTiets)
+                        .ThenInclude(ct => ct.SanPhamCT)
+                    .FirstOrDefaultAsync(h => h.IDHoaDon == dto.IDHoaDon);
+
                 if (order == null)
                     return ApiResponse<bool>.Fail("Không tìm thấy đơn hàng", 404);
 
@@ -389,17 +397,42 @@ namespace AppApi.Features.OrderManagerment.Services
                 var nguoiHuy = user?.HoTen ?? "Hệ thống";
                 var trangThaiCu = order.TrangThaiDonHang;
 
+                // ✅ Cộng trả số lượng tồn kho
+                if (order.HoaDonChiTiets != null && order.HoaDonChiTiets.Any())
+                {
+                    foreach (var chiTiet in order.HoaDonChiTiets)
+                    {
+                        if (chiTiet.SanPhamCT != null)
+                        {
+                            chiTiet.SanPhamCT.SoLuongTonKho += chiTiet.SoLuongSanPham;
+                            _context.SanPhamChiTiets.Update(chiTiet.SanPhamCT);
+                        }
+                    }
+                }
+
+                // ✅ Nếu có voucher thì cộng lại số lượng
+                if (order.IdVoucher.HasValue)
+                {
+                    var voucher = await _context.Vouchers.FirstOrDefaultAsync(v => v.IdVoucher == order.IdVoucher.Value);
+                    if (voucher != null && voucher.SoLuong.HasValue)
+                    {
+                        voucher.SoLuong = (voucher.SoLuong ?? 0) + 1;
+                        _context.Vouchers.Update(voucher);
+                    }
+                }
+
                 // Cập nhật trạng thái đơn hàng
                 order.TrangThaiDonHang = OrderStatus.DA_HUY;
                 order.IDNguoiTao = dto.IDNguoiHuy;
                 order.NgaySua = DateTime.UtcNow;
 
+                // Ghi chú lý do hủy
                 var cancelNote = $"[{DateTime.Now:dd/MM/yyyy HH:mm}] Đơn hàng đã bị hủy. Lý do: {dto.LyDoHuy}";
                 order.GhiChu = string.IsNullOrEmpty(order.GhiChu)
                     ? cancelNote
                     : $"{order.GhiChu}\n{cancelNote}";
 
-                // Thêm lịch sử trạng thái hủy
+                // Thêm lịch sử trạng thái
                 var lichSuTrangThai = new HoaDonTrangThai
                 {
                     IDHoaDon = dto.IDHoaDon,
@@ -409,13 +442,15 @@ namespace AppApi.Features.OrderManagerment.Services
                 };
 
                 _context.HoaDonTrangThai.Add(lichSuTrangThai);
+
+                // Lưu thay đổi
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
                 _logger.LogInformation("✅ Đơn hàng {OrderId} đã bị hủy từ trạng thái '{OldStatus}' bởi {User}. Lý do: {Reason}",
                     dto.IDHoaDon, trangThaiCu, nguoiHuy, dto.LyDoHuy);
 
-                return ApiResponse<bool>.Success(true, "Hủy đơn hàng thành công", 200);
+                return ApiResponse<bool>.Success(true, "Hủy đơn hàng thành công, đã hoàn trả tồn kho và voucher", 200);
             }
             catch (Exception ex)
             {
@@ -427,9 +462,9 @@ namespace AppApi.Features.OrderManagerment.Services
                     Message = "Có lỗi xảy ra khi hủy đơn hàng",
                     StatusCode = 500,
                     Errors = new Dictionary<string, string[]>
-                    {
-                        { "Exception", new[] { ex.Message } }
-                    }
+            {
+                { "Exception", new[] { ex.Message } }
+            }
                 };
             }
         }

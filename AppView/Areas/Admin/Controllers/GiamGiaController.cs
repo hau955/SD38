@@ -48,7 +48,12 @@ namespace AppApi.Controllers
 
             return Json(result);
         }
+
+
+   
+
         public async Task<IActionResult> Index(string searchTerm, string statusFilter, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 10)
+
         {
             var list = await _repo.GetAllAsync();
 

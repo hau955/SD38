@@ -46,7 +46,6 @@ namespace AppApi.Controllers
                 imageUrl = result
             });
         }
-
         public class ChangePasswordDto
         {
             public string OldPassword { get; set; } = string.Empty;

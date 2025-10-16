@@ -25,15 +25,15 @@ namespace AppView.Areas.Admin.Controllers
             {
                 var overview = await _thongKeRepo.GetOverviewAsync();
                 ViewBag.Title = "Tổng quan thống kê";
-                
+
                 // Kiểm tra nếu không có dữ liệu
                 if (overview?.Revenue?.TotalRevenue == 0 && overview?.Orders?.TotalOrders == 0)
                 {
                     ViewBag.ErrorMessage = "Không có dữ liệu thống kê. Vui lòng kiểm tra kết nối API hoặc thêm dữ liệu mẫu.";
                     ViewBag.ShowDebugInfo = true; // Hiển thị thông tin debug
                 }
-                
-                return View(overview);
+
+                return View(overview ?? new DashboardOverviewViewModel());
             }
             catch (Exception ex)
             {
@@ -57,7 +57,7 @@ namespace AppView.Areas.Admin.Controllers
             ViewBag.Title = "Báo cáo doanh thu";
             ViewBag.Request = request;
             ViewBag.Page = page;
-            return View(report);
+            return View(report ?? new RevenueReportViewModel());
         }
 
         [HttpPost]
@@ -81,7 +81,7 @@ namespace AppView.Areas.Admin.Controllers
                     ViewBag.ErrorMessage = "Không có dữ liệu trong khoảng thời gian đã chọn.";
                 }
 
-                return View(report);
+                return View(report ?? new RevenueReportViewModel());
             }
             catch (Exception ex)
             {
@@ -104,7 +104,7 @@ namespace AppView.Areas.Admin.Controllers
             var report = await _thongKeRepo.GetProductReportAsync(request);
             ViewBag.Title = "Báo cáo sản phẩm";
             ViewBag.Request = request;
-            return View(report);
+            return View(report ?? new ProductReportViewModel());
         }
 
         [HttpPost]
@@ -114,7 +114,7 @@ namespace AppView.Areas.Admin.Controllers
             var report = await _thongKeRepo.GetProductReportAsync(request);
             ViewBag.Title = "Báo cáo sản phẩm";
             ViewBag.Request = request;
-            return View(report);
+            return View(report ?? new ProductReportViewModel());
         }
 
         [HttpGet]
@@ -133,14 +133,17 @@ namespace AppView.Areas.Admin.Controllers
                 var report = await _thongKeRepo.GetCustomerReportAsync(request);
                 ViewBag.Title = "Báo cáo khách hàng";
                 ViewBag.Request = request;
-                
+
+                // Đảm bảo report không null
+                report = report ?? new CustomerReportViewModel();
+
                 // Kiểm tra nếu không có dữ liệu
-                if (report?.CustomerSegments?.Count == 0 && report?.CustomerActivities?.Count == 0)
+                if (report.CustomerSegments?.Count == 0 && report.CustomerActivities?.Count == 0)
                 {
                     ViewBag.ErrorMessage = "Không có dữ liệu khách hàng. Vui lòng kiểm tra kết nối API hoặc thêm dữ liệu mẫu.";
                     ViewBag.ShowDebugInfo = true;
                 }
-                
+
                 return View(report);
             }
             catch (Exception ex)
@@ -157,17 +160,31 @@ namespace AppView.Areas.Admin.Controllers
         {
             try
             {
+                // Đảm bảo request không null
+                if (request == null)
+                {
+                    request = new TimeRangeRequestViewModel
+                    {
+                        StartDate = DateTime.Now.AddDays(-30),
+                        EndDate = DateTime.Now,
+                        GroupType = TimeGroupTypeViewModel.Day
+                    };
+                }
+
                 var report = await _thongKeRepo.GetCustomerReportAsync(request);
                 ViewBag.Title = "Báo cáo khách hàng";
                 ViewBag.Request = request;
-                
+
+                // Đảm bảo report không null
+                report = report ?? new CustomerReportViewModel();
+
                 // Kiểm tra nếu không có dữ liệu
-                if (report?.CustomerSegments?.Count == 0 && report?.CustomerActivities?.Count == 0)
+                if (report.CustomerSegments?.Count == 0 && report.CustomerActivities?.Count == 0)
                 {
                     ViewBag.ErrorMessage = "Không có dữ liệu khách hàng trong khoảng thời gian đã chọn.";
                     ViewBag.ShowDebugInfo = true;
                 }
-                
+
                 return View(report);
             }
             catch (Exception ex)
@@ -192,7 +209,7 @@ namespace AppView.Areas.Admin.Controllers
             var report = await _thongKeRepo.GetPromotionReportAsync(request);
             ViewBag.Title = "Báo cáo khuyến mãi";
             ViewBag.Request = request;
-            return View(report);
+            return View(report ?? new PromotionReportViewModel());
         }
 
         [HttpPost]
@@ -202,8 +219,9 @@ namespace AppView.Areas.Admin.Controllers
             var report = await _thongKeRepo.GetPromotionReportAsync(request);
             ViewBag.Title = "Báo cáo khuyến mãi";
             ViewBag.Request = request;
-            return View(report);
+            return View(report ?? new PromotionReportViewModel());
         }
+
         [HttpGet]
         [Route("Employees")]
         public async Task<IActionResult> Employees()
@@ -218,7 +236,7 @@ namespace AppView.Areas.Admin.Controllers
             var report = await _thongKeRepo.GetEmployeeReportAsync(request);
             ViewBag.Title = "Báo cáo nhân viên";
             ViewBag.Request = request;
-            return View(report);
+            return View(report ?? new EmployeeReportViewModel());
         }
 
         [HttpPost]
@@ -228,7 +246,7 @@ namespace AppView.Areas.Admin.Controllers
             var report = await _thongKeRepo.GetEmployeeReportAsync(request);
             ViewBag.Title = "Báo cáo nhân viên";
             ViewBag.Request = request;
-            return View(report);
+            return View(report ?? new EmployeeReportViewModel());
         }
 
         [HttpGet]
@@ -240,7 +258,10 @@ namespace AppView.Areas.Admin.Controllers
                 var stats = await _thongKeRepo.GetCategoryStatsAsync();
                 ViewBag.Title = "Thống kê danh mục";
 
-                if (stats == null || stats.Count == 0)
+                // Đảm bảo stats không null
+                stats = stats ?? new List<CategoryOrderCountViewModel>();
+
+                if (stats.Count == 0)
                 {
                     ViewBag.ErrorMessage = "Không có dữ liệu thống kê danh mục.";
                     ViewBag.ShowDebugInfo = true;
@@ -255,16 +276,42 @@ namespace AppView.Areas.Admin.Controllers
                 return View(new List<CategoryOrderCountViewModel>());
             }
         }
+
         [HttpGet("GetCustomerOrders")]
         public async Task<IActionResult> GetCustomerOrders(string email)
         {
             try
             {
+                // Validate email parameter
+                if (string.IsNullOrEmpty(email))
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        data = new List<CustomerOrderViewModel>(),
+                        message = "Email không được để trống"
+                    });
+                }
+
                 var orders = await _thongKeRepo.GetCustomerOrdersByEmailAsync(email);
+
+                // Đảm bảo orders không null
+                orders = orders ?? new List<CustomerOrderViewModel>();
+
+                var result = orders.Select(o => new
+                {
+                    orderId = o.OrderId,
+                    orderDate = o.OrderDate.ToString("yyyy-MM-ddTHH:mm:ss"), // ISO format
+                    status = string.IsNullOrEmpty(o.Status) ? "pending" : o.Status.ToLower(),
+                    paymentStatus = string.IsNullOrEmpty(o.PaymentStatus) ? "unpaid" : o.PaymentStatus.ToLower(),
+                    totalAmount = o.TotalAmount,
+                    itemCount = o.ItemCount
+                }).ToList();
+
                 return Json(new
                 {
                     isSuccess = true,
-                    data = orders,
+                    data = result,
                     message = "Lấy đơn hàng thành công"
                 });
             }
@@ -273,12 +320,11 @@ namespace AppView.Areas.Admin.Controllers
                 return Json(new
                 {
                     isSuccess = false,
-                    data = new List<CustomerOrderViewModel>(),
+                    data = new List<object>(),
                     message = $"Lỗi khi lấy đơn hàng: {ex.Message}"
                 });
             }
         }
-
 
         [HttpGet]
         [Route("TopAoDai")]
@@ -289,7 +335,10 @@ namespace AppView.Areas.Admin.Controllers
                 var topSelling = await _thongKeRepo.GetTopSellingAoDaiAsync();
                 ViewBag.Title = "Top áo dài bán chạy";
 
-                if (topSelling == null || topSelling.Count == 0)
+                // Đảm bảo topSelling không null
+                topSelling = topSelling ?? new List<TopSellingAoDaiViewModel>();
+
+                if (topSelling.Count == 0)
                 {
                     ViewBag.ErrorMessage = "Không có dữ liệu top áo dài bán chạy.";
                     ViewBag.ShowDebugInfo = true;
@@ -309,8 +358,31 @@ namespace AppView.Areas.Admin.Controllers
         [Route("QuickMetrics")]
         public async Task<IActionResult> GetQuickMetrics([FromBody] TimeRangeRequestViewModel request)
         {
-            var metrics = await _thongKeRepo.GetQuickMetricsAsync(request);
-            return Json(metrics);
+            try
+            {
+                // Validate request
+                if (request == null)
+                {
+                    request = new TimeRangeRequestViewModel
+                    {
+                        StartDate = DateTime.Now.AddDays(-30),
+                        EndDate = DateTime.Now,
+                        GroupType = TimeGroupTypeViewModel.Day
+                    };
+                }
+
+                var metrics = await _thongKeRepo.GetQuickMetricsAsync(request);
+                return Json(metrics ?? new List<QuickMetricViewModel>());
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    error = true,
+                    message = ex.Message,
+                    data = new List<QuickMetricViewModel>()
+                });
+            }
         }
     }
 }

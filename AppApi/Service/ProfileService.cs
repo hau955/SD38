@@ -92,7 +92,6 @@ namespace AppApi.Service
             user.HinhAnh = imageUrl;
 
             await _userManager.UpdateAsync(user);
-
             return imageUrl;
         }
     }
